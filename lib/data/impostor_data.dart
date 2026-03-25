@@ -1,0 +1,17 @@
+const List<String> palabrasImpostor = [
+  'Pizza',
+  'Avión',
+  'Playa',
+  'Hospital',
+  'Perro',
+  'Cerveza',
+  'Discoteca',
+  'Montaña',
+  'WhatsApp',
+  'Netflix',
+  'Helado',
+  'Moto',
+  'Boda',
+  'Colegio',
+  'Dinero',
+];
