@@ -63,22 +63,33 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
           children: [
             Container(
               decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topCenter,
-                  radius: 1.3,
+                gradient: LinearGradient(
                   colors: [
+                    Color(0xFFB91C1C),
+                    Color(0xFF7F1D1D),
                     Color(0xFF2A0F14),
-                    Color(0xFF12080B),
-                    Color(0xFF070707),
+                    Color(0xFF090909),
                   ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
             ),
             Positioned(
-              top: -80 + (value * 50),
-              left: -30,
-              right: -30,
-              child: _fogLayer(160, 0.08),
+              top: -120,
+              left: -60,
+              right: -60,
+              child: Container(
+                height: 260,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFFB43C4B).withOpacity(0.35),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
             ),
             Positioned(
               bottom: -60 + (value * 30),
@@ -646,25 +657,60 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
   }
 
   Widget _titleBlock({bool compact = false}) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Barcelona, medianoche',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: compact ? 24 : 32,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.4,
+
+        /// BOTÓN HOME
+
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.10),
+            ),
+          ),
+          child: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.home_rounded,
+              color: Colors.white,
+            ),
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          'Subastas, traición, asesinatos y fortuna bajo la misma lámpara.',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.72),
-            fontSize: compact ? 13 : 15,
-            height: 1.35,
+
+        const SizedBox(width: 12),
+
+        /// TEXTO
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              Text(
+                'Barcelona, medianoche',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: compact ? 24 : 32,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.4,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                'Subastas, traición, asesinatos y fortuna bajo la misma lámpara.',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.72),
+                  fontSize: compact ? 13 : 15,
+                  height: 1.35,
+                ),
+              ),
+
+            ],
           ),
         ),
       ],
