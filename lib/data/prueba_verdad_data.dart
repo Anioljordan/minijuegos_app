@@ -1,17 +1,175 @@
 const List<String> preguntasVerdad = [
+
+  // EXISTENTES
   '¿Cuál es la cosa más vergonzosa que has hecho de fiesta?',
   '¿A quién del grupo besarías?',
   '¿Has mentido alguna vez para ligar?',
   '¿Cuál ha sido tu peor cita?',
   '¿Te has enamorado alguna vez de alguien que no debías?',
   '¿Qué es lo más raro que has hecho borracho?',
-];
 
+  // NUEVAS
+
+  '¿Quién del grupo te parece más atractivo?',
+  '¿Quién del grupo te cae peor?',
+  '¿Has enviado un mensaje del que luego te arrepentiste?',
+  '¿Cuál ha sido tu mayor ridículo?',
+  '¿Alguna vez te han pillado en una mentira?',
+  '¿Cuál es tu mayor miedo?',
+  '¿Has fingido estar enfermo para evitar algo?',
+  '¿Cuál es tu fantasía más rara?',
+  '¿Quién del grupo crees que besa mejor?',
+  '¿Qué secreto nunca le has contado a nadie aquí?',
+
+  '¿Cuál es tu peor hábito?',
+  '¿Has hablado mal de alguien de este grupo?',
+  '¿Qué harías si fueras invisible un día?',
+  '¿Cuál ha sido tu peor borrachera?',
+  '¿Alguna vez te has colado en un sitio?',
+  '¿Cuál ha sido tu mayor mentira?',
+  '¿Te has enamorado de un amigo?',
+  '¿Quién del grupo sería tu pareja ideal?',
+  '¿Cuál es tu recuerdo más vergonzoso?',
+  '¿Alguna vez has stalkado a alguien durante horas?',
+
+  '¿Cuál es tu mayor inseguridad?',
+  '¿Qué es lo más loco que harías por dinero?',
+  '¿Has tenido un crush secreto aquí?',
+  '¿Qué es lo más raro que has buscado en internet?',
+  '¿Cuál es tu mayor arrepentimiento?',
+  '¿Has fingido gustarte algo para encajar?',
+  '¿Cuál ha sido tu peor excusa?',
+  '¿Qué es lo más infantil que haces todavía?',
+  '¿Cuál ha sido tu peor decisión?',
+  '¿Has mentido para evitar quedar con alguien?',
+
+  '¿Quién del grupo sobreviviría menos en una isla?',
+  '¿Quién del grupo sería peor pareja?',
+  '¿Qué es lo más raro que has hecho solo?',
+  '¿Te han rechazado alguna vez?',
+  '¿Cuál ha sido tu mayor humillación?',
+  '¿Has llorado por amor?',
+  '¿Cuál ha sido tu peor ligue?',
+  '¿Te has arrepentido de besar a alguien?',
+  '¿Cuál ha sido tu peor resaca?',
+  '¿Has roto algo y culpado a otro?',
+
+  '¿Qué es lo más ilegal que has hecho?',
+  '¿Has robado alguna vez algo pequeño?',
+  '¿Cuál es tu peor manía?',
+  '¿Te han pillado haciendo algo vergonzoso?',
+  '¿Qué harías si supieras que nadie se enteraría?',
+  '¿Quién del grupo sería el peor jefe?',
+  '¿Quién del grupo sería el mejor amante?',
+  '¿Cuál es tu peor mentira a tus padres?',
+  '¿Has fingido interés por alguien?',
+  '¿Te has enamorado sin que te correspondan?',
+
+  '¿Qué es lo más vergonzoso que hay en tu móvil?',
+  '¿Has enviado fotos que luego borraste?',
+  '¿Qué es lo más raro que has hecho en público?',
+  '¿Has mentido sobre tu edad?',
+  '¿Cuál es tu peor secreto?',
+  '¿Qué es lo más loco que has hecho por amor?',
+  '¿Has tenido una cita terrible?',
+  '¿Te has arrepentido de un beso?',
+  '¿Cuál ha sido tu mayor locura?',
+  '¿Has fingido dormir para evitar hablar?',
+
+  '¿Qué es lo más raro que haces cuando estás solo?',
+  '¿Cuál ha sido tu mayor vergüenza?',
+  '¿Te han pillado mirando algo vergonzoso?',
+  '¿Has mentido en este juego alguna vez?',
+  '¿Cuál es tu peor miedo irracional?',
+  '¿Qué harías si pudieras borrar un recuerdo?',
+  '¿Cuál ha sido tu peor error?',
+  '¿Te has reído en un momento inapropiado?',
+  '¿Qué es lo más extraño que te gusta?',
+  '¿Cuál es tu secreto más raro?',
+
+];
 const List<String> pruebas = [
+
+  // EXISTENTES
   'Haz una imitación de alguien del grupo.',
   'Baila 10 segundos sin música.',
   'Habla con acento durante la siguiente ronda.',
   'Haz 5 sentadillas.',
   'Manda un audio diciendo “te extraño” a alguien.',
   'Deja que alguien del grupo te cambie la foto de perfil.',
+
+  // NUEVAS
+
+  'Haz un baile ridículo durante 10 segundos.',
+  'Imita a un animal.',
+  'Canta una canción sin música.',
+  'Habla como robot durante una ronda.',
+  'Haz una pose sexy.',
+  'Camina como modelo por la habitación.',
+  'Haz 10 saltos.',
+  'Imita a alguien famoso.',
+  'Haz una cara graciosa.',
+  'Ríe como villano.',
+
+  'Habla con voz de bebé.',
+  'Imita un mono.',
+  'Haz un saludo militar.',
+  'Haz un sonido raro.',
+  'Actúa como si estuvieras enamorado.',
+  'Haz una reverencia dramática.',
+  'Imita a alguien del grupo.',
+  'Haz una risa exagerada.',
+  'Finge que te caes.',
+  'Haz una voz grave.',
+
+  'Haz una voz aguda.',
+  'Imita a un pato.',
+  'Haz un baile lento.',
+  'Haz un baile rápido.',
+  'Haz una pose de superhéroe.',
+  'Actúa como zombie.',
+  'Haz un sonido de animal.',
+  'Finge llorar.',
+  'Haz una carcajada fuerte.',
+  'Imita a un bebé.',
+
+  // MÁS PICANTES
+
+  'Da un abrazo a alguien.',
+  'Da un beso en la mejilla a alguien.',
+  'Susurra algo al oído de alguien.',
+  'Haz una mirada seductora.',
+  'Di algo sexy.',
+  'Haz un baile sexy.',
+  'Da un cumplido atrevido.',
+  'Haz una pose provocativa.',
+  'Acércate mucho a alguien.',
+  'Haz una sonrisa seductora.',
+
+  // MÁS SOCIALES
+
+  'Elige a alguien y hazle un cumplido.',
+  'Elige a alguien y hazle reír.',
+  'Elige a alguien y haz una pose juntos.',
+  'Haz una pregunta incómoda a alguien.',
+  'Cuenta un chiste.',
+  'Inventa un saludo nuevo.',
+  'Haz una historia absurda.',
+  'Describe a alguien con 3 palabras.',
+  'Haz una frase rimando.',
+  'Cuenta una historia inventada.',
+
+  // MÁS LOCAS
+
+  'Habla al revés durante 10 segundos.',
+  'Camina hacia atrás durante 10 segundos.',
+  'Haz un sonido raro durante 5 segundos.',
+  'Actúa como robot durante 15 segundos.',
+  'Haz una escena dramática.',
+  'Haz una pose exagerada.',
+  'Habla como si fueras famoso.',
+  'Haz un baile sin mover los pies.',
+  'Haz un baile sin mover las manos.',
+  'Imita a un profesor.',
+
 ];
