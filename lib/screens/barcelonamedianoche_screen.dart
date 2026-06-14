@@ -12,19 +12,440 @@ class BarcelonaMedianocheScreen extends StatefulWidget {
 class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
     with SingleTickerProviderStateMixin {
   final BarcelonaMedianocheGame game = BarcelonaMedianocheGame();
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color accentRed = Color(0xFFE63946);
+  static const Color accentGold = Color(0xFFFFD166);
+  static const Color accentBlue = Color(0xFF60A5FA);
   final TextEditingController namesController = TextEditingController(
     text: 'Aniol\nMartina\nAlex\nJúlia\nMarc\nPaula',
   );
 
   late final AnimationController _bgController;
+  Widget _topCircleButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    String? tooltip,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: appWhite,
+          size: 27,
+        ),
+      ),
+    );
+  }
+  ButtonStyle _mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
 
+  ButtonStyle _secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget _circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget _rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+    required Color color,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRulesDialog() {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'BARCELONA, MEDIANOCHE',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  _rulesItem(
+                    icon: Icons.groups_rounded,
+                    title: 'Preparad la noche',
+                    text:
+                    'Escribe los nombres de los jugadores. Se necesitan mínimo 4 jugadores.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.visibility_off_rounded,
+                    title: 'Roles secretos',
+                    text:
+                    'Cada jugador mira su rol en secreto: Asesino, Agente o Invitado.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.local_fire_department_rounded,
+                    title: 'Asesinos',
+                    text:
+                    'Los asesinos reciben víctima, habitación y arma. Deben eliminar sin ser descubiertos.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.gavel_rounded,
+                    title: 'Agentes',
+                    text:
+                    'Los agentes pueden detener sospechosos si tienen pruebas claras.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.diamond_rounded,
+                    title: 'Subastas',
+                    text:
+                    'Durante la partida podéis abrir subastas para ganar bienes y aumentar riqueza.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.emoji_events_rounded,
+                    title: 'Victoria',
+                    text:
+                    'Al terminar la noche, gana quien tenga más riqueza total entre dinero y bienes.',
+                    color: appWhite,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: _mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _miniHeader(String title) {
+    return _screenHeader(
+      title: title.toLowerCase(),
+      subtitle: null,
+    );
+  }
+  Widget _screenHeader({
+    required String title,
+    String? subtitle,
+    VoidCallback? extraAction,
+    IconData? extraIcon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                if (extraAction != null && extraIcon != null) ...[
+                  _circleButton(
+                    onTap: extraAction,
+                    child: Icon(
+                      extraIcon,
+                      color: appWhite,
+                      size: 27,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                _circleButton(
+                  onTap: _showRulesDialog,
+                  child: const Icon(
+                    Icons.question_mark_rounded,
+                    color: appWhite,
+                    size: 27,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: title.contains('\n') ? 94 : 58,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontSize: 40,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: title.contains('\n') ? 82 : 50,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        if (subtitle != null) ...[
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.06),
+              border: Border(
+                left: const BorderSide(
+                  color: accentRed,
+                  width: 6,
+                ),
+                bottom: BorderSide(
+                  color: appWhite.withOpacity(0.36),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Text(
+              subtitle,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.76),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
   @override
   void initState() {
     super.initState();
+
     _bgController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
     )..repeat(reverse: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showRulesDialog();
+    });
   }
 
   @override
@@ -34,25 +455,6 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF090909),
-      body: Stack(
-        children: [
-          Positioned.fill(child: _buildAnimatedBackground()),
-          SafeArea(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: _buildCurrentPhase(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAnimatedBackground() {
     return AnimatedBuilder(
@@ -197,14 +599,7 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _preparePlayers,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB43C4B),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
+                    style: _mainButtonStyle(),
                     child: const Text('Preparar partida'),
                   ),
                 ),
@@ -278,6 +673,11 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
       child: Column(
         children: [
           const SizedBox(height: 8),
+
+          _miniHeader('Reparto secreto'),
+
+          const SizedBox(height: 22),
+
           Text(
             'Pasa el móvil a ${player.name}',
             textAlign: TextAlign.center,
@@ -363,14 +763,7 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
               onPressed: () {
                 setState(game.nextReveal);
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE8D7B0),
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
+              style: _mainButtonStyle(),
               child: Text(game.isLastReveal ? 'Empezar la noche' : 'Siguiente jugador'),
             ),
           ),
@@ -476,7 +869,16 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
       child: Column(
         children: [
           const SizedBox(height: 10),
-          const Icon(Icons.emoji_events_outlined, color: Color(0xFFE8D7B0), size: 44),
+
+          _miniHeader('Resultado final'),
+
+          const SizedBox(height: 22),
+
+          const Icon(
+            Icons.emoji_events_outlined,
+            color: Color(0xFFE8D7B0),
+            size: 44,
+          ),
           const SizedBox(height: 12),
           const Text(
             'La herencia tiene dueño',
@@ -564,14 +966,7 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _resetAll,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFB43C4B),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
+              style: _mainButtonStyle(),
               child: const Text('Nueva partida'),
             ),
           ),
@@ -633,106 +1028,56 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
 
     if (!player.isAlive) {
       text = 'Eliminado';
-      color = const Color(0xFF5C5C5C);
+      color = appWhite.withOpacity(0.55);
     } else if (player.isArrested) {
       text = 'Detenido';
-      color = const Color(0xFF64748B);
+      color = accentBlue;
     } else {
       text = 'Activo';
-      color = const Color(0xFFB43C4B);
+      color = accentRed;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.45)),
+        color: color.withOpacity(0.16),
+        border: Border.all(
+          color: color.withOpacity(0.50),
+          width: 1.4,
+        ),
       ),
       child: Text(
-        text,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        text.toUpperCase(),
+        style: TextStyle(
+          color: appWhite,
+          fontWeight: FontWeight.w900,
+          fontSize: 11,
+          letterSpacing: 0.4,
+        ),
       ),
     );
   }
 
   Widget _titleBlock({bool compact = false}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-
-        /// BOTÓN HOME
-
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.10),
-            ),
-          ),
-          child: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.home_rounded,
-              color: Colors.white,
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 12),
-
-        /// TEXTO
-
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              Text(
-                'Barcelona, medianoche',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: compact ? 24 : 32,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.4,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                'Subastas, traición, asesinatos y fortuna bajo la misma lámpara.',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.72),
-                  fontSize: compact ? 13 : 15,
-                  height: 1.35,
-                ),
-              ),
-
-            ],
-          ),
-        ),
-      ],
+    return _screenHeader(
+      title: 'barcelona\nmedianoche',
+      subtitle: compact
+          ? null
+          : 'Subastas, traición, asesinatos y fortuna bajo la misma lámpara.',
     );
   }
-
   Widget _glassCard({required Widget child}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(26),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            color: Colors.white.withOpacity(0.06),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
-          ),
-          child: child,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
         ),
       ),
+      child: child,
     );
   }
 
@@ -740,16 +1085,24 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.3,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFFE8D7B0)),
+          Icon(icon, size: 16, color: appWhite),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(color: Colors.white)),
+          Text(
+            text,
+            style: const TextStyle(
+              color: appWhite,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -759,20 +1112,30 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(999),
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.20),
+        ),
       ),
-      child: Text(text, style: TextStyle(color: Colors.white.withOpacity(0.85))),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: appWhite.withOpacity(0.85),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 
   Widget _sectionTitle(String text) {
     return Text(
-      text,
+      text.toLowerCase(),
       style: const TextStyle(
-        color: Colors.white,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
+        color: appWhite,
+        fontSize: 28,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
       ),
     );
   }
@@ -785,53 +1148,66 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: onTap,
-          child: Ink(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.white.withOpacity(0.05),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.08),
+            border: Border(
+              left: const BorderSide(
+                color: accentRed,
+                width: 6,
+              ),
+              bottom: BorderSide(
+                color: appWhite.withOpacity(0.30),
+                width: 2,
+              ),
+              top: BorderSide(
+                color: appWhite.withOpacity(0.18),
+                width: 1,
+              ),
+              right: BorderSide(
+                color: appWhite.withOpacity(0.18),
+                width: 1,
+              ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFB43C4B).withOpacity(0.16),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(icon, color: const Color(0xFFE8D7B0)),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: appWhite, size: 28),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title.toUpperCase(),
+                      style: const TextStyle(
+                        color: appWhite,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: TextStyle(color: Colors.white.withOpacity(0.68), height: 1.3),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.68),
+                        height: 1.25,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const Icon(Icons.chevron_right, color: Colors.white70),
-              ],
-            ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: appWhite.withOpacity(0.75),
+              ),
+            ],
           ),
         ),
       ),
@@ -844,17 +1220,31 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(16),
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.24),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              color: appWhite.withOpacity(0.62),
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.6,
+            ),
+          ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: appWhite,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -957,12 +1347,7 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
                         setState(() {});
                         _snack(message);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB43C4B),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      ),
+                      style: _mainButtonStyle(),
                       child: const Text('Confirmar'),
                     ),
                   ),
@@ -1055,12 +1440,7 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
                         setState(() {});
                         _snack(message);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE8D7B0),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      ),
+                      style: _mainButtonStyle(),
                       child: const Text('Confirmar detención'),
                     ),
                   ),
@@ -1201,7 +1581,6 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
       ],
     );
   }
-
   void _snack(String text) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -1209,9 +1588,24 @@ class _BarcelonaMedianocheScreenState extends State<BarcelonaMedianocheScreen>
         SnackBar(
           content: Text(text),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: const Color(0xFF1B1B1F),
+          backgroundColor: appBlue,
         ),
       );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          child: _buildCurrentPhase(),
+        ),
+      ),
+    );
   }
 }
 
@@ -1229,13 +1623,20 @@ class _RuleLine extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 5),
-            child: Icon(Icons.circle, size: 8, color: Color(0xFFB43C4B)),
+            child: Icon(
+              Icons.circle,
+              size: 8,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: Colors.white.withOpacity(0.78), height: 1.35),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.78),
+                height: 1.35,
+              ),
             ),
           ),
         ],

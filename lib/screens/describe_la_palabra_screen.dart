@@ -50,11 +50,19 @@ class DescribeLaPalabraScreen extends StatefulWidget {
   const DescribeLaPalabraScreen({super.key});
 
   @override
-  State<DescribeLaPalabraScreen> createState() => _DescribeLaPalabraScreenState();
+  State<DescribeLaPalabraScreen> createState() =>
+      _DescribeLaPalabraScreenState();
 }
 
 class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   final Random _random = Random();
+
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color accentCyan = Color(0xFF22D3EE);
+  static const Color accentGreen = Color(0xFF22C55E);
+  static const Color accentPurple = Color(0xFF8B5CF6);
+  static const Color accentYellow = Color(0xFFFFD166);
 
   DescribeStep currentStep = DescribeStep.setup;
   DescribeRoundType currentRound = DescribeRoundType.describe;
@@ -62,8 +70,10 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
 
   final TextEditingController playerController = TextEditingController();
   final TextEditingController customWordsController = TextEditingController();
-  final TextEditingController teamCountController = TextEditingController(text: '2');
-  final TextEditingController secondsController = TextEditingController(text: '30');
+  final TextEditingController teamCountController =
+  TextEditingController(text: '2');
+  final TextEditingController secondsController =
+  TextEditingController(text: '30');
 
   List<String> allPlayers = [];
   List<DescribeTeam> teams = [];
@@ -146,6 +156,16 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   bool turnRunning = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showRulesDialog();
+    });
+  }
+
+  @override
   void dispose() {
     timer?.cancel();
     playerController.dispose();
@@ -223,6 +243,17 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         return Icons.accessibility_new_rounded;
       case DescribeRoundType.sounds:
         return Icons.graphic_eq_rounded;
+    }
+  }
+
+  Color getRoundAccent(DescribeRoundType round) {
+    switch (round) {
+      case DescribeRoundType.describe:
+        return accentCyan;
+      case DescribeRoundType.mime:
+        return accentYellow;
+      case DescribeRoundType.sounds:
+        return accentPurple;
     }
   }
 
@@ -460,7 +491,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
 
     turnsPlayedInRound++;
 
-    // Si ya han jugado todos los equipos, termina la ronda
     if (turnsPlayedInRound >= teams.length) {
       finishRound();
       return;
@@ -521,84 +551,192 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     return sorted;
   }
 
+  ButtonStyle mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
   Widget buildTopBar({
     required String title,
     String? subtitle,
-    bool showHome = true,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    String visualTitle = title.toLowerCase();
+
+    if (visualTitle == 'describe la palabra') {
+      visualTitle = 'describe\nla palabra';
+    }
+
+    if (visualTitle.length > 18 && !visualTitle.contains('\n')) {
+      visualTitle = visualTitle.replaceFirst(' ', '\n');
+    }
+
+    final bool multiline = visualTitle.contains('\n');
+    final double titleHeight = multiline ? 86 : 58;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (showHome)
-          Container(
-            margin: const EdgeInsets.only(right: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.home_rounded, color: Colors.white),
-              tooltip: 'Volver al menú',
-            ),
-          ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [Color(0xFF22D3EE), Color(0xFF14B8A6)],
-                ).createShader(bounds),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.70),
-                    fontSize: 15,
-                    height: 1.3,
+            ),
+            circleButton(
+              onTap: showRulesDialog,
+              child: const Icon(
+                Icons.question_mark_rounded,
+                color: appWhite,
+                size: 27,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: titleHeight,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Text(
+                    visualTitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontSize: 39,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: titleHeight - 10,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
                   ),
                 ),
               ],
-            ],
+            ),
           ),
         ),
+
+        if (subtitle != null) ...[
+          const SizedBox(height: 10),
+          buildInfoBar(
+            text: subtitle,
+            color: getRoundAccent(currentRound),
+          ),
+        ],
       ],
     );
   }
 
-  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
+  Widget buildInfoBar({
+    required String text,
+    Color color = accentCyan,
+  }) {
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.08),
-            Colors.white.withOpacity(0.03),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.tealAccent.withOpacity(0.08),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
+        color: appWhite.withOpacity(0.06),
+        border: Border(
+          left: BorderSide(
+            color: color,
+            width: 6,
           ),
-        ],
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.36),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: appWhite.withOpacity(0.76),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+
+  Widget buildGlassCard({
+    required Widget child,
+    EdgeInsets? padding,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
       ),
       child: child,
     );
@@ -607,42 +745,253 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   InputDecoration inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
+      hintStyle: TextStyle(
+        color: appWhite.withOpacity(0.45),
+        fontWeight: FontWeight.w600,
+      ),
       filled: true,
-      fillColor: const Color(0xFF0F172A),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      fillColor: appWhite.withOpacity(0.07),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Color(0xFF14B8A6)),
-      ),
-    );
-  }
-
-  ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF14B8A6),
-      foregroundColor: Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite,
+          width: 2,
+        ),
       ),
     );
   }
 
-  ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: Colors.white,
-      side: BorderSide(color: Colors.white.withOpacity(0.18)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+  Widget sectionTitle(String text) {
+    return Text(
+      text.toLowerCase(),
+      style: const TextStyle(
+        color: appWhite,
+        fontSize: 29,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
+      ),
+    );
+  }
+
+  Widget rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showRulesDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'DESCRIBE LA PALABRA',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  rulesItem(
+                    icon: Icons.groups_rounded,
+                    title: 'Cread equipos',
+                    text:
+                    'Añadid jugadores, cread equipos y asignad a cada persona a un equipo.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.list_alt_rounded,
+                    title: 'Elegid palabras',
+                    text:
+                    'Podéis usar palabras de la app o escribir vuestra propia lista.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.chat_bubble_rounded,
+                    title: 'Ronda 1',
+                    text:
+                    'Describe palabras hablando, pero sin decir la palabra exacta.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.accessibility_new_rounded,
+                    title: 'Ronda 2',
+                    text:
+                    'Se usan las palabras acertadas de la ronda 1, pero solo con mímica.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.graphic_eq_rounded,
+                    title: 'Ronda 3',
+                    text:
+                    'Se usan las mismas palabras, pero solo puedes hacer sonidos.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.emoji_events_rounded,
+                    title: 'Puntuación',
+                    text:
+                    'Cada palabra acertada suma 1 punto. Gana el equipo con más puntos.',
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -655,26 +1004,27 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           title: 'Describe la palabra',
           subtitle: 'Jugadores, equipos y palabras',
         ),
-        const SizedBox(height: 22),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Añadir jugadores',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 16),
+              sectionTitle('Añadir jugadores'),
+
+              const SizedBox(height: 14),
+
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: playerController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(
+                        color: appWhite,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      cursorColor: appWhite,
                       decoration: inputDecoration('Nombre del jugador'),
                       onSubmitted: (_) => addPlayer(),
                     ),
@@ -684,58 +1034,80 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     onPressed: addPlayer,
                     style: mainButtonStyle(),
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+                      padding:
+                      EdgeInsets.symmetric(vertical: 14, horizontal: 10),
                       child: Icon(Icons.add_rounded),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
-              if (allPlayers.isNotEmpty)
+
+              if (allPlayers.isNotEmpty) ...[
+                const SizedBox(height: 14),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: List.generate(allPlayers.length, (index) {
                     return Chip(
-                      backgroundColor: Colors.white.withOpacity(0.08),
+                      backgroundColor: appWhite.withOpacity(0.10),
+                      side: BorderSide(
+                        color: appWhite.withOpacity(0.28),
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
                       label: Text(
                         allPlayers[index],
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(
+                          color: appWhite,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      deleteIconColor: Colors.white70,
+                      deleteIconColor: appWhite.withOpacity(0.8),
                       onDeleted: () => removePlayer(index),
                     );
                   }),
                 ),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 14),
+
         buildGlassCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Equipos',
+              sectionTitle('Equipos'),
+
+              const SizedBox(height: 14),
+
+              Text(
+                'NÚMERO DE EQUIPOS',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Número de equipos',
-                style: TextStyle(color: Colors.white70, fontSize: 15),
-              ),
+
               const SizedBox(height: 8),
+
               TextField(
                 controller: teamCountController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+                cursorColor: appWhite,
                 decoration: inputDecoration('Ejemplo: 2'),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 14),
+
               Row(
                 children: [
                   Expanded(
@@ -743,10 +1115,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       onPressed: createEmptyTeams,
                       style: mainButtonStyle(),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Crear equipos',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          'CREAR',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -757,36 +1132,50 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       onPressed: autoDistributePlayers,
                       style: secondaryButtonStyle(),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Reparto aleatorio',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          'ALEATORIO',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
+
               if (teams.isNotEmpty) ...[
                 const SizedBox(height: 18),
-                const Text(
-                  'Asignar jugadores',
+
+                Text(
+                  'ASIGNAR JUGADORES',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    color: appWhite.withOpacity(0.70),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.7,
                   ),
                 ),
+
                 const SizedBox(height: 10),
+
                 ...allPlayers.map((player) {
                   final assignedTeam = getPlayerAssignedTeamIndex(player);
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(16),
+                      color: appWhite.withOpacity(0.07),
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.22),
+                        width: 1.3,
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -794,27 +1183,33 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                           child: Text(
                             player,
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                              color: appWhite,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
                         DropdownButton<int>(
                           value: assignedTeam,
-                          dropdownColor: const Color(0xFF0F172A),
-                          hint: const Text(
+                          dropdownColor: appBlue,
+                          hint: Text(
                             'Equipo',
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(
+                              color: appWhite.withOpacity(0.7),
+                            ),
                           ),
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontWeight: FontWeight.w700,
+                          ),
                           underline: const SizedBox(),
+                          iconEnabledColor: appWhite,
                           items: List.generate(
                             teams.length,
                                 (index) => DropdownMenuItem(
                               value: index,
                               child: Text(
                                 teams[index].name,
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(color: appWhite),
                               ),
                             ),
                           ),
@@ -828,34 +1223,48 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     ),
                   );
                 }),
-                const SizedBox(height: 14),
+
+                const SizedBox(height: 8),
+
                 ...teams.map(
                       (team) => Container(
                     width: double.infinity,
                     margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white.withOpacity(0.06)),
+                      color: appWhite.withOpacity(0.07),
+                      border: Border(
+                        left: BorderSide(
+                          color: accentCyan,
+                          width: 6,
+                        ),
+                        bottom: BorderSide(
+                          color: appWhite.withOpacity(0.28),
+                          width: 2,
+                        ),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          team.name,
+                          team.name.toUpperCase(),
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
+                            color: appWhite,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Text(
-                          team.players.isEmpty ? 'Sin jugadores' : team.players.join(', '),
+                          team.players.isEmpty
+                              ? 'Sin jugadores'
+                              : team.players.join(', '),
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.72),
+                            color: appWhite.withOpacity(0.72),
                             height: 1.35,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -866,34 +1275,36 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 14),
+
         buildGlassCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Palabras y tiempo',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 16),
+              sectionTitle('Palabras y tiempo'),
+
+              const SizedBox(height: 14),
+
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(18),
+                  color: appWhite.withOpacity(0.07),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.22),
+                  ),
                 ),
                 child: Column(
                   children: [
                     RadioListTile<WordsSource>(
                       value: WordsSource.app,
                       groupValue: wordsSource,
-                      activeColor: const Color(0xFF14B8A6),
+                      activeColor: appWhite,
                       title: const Text(
                         'Palabras de la app',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: appWhite,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -904,10 +1315,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     RadioListTile<WordsSource>(
                       value: WordsSource.custom,
                       groupValue: wordsSource,
-                      activeColor: const Color(0xFF14B8A6),
+                      activeColor: appWhite,
                       title: const Text(
                         'Escribir mi lista',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: appWhite,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -918,30 +1332,50 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   ],
                 ),
               ),
+
               if (wordsSource == WordsSource.custom) ...[
                 const SizedBox(height: 12),
                 TextField(
                   controller: customWordsController,
                   maxLines: 8,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  cursorColor: appWhite,
                   decoration: inputDecoration(
                     'Una palabra por línea\nPerro\nAvión\nPizza',
                   ),
                 ),
               ],
-              const SizedBox(height: 16),
-              const Text(
-                'Segundos por turno',
-                style: TextStyle(color: Colors.white70, fontSize: 15),
+
+              const SizedBox(height: 14),
+
+              Text(
+                'SEGUNDOS POR TURNO',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
+                ),
               ),
+
               const SizedBox(height: 8),
+
               TextField(
                 controller: secondsController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+                cursorColor: appWhite,
                 decoration: inputDecoration('Ejemplo: 30'),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -950,8 +1384,12 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 15),
                     child: Text(
-                      'Empezar juego',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      'EMPEZAR JUEGO',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -973,51 +1411,69 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           title: getRoundTitle(currentRound),
           subtitle: getRoundDescription(currentRound),
         ),
-        const SizedBox(height: 22),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
               Container(
-                width: 84,
-                height: 84,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.tealAccent.withOpacity(0.14),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
+                  ),
                 ),
                 child: Icon(
                   getRoundIcon(currentRound),
-                  color: Colors.white,
+                  color: appWhite,
                   size: 38,
                 ),
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 16),
+
               Text(
-                team.name,
+                team.name.toLowerCase(),
+                textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
                 ),
               ),
-              const SizedBox(height: 10),
+
+              const SizedBox(height: 12),
+
               Text(
-                'Describe: ${team.currentDescriber}',
+                'DESCRIBE: ${team.currentDescriber}'.toUpperCase(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.80),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  color: appWhite.withOpacity(0.78),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 6),
+
               Text(
                 'Palabras restantes: ${currentRoundWords.length}',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.65),
-                  fontSize: 15,
+                  color: appWhite.withOpacity(0.65),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 22),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -1027,8 +1483,12 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   label: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text(
-                      'Empezar turno',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                      'EMPEZAR TURNO',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -1036,7 +1496,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 14),
+
         buildScoreCard(),
       ],
     );
@@ -1052,54 +1514,64 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           title: team.name,
           subtitle: 'Describe: ${team.currentDescriber}',
         ),
-        const SizedBox(height: 22),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
               Container(
-                width: 120,
-                height: 120,
+                width: 92,
+                height: 92,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.tealAccent.withOpacity(0.22),
-                      Colors.cyanAccent.withOpacity(0.14),
-                    ],
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
                   ),
                 ),
                 child: Center(
                   child: Text(
                     '$remainingSeconds',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: appWhite,
                       fontSize: 38,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 30),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 28,
+                ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.30),
+                    width: 1.4,
+                  ),
                 ),
                 child: Text(
-                  currentWord,
+                  currentWord.toLowerCase(),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
+                    color: appWhite,
+                    fontSize: 39,
+                    height: 0.95,
                     fontWeight: FontWeight.w900,
-                    height: 1.2,
+                    letterSpacing: -1,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 18),
+
               Row(
                 children: [
                   Expanded(
@@ -1108,10 +1580,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       style: secondaryButtonStyle(),
                       icon: const Icon(Icons.skip_next_rounded),
                       label: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Pasar',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          'PASAR',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -1123,10 +1598,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       style: mainButtonStyle(),
                       icon: const Icon(Icons.check_rounded),
                       label: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Acierto',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          'ACIERTO',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -1136,7 +1614,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+
+        const SizedBox(height: 14),
+
         buildScoreCard(),
       ],
     );
@@ -1152,16 +1632,31 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           title: '${getRoundTitle(currentRound)} terminada',
           subtitle: 'Resumen de puntuaciones',
         ),
-        const SizedBox(height: 22),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
-              const Icon(
-                Icons.flag_rounded,
-                color: Colors.white,
-                size: 50,
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.flag_rounded,
+                  color: appWhite,
+                  size: 36,
+                ),
               ),
+
               const SizedBox(height: 16),
+
               Text(
                 currentRound == DescribeRoundType.describe
                     ? 'Las palabras acertadas pasan a la ronda 2'
@@ -1170,15 +1665,19 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     : 'Habéis terminado el juego',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.82),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  color: appWhite.withOpacity(0.82),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
                   height: 1.35,
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               buildScoreBoard(),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -1187,10 +1686,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     child: Text(
-                      isLastRound ? 'Ver ganador' : 'Siguiente ronda',
+                      isLastRound ? 'VER GANADOR' : 'SIGUIENTE RONDA',
                       style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
                       ),
                     ),
                   ),
@@ -1213,45 +1713,74 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           title: 'Juego terminado',
           subtitle: 'Ya tenemos ganador',
         ),
-        const SizedBox(height: 22),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
               Container(
-                width: 92,
-                height: 92,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.amber.withOpacity(0.18),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
+                  ),
                 ),
                 child: const Icon(
                   Icons.emoji_events_rounded,
-                  color: Colors.amber,
-                  size: 46,
+                  color: appWhite,
+                  size: 39,
                 ),
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 16),
+
+              const Text(
+                'ganador',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
               Text(
-                winner.name,
+                winner.name.toLowerCase(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
+                  color: appWhite,
+                  fontSize: 34,
+                  height: 0.95,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.7,
                 ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 6),
+
               Text(
                 '${winner.points} puntos',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.75),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  color: appWhite.withOpacity(0.75),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               buildScoreBoard(),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               Row(
                 children: [
                   Expanded(
@@ -1259,10 +1788,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       onPressed: () => Navigator.pop(context),
                       style: secondaryButtonStyle(),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Menú',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          'MENÚ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -1273,10 +1805,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       onPressed: resetAll,
                       style: mainButtonStyle(),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Jugar otra vez',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          'OTRA VEZ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -1302,22 +1837,35 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Puntuación',
+          'puntuación',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
+            color: appWhite,
+            fontSize: 25,
+            height: 0.95,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
           ),
         ),
+
         const SizedBox(height: 12),
+
         ...sortedTeams.map(
               (team) => Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(16),
+              color: appWhite.withOpacity(0.07),
+              border: Border(
+                left: BorderSide(
+                  color: accentGreen,
+                  width: 5,
+                ),
+                bottom: BorderSide(
+                  color: appWhite.withOpacity(0.25),
+                  width: 2,
+                ),
+              ),
             ),
             child: Row(
               children: [
@@ -1325,15 +1873,15 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   child: Text(
                     team.name,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                      color: appWhite,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
                 Text(
                   '${team.points} pts',
                   style: const TextStyle(
-                    color: Color(0xFF2DD4BF),
+                    color: appWhite,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -1368,55 +1916,12 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF06121A),
-      body: SizedBox.expand(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF0B1F2A),
-                Color(0xFF07131C),
-                Color(0xFF041017),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -70,
-                left: -40,
-                child: Container(
-                  width: 220,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.tealAccent.withOpacity(0.08),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 120,
-                right: -20,
-                child: Container(
-                  width: 170,
-                  height: 170,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.cyanAccent.withOpacity(0.06),
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: SingleChildScrollView(
-                    child: body,
-                  ),
-                ),
-              ),
-            ],
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          child: SingleChildScrollView(
+            child: body,
           ),
         ),
       ),

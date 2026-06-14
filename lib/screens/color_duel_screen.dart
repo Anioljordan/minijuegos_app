@@ -41,6 +41,11 @@ class ColorDuelScreen extends StatefulWidget {
 class _ColorDuelScreenState extends State<ColorDuelScreen> {
   final Random _random = Random();
 
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color accentPurple = Color(0xFF8B5CF6);
+  static const Color accentGreen = Color(0xFF22C55E);
+
   ColorDuelPhase _phase = ColorDuelPhase.setup;
 
   final TextEditingController _playersCountController =
@@ -74,6 +79,16 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   Timer? _timer;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showRulesDialog();
+    });
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     _playersCountController.dispose();
@@ -85,6 +100,439 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     }
 
     super.dispose();
+  }
+
+  ButtonStyle mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget _circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget _glassCard({
+    required Widget child,
+    EdgeInsets padding = const EdgeInsets.all(16),
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _primaryButton({
+    required String text,
+    required VoidCallback onPressed,
+    IconData? icon,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: mainButtonStyle(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, color: appBlue, size: 22),
+                const SizedBox(width: 9),
+              ],
+              Text(
+                text.toUpperCase(),
+                style: const TextStyle(
+                  color: appBlue,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _fancyInput(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(
+        color: appWhite.withOpacity(0.65),
+        fontWeight: FontWeight.w700,
+      ),
+      filled: true,
+      fillColor: appWhite.withOpacity(0.07),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    final bool showRound = _phase != ColorDuelPhase.setup;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            _circleButton(
+              onTap: _showRulesDialog,
+              child: const Icon(
+                Icons.question_mark_rounded,
+                color: appWhite,
+                size: 27,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: 102,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Text(
+                    'memoria\nfotográfica',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 42,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 90,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        if (showRound) ...[
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.06),
+              border: Border(
+                left: BorderSide(
+                  color: accentPurple,
+                  width: 6,
+                ),
+                bottom: BorderSide(
+                  color: appWhite.withOpacity(0.36),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Text(
+              'RONDA $_currentRound DE $_totalRounds',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.82),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.1,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRulesDialog() {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'MEMORIA FOTOGRÁFICA',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  _rulesItem(
+                    icon: Icons.visibility_rounded,
+                    title: 'Memoriza',
+                    text:
+                    'Cada jugador verá un color durante unos segundos. Intenta recordarlo lo mejor posible.',
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.phone_android_rounded,
+                    title: 'Pasa el móvil',
+                    text:
+                    'Cuando termine el tiempo, pasa el móvil al jugador correspondiente sin enseñar el color.',
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.palette_rounded,
+                    title: 'Recrea el color',
+                    text:
+                    'Usa la ruleta para elegir el color que crees que era el original.',
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.group_work_rounded,
+                    title: 'Modos',
+                    text:
+                    'Podéis jugar con el mismo color para todos o con un color distinto para cada jugador.',
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.emoji_events_rounded,
+                    title: 'Puntuación',
+                    text:
+                    'Cuanto más se parezca tu color al objetivo, más puntos ganas.',
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _updatePlayerControllers() {
@@ -339,178 +787,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return sorted;
   }
 
-  Widget _glassCard({
-    required Widget child,
-    EdgeInsets padding = const EdgeInsets.all(18),
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        color: Colors.white.withOpacity(0.085),
-        border: Border.all(color: Colors.white.withOpacity(0.11)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
-    );
-  }
-
-  Widget _primaryButton({
-    required String text,
-    required VoidCallback onPressed,
-    IconData? icon,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF7C3AED),
-                Color(0xFF2563EB),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF2563EB).withOpacity(0.38),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, color: Colors.white),
-                  const SizedBox(width: 10),
-                ],
-                Text(
-                  text,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _fancyInput(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withOpacity(0.68)),
-      filled: true,
-      fillColor: const Color(0xFF0F172A).withOpacity(0.75),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(18)),
-        borderSide: BorderSide(color: Color(0xFF60A5FA), width: 1.4),
-      ),
-    );
-  }
-
-  Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.white.withOpacity(0.08),
-              border: Border.all(color: Colors.white.withOpacity(0.10)),
-            ),
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(
-                Icons.home_rounded,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              children: [
-                const Text(
-                  'Memoria Fotográfica',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                if (_phase != ColorDuelPhase.setup)
-                  Text(
-                    'Ronda $_currentRound de $_totalRounds',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.72),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.white.withOpacity(0.08),
-              border: Border.all(color: Colors.white.withOpacity(0.10)),
-            ),
-            child: const Icon(
-              Icons.palette_outlined,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _stepperCard({
     required String title,
     required String subtitle,
@@ -520,43 +796,32 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     required VoidCallback onPlus,
   }) {
     return _glassCard(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF7C3AED),
-                  Color(0xFF2563EB),
-                ],
-              ),
-            ),
-            child: Icon(icon, color: Colors.white),
-          ),
-          const SizedBox(width: 14),
+          Icon(icon, color: appWhite, size: 26),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  title.toUpperCase(),
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
+                    color: appWhite,
+                    fontSize: 14,
                     fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.62),
-                    fontSize: 12,
-                    height: 1.25,
+                    color: appWhite.withOpacity(0.62),
+                    fontSize: 11.5,
+                    height: 1.2,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -564,19 +829,19 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ),
           IconButton(
             onPressed: onMinus,
-            icon: const Icon(Icons.remove_circle_outline, color: Colors.white),
+            icon: const Icon(Icons.remove_rounded, color: appWhite),
           ),
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 25,
+              color: appWhite,
+              fontSize: 22,
               fontWeight: FontWeight.w900,
             ),
           ),
           IconButton(
             onPressed: onPlus,
-            icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+            icon: const Icon(Icons.add_rounded, color: appWhite),
           ),
         ],
       ),
@@ -595,50 +860,53 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: selected
-              ? const Color(0xFF2563EB).withOpacity(0.30)
-              : Colors.white.withOpacity(0.07),
-          border: Border.all(
-            color: selected
-                ? const Color(0xFF60A5FA)
-                : Colors.white.withOpacity(0.10),
-            width: selected ? 2 : 1,
+          color: selected ? appWhite.withOpacity(0.14) : appWhite.withOpacity(0.07),
+          border: Border(
+            left: BorderSide(
+              color: selected ? accentPurple : appWhite.withOpacity(0.26),
+              width: selected ? 7 : 2,
+            ),
+            bottom: BorderSide(
+              color: appWhite.withOpacity(0.30),
+              width: 2,
+            ),
+            top: BorderSide(
+              color: appWhite.withOpacity(0.18),
+              width: 1,
+            ),
+            right: BorderSide(
+              color: appWhite.withOpacity(0.18),
+              width: 1,
+            ),
           ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                color: Colors.white.withOpacity(0.11),
-              ),
-              child: Icon(icon, color: Colors.white, size: 28),
-            ),
-            const SizedBox(width: 14),
+            Icon(icon, color: appWhite, size: 28),
+            const SizedBox(width: 13),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    title.toUpperCase(),
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
+                      color: appWhite,
+                      fontSize: 15,
                       fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.68),
-                      fontSize: 13,
+                      color: appWhite.withOpacity(0.68),
+                      fontSize: 12.5,
                       height: 1.25,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -646,8 +914,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             ),
             if (selected)
               const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFF60A5FA),
+                Icons.check_rounded,
+                color: appWhite,
               ),
           ],
         ),
@@ -655,44 +923,15 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _miniInfoCard({
-    required IconData icon,
-    required String title,
-    required String text,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withOpacity(0.10)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
-                fontSize: 12,
-                height: 1.25,
-              ),
-            ),
-          ],
-        ),
+  Widget _sectionTitle(String text) {
+    return Text(
+      text.toLowerCase(),
+      style: const TextStyle(
+        color: appWhite,
+        fontSize: 30,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
       ),
     );
   }
@@ -700,86 +939,25 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   Widget _buildSetupPhase() {
     return SingleChildScrollView(
       key: const ValueKey('setup'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _glassCard(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              children: [
-                Container(
-                  width: 82,
-                  height: 82,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF7C3AED),
-                        Color(0xFF2563EB),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2563EB).withOpacity(0.35),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.remove_red_eye_rounded,
-                    color: Colors.white,
-                    size: 40,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Memoriza el color',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Cada jugador verá un color durante unos segundos. Luego tendrá que recrearlo con la ruleta de colores.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.72),
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    _miniInfoCard(
-                      icon: Icons.visibility_rounded,
-                      title: 'Mira',
-                      text: 'Memoriza rápido',
-                    ),
-                    const SizedBox(width: 10),
-                    _miniInfoCard(
-                      icon: Icons.palette_rounded,
-                      title: 'Copia',
-                      text: 'Elige el color',
-                    ),
-                    const SizedBox(width: 10),
-                    _miniInfoCard(
-                      icon: Icons.emoji_events_rounded,
-                      title: 'Gana',
-                      text: 'Más precisión',
-                    ),
-                  ],
-                ),
-              ],
+          _sectionTitle('Configura la partida'),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Elige jugadores, rondas, tiempo y modo de juego.',
+            style: TextStyle(
+              color: appWhite.withOpacity(0.70),
+              fontSize: 13,
+              height: 1.3,
+              fontWeight: FontWeight.w700,
             ),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           _stepperCard(
             title: 'Jugadores',
@@ -790,7 +968,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             onPlus: () => _changePlayersCount(1),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           _stepperCard(
             title: 'Rondas',
@@ -801,7 +979,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             onPlus: () => _changeRounds(1),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           _stepperCard(
             title: 'Memoria',
@@ -812,18 +990,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             onPlus: () => _changeSeconds(1),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
-          const Text(
-            'Modo de juego',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
+          _sectionTitle('Modo'),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           _modeCard(
             title: 'Mismo color',
@@ -837,7 +1008,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             },
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           _modeCard(
             title: 'Color distinto',
@@ -851,18 +1022,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             },
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
-          const Text(
-            'Nombres',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
+          _sectionTitle('Nombres'),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           _glassCard(
             child: Column(
@@ -873,7 +1037,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   ),
                   child: TextField(
                     controller: _nameControllers[index],
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    cursorColor: appWhite,
                     decoration: _fancyInput('Jugador ${index + 1}'),
                   ),
                 );
@@ -881,7 +1049,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
 
           _primaryButton(
             text: 'Empezar partida',
@@ -913,10 +1081,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   Widget _buildMemorizePhase() {
     return Padding(
       key: const ValueKey('memorize'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
       child: Center(
         child: _glassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(18),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -924,57 +1092,60 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 'Turno de ${_players[_currentPlayerIndex].name}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
+                  color: appWhite,
+                  fontSize: 25,
+                  height: 0.95,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.4,
                 ),
               ),
-              const SizedBox(height: 10),
+
+              const SizedBox(height: 8),
+
               Text(
                 _gameMode == ColorDuelMode.sameColorForAll
                     ? 'Memoriza este color'
                     : 'Memoriza tu color',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.72),
-                  fontSize: 16,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 20),
+
               Container(
-                width: 220,
-                height: 220,
+                width: 230,
+                height: 230,
                 decoration: BoxDecoration(
                   color: _targetColor,
-                  borderRadius: BorderRadius.circular(28),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.25),
+                    color: appWhite.withOpacity(0.75),
                     width: 3,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _targetColor.withOpacity(0.45),
-                      blurRadius: 28,
-                      spreadRadius: 4,
-                    ),
-                  ],
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 20),
+
               Container(
-                width: 90,
-                height: 90,
+                width: 74,
+                height: 74,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.08),
-                  border: Border.all(color: Colors.white.withOpacity(0.12)),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
+                  ),
                 ),
                 child: Center(
                   child: Text(
                     '$_secondsLeft',
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
+                      color: appWhite,
+                      fontSize: 34,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -992,67 +1163,70 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return Padding(
       key: const ValueKey('passPhone'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
       child: Center(
         child: _glassCard(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 90,
-                height: 90,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF7C3AED),
-                      Color(0xFF2563EB),
-                    ],
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.35),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
                 ),
                 child: const Icon(
                   Icons.phone_android_rounded,
-                  color: Colors.white,
-                  size: 42,
+                  color: appWhite,
+                  size: 39,
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               const Text(
-                'Pasa el móvil',
+                'pasa\nel móvil',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.9,
                 ),
               ),
-              const SizedBox(height: 10),
+
+              const SizedBox(height: 12),
+
               Text(
                 'Turno de ${player.name}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                  color: appWhite,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 10),
+
+              const SizedBox(height: 6),
+
               Text(
                 'Que nadie más mire la pantalla',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 16,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 22),
+
               _primaryButton(
                 text: 'Estoy listo',
                 icon: Icons.visibility_outlined,
@@ -1070,86 +1244,164 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return SingleChildScrollView(
       key: const ValueKey('pick'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
+      child: _glassCard(
+        child: Column(
+          children: [
+            Text(
+              'Turno de ${player.name}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 25,
+                height: 0.95,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'Elige el color que más se parezca',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.70),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Container(
+              width: double.infinity,
+              height: 130,
+              decoration: BoxDecoration(
+                color: _currentSelectedColor,
+                border: Border.all(
+                  color: appWhite.withOpacity(0.75),
+                  width: 3,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            ColorWheelPicker(
+              onColorChanged: (color) {
+                setState(() {
+                  _red = color.red.toDouble();
+                  _green = color.green.toDouble();
+                  _blue = color.blue.toDouble();
+                });
+              },
+            ),
+
+            const SizedBox(height: 14),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.08),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.26),
+                  width: 1.4,
+                ),
+              ),
+              child: Text(
+                'RGB(${_red.round()}, ${_green.round()}, ${_blue.round()})',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: appWhite,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            _primaryButton(
+              text: 'Confirmar color',
+              icon: Icons.check_circle_outline_rounded,
+              onPressed: _confirmCurrentPlayerColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _colorBlock({
+    required String label,
+    required Color color,
+  }) {
+    return Expanded(
       child: Column(
         children: [
-          _glassCard(
-            child: Column(
-              children: [
-                Text(
-                  'Turno de ${player.name}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Elige el color que más se parezca',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.72),
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    color: _currentSelectedColor,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.20),
-                      width: 3,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _currentSelectedColor.withOpacity(0.45),
-                        blurRadius: 24,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ColorWheelPicker(
-                  onColorChanged: (color) {
-                    setState(() {
-                      _red = color.red.toDouble();
-                      _green = color.green.toDouble();
-                      _blue = color.blue.toDouble();
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white.withOpacity(0.06),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
-                  ),
-                  child: Text(
-                    'RGB(${_red.round()}, ${_green.round()}, ${_blue.round()})',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _primaryButton(
-                  text: 'Confirmar color',
-                  icon: Icons.check_circle_outline_rounded,
-                  onPressed: _confirmCurrentPlayerColor,
-                ),
-              ],
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              color: appWhite.withOpacity(0.72),
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Container(
+            height: 74,
+            decoration: BoxDecoration(
+              color: color,
+              border: Border.all(
+                color: appWhite.withOpacity(0.50),
+                width: 2,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _scoreBox({
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: appWhite.withOpacity(0.07),
+          border: Border.all(
+            color: appWhite.withOpacity(0.22),
+            width: 1.3,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                color: appWhite.withOpacity(0.62),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1159,56 +1411,45 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return SingleChildScrollView(
       key: const ValueKey('roundResult'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Resultado de la ronda',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 18),
+          _sectionTitle('Resultado de la ronda'),
+
+          const SizedBox(height: 14),
+
           if (_gameMode == ColorDuelMode.sameColorForAll) ...[
             _glassCard(
               child: Column(
                 children: [
                   Text(
-                    'Color objetivo',
+                    'COLOR OBJETIVO',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.72),
-                      fontSize: 16,
+                      color: appWhite.withOpacity(0.72),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Container(
-                    width: 180,
-                    height: 110,
+                    width: double.infinity,
+                    height: 90,
                     decoration: BoxDecoration(
                       color: _targetColor,
-                      borderRadius: BorderRadius.circular(22),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.20),
-                        width: 3,
+                        color: appWhite.withOpacity(0.65),
+                        width: 2.4,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _targetColor.withOpacity(0.45),
-                          blurRadius: 20,
-                          spreadRadius: 2,
-                        ),
-                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
           ],
+
           ...roundRanking.map((player) {
             final playerIndex = _players.indexOf(player);
             final Color targetForPlayer =
@@ -1222,7 +1463,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             );
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.only(bottom: 12),
               child: _glassCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1230,159 +1471,68 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     Text(
                       player.name,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: appWhite,
                         fontSize: 21,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 14),
+
+                    const SizedBox(height: 12),
+
                     Row(
                       children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                'Objetivo',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                height: 82,
-                                decoration: BoxDecoration(
-                                  color: targetForPlayer,
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.16),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        _colorBlock(
+                          label: 'Objetivo',
+                          color: targetForPlayer,
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                'Elegido',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                height: 82,
-                                decoration: BoxDecoration(
-                                  color:
-                                  player.selectedColor ?? Colors.transparent,
-                                  borderRadius: BorderRadius.circular(18),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.16),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        _colorBlock(
+                          label: 'Elegido',
+                          color: player.selectedColor ?? Colors.transparent,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+
+                    const SizedBox(height: 12),
+
                     Container(
-                      height: 10,
+                      height: 8,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        color: Colors.white.withOpacity(0.08),
+                        color: appWhite.withOpacity(0.12),
                       ),
                       child: FractionallySizedBox(
                         alignment: Alignment.centerLeft,
                         widthFactor: accuracy / 100,
                         child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(999),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF22C55E),
-                                Color(0xFF3B82F6),
-                              ],
-                            ),
-                          ),
+                          color: accentGreen,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+
+                    const SizedBox(height: 7),
+
                     Text(
-                      'Precisión: $accuracy%',
+                      'PRECISIÓN: $accuracy%',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.78),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        color: appWhite.withOpacity(0.74),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
                       ),
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: 12),
+
                     Row(
                       children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: Colors.white.withOpacity(0.06),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Ronda',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.65),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '+${player.lastRoundScore}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        _scoreBox(
+                          label: 'Ronda',
+                          value: '+${player.lastRoundScore}',
                         ),
                         const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: Colors.white.withOpacity(0.06),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Total',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.65),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${player.totalScore}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        _scoreBox(
+                          label: 'Total',
+                          value: '${player.totalScore}',
                         ),
                       ],
                     ),
@@ -1391,7 +1541,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               ),
             );
           }),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 4),
+
           _primaryButton(
             text: _currentRound < _totalRounds
                 ? 'Siguiente ronda'
@@ -1410,102 +1562,115 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return SingleChildScrollView(
       key: const ValueKey('finalResult'),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _glassCard(
             child: Column(
               children: [
-                const Icon(
-                  Icons.emoji_events_rounded,
-                  size: 74,
-                  color: Colors.amber,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Resultado final',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
+                Container(
+                  width: 78,
+                  height: 78,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: appWhite.withOpacity(0.85),
+                      width: 2.2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_rounded,
+                    size: 39,
+                    color: appWhite,
                   ),
                 ),
-                const SizedBox(height: 10),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  'resultado\nfinal',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: 38,
+                    height: 0.9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.9,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
                 Text(
                   'Ganador: ${winner.name}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.76),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 18),
+
+          const SizedBox(height: 14),
+
           ...finalRanking.asMap().entries.map((entry) {
             final index = entry.key;
             final player = entry.value;
 
-            final medalColor = index == 0
-                ? Colors.amber
-                : index == 1
-                ? Colors.blueGrey.shade200
-                : const Color(0xFFCD7F32);
-
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: 10),
               child: _glassCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Container(
-                      width: 54,
-                      height: 54,
+                      width: 42,
+                      height: 42,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: medalColor.withOpacity(0.18),
-                        border: Border.all(color: medalColor.withOpacity(0.5)),
+                        border: Border.all(
+                          color: appWhite.withOpacity(0.85),
+                          width: 2,
+                        ),
                       ),
                       child: Center(
                         child: Text(
                           '${index + 1}',
-                          style: TextStyle(
-                            color: medalColor,
+                          style: const TextStyle(
+                            color: appWhite,
                             fontWeight: FontWeight.w900,
-                            fontSize: 20,
+                            fontSize: 17,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+
+                    const SizedBox(width: 12),
+
                     Expanded(
                       child: Text(
                         player.name,
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 19,
-                          fontWeight: FontWeight.w700,
+                          color: appWhite,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.white.withOpacity(0.06),
-                      ),
-                      child: Text(
-                        '${player.totalScore} pts',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                        ),
+
+                    Text(
+                      '${player.totalScore} pts',
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.78),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ],
@@ -1513,7 +1678,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               ),
             );
           }),
-          const SizedBox(height: 14),
+
+          const SizedBox(height: 8),
+
           _primaryButton(
             text: 'Volver a jugar',
             icon: Icons.refresh_rounded,
@@ -1527,20 +1694,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B1A),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0B1023),
-              Color(0xFF11162C),
-              Color(0xFF1B1140),
-            ],
-          ),
-        ),
-        child: SafeArea(
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
           child: Column(
             children: [
               _buildTopBar(),

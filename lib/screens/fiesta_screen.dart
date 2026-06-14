@@ -1,91 +1,201 @@
 import 'package:flutter/material.dart';
-import '../widgets/game_card.dart';
 import 'yo_nunca_modes_screen.dart';
 import 'piccolo_screen.dart';
 import 'uno_dos_screen.dart';
 import 'prueba_verdad_screen.dart';
 import 'drink_dare_screen.dart';
 import 'ping_pong_screen.dart';
+import '../widgets/app_settings_button.dart';
 
 class FiestaScreen extends StatelessWidget {
   const FiestaScreen({super.key});
+
+  static const Color blue = Color(0xFF2F4F9C);
+  static const Color white = Color(0xFFF7F7F7);
+
+  Widget buildTopIcons(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: white.withOpacity(0.85),
+                  width: 2.2,
+                ),
+              ),
+              child: const Center(
+                child: Text(
+                  '8',
+                  style: TextStyle(
+                    color: white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const AppSettingsButton(
+            blue: blue,
+            white: white,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildTitle() {
+    const double parentPadding = 30;
+    const double sideInset = 28;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: sideInset),
+      child: SizedBox(
+        width: double.infinity,
+        height: 82,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Positioned(
+              top: 0,
+              left: 0,
+              child: Text(
+                'party',
+                style: TextStyle(
+                  color: white,
+                  fontSize: 66,
+                  height: 0.9,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+
+            Positioned(
+              top: 68,
+              left: 0,
+              right: -parentPadding,
+              child: Container(
+                height: 3,
+                color: white.withOpacity(0.58),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildGameButton({
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          height: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: const BoxDecoration(
+            color: white,
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: blue,
+                fontSize: 21,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final juegos = [
       {
-        'title': 'Yo Nunca Nunca',
-        'icon': Icons.local_bar_outlined,
-        'colors': [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
+        'title': 'Yo Nunca',
         'screen': const YoNuncaModesScreen(),
       },
       {
         'title': 'Señala y bebe',
-        'icon': Icons.touch_app_outlined,
-        'colors': [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
         'screen': const PiccoloScreen(),
       },
       {
-        'title': '1 y 2',
-        'icon': Icons.visibility_outlined,
-        'colors': [const Color(0xFF48DCCB), const Color(0xFF22C1B5)],
+        'title': '1 & 2',
         'screen': const UnoDosScreen(),
       },
       {
         'title': 'Prueba o verdad',
-        'icon': Icons.theater_comedy_outlined,
-        'colors': [const Color(0xFFFBBF24), const Color(0xFFF59E0B)],
         'screen': const PruebaVerdadScreen(),
       },
       {
-        'title': 'Drink and Dare',
-        'icon': Icons.blur_circular,
-        'colors': [const Color(0xFFFF5A5F), const Color(0xFFEF4444)],
+        'title': 'Drink & Dare',
         'screen': const DrinkDareScreen(),
       },
       {
         'title': 'Ping Pong',
-        'icon': Icons.timer_outlined,
-        'colors': [const Color(0xFF38BDF8), const Color(0xFF0EA5E9)],
         'screen': const PingPongScreen(),
       },
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF08051A),
-      appBar: AppBar(
-        title: const Text('Juegos de fiesta'),
-        backgroundColor: const Color(0xFF08051A),
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: GridView.builder(
-          itemCount: juegos.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 14,
-            mainAxisSpacing: 14,
-            childAspectRatio: 0.92,
-          ),
-          itemBuilder: (context, index) {
-            final juego = juegos[index];
+      backgroundColor: blue,
+      body: Stack(
+        children: [
+          buildTopIcons(context),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(30, 180, 30, 30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildTitle(),
+                  const SizedBox(height: 105),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: juegos.length,
+                      itemBuilder: (context, index) {
+                        final juego = juegos[index];
 
-            return GameCard(
-              title: juego['title'] as String,
-              icon: juego['icon'] as IconData,
-              gradientColors: juego['colors'] as List<Color>,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => juego['screen'] as Widget,
+                        return buildGameButton(
+                          title: juego['title'] as String,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => juego['screen'] as Widget,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-            );
-          },
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../core/app_settings.dart';
 
 class CuatroEnRayaScreen extends StatefulWidget {
   const CuatroEnRayaScreen({super.key});
@@ -38,6 +39,85 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+
+  static const Color boardBlue = Color(0xFF24458E);
+  static const Color boardBlueDark = Color(0xFF1D3979);
+  static const Color boardBlueLight = Color(0xFF7E96D6);
+  static const Color emptyHoleColor = Color(0xFF2F4F9C);
+
+  static const Color redDisc = Color(0xFFE63946);
+  static const Color yellowDisc = Color(0xFFFFD166);
+
+  @override
+  void initState() {
+    super.initState();
+
+    AppSettings.instance.load();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      mostrarNormas();
+    });
+  }
+
+  Widget _rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+    required Color color,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _audioPlayer.dispose();
@@ -45,15 +125,35 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   Future<void> reproducirSonido(String asset) async {
+    final settings = AppSettings.instance;
+
+    if (!settings.soundEnabled) return;
+
     try {
+      await _audioPlayer.setVolume(settings.volume);
       await _audioPlayer.play(AssetSource(asset));
     } catch (_) {}
   }
 
+  void vibrarMedium() {
+    if (!AppSettings.instance.vibrationEnabled) return;
+    HapticFeedback.mediumImpact();
+  }
+
+  void vibrarHeavy() {
+    if (!AppSettings.instance.vibrationEnabled) return;
+    HapticFeedback.heavyImpact();
+  }
+
+  void vibrarClick() {
+    if (!AppSettings.instance.vibrationEnabled) return;
+    HapticFeedback.selectionClick();
+  }
+
   Color colorFicha(int valor) {
-    if (valor == 1) return const Color(0xFFFF4D6D);
-    if (valor == 2) return const Color(0xFFFFD166);
-    return const Color(0xFFEFF6FF);
+    if (valor == 1) return redDisc;
+    if (valor == 2) return yellowDisc;
+    return emptyHoleColor;
   }
 
   Color colorJugadorActual() {
@@ -67,7 +167,96 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     if (juegoTerminado) return 'Partida terminada';
     return jugadorActual == 1 ? 'Turno del rojo' : 'Turno del amarillo';
   }
+  Widget _buildDisc({
+    required int valor,
+    required bool mostrarFichaAnimada,
+    required bool ganadora,
+  }) {
+    final int valorVisual = mostrarFichaAnimada ? (animJugador ?? 0) : valor;
+    final bool vacio = valorVisual == 0;
+    final Color discColor = colorFicha(valorVisual);
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rawSize = math.min(constraints.maxWidth, constraints.maxHeight);
+        final outerSize = rawSize * 0.86;
+        final innerSize = outerSize * 0.82;
+
+        return AnimatedScale(
+          duration: const Duration(milliseconds: 220),
+          scale: ganadora ? 1.08 : 1.0,
+          child: SizedBox(
+            width: outerSize,
+            height: outerSize,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: outerSize,
+                  height: outerSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: boardBlueLight.withOpacity(0.85),
+                  ),
+                ),
+
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  width: innerSize,
+                  height: innerSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: vacio ? emptyHoleColor : discColor,
+                    border: Border.all(
+                      color: vacio
+                          ? boardBlueDark
+                          : appWhite.withOpacity(ganadora ? 0.95 : 0.45),
+                      width: ganadora ? 3 : 1.8,
+                    ),
+                    boxShadow: [
+                      if (!vacio)
+                        BoxShadow(
+                          color: discColor.withOpacity(0.35),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      if (ganadora)
+                        BoxShadow(
+                          color: appWhite.withOpacity(0.75),
+                          blurRadius: 18,
+                          spreadRadius: 3,
+                        ),
+                    ],
+                  ),
+                ),
+
+                if (!vacio)
+                  Positioned(
+                    top: innerSize * 0.18,
+                    left: innerSize * 0.28,
+                    right: innerSize * 0.28,
+                    child: Container(
+                      height: innerSize * 0.16,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        gradient: LinearGradient(
+                          colors: [
+                            appWhite.withOpacity(0.42),
+                            appWhite.withOpacity(0.0),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
   int? obtenerFilaDisponible(int columna) {
     for (int fila = filas - 1; fila >= 0; fila--) {
       if (tablero[fila][columna] == 0) return fila;
@@ -97,7 +286,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
     if (!mounted) return;
 
-    HapticFeedback.mediumImpact();
+    vibrarMedium();
     await reproducirSonido('sounds/drop.wav');
 
     setState(() {
@@ -122,7 +311,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         }
       });
 
-      HapticFeedback.heavyImpact();
+      vibrarHeavy();
       await reproducirSonido('sounds/win.wav');
 
       await Future.delayed(const Duration(milliseconds: 1100));
@@ -140,7 +329,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         empates++;
       });
 
-      HapticFeedback.selectionClick();
+      vibrarClick();
       await Future.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
 
@@ -276,40 +465,39 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
   ButtonStyle mainButtonStyle(Color color) {
     return ElevatedButton.styleFrom(
-      backgroundColor: color,
-      foregroundColor: Colors.white,
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
       ),
     );
   }
 
   ButtonStyle secondaryButtonStyle() {
     return OutlinedButton.styleFrom(
-      foregroundColor: Colors.white,
-      side: BorderSide(color: Colors.white.withOpacity(0.20)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
       ),
     );
   }
+
 
   Widget glassCard({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.22),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
-          ),
-        ],
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.30),
+          width: 1.4,
+        ),
       ),
       child: child,
     );
@@ -318,54 +506,147 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   void mostrarNormas() {
     showDialog(
       context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF151122),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Cómo se juega',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Dos jugadores se turnan para colocar fichas.\n\n'
-                    'Pulsa una columna y la ficha caerá al hueco más bajo.\n\n'
-                    'Gana quien consiga conectar 4 fichas en línea.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.82),
-                  fontSize: 16,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: mainButtonStyle(const Color(0xFF2563EB)),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'Cerrar',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    '4 EN RAYA',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                ),
+
+                  const SizedBox(height: 14),
+
+                  _rulesItem(
+                    icon: Icons.touch_app_rounded,
+                    title: 'Coloca ficha',
+                    text:
+                    'Pulsa una columna. La ficha caerá hasta el hueco más bajo.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.swap_horiz_rounded,
+                    title: 'Turnos',
+                    text:
+                    'Los jugadores se alternan entre rojo y amarillo.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.blur_linear_rounded,
+                    title: 'Objetivo',
+                    text:
+                    'Gana quien conecte 4 fichas en horizontal, vertical o diagonal.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.undo_rounded,
+                    title: 'Deshacer',
+                    text:
+                    'Puedes deshacer la última jugada antes de que termine la partida.',
+                    color: appWhite,
+                  ),
+
+                  _rulesItem(
+                    icon: Icons.emoji_events_rounded,
+                    title: 'Marcador',
+                    text:
+                    'Cada victoria suma un punto. Los empates también se cuentan.',
+                    color: appWhite,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(appWhite),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -376,71 +657,154 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     final bool empate = mensaje == 'Empate';
     final bool ganaRojo = mensaje == 'Ha ganado el rojo';
 
-    final List<Color> colors = empate
-        ? const [Color(0xFF334155), Color(0xFF111827)]
+    final Color accentColor = empate
+        ? appWhite
         : ganaRojo
-        ? const [Color(0xFFFF4D6D), Color(0xFFBE123C)]
-        : const [Color(0xFFFFD166), Color(0xFFF59E0B)];
+        ? redDisc
+        : yellowDisc;
+
+    final String titulo = empate ? 'empate' : 'victoria';
+
+    final String subtitulo = empate
+        ? 'La partida termina sin ganador'
+        : ganaRojo
+        ? 'Gana el jugador rojo'
+        : 'Gana el jugador amarillo';
+
+    final IconData icon = empate
+        ? Icons.handshake_rounded
+        : Icons.emoji_events_rounded;
 
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Resultado',
-      barrierColor: Colors.black.withOpacity(0.70),
-      transitionDuration: const Duration(milliseconds: 350),
+      barrierColor: Colors.black.withOpacity(0.45),
+      transitionDuration: const Duration(milliseconds: 320),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Center(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.symmetric(horizontal: 22),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: colors,
+              color: appBlue,
+              border: Border.all(
+                color: appWhite.withOpacity(0.75),
+                width: 2.2,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.first.withOpacity(0.35),
-                  blurRadius: 30,
-                  offset: const Offset(0, 16),
-                ),
-              ],
             ),
             child: Material(
               color: Colors.transparent,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    empate
-                        ? Icons.handshake_rounded
-                        : Icons.emoji_events_rounded,
-                    size: 70,
-                    color: Colors.white,
+                  Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.2,
+                          ),
+                        ),
+                        child: Icon(
+                          icon,
+                          color: accentColor,
+                          size: 31,
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      Expanded(
+                        child: Text(
+                          titulo,
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontSize: 40,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    empate ? 'EMPATE' : 'VICTORIA',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
+
                   const SizedBox(height: 10),
-                  Text(
-                    mensaje,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: appWhite.withOpacity(0.08),
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.26),
+                        width: 1.4,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: accentColor,
+                            border: Border.all(
+                              color: appWhite.withOpacity(0.75),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        Text(
+                          subtitulo.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        Text(
+                          empate
+                              ? 'Nadie ha conseguido conectar 4 fichas.'
+                              : 'Se ha conectado una línea de 4 fichas.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appWhite.withOpacity(0.72),
+                            fontSize: 13,
+                            height: 1.3,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+
+                  const SizedBox(height: 18),
+
                   Row(
                     children: [
                       Expanded(
@@ -449,49 +813,38 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                             Navigator.pop(context);
                             reiniciarJuego();
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black87,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
+                          style: mainButtonStyle(appWhite),
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: Text(
-                              'Revancha',
+                              'REVANCHA',
                               style: TextStyle(
-                                fontSize: 17,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ),
                         ),
                       ),
+
                       const SizedBox(width: 12),
+
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
                             Navigator.pop(context);
                             reiniciarMarcadorYJuego();
                           },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(
-                              color: Colors.white.withOpacity(0.35),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
+                          style: secondaryButtonStyle(),
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: Text(
-                              'Reset total',
+                              'RESET',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ),
@@ -512,7 +865,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         );
 
         return Transform.scale(
-          scale: curved.value,
+          scale: 0.92 + (curved.value * 0.08),
           child: Opacity(
             opacity: animation.value,
             child: child,
@@ -523,37 +876,93 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   Widget buildTopBar() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.home_rounded, color: Colors.white),
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: Text(
-            '4 en Raya',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 31,
-              fontWeight: FontWeight.w900,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    '8',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
+
+            GestureDetector(
+              onTap: mostrarNormas,
+              child: Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.question_mark_rounded,
+                  color: appWhite,
+                  size: 28,
+                ),
+              ),
+            ),
+          ],
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: IconButton(
-            onPressed: mostrarNormas,
-            icon: const Icon(Icons.help_outline_rounded, color: Colors.white),
+
+        const SizedBox(height: 72),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: 82,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Text(
+                    '4 en raya',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 58,
+                      height: 0.9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.2,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 62,
+                  left: 0,
+                  right: -30,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -568,30 +977,39 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 10),
+        height: 48,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.10),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: color.withOpacity(0.35)),
+          color: appWhite,
+          border: Border.all(
+            color: appWhite.withOpacity(0.75),
+            width: 1.5,
+          ),
         ),
-        child: Column(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 5),
+            Icon(icon, color: color, size: 14),
+            const SizedBox(width: 6),
             Text(
               value,
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
+                color: appBlue,
+                fontSize: 21,
                 fontWeight: FontWeight.w900,
               ),
             ),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: appBlue.withOpacity(0.70),
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.3,
+                ),
               ),
             ),
           ],
@@ -626,31 +1044,41 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       ],
     );
   }
-
   Widget buildTurnCard() {
     final colorTurno = colorJugadorActual();
 
-    return glassCard(
-      padding: const EdgeInsets.all(18),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.07),
+        border: Border(
+          left: BorderSide(
+            color: colorTurno,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.40),
+            width: 2,
+          ),
+        ),
+      ),
       child: Row(
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            width: 52,
-            height: 52,
+            width: 26,
+            height: 26,
             decoration: BoxDecoration(
-              color: juegoTerminado ? Colors.white54 : colorTurno,
+              color: juegoTerminado ? appWhite.withOpacity(0.55) : colorTurno,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: colorTurno.withOpacity(0.45),
-                  blurRadius: 18,
-                  spreadRadius: 2,
-                ),
-              ],
+              border: Border.all(
+                color: appWhite.withOpacity(0.75),
+                width: 1.6,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -658,20 +1086,21 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                 Text(
                   textoTurno(),
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
+                    color: appWhite,
+                    fontSize: 17,
                     fontWeight: FontWeight.w900,
+                    letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   animando
                       ? 'La ficha está cayendo...'
                       : 'Pulsa una columna para jugar',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.66),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    color: appWhite.withOpacity(0.68),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -706,7 +1135,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
               behavior: HitTestBehavior.opaque,
               onTap: () => colocarFicha(columna),
               child: SizedBox(
-                height: 42,
+                height: 22,
                 child: Center(
                   child: AnimatedScale(
                     duration: const Duration(milliseconds: 160),
@@ -715,18 +1144,11 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                       duration: const Duration(milliseconds: 160),
                       opacity: mostrarPreview ? 1 : 0,
                       child: Container(
-                        width: 34,
-                        height: 34,
+                        width: 20,
+                        height: 20,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: colorJugadorActual().withOpacity(0.80),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorJugadorActual().withOpacity(0.45),
-                              blurRadius: 14,
-                              spreadRadius: 2,
-                            ),
-                          ],
+                          color: colorJugadorActual().withOpacity(0.85),
                         ),
                       ),
                     ),
@@ -748,7 +1170,6 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
     final int valorCelda = tablero[fila][columna];
     final bool ganadora = esFichaGanadora(fila, columna);
-    final bool hover = hoverColumna == columna && !animando && !juegoTerminado;
 
     return Expanded(
       child: MouseRegion(
@@ -765,53 +1186,12 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => colocarFicha(columna),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 130),
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: hover
-                  ? Colors.white.withOpacity(0.20)
-                  : Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
-            ),
+          child: SizedBox.expand(
             child: Center(
-              child: AnimatedScale(
-                duration: const Duration(milliseconds: 220),
-                scale: ganadora ? 1.08 : 1,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 240),
-                  margin: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: mostrarFichaAnimada
-                        ? colorFicha(animJugador!)
-                        : colorFicha(valorCelda),
-                    border: Border.all(
-                      color: ganadora
-                          ? Colors.white
-                          : Colors.black.withOpacity(0.08),
-                      width: ganadora ? 4 : 1,
-                    ),
-                    boxShadow: [
-                      if (valorCelda != 0 || mostrarFichaAnimada)
-                        BoxShadow(
-                          color: (mostrarFichaAnimada
-                              ? colorFicha(animJugador!)
-                              : colorFicha(valorCelda))
-                              .withOpacity(0.45),
-                          blurRadius: 12,
-                          spreadRadius: 1,
-                        ),
-                      if (ganadora)
-                        BoxShadow(
-                          color: Colors.white.withOpacity(0.75),
-                          blurRadius: 22,
-                          spreadRadius: 4,
-                        ),
-                    ],
-                  ),
-                ),
+              child: _buildDisc(
+                valor: valorCelda,
+                mostrarFichaAnimada: mostrarFichaAnimada,
+                ganadora: ganadora,
               ),
             ),
           ),
@@ -862,138 +1242,107 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   Widget buildBoardCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF2563EB).withOpacity(0.95),
-            const Color(0xFF1D4ED8).withOpacity(0.95),
-            const Color(0xFF312E81).withOpacity(0.95),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: boardBlue,
+        border: Border.all(
+          color: appWhite.withOpacity(0.75),
+          width: 2.5,
         ),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF2563EB).withOpacity(0.35),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
-          ),
-        ],
       ),
-      child: buildTablero(),
+      child: AspectRatio(
+        aspectRatio: columnas / filas,
+        child: buildTablero(),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF020617),
-      body: SizedBox.expand(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF2563EB),
-                Color(0xFF1E1B4B),
-                Color(0xFF08051A),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -80,
-                left: -60,
-                child: Container(
-                  width: 230,
-                  height: 230,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.08),
+    return AnimatedBuilder(
+      animation: AppSettings.instance,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: appBlue,
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+              child: Column(
+                children: [
+                  buildTopBar(),
+
+                  const SizedBox(height: 14),
+
+                  buildMarcador(),
+
+                  const SizedBox(height: 8),
+
+                  buildTurnCard(),
+
+                  const SizedBox(height: 4),
+
+                  buildPreviewRow(),
+
+                  const SizedBox(height: 4),
+
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: buildBoardCard(),
+                    ),
                   ),
-                ),
-              ),
-              Positioned(
-                bottom: -100,
-                right: -70,
-                child: Container(
-                  width: 280,
-                  height: 280,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.yellowAccent.withOpacity(0.08),
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
+
+                  const SizedBox(height: 12),
+
+                  Row(
                     children: [
-                      buildTopBar(),
-                      const SizedBox(height: 18),
-                      buildMarcador(),
-                      const SizedBox(height: 14),
-                      buildTurnCard(),
-                      const SizedBox(height: 12),
-                      buildPreviewRow(),
-                      const SizedBox(height: 8),
-                      Expanded(child: buildBoardCard()),
-                      const SizedBox(height: 18),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: historialJugadas.isEmpty ||
-                                  animando ||
-                                  juegoTerminado
-                                  ? null
-                                  : deshacerJugada,
-                              style: secondaryButtonStyle(),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 15),
-                                child: Text(
-                                  'Deshacer',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: historialJugadas.isEmpty ||
+                              animando ||
+                              juegoTerminado
+                              ? null
+                              : deshacerJugada,
+                          style: secondaryButtonStyle(),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 13),
+                            child: Text(
+                              'DESHACER',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: reiniciarJuego,
-                              style: mainButtonStyle(const Color(0xFF8B5CF6)),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 15),
-                                child: Text(
-                                  'Reiniciar',
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: reiniciarJuego,
+                          style: mainButtonStyle(appWhite),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 13),
+                            child: Text(
+                              'REINICIAR',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

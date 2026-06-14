@@ -163,14 +163,10 @@ const List<String> castigosPingPong = [
   'Bebe durante 4 segundos.',
   'El de tu derecha te pone un castigo.',
   'El de tu izquierda elige tu castigo.',
-  'Todos te ponen un castigo pequeño.',
   'Haz un brindis y bebe.',
   'Bebe sin usar las manos.',
   'Elige a alguien para beber contigo.',
-  'Bebe el doble.',
+  'Bebe el doble del numero que diga el de tu izquierda.',
   'Todos beben menos tú.',
-  'Bebe mirando a alguien a los ojos.',
-  'Da un trago largo.',
-  'Bebe y di algo gracioso.',
-  'Bebe mientras sonríes.',
+  'Da un trago largo.'
 ];

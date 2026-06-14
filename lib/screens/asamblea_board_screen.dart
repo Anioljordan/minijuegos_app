@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_setup_screen.dart';
+import '../widgets/asamblea_rules_dialog.dart';
 
 enum LeyType {
   izquierda,
@@ -32,6 +33,14 @@ class AsambleaBoardScreen extends StatefulWidget {
 class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   static const String saveKey = 'asamblea_partida_guardada';
 
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color leftBlue = Color(0xFF60A5FA);
+  static const Color rightRed = Color(0xFFE63946);
+  static const Color leaderGold = Color(0xFFFFD166);
+  static const Color accentPurple = Color(0xFF8B5CF6);
+  static const Color accentGreen = Color(0xFF22C55E);
+
   late List<AsambleaPlayer> players;
 
   List<LeyType> mazo = [];
@@ -49,40 +58,124 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
-        title: const Text(
-          'La Asamblea',
-          style: TextStyle(color: Colors.white),
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.85),
+                        width: 2.1,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_rounded,
+                      color: appWhite,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Text(
+                      'salir',
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 38,
+                        height: 0.9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Container(height: 3, color: appWhite.withOpacity(0.58)),
+              const SizedBox(height: 18),
+              Text(
+                'La partida está guardada automáticamente. ¿Qué quieres hacer?',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.76),
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: mainButtonStyle(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'CONTINUAR JUGANDO',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                style: secondaryButtonStyle(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'SALIR AL MENÚ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () async {
+                  await _borrarPartidaGuardada();
+                  if (!mounted) return;
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                style: secondaryButtonStyle(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'REINICIAR PARTIDA',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        content: const Text(
-          '¿Qué quieres hacer?',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Continuar jugando'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // cierra el dialog
-              Navigator.pop(context); // vuelve al setup
-            },
-            child: const Text('Salir al menú'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await _borrarPartidaGuardada();
-              if (!mounted) return;
-              Navigator.pop(context); // cierra el dialog
-              Navigator.pop(context); // vuelve al setup
-            },
-            child: const Text('Reiniciar partida'),
-          ),
-        ],
       ),
     );
   }
@@ -288,6 +381,67 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         return 'Eliminar jugador';
       case PoderDerecha.elegirSiguientePresidente:
         return 'Elegir siguiente presidente';
+    }
+  }
+
+
+  PoderDerecha _getPoderDerechaPorCasilla(int casillaDerecha) {
+    final total = players.length;
+
+    if (total >= 5 && total <= 6) {
+      switch (casillaDerecha) {
+        case 3:
+          return PoderDerecha.verTresLeyes;
+        case 4:
+        case 5:
+          return PoderDerecha.eliminarJugador;
+        default:
+          return PoderDerecha.none;
+      }
+    }
+
+    if (total >= 7 && total <= 8) {
+      switch (casillaDerecha) {
+        case 3:
+          return PoderDerecha.investigarJugador;
+        case 4:
+          return PoderDerecha.elegirSiguientePresidente;
+        case 5:
+          return PoderDerecha.eliminarJugador;
+        default:
+          return PoderDerecha.none;
+      }
+    }
+
+    if (total >= 9 && total <= 10) {
+      switch (casillaDerecha) {
+        case 2:
+          return PoderDerecha.investigarJugador;
+        case 3:
+          return PoderDerecha.elegirSiguientePresidente;
+        case 4:
+        case 5:
+          return PoderDerecha.eliminarJugador;
+        default:
+          return PoderDerecha.none;
+      }
+    }
+
+    return PoderDerecha.none;
+  }
+
+  IconData _iconoPoder(PoderDerecha poder) {
+    switch (poder) {
+      case PoderDerecha.none:
+        return Icons.remove_rounded;
+      case PoderDerecha.investigarJugador:
+        return Icons.search_rounded;
+      case PoderDerecha.verTresLeyes:
+        return Icons.visibility_outlined;
+      case PoderDerecha.eliminarJugador:
+        return Icons.close_rounded;
+      case PoderDerecha.elegirSiguientePresidente:
+        return Icons.how_to_vote_outlined;
     }
   }
 
@@ -960,35 +1114,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Future<void> _mostrarNormas() async {
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
-        title: const Text(
-          'Normas de La Asamblea',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const SingleChildScrollView(
-          child: Text(
-            '1. El presidente elige un portavoz.\n\n'
-                '2. El presidente roba 3 leyes, descarta 1 y pasa 2 al portavoz.\n\n'
-                '3. El portavoz elige cuál se aprueba.\n\n'
-                '4. La Izquierda gana con 5 leyes de izquierda.\n\n'
-                '5. La Derecha gana con 6 leyes de derecha.\n\n'
-                '6. Si el Líder Oculto es elegido portavoz a partir de 3 leyes de derecha, gana la Derecha.\n\n'
-                '7. Las leyes de derecha pueden desbloquear poderes especiales según el número de jugadores.\n\n'
-                '8. También puedes usar el botón de ley aleatoria si quieres acelerar la partida o improvisar.',
-            style: TextStyle(color: Colors.white70, height: 1.5),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
+    await showAsambleaRulesDialog(context);
   }
 
   Future<void> _mostrarGanador(String titulo, String mensaje) async {
@@ -1055,9 +1181,15 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   void _snack(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: appBlue,
+        ),
+      );
   }
 
   Map<String, dynamic> _toJson() {
@@ -1127,42 +1259,294 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await prefs.remove(saveKey);
   }
 
+
+  ButtonStyle mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget buildTopBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            circleButton(
+              onTap: _mostrarDialogoSalirTablero,
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                circleButton(
+                  onTap: _reiniciarPartida,
+                  child: const Icon(
+                    Icons.restart_alt_rounded,
+                    color: appWhite,
+                    size: 27,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                circleButton(
+                  onTap: _mostrarNormas,
+                  child: const Icon(
+                    Icons.question_mark_rounded,
+                    color: appWhite,
+                    size: 27,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: 86,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Text(
+                    'tablero\nasamblea',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 42,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 74,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildInfoBar({
+    required String text,
+    Color color = leaderGold,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.06),
+        border: Border(
+          left: BorderSide(
+            color: color,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.36),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: appWhite.withOpacity(0.76),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+
+  Widget buildPanel({
+    required Widget child,
+    EdgeInsets? padding,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: padding ?? const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget sectionTitle(String text) {
+    return Text(
+      text.toLowerCase(),
+      style: const TextStyle(
+        color: appWhite,
+        fontSize: 28,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
+      ),
+    );
+  }
+
   Widget _buildLeyTrack({
     required String title,
     required int total,
     required int active,
     required Color color,
+    bool mostrarAcciones = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF15112B),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white10),
-      ),
+    return buildPanel(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title.toLowerCase(),
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: 26,
+                    height: 0.95,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.6,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.18),
+                  border: Border.all(
+                    color: color.withOpacity(0.55),
+                    width: 1.4,
+                  ),
+                ),
+                child: Text(
+                  '$active/$total',
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Row(
             children: List.generate(total, (index) {
               final filled = index < active;
+              final casilla = index + 1;
+              final poder = mostrarAcciones
+                  ? _getPoderDerechaPorCasilla(casilla)
+                  : PoderDerecha.none;
+              final tienePoder = poder != PoderDerecha.none;
+
               return Expanded(
                 child: Container(
-                  height: 52,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  height: mostrarAcciones ? 74 : 56,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 4, vertical: 6),
                   decoration: BoxDecoration(
-                    color: filled ? color : Colors.white10,
-                    borderRadius: BorderRadius.circular(12),
+                    color: filled ? color : appWhite.withOpacity(0.08),
                     border: Border.all(
-                      color: filled ? color : Colors.white24,
+                      color: filled ? color : appWhite.withOpacity(0.26),
+                      width: 1.4,
+                    ),
+                  ),
+                  child: mostrarAcciones && tienePoder
+                      ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _iconoPoder(poder),
+                        color: appWhite,
+                        size: 18,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _textoPoder(poder),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: appWhite.withOpacity(0.86),
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w900,
+                          height: 1.05,
+                        ),
+                      ),
+                    ],
+                  )
+                      : Center(
+                    child: Text(
+                      '$casilla',
+                      style: TextStyle(
+                        color: filled ? appWhite : appWhite.withOpacity(0.42),
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ),
@@ -1174,292 +1558,321 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     );
   }
 
-  Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF15112B),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white10),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 30),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white54, fontSize: 13),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildJugadoresList() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF15112B),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Jugadores',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...players.asMap().entries.map((entry) {
-            final i = entry.key;
-            final player = entry.value;
-            final isPresident = i == presidenteIndex;
-            final isPortavoz = i == portavozIndex;
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: player.isAlive ? Colors.white.withOpacity(0.04) : Colors.white10,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isPresident
-                      ? const Color(0xFFF59E0B)
-                      : isPortavoz
-                      ? const Color(0xFF7C3AED)
-                      : Colors.white12,
+    Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
+      return Expanded(
+        child: buildPanel(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          child: Column(
+            children: [
+              Icon(icon, color: appWhite, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                title.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.62),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.6,
                 ),
               ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: isPresident
-                        ? const Color(0xFFF59E0B)
-                        : isPortavoz
-                        ? const Color(0xFF7C3AED)
-                        : const Color(0xFF2563EB),
-                    child: Text(
-                      '${i + 1}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      player.isAlive ? player.name : '${player.name} (eliminado)',
-                      style: TextStyle(
-                        color: player.isAlive ? Colors.white : Colors.white38,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (isPresident)
-                    const Text(
-                      'PRESIDENTE',
-                      style: TextStyle(
-                        color: Color(0xFFF59E0B),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  if (isPortavoz)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Text(
-                        'PORTAVOZ',
-                        style: TextStyle(
-                          color: Color(0xFF7C3AED),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                ],
+              const SizedBox(height: 6),
+              Text(
+                value,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: appWhite,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
               ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!mounted || (players.isEmpty && mazo.isEmpty && descarte.isEmpty)) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF08051A),
-        body: Center(
-          child: CircularProgressIndicator(),
+            ],
+          ),
         ),
       );
     }
 
-    final poderActual = _getPoderDerechaActual();
-
-    return PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) async {
-      if (didPop) return;
-      await _mostrarDialogoSalirTablero();
-    },
-    child: Scaffold(
-      backgroundColor: const Color(0xFF08051A),
-      appBar: AppBar(
-        title: const Text('La Asamblea'),
-        backgroundColor: const Color(0xFF08051A),
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: _mostrarNormas,
-            icon: const Icon(Icons.menu_book_outlined),
-          ),
-          IconButton(
-            onPressed: _reiniciarPartida,
-            icon: const Icon(Icons.restart_alt),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(14),
+    Widget _buildJugadoresList() {
+      return buildPanel(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                _buildInfoCard(
-                  'Presidente',
-                  players[presidenteIndex].name,
-                  Icons.account_balance_outlined,
-                  const Color(0xFFF59E0B),
-                ),
-                const SizedBox(width: 12),
-                _buildInfoCard(
-                  'Portavoz',
-                  portavozIndex != null ? players[portavozIndex!].name : 'Sin elegir',
-                  Icons.campaign_outlined,
-                  const Color(0xFF7C3AED),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            _buildLeyTrack(
-              title: 'Izquierda',
-              total: 5,
-              active: leyesIzquierda,
-              color: const Color(0xFF2563EB),
-            ),
-            const SizedBox(height: 14),
-            _buildLeyTrack(
-              title: 'Derecha',
-              total: 6,
-              active: leyesDerecha,
-              color: const Color(0xFFDC2626),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF15112B),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white10),
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Poder actual de la Derecha',
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _textoPoder(poderActual),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+            sectionTitle('Jugadores'),
+            const SizedBox(height: 12),
+            ...players.asMap().entries.map((entry) {
+              final i = entry.key;
+              final player = entry.value;
+              final isPresident = i == presidenteIndex;
+              final isPortavoz = i == portavozIndex;
+
+              Color borderColor = appWhite.withOpacity(0.22);
+              if (isPresident) borderColor = leaderGold;
+              if (isPortavoz) borderColor = accentPurple;
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 9),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: player.isAlive
+                      ? appWhite.withOpacity(0.07)
+                      : appWhite.withOpacity(0.035),
+                  border: Border(
+                    left: BorderSide(
+                      color: borderColor,
+                      width: 5,
+                    ),
+                    bottom: BorderSide(
+                      color: appWhite.withOpacity(0.24),
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${players.length} jugadores',
-                    style: const TextStyle(color: Colors.white38),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: appWhite.withOpacity(0.85),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${i + 1}',
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            player.isAlive ? player.name : '${player.name} (eliminado)',
+                            style: TextStyle(
+                              color: player.isAlive ? appWhite : appWhite.withOpacity(0.45),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 15.5,
+                            ),
+                          ),
+                          if (isPresident || isPortavoz) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              [
+                                if (isPresident) 'PRESIDENTE',
+                                if (isPortavoz) 'PORTAVOZ',
+                              ].join(' · '),
+                              style: TextStyle(
+                                color: appWhite.withOpacity(0.68),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 10.5,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      if (!mounted || (players.isEmpty && mazo.isEmpty && descarte.isEmpty)) {
+        return const Scaffold(
+          backgroundColor: appBlue,
+          body: Center(
+            child: CircularProgressIndicator(color: appWhite),
+          ),
+        );
+      }
+
+      final poderActual = _getPoderDerechaActual();
+
+      return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
+          await _mostrarDialogoSalirTablero();
+        },
+        child: Scaffold(
+          backgroundColor: appBlue,
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+              child: Column(
+                children: [
+                  buildTopBar(),
+                  const SizedBox(height: 14),
+                  buildInfoBar(
+                    text:
+                    "Presidente: ${players[presidenteIndex].name} · Portavoz: ${portavozIndex != null ? players[portavozIndex!].name : 'sin elegir'}",
+                    color: leaderGold,
+                  ),
+                  const SizedBox(height: 14),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              _buildInfoCard(
+                                'Presidente',
+                                players[presidenteIndex].name,
+                                Icons.account_balance_outlined,
+                                leaderGold,
+                              ),
+                              const SizedBox(width: 10),
+                              _buildInfoCard(
+                                'Portavoz',
+                                portavozIndex != null
+                                    ? players[portavozIndex!].name
+                                    : 'Sin elegir',
+                                Icons.campaign_outlined,
+                                accentPurple,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildLeyTrack(
+                            title: 'Izquierda',
+                            total: 5,
+                            active: leyesIzquierda,
+                            color: leftBlue,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildLeyTrack(
+                            title: 'Derecha',
+                            total: 6,
+                            active: leyesDerecha,
+                            color: rightRed,
+                            mostrarAcciones: true,
+                          ),
+                          const SizedBox(height: 12),
+                          buildPanel(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'PODER ACTUAL DE LA DERECHA',
+                                  style: TextStyle(
+                                    color: appWhite.withOpacity(0.62),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.7,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _textoPoder(poderActual),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: appWhite,
+                                    fontSize: 22,
+                                    height: 0.95,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${players.length} jugadores · Mazo ${mazo.length} · Descarte ${descarte.length}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: appWhite.withOpacity(0.62),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildJugadoresList(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: partidaTerminada ? null : _seleccionarPortavoz,
+                          style: secondaryButtonStyle(),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 13),
+                            child: Text(
+                              'PORTAVOZ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: partidaTerminada ? null : _sacarLeyAleatoria,
+                          style: secondaryButtonStyle(),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 13),
+                            child: Text(
+                              'LEY RANDOM',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: partidaTerminada ? null : _jugarTurno,
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        child: Text(
+                          'JUGAR TURNO',
+                          style: TextStyle(
+                            color: appBlue,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-            _buildJugadoresList(),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: partidaTerminada ? null : _seleccionarPortavoz,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7C3AED),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text(
-                  'Elegir portavoz',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: partidaTerminada ? null : _jugarTurno,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFDC2626),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text(
-                  'Jugar turno',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: partidaTerminada ? null : _sacarLeyAleatoria,
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white24),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text(
-                  'Sacar ley aleatoria',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Mazo: ${mazo.length} cartas · Descarte: ${descarte.length}',
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
-    );
+      );
+    }
   }
-}
+

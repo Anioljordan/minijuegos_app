@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'asamblea_setup_screen.dart';
 import 'asamblea_board_screen.dart';
+import '../widgets/asamblea_rules_dialog.dart';
 
 class AsambleaRolesScreen extends StatefulWidget {
   final List<AsambleaPlayer> players;
@@ -17,6 +18,12 @@ class AsambleaRolesScreen extends StatefulWidget {
 class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   int currentIndex = 0;
   bool revealed = false;
+
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color leftBlue = Color(0xFF60A5FA);
+  static const Color rightRed = Color(0xFFE63946);
+  static const Color leaderGold = Color(0xFFFFD166);
 
   String _roleTitle(AsambleaRole? role) {
     switch (role) {
@@ -47,13 +54,13 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   Color _roleColor(AsambleaRole? role) {
     switch (role) {
       case AsambleaRole.izquierda:
-        return const Color(0xFF2563EB);
+        return leftBlue;
       case AsambleaRole.derecha:
-        return const Color(0xFFDC2626);
+        return rightRed;
       case AsambleaRole.liderOculto:
-        return const Color(0xFFF59E0B);
+        return leaderGold;
       default:
-        return Colors.white;
+        return appWhite;
     }
   }
 
@@ -68,6 +75,296 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
       default:
         return Icons.help_outline;
     }
+  }
+
+  ButtonStyle mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget buildTopBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            circleButton(
+              onTap: () => showAsambleaRulesDialog(context),
+              child: const Icon(
+                Icons.question_mark_rounded,
+                color: appWhite,
+                size: 27,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: 86,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Text(
+                    'reparto\nde roles',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 42,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 74,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildInfoBar() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.06),
+        border: Border(
+          left: const BorderSide(
+            color: leaderGold,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.36),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        'Jugador ${currentIndex + 1} de ${widget.players.length} · mira tu rol en secreto',
+        style: TextStyle(
+          color: appWhite.withOpacity(0.76),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+
+  Widget buildMainCard(AsambleaPlayer player, AsambleaRole? role) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 260),
+        child: !revealed
+            ? Column(
+          key: const ValueKey('hidden'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'pasa el móvil a',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.68),
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              player.name.toLowerCase(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 42,
+                height: 0.92,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Container(
+              width: 82,
+              height: 82,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: appWhite.withOpacity(0.85),
+                  width: 2.2,
+                ),
+              ),
+              child: const Icon(
+                Icons.phone_android_rounded,
+                color: appWhite,
+                size: 40,
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            Text(
+              'Cuando esté listo, pulsa para ver su rol',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.72),
+                fontSize: 14,
+                height: 1.3,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        )
+            : Column(
+          key: const ValueKey('revealed'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 86,
+              height: 86,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _roleColor(role).withOpacity(0.18),
+                border: Border.all(
+                  color: _roleColor(role).withOpacity(0.90),
+                  width: 2.4,
+                ),
+              ),
+              child: Icon(
+                _roleIcon(role),
+                color: appWhite,
+                size: 42,
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            Text(
+              _roleTitle(role).toLowerCase(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 42,
+                height: 0.92,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.08),
+                border: Border(
+                  left: BorderSide(
+                    color: _roleColor(role),
+                    width: 6,
+                  ),
+                  bottom: BorderSide(
+                    color: appWhite.withOpacity(0.28),
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Text(
+                _roleDescription(role),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.78),
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _nextStep() {
@@ -100,117 +397,53 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     final role = player.role;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF08051A),
-      appBar: AppBar(
-        title: const Text('Reparto de roles'),
-        backgroundColor: const Color(0xFF08051A),
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF15112B),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white10),
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          child: Column(
+            children: [
+              buildTopBar(),
+
+              const SizedBox(height: 14),
+
+              buildInfoBar(),
+
+              const SizedBox(height: 18),
+
+              Expanded(
+                child: Center(
+                  child: buildMainCard(player, role),
+                ),
               ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Pasa el móvil a:',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    player.name,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  if (!revealed) ...[
-                    const Icon(
-                      Icons.phone_android,
-                      color: Colors.white70,
-                      size: 46,
-                    ),
-                    const SizedBox(height: 14),
-                    const Text(
-                      'Cuando esté listo, pulsa para ver su rol',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ] else ...[
-                    Icon(
-                      _roleIcon(role),
-                      color: _roleColor(role),
-                      size: 58,
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      _roleTitle(role),
-                      style: TextStyle(
-                        color: _roleColor(role),
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      _roleDescription(role),
-                      textAlign: TextAlign.center,
+
+              const SizedBox(height: 18),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _nextStep,
+                  style: mainButtonStyle(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: Text(
+                      !revealed
+                          ? 'VER ROL'
+                          : currentIndex == widget.players.length - 1
+                          ? 'TERMINAR REPARTO'
+                          : 'SIGUIENTE JUGADOR',
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: appBlue,
                         fontSize: 16,
-                        height: 1.4,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
                       ),
                     ),
-                  ],
-                ],
-              ),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _nextStep,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: revealed
-                      ? const Color(0xFFDC2626)
-                      : const Color(0xFF7C3AED),
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  !revealed
-                      ? 'Ver rol'
-                      : currentIndex == widget.players.length - 1
-                      ? 'Terminar reparto'
-                      : 'Siguiente jugador',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

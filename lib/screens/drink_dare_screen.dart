@@ -13,6 +13,13 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     with SingleTickerProviderStateMixin {
   final Random random = Random();
 
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color accentPink = Color(0xFFFF4D6D);
+  static const Color accentOrange = Color(0xFFFFB86C);
+  static const Color accentYellow = Color(0xFFFFD166);
+  static const Color accentGreen = Color(0xFF22C55E);
+
   late AnimationController controller;
 
   double angle = 0;
@@ -22,15 +29,15 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
 
   String resultado = 'Pulsa girar para empezar';
 
-  final List<Color> colors = const [
-    Color(0xFFFF005C),
-    Color(0xFFFF7A00),
-    Color(0xFFFFD60A),
-    Color(0xFF00D084),
-    Color(0xFF00A3FF),
-    Color(0xFF8A2BE2),
-    Color(0xFFFF3D71),
-    Color(0xFF00C2A8),
+  final List<Color> wheelColors = const [
+    Color(0xFFFF4D6D),
+    Color(0xFFFFB86C),
+    Color(0xFFFFD166),
+    Color(0xFF22C55E),
+    Color(0xFF60A5FA),
+    Color(0xFF8B5CF6),
+    Color(0xFFF472B6),
+    Color(0xFF14B8A6),
   ];
 
   @override
@@ -45,6 +52,8 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     controller.addListener(() {
       if (!spinning) return;
 
+      bool shouldFinish = false;
+
       setState(() {
         angle += speed;
         angle %= 2 * pi;
@@ -53,10 +62,19 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
           speed *= 0.965;
 
           if (speed < 0.008) {
-            finishSpin();
+            shouldFinish = true;
           }
         }
       });
+
+      if (shouldFinish) {
+        finishSpin();
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      mostrarNormas();
     });
   }
 
@@ -107,8 +125,6 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     final total = drinkDareOpciones.length;
     final segmentAngle = 2 * pi / total;
 
-    // La ruleta empieza dibujando el primer segmento arriba (-pi/2)
-    // Cuando giramos la ruleta, el segmento bajo la flecha es el ángulo contrario
     final normalizedAngle = ((-angle) % (2 * pi) + (2 * pi)) % (2 * pi);
 
     return (normalizedAngle / segmentAngle).floor() % total;
@@ -123,48 +139,455 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     });
   }
 
+  ButtonStyle mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle stopButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: accentPink,
+      foregroundColor: appWhite,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget buildTopBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            circleButton(
+              onTap: mostrarNormas,
+              child: const Icon(
+                Icons.question_mark_rounded,
+                color: appWhite,
+                size: 27,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: 94,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Text(
+                    'drink\n& dare',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 42,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 82,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildInfoBar() {
+    String text;
+
+    if (spinning && stopping) {
+      text = 'La ruleta está frenando...';
+    } else if (spinning) {
+      text = 'Pulsa parar cuando quieras';
+    } else {
+      text = 'Gira la ruleta y acepta el reto';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.06),
+        border: Border(
+          left: const BorderSide(
+            color: accentPink,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.36),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: appWhite.withOpacity(0.76),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+
+  Widget rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void mostrarNormas() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'DRINK & DARE',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  rulesItem(
+                    icon: Icons.rotate_right_rounded,
+                    title: 'Gira la ruleta',
+                    text:
+                    'Pulsa GIRAR para que la ruleta empiece a moverse con todas las opciones.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.pan_tool_alt_rounded,
+                    title: 'Para cuando quieras',
+                    text:
+                    'Pulsa PARAR en el momento que quieras. La ruleta irá frenando poco a poco.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.casino_rounded,
+                    title: 'Acepta el resultado',
+                    text:
+                    'Cuando se detenga, aparecerá el reto o castigo que tiene que hacer el jugador.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.groups_rounded,
+                    title: 'Turnos',
+                    text:
+                    'Los jugadores se van turnando para girar la ruleta.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.local_bar_rounded,
+                    title: 'Si no quieres hacerlo',
+                    text:
+                    'Si alguien se niega a cumplir el reto, bebe como castigo.',
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void mostrarResultado(String text) {
     showDialog(
       context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.pinkAccent.withOpacity(0.25),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Te ha tocado',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.1,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.local_bar_rounded,
+                  color: appWhite,
+                  size: 30,
                 ),
               ),
-              const SizedBox(height: 14),
+
+              const SizedBox(height: 16),
+
               Text(
-                text,
+                'te ha\ntocado',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  height: 1.25,
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 12),
+
+              Container(
+                height: 3,
+                color: appWhite.withOpacity(0.58),
+              ),
+
+              const SizedBox(height: 18),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.26),
+                    width: 1.4,
+                  ),
+                ),
+                child: Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 24,
+                    height: 1.18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -174,7 +597,11 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text(
                       'OK',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -186,92 +613,97 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
-  void mostrarNormas() {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: const Color(0xFF171027),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Cómo se juega',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Los jugadores se turnan para girar la ruleta.\n\n'
-                    'Pulsa GIRAR y luego PARAR cuando quieras.\n\n'
-                    'El resultado indica lo que debe hacer el jugador.\n\n'
-                    'Si alguien no quiere hacerlo, bebe.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.82),
-                  fontSize: 16,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'Cerrar',
-                      style: TextStyle(fontWeight: FontWeight.w800),
-                    ),
+  Widget buildWheel() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(
+              child: Transform.rotate(
+                angle: angle,
+                child: CustomPaint(
+                  painter: _DrinkWheelPainter(
+                    options: drinkDareOpciones,
+                    colors: wheelColors,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: appBlue,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: appWhite.withOpacity(0.85),
+                  width: 2.2,
+                ),
+              ),
+              child: const Icon(
+                Icons.local_bar_rounded,
+                color: appWhite,
+                size: 28,
+              ),
+            ),
+
+            Positioned(
+              top: -8,
+              child: Icon(
+                Icons.arrow_drop_down_rounded,
+                size: 76,
+                color: appWhite,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.55),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFFF005C),
-      foregroundColor: Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+  Widget buildResultCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
       ),
-    );
-  }
-
-  ButtonStyle stopButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFFF7A00),
-      foregroundColor: Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
-    );
-  }
-
-  ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: Colors.white,
-      side: BorderSide(color: Colors.white.withOpacity(0.20)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 260),
+        child: Text(
+          resultado,
+          key: ValueKey(resultado),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: appWhite,
+            fontSize: 22,
+            height: 1.18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.4,
+          ),
+        ),
       ),
     );
   }
@@ -279,287 +711,94 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF180027),
-      body: SizedBox.expand(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFFF005C),
-                Color(0xFF7C2D12),
-                Color(0xFF180027),
-                Color(0xFF08051A),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Stack(
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          child: Column(
             children: [
-              Positioned(
-                top: -80,
-                left: -60,
-                child: Container(
-                  width: 230,
-                  height: 230,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.08),
+              buildTopBar(),
+
+              const SizedBox(height: 14),
+
+              buildInfoBar(),
+
+              const SizedBox(height: 16),
+
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        buildWheel(),
+                        const SizedBox(height: 14),
+                        buildResultCard(),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              Positioned(
-                bottom: -90,
-                right: -70,
-                child: Container(
-                  width: 270,
-                  height: 270,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.orangeAccent.withOpacity(0.10),
+
+              const SizedBox(height: 16),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: spinning ? null : girarRuleta,
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        child: Text(
+                          'GIRAR',
+                          style: TextStyle(
+                            color: appBlue,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: spinning && !stopping ? pararRuleta : null,
+                      style: stopButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        child: Text(
+                          'PARAR',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(
-                                Icons.home_rounded,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text(
-                              'Drink & Dare',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: IconButton(
-                              onPressed: mostrarNormas,
-                              icon: const Icon(
-                                Icons.help_outline_rounded,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+              const SizedBox(height: 10),
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: spinning ? null : reiniciarJuego,
+                  style: secondaryButtonStyle(),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 13),
+                    child: Text(
+                      'REINICIAR',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
                       ),
-
-                      const SizedBox(height: 18),
-
-                      Text(
-                        spinning
-                            ? stopping
-                            ? 'La ruleta está frenando...'
-                            : 'Pulsa PARAR cuando quieras'
-                            : 'Gira la ruleta y acepta el reto',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.78),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      Expanded(
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(34),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.12),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.25),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 14),
-                                ),
-                              ],
-                            ),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.pinkAccent.withOpacity(0.45),
-                                          blurRadius: 50,
-                                          spreadRadius: 4,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  Transform.rotate(
-                                    angle: angle,
-                                    child: CustomPaint(
-                                      painter: _DrinkWheelPainter(
-                                        options: drinkDareOpciones,
-                                        colors: colors,
-                                      ),
-                                      size: const Size.square(360),
-                                    ),
-                                  ),
-
-                                  Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF111827),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.18),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.local_bar_rounded,
-                                      color: Colors.white,
-                                      size: 27,
-                                    ),
-                                  ),
-
-                                  Positioned(
-                                    top: -4,
-                                    child: Icon(
-                                      Icons.arrow_drop_down_rounded,
-                                      size: 78,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.pinkAccent.withOpacity(0.9),
-                                          blurRadius: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.11),
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.14),
-                          ),
-                        ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: Text(
-                            resultado,
-                            key: ValueKey(resultado),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              height: 1.22,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: spinning ? null : girarRuleta,
-                              style: mainButtonStyle(),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Text(
-                                  'GIRAR',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: spinning && !stopping ? pararRuleta : null,
-                              style: stopButtonStyle(),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Text(
-                                  'PARAR',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: spinning ? null : reiniciarJuego,
-                          style: secondaryButtonStyle(),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            child: Text(
-                              'Reiniciar',
-                              style: TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -631,18 +870,16 @@ class _DrinkWheelPainter extends CustomPainter {
     required double angle,
     required String text,
   }) {
-    // Limitar longitud visual
-    final shortText =
-    text.length > 28 ? '${text.substring(0, 28)}...' : text;
+    final shortText = text.length > 26 ? '${text.substring(0, 26)}...' : text;
 
     final textPainter = TextPainter(
       text: TextSpan(
         text: shortText,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w900,
-          height: 1.1,
+          height: 1.05,
           shadows: [
             Shadow(
               color: Colors.black,
@@ -657,11 +894,9 @@ class _DrinkWheelPainter extends CustomPainter {
       ellipsis: '...',
     );
 
-    // MÁS margen lateral
-    textPainter.layout(maxWidth: radius * 0.38);
+    textPainter.layout(maxWidth: radius * 0.36);
 
-    // MÁS cerca del borde (mejora visibilidad)
-    final textRadius = radius * 0.78;
+    final textRadius = radius * 0.74;
 
     final offset = Offset(
       center.dx + cos(angle) * textRadius,
@@ -669,10 +904,7 @@ class _DrinkWheelPainter extends CustomPainter {
     );
 
     canvas.save();
-
     canvas.translate(offset.dx, offset.dy);
-
-    // Rotación más natural
     canvas.rotate(angle + pi / 2);
 
     textPainter.paint(

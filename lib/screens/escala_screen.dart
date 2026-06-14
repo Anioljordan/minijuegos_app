@@ -14,6 +14,13 @@ class EscalaScreen extends StatefulWidget {
 class _EscalaScreenState extends State<EscalaScreen> {
   final math.Random random = math.Random();
 
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color accentPurple = Color(0xFF8B5CF6);
+  static const Color accentGreen = Color(0xFF22C55E);
+  static const Color accentYellow = Color(0xFFFFD166);
+  static const Color accentRed = Color(0xFFE63946);
+
   final TextEditingController izquierdaController = TextEditingController();
   final TextEditingController derechaController = TextEditingController();
   final TextEditingController respuestaController = TextEditingController();
@@ -34,6 +41,11 @@ class _EscalaScreenState extends State<EscalaScreen> {
   void initState() {
     super.initState();
     inicializarPantalla();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      mostrarNormas();
+    });
   }
 
   @override
@@ -233,97 +245,167 @@ class _EscalaScreenState extends State<EscalaScreen> {
     if (valor <= 80) return 'tirando a la derecha';
     return 'muy hacia la derecha';
   }
-
   ButtonStyle mainButtonStyle({
-    Color color = const Color(0xFF8B5CF6),
+    Color color = appWhite,
   }) {
     return ElevatedButton.styleFrom(
-      backgroundColor: color,
-      foregroundColor: Colors.white,
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
       ),
     );
   }
 
   ButtonStyle secondaryButtonStyle() {
     return OutlinedButton.styleFrom(
-      foregroundColor: Colors.white,
-      side: BorderSide(color: Colors.white.withOpacity(0.22)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
       ),
     );
   }
 
   Widget buildTopBar() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.home_rounded, color: Colors.white),
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Escala mental',
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
+                  color: appWhite,
+                  fontSize: 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              SizedBox(height: 3),
-              Text(
-                'Adivina la posición correcta',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+            ),
+            circleButton(
+              onTap: mostrarNormas,
+              child: const Icon(
+                Icons.question_mark_rounded,
+                color: appWhite,
+                size: 27,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: IconButton(
-            onPressed: mostrarNormas,
-            icon: const Icon(Icons.help_outline_rounded, color: Colors.white),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: 86,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Text(
+                    'escala\nmental',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 42,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 74,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
+  Widget buildInfoBar({
+    required String text,
+    Color color = accentPurple,
+  }) {
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(22),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.24),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+        color: appWhite.withOpacity(0.06),
+        border: Border(
+          left: BorderSide(
+            color: color,
+            width: 6,
           ),
-        ],
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.36),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: appWhite.withOpacity(0.76),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+
+  Widget buildGlassCard({
+    required Widget child,
+    EdgeInsets? padding,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
       ),
       child: child,
     );
@@ -332,7 +414,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
   Widget buildFancyButton({
     required String text,
     required VoidCallback? onPressed,
-    Color color = const Color(0xFF8B5CF6),
+    Color color = appWhite,
     IconData? icon,
   }) {
     return SizedBox(
@@ -341,19 +423,20 @@ class _EscalaScreenState extends State<EscalaScreen> {
         onPressed: onPressed,
         style: mainButtonStyle(color: color),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon, color: Colors.white),
-                const SizedBox(width: 10),
+                Icon(icon, color: appBlue, size: 22),
+                const SizedBox(width: 9),
               ],
               Text(
-                text,
+                text.toUpperCase(),
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
                 ),
               ),
             ],
@@ -371,24 +454,102 @@ class _EscalaScreenState extends State<EscalaScreen> {
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(
+        color: appWhite,
+        fontWeight: FontWeight.w700,
+      ),
+      cursorColor: appWhite,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.68)),
-        filled: true,
-        fillColor: const Color(0xFF0F172A).withOpacity(0.74),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.10)),
+        labelStyle: TextStyle(
+          color: appWhite.withOpacity(0.62),
+          fontWeight: FontWeight.w700,
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(18)),
+        filled: true,
+        fillColor: appWhite.withOpacity(0.07),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
           borderSide: BorderSide(
-            color: Color(0xFF8B5CF6),
-            width: 1.6,
+            color: appWhite.withOpacity(0.28),
+            width: 1.4,
           ),
         ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(
+            color: appWhite,
+            width: 2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget sectionTitle(String text) {
+    return Text(
+      text.toLowerCase(),
+      style: const TextStyle(
+        color: appWhite,
+        fontSize: 30,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
+      ),
+    );
+  }
+
+  Widget rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -396,48 +557,142 @@ class _EscalaScreenState extends State<EscalaScreen> {
   void mostrarNormas() {
     showDialog(
       context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF151122),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Cómo se juega',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    'ESCALA MENTAL',
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  rulesItem(
+                    icon: Icons.swap_horiz_rounded,
+                    title: 'Elegid escala',
+                    text:
+                    'La escala tiene dos extremos. Por ejemplo: comida buenísima y comida horrible.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.visibility_rounded,
+                    title: 'Jugador 1 mira',
+                    text:
+                    'El jugador 1 ve una posición secreta entre 0 y 100.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.edit_rounded,
+                    title: 'Escribe pista',
+                    text:
+                    'Jugador 1 escribe una respuesta sin decir ningún número.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.track_changes_rounded,
+                    title: 'Jugador 2 adivina',
+                    text:
+                    'Jugador 2 coloca la aguja donde cree que estaba la posición.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.emoji_events_rounded,
+                    title: 'Puntuación',
+                    text:
+                    'Diferencia de 3 o menos = 4 puntos. De 8 o menos = 2. De 15 o menos = 1.',
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Elegid una escala con dos extremos.\n\n'
-                    'Jugador 1 ve una posición secreta y escribe una respuesta que encaje.\n\n'
-                    'Jugador 2 lee la respuesta e intenta adivinar la posición.\n\n'
-                    'Puntuación:\n'
-                    'A 3 o menos = 4 puntos\n'
-                    'A 8 o menos = 2 puntos\n'
-                    'A 15 o menos = 1 punto',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.82),
-                  fontSize: 16,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 22),
-              buildFancyButton(
-                text: 'Cerrar',
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -448,38 +703,89 @@ class _EscalaScreenState extends State<EscalaScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
-            color: const Color(0xFF151122),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '¿Qué hacemos ahora?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
+              Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.85),
+                        width: 2.1,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.flag_rounded,
+                      color: appWhite,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Text(
+                      'ronda',
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 38,
+                        height: 0.9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              Container(
+                height: 3,
+                color: appWhite.withOpacity(0.58),
+              ),
+
+              const SizedBox(height: 18),
+
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.26),
+                    width: 1.4,
+                  ),
+                ),
+                child: Text(
+                  '${escalaActual['izquierda']} ↔ ${escalaActual['derecha']}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.82),
+                    fontSize: 14,
+                    height: 1.3,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-              const SizedBox(height: 14),
-              Text(
-                '${escalaActual['izquierda']} ↔ ${escalaActual['derecha']}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.78),
-                  fontSize: 16,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 16),
+
               buildFancyButton(
                 text: 'Seguir con esta escala',
                 icon: Icons.refresh_rounded,
@@ -488,16 +794,27 @@ class _EscalaScreenState extends State<EscalaScreen> {
                   nuevaRondaMismaEscala();
                 },
               ),
+
               const SizedBox(height: 10),
-              buildFancyButton(
-                text: 'Cambiar escala',
-                color: const Color(0xFF2563EB),
-                icon: Icons.swap_horiz_rounded,
+
+              OutlinedButton(
                 onPressed: () {
                   Navigator.pop(context);
                   volverAElegirEscala();
                 },
+                style: secondaryButtonStyle(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'CAMBIAR ESCALA',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
               ),
+
               if (escalaActualEsPersonalizada) ...[
                 const SizedBox(height: 10),
                 OutlinedButton(
@@ -511,8 +828,11 @@ class _EscalaScreenState extends State<EscalaScreen> {
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text(
-                      'Guardar escala',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                      'GUARDAR ESCALA',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -534,14 +854,16 @@ class _EscalaScreenState extends State<EscalaScreen> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            color: appWhite.withOpacity(0.08),
+            border: Border.all(
+              color: appWhite.withOpacity(0.28),
+              width: 1.4,
+            ),
           ),
           child: SizedBox(
-            height: 235,
+            height: 210,
             width: double.infinity,
             child: CustomPaint(
               painter: NeedleGaugePainter(
@@ -554,16 +876,18 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+
+        const SizedBox(height: 10),
+
         Row(
           children: [
             Expanded(
               child: Text(
                 escalaActual['izquierda']!,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
+                  color: appWhite,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -572,29 +896,34 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 escalaActual['derecha']!,
                 textAlign: TextAlign.right,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
+                  color: appWhite,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
+
+        const SizedBox(height: 8),
+
         if (mostrarNumero && valor != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.10),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: Colors.white.withOpacity(0.10)),
+              color: appWhite.withOpacity(0.08),
+              border: Border.all(
+                color: appWhite.withOpacity(0.26),
+                width: 1.4,
+              ),
             ),
             child: Text(
-              'Posición: $valor',
+              'POSICIÓN: $valor',
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 17,
+                color: appWhite,
+                fontSize: 14,
                 fontWeight: FontWeight.w900,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -609,32 +938,37 @@ class _EscalaScreenState extends State<EscalaScreen> {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withOpacity(0.10)),
+          color: appWhite.withOpacity(0.08),
+          border: Border.all(
+            color: appWhite.withOpacity(0.26),
+            width: 1.4,
+          ),
         ),
         child: Column(
           children: [
-            Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(height: 8),
+            Icon(icon, color: appWhite, size: 23),
+            const SizedBox(height: 7),
             Text(
-              title,
+              title.toUpperCase(),
+              textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: appWhite,
                 fontWeight: FontWeight.w900,
-                fontSize: 14,
+                fontSize: 11,
+                letterSpacing: 0.4,
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 4),
             Text(
               text,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
-                fontSize: 12,
-                height: 1.25,
+                color: appWhite.withOpacity(0.65),
+                fontSize: 10.5,
+                height: 1.2,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -648,118 +982,87 @@ class _EscalaScreenState extends State<EscalaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildGlassCard(
-            child: Column(
-              children: [
-                Container(
-                  width: 82,
-                  height: 82,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF8B5CF6),
-                        Color(0xFF2563EB),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF8B5CF6).withOpacity(0.35),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.speed_rounded,
-                    color: Colors.white,
-                    size: 42,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Crea una escala',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Elige dos extremos. Uno verá una posición secreta y el otro tendrá que adivinarla.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.72),
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    buildInfoPill(
-                      icon: Icons.visibility_rounded,
-                      title: 'Mira',
-                      text: 'Jugador 1 ve el número',
-                    ),
-                    const SizedBox(width: 10),
-                    buildInfoPill(
-                      icon: Icons.edit_rounded,
-                      title: 'Escribe',
-                      text: 'Da una pista',
-                    ),
-                    const SizedBox(width: 10),
-                    buildInfoPill(
-                      icon: Icons.track_changes_rounded,
-                      title: 'Adivina',
-                      text: 'Jugador 2 coloca la aguja',
-                    ),
-                  ],
-                ),
-              ],
+          sectionTitle('Crea una escala'),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Elige una escala aleatoria o crea una personalizada.',
+            style: TextStyle(
+              color: appWhite.withOpacity(0.70),
+              fontSize: 13,
+              height: 1.3,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 18),
+
+          const SizedBox(height: 16),
+
+          Row(
+            children: [
+              buildInfoPill(
+                icon: Icons.visibility_rounded,
+                title: 'Mira',
+                text: 'Jugador 1 ve el número',
+              ),
+              const SizedBox(width: 10),
+              buildInfoPill(
+                icon: Icons.edit_rounded,
+                title: 'Escribe',
+                text: 'Da una pista',
+              ),
+              const SizedBox(width: 10),
+              buildInfoPill(
+                icon: Icons.track_changes_rounded,
+                title: 'Adivina',
+                text: 'Jugador 2 coloca la aguja',
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
           buildFancyButton(
             text: 'Usar escala aleatoria',
             icon: Icons.casino_rounded,
-            color: const Color(0xFF2563EB),
             onPressed: usarEscalaAleatoria,
           ),
-          const SizedBox(height: 18),
+
+          const SizedBox(height: 14),
+
           buildGlassCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Personalizada',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 6),
+                sectionTitle('Personalizada'),
+
+                const SizedBox(height: 8),
+
                 Text(
                   'Ejemplo: “Comida buenísima” ↔ “Comida horrible”',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.65),
-                    fontSize: 14,
+                    color: appWhite.withOpacity(0.65),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 16),
+
+                const SizedBox(height: 14),
+
                 buildCustomField(
                   controller: izquierdaController,
                   label: 'Extremo izquierdo',
                 ),
+
                 const SizedBox(height: 12),
+
                 buildCustomField(
                   controller: derechaController,
                   label: 'Extremo derecho',
                 ),
-                const SizedBox(height: 18),
+
+                const SizedBox(height: 16),
+
                 buildFancyButton(
                   text: 'Usar esta escala',
                   icon: Icons.play_arrow_rounded,
@@ -768,17 +1071,11 @@ class _EscalaScreenState extends State<EscalaScreen> {
               ],
             ),
           ),
+
           if (escalasGuardadas.isNotEmpty) ...[
-            const SizedBox(height: 18),
-            const Text(
-              'Escalas guardadas',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            sectionTitle('Guardadas'),
+            const SizedBox(height: 10),
             ...escalasGuardadas.map(
                   (escala) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -786,11 +1083,14 @@ class _EscalaScreenState extends State<EscalaScreen> {
                   onPressed: () => usarEscalaGuardada(escala),
                   style: secondaryButtonStyle(),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
                     child: Text(
                       '${escala['izquierda']} ↔ ${escala['derecha']}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.3,
+                      ),
                     ),
                   ),
                 ),
@@ -809,42 +1109,44 @@ class _EscalaScreenState extends State<EscalaScreen> {
         buildGlassCard(
           child: Column(
             children: [
-              const Text(
-                'Jugador 1',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              sectionTitle('Jugador 1'),
+
               const SizedBox(height: 8),
+
               Text(
                 'Mira la posición secreta y piensa una respuesta.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.70),
-                  fontSize: 15,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 16),
+
               buildMedidorSemicircular(
                 valor: valorReal,
                 mostrarNumero: true,
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 14),
+
               Text(
                 'Tu posición está ${interpretarLado(valorReal)}.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
+                  color: appWhite,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ],
           ),
         ),
+
         const Spacer(),
+
         buildFancyButton(
           text: 'Continuar',
           icon: Icons.arrow_forward_rounded,
@@ -861,29 +1163,29 @@ class _EscalaScreenState extends State<EscalaScreen> {
         buildGlassCard(
           child: Column(
             children: [
-              const Text(
-                'Escribe tu pista',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              sectionTitle('Escribe pista'),
+
               const SizedBox(height: 8),
+
               Text(
                 'No pongas un número. Escribe algo que encaje con la posición.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.70),
-                  fontSize: 15,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 16),
+
               buildMedidorSemicircular(
                 valor: null,
                 mostrarNumero: false,
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 16),
+
               buildCustomField(
                 controller: respuestaController,
                 label: 'Tu respuesta',
@@ -892,7 +1194,9 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ],
           ),
         ),
+
         const Spacer(),
+
         buildFancyButton(
           text: 'Confirmar respuesta',
           icon: Icons.check_rounded,
@@ -910,54 +1214,54 @@ class _EscalaScreenState extends State<EscalaScreen> {
           child: Column(
             children: [
               Container(
-                width: 86,
-                height: 86,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF8B5CF6),
-                      Color(0xFF2563EB),
-                    ],
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF8B5CF6).withOpacity(0.35),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
                 ),
                 child: const Icon(
                   Icons.phone_android_rounded,
-                  color: Colors.white,
-                  size: 42,
+                  color: appWhite,
+                  size: 39,
                 ),
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 18),
+
               const Text(
-                'Pasa el móvil',
+                'pasa\nel móvil',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.9,
                 ),
               ),
+
               const SizedBox(height: 12),
+
               Text(
                 'Ahora le toca al Jugador 2 adivinar la posición.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.76),
-                  fontSize: 17,
+                  color: appWhite.withOpacity(0.76),
+                  fontSize: 14,
                   height: 1.35,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 26),
+
+        const SizedBox(height: 18),
+
         buildFancyButton(
           text: 'Estoy listo',
           icon: Icons.visibility_rounded,
@@ -974,44 +1278,58 @@ class _EscalaScreenState extends State<EscalaScreen> {
         buildGlassCard(
           child: Column(
             children: [
-              const Text(
-                'Jugador 2',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              sectionTitle('Jugador 2'),
+
               const SizedBox(height: 8),
+
               Text(
                 '¿Dónde crees que estaba la respuesta?',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.70),
-                  fontSize: 15,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 18),
-              Text(
-                '"$respuestaJugador1"',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
+
+              const SizedBox(height: 16),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                decoration: BoxDecoration(
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.28),
+                    width: 1.4,
+                  ),
+                ),
+                child: Text(
+                  '"$respuestaJugador1"',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 25,
+                    height: 1.05,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 16),
+
               buildMedidorSemicircular(
                 valor: valorAdivinado.round(),
                 mostrarNumero: true,
               ),
+
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: const Color(0xFF8B5CF6),
-                  inactiveTrackColor: Colors.white.withOpacity(0.15),
-                  thumbColor: Colors.white,
-                  overlayColor: const Color(0xFF8B5CF6).withOpacity(0.15),
-                  trackHeight: 8,
+                  activeTrackColor: appWhite,
+                  inactiveTrackColor: appWhite.withOpacity(0.18),
+                  thumbColor: appWhite,
+                  overlayColor: appWhite.withOpacity(0.12),
+                  trackHeight: 7,
                 ),
                 child: Slider(
                   value: valorAdivinado,
@@ -1029,7 +1347,9 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ],
           ),
         ),
+
         const Spacer(),
+
         buildFancyButton(
           text: 'Confirmar',
           icon: Icons.check_circle_rounded,
@@ -1049,15 +1369,10 @@ class _EscalaScreenState extends State<EscalaScreen> {
         buildGlassCard(
           child: Column(
             children: [
-              const Text(
-                'Resultado',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 18),
+              sectionTitle('Resultado'),
+
+              const SizedBox(height: 16),
+
               buildMedidorSemicircular(
                 valor: null,
                 mostrarNumero: false,
@@ -1065,63 +1380,82 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 mostrarZonasPuntuacion: true,
                 centroZonas: valorReal,
               ),
-              const SizedBox(height: 18),
-              Text(
-                '"$respuestaJugador1"',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+
               const SizedBox(height: 16),
-              Text(
-                'Real: $valorReal · Adivinada: ${valorAdivinado.round()}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                'Diferencia: $diferencia',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 16),
+
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
-                ),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF8B5CF6),
-                      Color(0xFF2563EB),
-                    ],
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.28),
+                    width: 1.4,
                   ),
-                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '$puntos puntos',
+                  '"$respuestaJugador1"',
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
+                    color: appWhite,
+                    fontSize: 24,
+                    height: 1.05,
                     fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              Text(
+                'REAL: $valorReal · ADIVINADA: ${valorAdivinado.round()}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.82),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                'DIFERENCIA: $diferencia',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.82),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: appWhite,
+                ),
+                child: Text(
+                  '$puntos PUNTOS',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appBlue,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.7,
                   ),
                 ),
               ),
             ],
           ),
         ),
+
         const Spacer(),
+
         buildFancyButton(
           text: 'Terminar ronda',
           icon: Icons.flag_rounded,
@@ -1153,57 +1487,25 @@ class _EscalaScreenState extends State<EscalaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF08051A),
-      body: SizedBox.expand(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF8B5CF6),
-                Color(0xFF312E81),
-                Color(0xFF08051A),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Stack(
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          child: Column(
             children: [
-              Positioned(
-                top: -80,
-                left: -60,
-                child: Container(
-                  width: 230,
-                  height: 230,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.08),
-                  ),
-                ),
+              buildTopBar(),
+
+              const SizedBox(height: 14),
+
+              buildInfoBar(
+                text: 'Adivina la posición correcta dentro de la escala',
+                color: accentPurple,
               ),
-              Positioned(
-                bottom: -100,
-                right: -70,
-                child: Container(
-                  width: 280,
-                  height: 280,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blueAccent.withOpacity(0.10),
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    children: [
-                      buildTopBar(),
-                      const SizedBox(height: 18),
-                      Expanded(child: buildContenido()),
-                    ],
-                  ),
-                ),
+
+              const SizedBox(height: 14),
+
+              Expanded(
+                child: buildContenido(),
               ),
             ],
           ),

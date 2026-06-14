@@ -27,11 +27,19 @@ class ImpostorScreen extends StatefulWidget {
 class _ImpostorScreenState extends State<ImpostorScreen> {
   final Random _random = Random();
 
+  static const Color appBlue = Color(0xFF2F4F9C);
+  static const Color appWhite = Color(0xFFF7F7F7);
+  static const Color accentPink = Color(0xFFFF4D6D);
+  static const Color accentOrange = Color(0xFFFFB86C);
+  static const Color accentGreen = Color(0xFF22C55E);
+
   ImpostorMode? selectedMode;
   ImpostorStep currentStep = ImpostorStep.modeSelection;
 
-  final TextEditingController playersController = TextEditingController(text: '6');
-  final TextEditingController impostorsController = TextEditingController(text: '1');
+  final TextEditingController playersController =
+  TextEditingController(text: '6');
+  final TextEditingController impostorsController =
+  TextEditingController(text: '1');
   final TextEditingController namesController = TextEditingController();
 
   int playersCount = 6;
@@ -49,11 +57,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   String selectedHint = '';
   String selectedFakeFactList = '';
 
-  bool currentPlayerIsImpostor() {
-    return impostorIndexes.contains(currentPlayerIndex);
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showRulesDialog();
+    });
   }
-
-
 
   @override
   void dispose() {
@@ -61,6 +73,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     impostorsController.dispose();
     namesController.dispose();
     super.dispose();
+  }
+
+  bool currentPlayerIsImpostor() {
+    return impostorIndexes.contains(currentPlayerIndex);
   }
 
   void resetGame() {
@@ -203,8 +219,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   void setupQuestionMode() {
-    final pair =
-    questionPairsData[_random.nextInt(questionPairsData.length)];
+    final pair = questionPairsData[_random.nextInt(questionPairsData.length)];
 
     selectedCategory = 'Pregunta';
     selectedWord = pair['normal']!;
@@ -222,7 +237,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   void setupFakeFactMode() {
-    final facts = List<Map<String, String>>.from(curiousFactsData)..shuffle(_random);
+    final facts = List<Map<String, String>>.from(curiousFactsData)
+      ..shuffle(_random);
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
@@ -242,7 +258,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       return fact['fact']!;
     });
 
-    selectedWord = 'Impostor(es): ${impostorIndexes.map((e) => playerNames[e]).join(', ')}';
+    selectedWord =
+    'Impostor(es): ${impostorIndexes.map((e) => playerNames[e]).join(', ')}';
   }
 
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
@@ -280,127 +297,11 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     }
   }
 
-  void showRulesDialog() {
-    if (selectedMode == null) return;
-
-    String title = getModeTitle(selectedMode!);
-    List<String> rules = [];
-
-    switch (selectedMode!) {
-      case ImpostorMode.classic:
-        rules = [
-          'Todos reciben la misma palabra menos el impostor.',
-          'El impostor debe intentar disimular.',
-          'Haced preguntas sin decir la palabra exacta.',
-          'Después votáis quién creéis que es el impostor.',
-        ];
-        break;
-      case ImpostorMode.roles:
-        rules = [
-          'Todos comparten el mismo lugar.',
-          'Cada jugador normal recibe un rol distinto.',
-          'El impostor no sabe ni el sitio ni el rol.',
-          'Hay que descubrir quién responde raro.',
-        ];
-        break;
-      case ImpostorMode.question:
-        rules = [
-          'Todos reciben una pregunta.',
-          'Uno o varios reciben una parecida, pero no igual.',
-          'Responded con naturalidad.',
-          'Detectad quién parece estar contestando a otra cosa.',
-        ];
-        break;
-      case ImpostorMode.fakeFact:
-        rules = [
-          'Los jugadores normales reciben un dato curioso real.',
-          'El impostor no recibe dato y debe inventarse uno.',
-          'Cada jugador dice su dato en voz alta.',
-          'Después votáis quién creéis que se lo ha inventado.',
-        ];
-        break;
-    }
-
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1B132C),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.pinkAccent.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Normas · $title',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 18),
-              ...rules.map(
-                    (rule) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 2),
-                        child: Icon(Icons.star_rounded, color: Colors.pinkAccent, size: 18),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          rule,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.82),
-                            fontSize: 15,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('Cerrar'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void showCustomSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: appBlue,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -440,28 +341,64 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     return secret;
   }
 
-  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
+  ButtonStyle mainButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: appWhite,
+      foregroundColor: appBlue,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  ButtonStyle secondaryButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: appWhite,
+      side: BorderSide(
+        color: appWhite.withOpacity(0.70),
+        width: 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget buildGlassCard({
+    required Widget child,
+    EdgeInsets? padding,
+  }) {
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(18),
+      padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.08),
-            Colors.white.withOpacity(0.03),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
         ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.pinkAccent.withOpacity(0.10),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: child,
     );
@@ -472,97 +409,499 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     String? subtitle,
     bool showBack = false,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    String visualTitle = title.toLowerCase();
+
+    if (visualTitle == 'juego del impostor') {
+      visualTitle = 'juego del\nimpostor';
+    }
+
+    if (visualTitle.length > 18 && !visualTitle.contains('\n')) {
+      visualTitle = visualTitle.replaceFirst(' ', '\n');
+    }
+
+    final bool multiline = visualTitle.contains('\n');
+    final double titleHeight = multiline ? 92 : 60;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-
-        /// BOTÓN VOLVER AL MENÚ (ChillScreen)
-        Container(
-          margin: const EdgeInsets.only(right: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.07),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: IconButton(
-            onPressed: () {
-              Navigator.pop(context); // ← vuelve al menú
-            },
-            icon: const Icon(
-              Icons.home_rounded,
-              color: Colors.white,
-            ),
-            tooltip: 'Volver al menú',
-          ),
-        ),
-
-        /// BOTÓN BACK INTERNO
-        if (showBack)
-          Container(
-            margin: const EdgeInsets.only(right: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.07),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: IconButton(
-              onPressed: resetGame,
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white,
-              ),
-            ),
-          ),
-
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [Color(0xFFFF70A6), Color(0xFFFFB86C)],
-                ).createShader(bounds),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            circleButton(
+              onTap: () => Navigator.pop(context),
+              child: const Text(
+                '8',
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-
-              if (subtitle != null) ...[
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.70),
-                    fontSize: 15,
-                    height: 1.3,
+            ),
+            Row(
+              children: [
+                if (showBack) ...[
+                  circleButton(
+                    onTap: resetGame,
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: appWhite,
+                      size: 27,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                circleButton(
+                  onTap: showRulesDialog,
+                  child: const Icon(
+                    Icons.question_mark_rounded,
+                    color: appWhite,
+                    size: 27,
                   ),
                 ),
               ],
-            ],
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        Padding(
+          padding: const EdgeInsets.only(left: 28),
+          child: SizedBox(
+            height: titleHeight,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Text(
+                    visualTitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontSize: 40,
+                      height: 0.88,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: titleHeight - 10,
+                  left: 0,
+                  right: -18,
+                  child: Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
 
-        /// BOTÓN NORMAS
-        if (selectedMode != null)
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
-            ),
-            child: IconButton(
-              onPressed: showRulesDialog,
-              icon: const Icon(
-                Icons.question_mark_rounded,
-                color: Colors.white,
-              ),
-              tooltip: 'Normas',
+        if (subtitle != null) ...[
+          const SizedBox(height: 10),
+          buildInfoBar(
+            text: subtitle,
+            color: accentPink,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget buildInfoBar({
+    required String text,
+    Color color = accentPink,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.06),
+        border: Border(
+          left: BorderSide(
+            color: color,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.36),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: appWhite.withOpacity(0.76),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+
+  Widget sectionTitle(String text) {
+    return Text(
+      text.toLowerCase(),
+      style: const TextStyle(
+        color: appWhite,
+        fontSize: 30,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
+      ),
+    );
+  }
+
+  InputDecoration inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(
+        color: appWhite.withOpacity(0.45),
+        fontWeight: FontWeight.w600,
+      ),
+      filled: true,
+      fillColor: appWhite.withOpacity(0.07),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite.withOpacity(0.28),
+          width: 1.4,
+        ),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(
+          color: appWhite,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget rulesItem({
+    required IconData icon,
+    required String title,
+    required String text,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: appWhite.withOpacity(0.26),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: appWhite,
+            size: 22,
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.25,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  void showRulesDialog() {
+    final bool generic = selectedMode == null;
+    final String title = generic ? 'Juego del impostor' : getModeTitle(selectedMode!);
+
+    final List<Map<String, dynamic>> rules = [];
+
+    if (generic) {
+      rules.addAll([
+        {
+          'icon': Icons.videogame_asset_rounded,
+          'title': 'Elige modo',
+          'text': 'Escoge entre clásico, roles, pregunta distinta o dato falso.',
+        },
+        {
+          'icon': Icons.groups_rounded,
+          'title': 'Configura',
+          'text': 'Pon jugadores, impostores y nombres antes de empezar.',
+        },
+        {
+          'icon': Icons.phone_android_rounded,
+          'title': 'Pasa el móvil',
+          'text': 'Cada jugador mira su información en secreto.',
+        },
+        {
+          'icon': Icons.visibility_off_rounded,
+          'title': 'Disimula',
+          'text': 'El impostor debe intentar no ser descubierto durante la conversación.',
+        },
+        {
+          'icon': Icons.how_to_vote_rounded,
+          'title': 'Votad',
+          'text': 'Al final debatís y votáis quién creéis que es el impostor.',
+        },
+      ]);
+    } else {
+      switch (selectedMode!) {
+        case ImpostorMode.classic:
+          rules.addAll([
+            {
+              'icon': Icons.text_fields_rounded,
+              'title': 'Palabra secreta',
+              'text': 'Todos reciben la misma palabra menos el impostor.',
+            },
+            {
+              'icon': Icons.visibility_off_rounded,
+              'title': 'Impostor',
+              'text': 'El impostor no sabe la palabra y debe intentar disimular.',
+            },
+            {
+              'icon': Icons.question_answer_rounded,
+              'title': 'Preguntas',
+              'text': 'Haced preguntas sin decir la palabra exacta.',
+            },
+            {
+              'icon': Icons.how_to_vote_rounded,
+              'title': 'Votación',
+              'text': 'Después votáis quién creéis que es el impostor.',
+            },
+          ]);
+          break;
+
+        case ImpostorMode.roles:
+          rules.addAll([
+            {
+              'icon': Icons.location_on_rounded,
+              'title': 'Lugar común',
+              'text': 'Todos comparten el mismo lugar.',
+            },
+            {
+              'icon': Icons.theater_comedy_rounded,
+              'title': 'Roles',
+              'text': 'Cada jugador normal recibe un rol distinto.',
+            },
+            {
+              'icon': Icons.visibility_off_rounded,
+              'title': 'Impostor',
+              'text': 'El impostor no sabe ni el sitio ni el rol.',
+            },
+            {
+              'icon': Icons.search_rounded,
+              'title': 'Detectad',
+              'text': 'Hay que descubrir quién responde raro.',
+            },
+          ]);
+          break;
+
+        case ImpostorMode.question:
+          rules.addAll([
+            {
+              'icon': Icons.quiz_rounded,
+              'title': 'Pregunta',
+              'text': 'Todos reciben una pregunta.',
+            },
+            {
+              'icon': Icons.compare_arrows_rounded,
+              'title': 'Distinta',
+              'text': 'Uno o varios reciben una parecida, pero no igual.',
+            },
+            {
+              'icon': Icons.record_voice_over_rounded,
+              'title': 'Responded',
+              'text': 'Responded con naturalidad.',
+            },
+            {
+              'icon': Icons.search_rounded,
+              'title': 'Detectad',
+              'text': 'Encontrad quién parece estar contestando a otra cosa.',
+            },
+          ]);
+          break;
+
+        case ImpostorMode.fakeFact:
+          rules.addAll([
+            {
+              'icon': Icons.fact_check_rounded,
+              'title': 'Dato real',
+              'text': 'Los jugadores normales reciben un dato curioso real.',
+            },
+            {
+              'icon': Icons.psychology_rounded,
+              'title': 'Dato falso',
+              'text': 'El impostor debe inventarse uno que parezca real.',
+            },
+            {
+              'icon': Icons.record_voice_over_rounded,
+              'title': 'Decidlo',
+              'text': 'Cada jugador dice su dato en voz alta.',
+            },
+            {
+              'icon': Icons.how_to_vote_rounded,
+              'title': 'Votad',
+              'text': 'Después votáis quién creéis que se lo ha inventado.',
+            },
+          ]);
+          break;
+      }
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.75),
+              width: 2.2,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
+                          color: appWhite,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Container(
+                    height: 3,
+                    color: appWhite.withOpacity(0.58),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  Text(
+                    title.toUpperCase(),
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  ...rules.map(
+                        (rule) => rulesItem(
+                      icon: rule['icon'] as IconData,
+                      title: rule['title'] as String,
+                      text: rule['text'] as String,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -572,70 +911,69 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     required String emoji,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(28),
+    return GestureDetector(
       onTap: onTap,
-      child: Ink(
-        padding: const EdgeInsets.all(18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1430),
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.pinkAccent.withOpacity(0.12),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+          color: appWhite.withOpacity(0.08),
+          border: Border(
+            left: const BorderSide(
+              color: accentPink,
+              width: 6,
             ),
-          ],
+            bottom: BorderSide(
+              color: appWhite.withOpacity(0.30),
+              width: 2,
+            ),
+            top: BorderSide(
+              color: appWhite.withOpacity(0.18),
+              width: 1,
+            ),
+            right: BorderSide(
+              color: appWhite.withOpacity(0.18),
+              width: 1,
+            ),
+          ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 66,
-              height: 66,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.pinkAccent.withOpacity(0.25),
-                    Colors.orangeAccent.withOpacity(0.18),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
-                child: Text(
-                  emoji,
-                  style: const TextStyle(fontSize: 30),
-                ),
-              ),
+            Text(
+              emoji,
+              style: const TextStyle(fontSize: 34),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    title.toUpperCase(),
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.70),
-                      fontSize: 14,
-                      height: 1.3,
+                      color: appWhite.withOpacity(0.68),
+                      fontSize: 12.5,
+                      height: 1.25,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 18),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: appWhite.withOpacity(0.75),
+            ),
           ],
         ),
       ),
@@ -650,31 +988,39 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           title: 'Juego del Impostor',
           subtitle: 'Elige el modo y empieza la partida',
         ),
-        const SizedBox(height: 26),
+
+        const SizedBox(height: 18),
+
         buildModeCard(
           title: 'Impostor clásico',
           subtitle: 'Todos reciben una palabra menos el impostor.',
           emoji: '🕵️',
           onTap: () => goToSetup(ImpostorMode.classic),
         ),
-        const SizedBox(height: 14),
+
+        const SizedBox(height: 12),
+
         buildModeCard(
           title: 'Impostor con roles',
           subtitle: 'Mismo lugar, roles distintos y alguien no sabe nada.',
           emoji: '🎭',
           onTap: () => goToSetup(ImpostorMode.roles),
         ),
-        const SizedBox(height: 14),
+
+        const SizedBox(height: 12),
+
         buildModeCard(
           title: 'Pregunta distinta',
           subtitle: 'Uno recibe una pregunta parecida, pero no igual.',
           emoji: '❓',
           onTap: () => goToSetup(ImpostorMode.question),
         ),
-        const SizedBox(height: 14),
+
+        const SizedBox(height: 12),
+
         buildModeCard(
           title: 'Datos curiosos',
-          subtitle: 'Todos reciben un dato real menos el impostor, que debe inventárselo.',
+          subtitle: 'Todos reciben un dato real menos el impostor.',
           emoji: '📚',
           onTap: () => goToSetup(ImpostorMode.fakeFact),
         ),
@@ -694,66 +1040,104 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           subtitle: 'Configura la partida',
           showBack: true,
         ),
-        const SizedBox(height: 22),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Configuración',
+              sectionTitle('Configuración'),
+
+              const SizedBox(height: 16),
+
+              Text(
+                'NÚMERO DE JUGADORES',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
                 ),
               ),
-              const SizedBox(height: 18),
-              const Text(
-                'Número de jugadores',
-                style: TextStyle(color: Colors.white70, fontSize: 15),
-              ),
+
               const SizedBox(height: 8),
+
               TextField(
                 controller: playersController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+                cursorColor: appWhite,
                 decoration: inputDecoration('Ejemplo: 6'),
               ),
+
               if (showImpostorsInput) ...[
-                const SizedBox(height: 18),
-                const Text(
-                  'Número de impostores',
-                  style: TextStyle(color: Colors.white70, fontSize: 15),
+                const SizedBox(height: 16),
+
+                Text(
+                  'NÚMERO DE IMPOSTORES',
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.70),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.7,
+                  ),
                 ),
+
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: impostorsController,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  cursorColor: appWhite,
                   decoration: inputDecoration('Ejemplo: 1'),
                 ),
               ],
-              const SizedBox(height: 18),
-              const Text(
-                'Nombres de jugadores',
-                style: TextStyle(color: Colors.white70, fontSize: 15),
+
+              const SizedBox(height: 16),
+
+              Text(
+                'NOMBRES DE JUGADORES',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
+                ),
               ),
+
               const SizedBox(height: 8),
+
               TextField(
                 controller: namesController,
                 maxLines: 6,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+                cursorColor: appWhite,
                 decoration: inputDecoration(
                   'Uno por línea\nAniol\nMartina\nJan',
                 ),
               ),
+
               const SizedBox(height: 16),
+
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF120D20),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                  color: appWhite.withOpacity(0.07),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.22),
+                    width: 1.3,
+                  ),
                 ),
                 child: SwitchListTile(
                   value: showHints,
@@ -763,21 +1147,26 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     });
                   },
                   contentPadding: EdgeInsets.zero,
-                  activeColor: Colors.pinkAccent,
+                  activeColor: appWhite,
                   title: const Text(
                     'Activar pista',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                      color: appWhite,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                   subtitle: Text(
                     'Muestra una pequeña ayuda en la revelación',
-                    style: TextStyle(color: Colors.white.withOpacity(0.60)),
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.60),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -786,8 +1175,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 15),
                     child: Text(
-                      'Empezar partida',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      'EMPEZAR PARTIDA',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -810,49 +1203,58 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           subtitle: 'Que nadie más mire la pantalla',
           showBack: true,
         ),
-        const SizedBox(height: 24),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
               Container(
-                width: 84,
-                height: 84,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.pinkAccent.withOpacity(0.30),
-                      Colors.orangeAccent.withOpacity(0.18),
-                    ],
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
                   ),
                 ),
                 child: const Icon(
                   Icons.phone_android_rounded,
-                  color: Colors.white,
-                  size: 38,
+                  color: appWhite,
+                  size: 39,
                 ),
               ),
+
               const SizedBox(height: 18),
+
               Text(
-                playerName,
+                playerName.toLowerCase(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
                   fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
                 ),
               ),
+
               const SizedBox(height: 12),
+
               Text(
                 'Coge el móvil y pulsa para ver tu información secreta',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.72),
-                  fontSize: 16,
+                  color: appWhite.withOpacity(0.72),
+                  fontSize: 14,
                   height: 1.35,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 28),
+
+              const SizedBox(height: 22),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -862,8 +1264,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   label: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text(
-                      'Ver mi información',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                      'VER MI INFORMACIÓN',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -887,54 +1293,71 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           subtitle: 'Lee esto en secreto',
           showBack: true,
         ),
-        const SizedBox(height: 24),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF120D20),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.28),
+                    width: 1.4,
+                  ),
                 ),
                 child: Text(
                   secret,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    height: 1.4,
-                    fontWeight: FontWeight.w800,
+                    color: appWhite,
+                    fontSize: 25,
+                    height: 1.25,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.4,
                   ),
                 ),
               ),
-              if (showHints && selectedHint.isNotEmpty && currentPlayerIsImpostor()) ...[
+
+              if (showHints &&
+                  selectedHint.isNotEmpty &&
+                  currentPlayerIsImpostor()) ...[
                 const SizedBox(height: 14),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(13),
                   decoration: BoxDecoration(
-                    color: Colors.orangeAccent.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: Colors.orangeAccent.withOpacity(0.18),
+                    color: appWhite.withOpacity(0.08),
+                    border: Border(
+                      left: const BorderSide(
+                        color: accentOrange,
+                        width: 6,
+                      ),
+                      bottom: BorderSide(
+                        color: appWhite.withOpacity(0.28),
+                        width: 2,
+                      ),
                     ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.lightbulb_rounded, color: Colors.orangeAccent),
+                      const Icon(
+                        Icons.lightbulb_rounded,
+                        color: appWhite,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Pista: $selectedHint',
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
+                            color: appWhite,
+                            fontSize: 14,
                             height: 1.35,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -942,7 +1365,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   ),
                 ),
               ],
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               Row(
                 children: [
                   Expanded(
@@ -950,10 +1375,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       onPressed: hideRole,
                       style: secondaryButtonStyle(),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          'Ocultar',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                          'OCULTAR',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -964,10 +1393,16 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       onPressed: nextPlayer,
                       style: mainButtonStyle(),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
                         child: Text(
-                          currentPlayerIndex == playersCount - 1 ? 'Finalizar' : 'Siguiente',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                          currentPlayerIndex == playersCount - 1
+                              ? 'FINALIZAR'
+                              : 'SIGUIENTE',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -986,14 +1421,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     if (selectedMode == ImpostorMode.classic) {
       summaryText =
-      'Todos ya conocen su palabra.\n\n'
-          'Haced preguntas sin decir la palabra exacta.\n'
-          'Después votad quién creéis que es el impostor.';
+      'Todos ya conocen su palabra.\n\nHaced preguntas sin decir la palabra exacta.\nDespués votad quién creéis que es el impostor.';
     } else if (selectedMode == ImpostorMode.roles) {
       summaryText =
-      'Todos ya conocen su rol.\n\n'
-          'El impostor debe intentar descubrir el lugar.\n'
-          'Los demás deben descubrir quién no sabe nada.';
+      'Todos ya conocen su rol.\n\nEl impostor debe intentar descubrir el lugar.\nLos demás deben descubrir quién no sabe nada.';
     } else if (selectedMode == ImpostorMode.question) {
       summaryText =
       'Las preguntas ya están repartidas.\nAhora debatid y descubrid quién tiene la distinta.';
@@ -1006,63 +1437,73 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildTopBar(
-          title: '¡Todo listo!',
+          title: 'Todo listo',
           subtitle: 'La partida ya puede empezar',
           showBack: true,
         ),
-        const SizedBox(height: 24),
+
+        const SizedBox(height: 18),
+
         buildGlassCard(
           child: Column(
             children: [
               Container(
-                width: 84,
-                height: 84,
+                width: 78,
+                height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.greenAccent.withOpacity(0.25),
-                      Colors.pinkAccent.withOpacity(0.22),
-                    ],
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.85),
+                    width: 2.2,
                   ),
                 ),
                 child: const Icon(
                   Icons.celebration_rounded,
-                  color: Colors.white,
-                  size: 40,
+                  color: appWhite,
+                  size: 39,
                 ),
               ),
+
               const SizedBox(height: 18),
-              Text(
-                'Ya podéis empezar a jugar',
+
+              const Text(
+                'empezad\na jugar',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.82),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  color: appWhite,
+                  fontSize: 38,
+                  height: 0.9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
                 ),
               ),
-              const SizedBox(height: 18),
+
+              const SizedBox(height: 16),
+
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF120D20),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.28),
+                    width: 1.4,
+                  ),
                 ),
                 child: Text(
                   summaryText,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    height: 1.45,
-                    fontWeight: FontWeight.w600,
+                    color: appWhite,
+                    fontSize: 16,
+                    height: 1.42,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -1071,8 +1512,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 14),
                     child: Text(
-                      'Volver al inicio',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      'VOLVER AL INICIO',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ),
@@ -1081,49 +1526,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  InputDecoration inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
-      filled: true,
-      fillColor: const Color(0xFF120D20),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.pinkAccent),
-      ),
-    );
-  }
-
-  ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: Colors.pinkAccent,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
-    );
-  }
-
-  ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: Colors.white,
-      side: BorderSide(color: Colors.white.withOpacity(0.18)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
     );
   }
 
@@ -1150,55 +1552,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF09050F),
-      body: SizedBox.expand(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF211133),
-                Color(0xFF12091E),
-                Color(0xFF09050F),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -80,
-                left: -40,
-                child: Container(
-                  width: 220,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.pinkAccent.withOpacity(0.10),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 100,
-                right: -30,
-                child: Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.orangeAccent.withOpacity(0.08),
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: SingleChildScrollView(
-                    child: bodyContent,
-                  ),
-                ),
-              ),
-            ],
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+          child: SingleChildScrollView(
+            child: bodyContent,
           ),
         ),
       ),
