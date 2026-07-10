@@ -485,14 +485,12 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.only(left: 28),
-          child: SizedBox(
-            height: 86,
+          child: IntrinsicWidth(
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 14),
                   child: Text(
                     'la\nasamblea',
                     style: TextStyle(
@@ -504,10 +502,11 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: 74,
-                  left: 0,
-                  right: -18,
+                  left: -46,
+                  right: 35,
+                  bottom: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),

@@ -423,22 +423,37 @@ class _EscalaScreenState extends State<EscalaScreen> {
         onPressed: onPressed,
         style: mainButtonStyle(color: color),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 14),
+          padding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 8,
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon, color: appBlue, size: 22),
+                Icon(
+                  icon,
+                  color: appBlue,
+                  size: 22,
+                ),
                 const SizedBox(width: 9),
               ],
-              Text(
-                text.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.4,
+
+              Expanded(
+                child: Text(
+                  text.toUpperCase(),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.05,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
                 ),
               ),
+
+              if (icon != null)
+                const SizedBox(width: 31),
             ],
           ),
         ),
@@ -996,32 +1011,8 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ),
           ),
 
-          const SizedBox(height: 16),
 
-          Row(
-            children: [
-              buildInfoPill(
-                icon: Icons.visibility_rounded,
-                title: 'Mira',
-                text: 'Jugador 1 ve el número',
-              ),
-              const SizedBox(width: 10),
-              buildInfoPill(
-                icon: Icons.edit_rounded,
-                title: 'Escribe',
-                text: 'Da una pista',
-              ),
-              const SizedBox(width: 10),
-              buildInfoPill(
-                icon: Icons.track_changes_rounded,
-                title: 'Adivina',
-                text: 'Jugador 2 coloca la aguja',
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 14),
           buildFancyButton(
             text: 'Usar escala aleatoria',
             icon: Icons.casino_rounded,
@@ -1145,7 +1136,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
           ),
         ),
 
-        const Spacer(),
+        const SizedBox(height: 18),
 
         buildFancyButton(
           text: 'Continuar',
@@ -1195,7 +1186,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
           ),
         ),
 
-        const Spacer(),
+        const SizedBox(height: 18),
 
         buildFancyButton(
           text: 'Confirmar respuesta',
@@ -1348,7 +1339,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
           ),
         ),
 
-        const Spacer(),
+        const SizedBox(height: 18),
 
         buildFancyButton(
           text: 'Confirmar',
@@ -1454,7 +1445,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
           ),
         ),
 
-        const Spacer(),
+        const SizedBox(height: 18),
 
         buildFancyButton(
           text: 'Terminar ronda',
@@ -1466,22 +1457,50 @@ class _EscalaScreenState extends State<EscalaScreen> {
   }
 
   Widget buildContenido() {
+    Widget contenido;
+
     switch (fase) {
       case 0:
-        return buildPantallaElegirEscala();
+        contenido = buildPantallaElegirEscala();
+        break;
+
       case 1:
-        return buildPantallaInicioJugador1();
+        contenido = buildPantallaInicioJugador1();
+        break;
+
       case 2:
-        return buildPantallaRespuesta();
+        contenido = buildPantallaRespuesta();
+        break;
+
       case 3:
-        return buildPantallaPasarMovil();
+        contenido = buildPantallaPasarMovil();
+        break;
+
       case 4:
-        return buildPantallaAdivinar();
+        contenido = buildPantallaAdivinar();
+        break;
+
       case 5:
-        return buildPantallaResultado();
+        contenido = buildPantallaResultado();
+        break;
+
       default:
-        return const SizedBox.shrink();
+        contenido = const SizedBox.shrink();
     }
+
+    // La configuración ya tiene su propio scroll.
+    if (fase == 0) {
+      return contenido;
+    }
+
+    // El resto de pantallas pueden desplazarse
+    // si el móvil es demasiado pequeño.
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: contenido,
+      ),
+    );
   }
 
   @override
@@ -1497,10 +1516,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
               const SizedBox(height: 14),
 
-              buildInfoBar(
-                text: 'Adivina la posición correcta dentro de la escala',
-                color: accentPurple,
-              ),
+
 
               const SizedBox(height: 14),
 

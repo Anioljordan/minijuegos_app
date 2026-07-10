@@ -1,4 +1,4 @@
-package com.example.minijuegos_app
+package com.anioldev.cubo
 
 import io.flutter.embedding.android.FlutterActivity
 

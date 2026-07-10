@@ -177,39 +177,55 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final categoryData =
     classicWordsData[_random.nextInt(classicWordsData.length)];
 
-    final words = List<String>.from(categoryData['words']);
+    final words = (categoryData['words'] as List)
+        .map(
+          (item) => Map<String, String>.from(item as Map),
+    )
+        .toList();
+
+    final selectedData =
+    words[_random.nextInt(words.length)];
 
     selectedCategory = categoryData['category'] as String;
-    selectedHint = categoryData['hint'] as String;
-    selectedWord = words[_random.nextInt(words.length)];
+    selectedWord = selectedData['word']!;
+    selectedHint = selectedData['hint']!;
 
-    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes =
+        generateImpostorIndexes(playersCount, impostorsCount);
 
     playerSecrets = List.generate(playersCount, (index) {
-      if (impostorIndexes.contains(index)) return 'IMPOSTOR';
+      if (impostorIndexes.contains(index)) {
+        return 'IMPOSTOR';
+      }
+
       return selectedWord;
     });
   }
 
   void setupRolesMode() {
     final scenario =
-    rolesScenariosData[_random.nextInt(rolesScenariosData.length)];
+    rolesScenariosData[
+    _random.nextInt(rolesScenariosData.length)
+    ];
 
     final place = scenario['place'] as String;
     final roles = List<String>.from(scenario['roles']);
 
-    roles.shuffle();
+    roles.shuffle(_random);
 
     selectedCategory = 'Lugar';
     selectedWord = place;
     selectedHint = scenario['hint'] as String;
 
-    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes =
+        generateImpostorIndexes(playersCount, impostorsCount);
 
     int roleCursor = 0;
 
     playerSecrets = List.generate(playersCount, (index) {
-      if (impostorIndexes.contains(index)) return 'IMPOSTOR';
+      if (impostorIndexes.contains(index)) {
+        return 'IMPOSTOR';
+      }
 
       final role = roles[roleCursor % roles.length];
       roleCursor++;
@@ -219,13 +235,17 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   void setupQuestionMode() {
-    final pair = questionPairsData[_random.nextInt(questionPairsData.length)];
+    final pair =
+    questionPairsData[
+    _random.nextInt(questionPairsData.length)
+    ];
 
     selectedCategory = 'Pregunta';
     selectedWord = pair['normal']!;
-    selectedHint = pair['hint']!;
+    // selectedHint = pair['hint']!;
 
-    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes =
+        generateImpostorIndexes(playersCount, impostorsCount);
 
     playerSecrets = List.generate(playersCount, (index) {
       if (impostorIndexes.contains(index)) {
@@ -237,29 +257,48 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   void setupFakeFactMode() {
-    final facts = List<Map<String, String>>.from(curiousFactsData)
+    final facts =
+    List<Map<String, String>>.from(curiousFactsData)
       ..shuffle(_random);
 
-    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes =
+        generateImpostorIndexes(playersCount, impostorsCount);
 
     selectedCategory = 'Datos curiosos';
-    selectedHint = 'Invéntate un dato que suene real';
+
+    final List<Map<String, String>> factsAsignados = [];
 
     int factCursor = 0;
 
     playerSecrets = List.generate(playersCount, (index) {
       if (impostorIndexes.contains(index)) {
-        return 'ERES EL IMPOSTOR\n\nInvéntate un dato curioso falso, pero que parezca real.';
+        return 'ERES EL IMPOSTOR\n\n'
+            'Invéntate un dato curioso falso, '
+            'pero que parezca real.';
       }
 
       final fact = facts[factCursor % facts.length];
       factCursor++;
 
+      factsAsignados.add(fact);
+
       return fact['fact']!;
     });
 
+    if (factsAsignados.isNotEmpty) {
+      final factParaPista =
+      factsAsignados[
+      _random.nextInt(factsAsignados.length)
+      ];
+
+      // selectedHint = factParaPista['hint']!;
+    } else {
+      selectedHint = '';
+    }
+
     selectedWord =
-    'Impostor(es): ${impostorIndexes.map((e) => playerNames[e]).join(', ')}';
+    'Impostor(es): '
+        '${impostorIndexes.map((e) => playerNames[e]).join(', ')}';
   }
 
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
@@ -1156,10 +1195,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    'Muestra una pequeña ayuda en la revelación',
+                    'El impostor recibe una pista de una sola palabra',
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.60),
-                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.60),
                     ),
                   ),
                 ),

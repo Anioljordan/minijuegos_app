@@ -148,7 +148,7 @@ class ChillScreen extends StatelessWidget {
         'screen': const BarcelonaMedianocheScreen(),
       },
       {
-        'title': 'Markel & Cesar',
+        'title': 'Escala mental',
         'screen': const EscalaScreen(),
       },
       {
@@ -160,11 +160,11 @@ class ChillScreen extends StatelessWidget {
         'screen': const DescribeLaPalabraScreen(),
       },
       {
-        'title': 'Memoria Fotográfica',
+        'title': 'Color Memory',
         'screen': const ColorDuelScreen(),
       },
       {
-        'title': 'Animales Profesionales',
+        'title': 'Animales Prof',
         'screen': const AnimalesProfesionalesScreen(),
       },
     ];

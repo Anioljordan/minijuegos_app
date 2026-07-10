@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_setup_screen.dart';
+import 'asamblea_roles_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 
 enum LeyType {
@@ -547,6 +548,10 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<List<LeyType>?> _modalPresidente(List<LeyType> cartas) async {
     bool cartasVisibles = true;
 
+    // Guardamos índices y no tipos de ley,
+    // porque pueden salir varias cartas iguales.
+    final Set<int> cartasSeleccionadas = <int>{};
+
     return showDialog<List<LeyType>>(
       context: context,
       barrierDismissible: false,
@@ -555,15 +560,21 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           builder: (context, setModalState) {
             return AlertDialog(
               backgroundColor: const Color(0xFF15112B),
+
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
+
               title: Row(
                 children: [
                   const Expanded(
                     child: Text(
-                      'Presidente: descarta 1 carta',
-                      style: TextStyle(color: Colors.white),
+                      'Presidente: selecciona 2 cartas',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
+
                   IconButton(
                     onPressed: () {
                       setModalState(() {
@@ -576,10 +587,13 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
+                    tooltip: cartasVisibles
+                        ? 'Ocultar cartas'
+                        : 'Mostrar cartas',
                   ),
                 ],
               ),
+
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -589,12 +603,15 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
+                      border: Border.all(
+                        color: Colors.white12,
+                      ),
                     ),
                     child: Text(
                       cartasVisibles
-                          ? 'Pulsa una carta para descartarla'
+                          ? cartasSeleccionadas.length == 2
+                          ? '2 de 2 seleccionadas · pulsa CONFIRMAR'
+                          : 'Selecciona las 2 cartas que quieres pasar al portavoz'
                           : 'Cartas ocultas para pasar el móvil',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -603,49 +620,157 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       ),
                     ),
                   ),
-                  ...cartas.map((ley) {
-                    final visible = cartasVisibles;
+
+                  ...List.generate(cartas.length, (index) {
+                    final ley = cartas[index];
+                    final seleccionada =
+                    cartasSeleccionadas.contains(index);
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: visible
+                          backgroundColor: cartasVisibles
                               ? _colorLey(ley)
                               : const Color(0xFF2A2540),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          disabledBackgroundColor: const Color(0xFF2A2540),
+                          disabledBackgroundColor:
+                          const Color(0xFF2A2540),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 16,
+                          ),
+                          side: BorderSide(
+                            color: seleccionada
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.18),
+                            width: seleccionada ? 4 : 1.4,
+                          ),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
                         ),
-                        onPressed: visible
+
+                        onPressed: cartasVisibles
                             ? () {
-                          final copia = List<LeyType>.from(cartas);
-                          copia.remove(ley);
-                          descarte.add(ley);
-                          Navigator.pop(context, copia);
+                          setModalState(() {
+                            if (seleccionada) {
+                              cartasSeleccionadas.remove(index);
+                            } else if (
+                            cartasSeleccionadas.length < 2) {
+                              cartasSeleccionadas.add(index);
+                            }
+                          });
                         }
                             : null,
+
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              visible
-                                  ? (ley == LeyType.izquierda
+                              cartasVisibles
+                                  ? ley == LeyType.izquierda
                                   ? Icons.gavel_outlined
-                                  : Icons.policy_outlined)
+                                  : Icons.policy_outlined
                                   : Icons.visibility_off_outlined,
                               color: Colors.white,
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              visible ? _textoLey(ley) : 'Carta oculta',
-                              style: const TextStyle(color: Colors.white),
+
+                            const SizedBox(width: 10),
+
+                            Expanded(
+                              child: Text(
+                                cartasVisibles
+                                    ? _textoLey(ley)
+                                    : 'Carta oculta',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             ),
+
+                            if (cartasVisibles && seleccionada)
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                color: Colors.white,
+                                size: 26,
+                              ),
                           ],
                         ),
                       ),
                     );
                   }),
+
+                  const SizedBox(height: 8),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed:
+                      cartasVisibles &&
+                          cartasSeleccionadas.length == 2
+                          ? () {
+                        // La única carta no seleccionada
+                        // se descarta.
+                        final indiceDescartado =
+                        List.generate(
+                          cartas.length,
+                              (index) => index,
+                        ).firstWhere(
+                              (index) =>
+                          !cartasSeleccionadas
+                              .contains(index),
+                        );
+
+                        descarte.add(
+                          cartas[indiceDescartado],
+                        );
+
+                        // Las dos seleccionadas pasan al portavoz.
+                        final indicesSeleccionados =
+                        cartasSeleccionadas.toList()
+                          ..sort();
+
+                        final cartasParaPortavoz =
+                        indicesSeleccionados
+                            .map(
+                              (index) => cartas[index],
+                        )
+                            .toList();
+
+                        Navigator.pop(
+                          context,
+                          cartasParaPortavoz,
+                        );
+                      }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appWhite,
+                        foregroundColor: appBlue,
+                        disabledBackgroundColor:
+                        appWhite.withOpacity(0.18),
+                        disabledForegroundColor:
+                        appWhite.withOpacity(0.40),
+                        elevation: 0,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
+                        child: Text(
+                          'CONFIRMAR CARTAS',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -1116,34 +1241,569 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<void> _mostrarNormas() async {
     await showAsambleaRulesDialog(context);
   }
+  List<AsambleaPlayer> _crearNuevaPartidaMismosJugadores() {
+    final random = Random();
 
-  Future<void> _mostrarGanador(String titulo, String mensaje) async {
+    final nuevosJugadores = players
+        .map(
+          (player) => AsambleaPlayer(
+        name: player.name,
+        isAlive: true,
+      ),
+    )
+        .toList()
+      ..shuffle(random);
+
+    final total = nuevosJugadores.length;
+
+    int numDerecha;
+
+    if (total <= 6) {
+      numDerecha = 1;
+    } else if (total <= 8) {
+      numDerecha = 2;
+    } else {
+      numDerecha = 3;
+    }
+
+    nuevosJugadores[0].role = AsambleaRole.liderOculto;
+
+    for (int i = 1; i <= numDerecha; i++) {
+      nuevosJugadores[i].role = AsambleaRole.derecha;
+    }
+
+    for (int i = numDerecha + 1; i < nuevosJugadores.length; i++) {
+      nuevosJugadores[i].role = AsambleaRole.izquierda;
+    }
+
+    return nuevosJugadores;
+  }
+
+  Future<void> _mostrarGanador(
+      String titulo,
+      String mensaje,
+      ) async {
+    final bool ganaIzquierda =
+    titulo.toLowerCase().contains('izquierda');
+
+    final Color winnerColor =
+    ganaIzquierda ? leftBlue : rightRed;
+
+    final String winnerName =
+    ganaIzquierda ? 'IZQUIERDA' : 'DERECHA';
+
+    final IconData winnerIcon = ganaIzquierda
+        ? Icons.shield_outlined
+        : Icons.gavel_rounded;
+
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
-        title: Text(
-          titulo,
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          mensaje,
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await _borrarPartidaGuardada();
-              if (!mounted) return;
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text('Cerrar partida'),
+      barrierColor: Colors.black.withOpacity(0.70),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 24,
           ),
-        ],
-      ),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: appBlue,
+              border: Border.all(
+                color: appWhite,
+                width: 2.5,
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // CABECERA GANADORA
+
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(
+                      20,
+                      24,
+                      20,
+                      22,
+                    ),
+                    decoration: BoxDecoration(
+                      color: winnerColor,
+                      border: const Border(
+                        bottom: BorderSide(
+                          color: appWhite,
+                          width: 3,
+                        ),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 82,
+                          height: 82,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: appWhite,
+                            border: Border.all(
+                              color: appWhite,
+                              width: 3,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.emoji_events_rounded,
+                            color: winnerColor,
+                            size: 50,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        const Text(
+                          'FIN DE LA PARTIDA',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        const Text(
+                          '¡GANA!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 28,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.6,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Text(
+                          winnerName,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontSize: 43,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // CONTENIDO
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      18,
+                      18,
+                      18,
+                      18,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.stretch,
+                      children: [
+                        // MOTIVO DE LA VICTORIA
+
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: appWhite.withOpacity(0.08),
+                            border: Border(
+                              left: BorderSide(
+                                color: winnerColor,
+                                width: 6,
+                              ),
+                              bottom: BorderSide(
+                                color: appWhite.withOpacity(0.30),
+                                width: 2,
+                              ),
+                              top: BorderSide(
+                                color: appWhite.withOpacity(0.20),
+                                width: 1,
+                              ),
+                              right: BorderSide(
+                                color: appWhite.withOpacity(0.20),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                winnerIcon,
+                                color: appWhite,
+                                size: 27,
+                              ),
+
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'MOTIVO DE LA VICTORIA',
+                                      style: TextStyle(
+                                        color: appWhite,
+                                        fontSize: 11,
+                                        fontWeight:
+                                        FontWeight.w900,
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 6),
+
+                                    Text(
+                                      mensaje,
+                                      style: TextStyle(
+                                        color: appWhite.withOpacity(
+                                          0.82,
+                                        ),
+                                        fontSize: 14,
+                                        height: 1.3,
+                                        fontWeight:
+                                        FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // MARCADOR FINAL
+
+                        const Text(
+                          'MARCADOR FINAL',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding:
+                                const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                  leftBlue.withOpacity(0.22),
+                                  border: Border.all(
+                                    color: leftBlue,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Icon(
+                                      Icons.shield_outlined,
+                                      color: appWhite,
+                                      size: 25,
+                                    ),
+
+                                    const SizedBox(height: 7),
+
+                                    const Text(
+                                      'IZQUIERDA',
+                                      style: TextStyle(
+                                        color: appWhite,
+                                        fontSize: 10,
+                                        fontWeight:
+                                        FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 5),
+
+                                    Text(
+                                      '$leyesIzquierda',
+                                      style: const TextStyle(
+                                        color: appWhite,
+                                        fontSize: 32,
+                                        height: 0.9,
+                                        fontWeight:
+                                        FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Expanded(
+                              child: Container(
+                                padding:
+                                const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                  rightRed.withOpacity(0.22),
+                                  border: Border.all(
+                                    color: rightRed,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    const Icon(
+                                      Icons.gavel_rounded,
+                                      color: appWhite,
+                                      size: 25,
+                                    ),
+
+                                    const SizedBox(height: 7),
+
+                                    const Text(
+                                      'DERECHA',
+                                      style: TextStyle(
+                                        color: appWhite,
+                                        fontSize: 10,
+                                        fontWeight:
+                                        FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 5),
+
+                                    Text(
+                                      '$leyesDerecha',
+                                      style: const TextStyle(
+                                        color: appWhite,
+                                        fontSize: 32,
+                                        height: 0.9,
+                                        fontWeight:
+                                        FontWeight.w900,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // MISMOS JUGADORES
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final nuevosJugadores =
+                              _crearNuevaPartidaMismosJugadores();
+
+                              await _borrarPartidaGuardada();
+
+                              if (!mounted) return;
+
+                              Navigator.of(dialogContext).pop();
+
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AsambleaRolesScreen(
+                                        players: nuevosJugadores,
+                                      ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: appWhite,
+                              foregroundColor: appBlue,
+                              elevation: 0,
+                              shape:
+                              const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 13,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.replay_rounded,
+                                    size: 22,
+                                  ),
+                                  SizedBox(width: 9),
+                                  Expanded(
+                                    child: Text(
+                                      'REPETIR · MISMOS JUGADORES',
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        height: 1.05,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 31),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // CAMBIAR JUGADORES
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              await _borrarPartidaGuardada();
+
+                              if (!mounted) return;
+
+                              Navigator.of(dialogContext).pop();
+
+                              Navigator.of(context)
+                                  .pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                  const AsambleaSetupScreen(),
+                                ),
+                                    (route) => route.isFirst,
+                              );
+                            },
+                            style: secondaryButtonStyle(),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.group_add_outlined,
+                                    size: 21,
+                                  ),
+                                  SizedBox(width: 9),
+                                  Text(
+                                    'CAMBIAR JUGADORES',
+                                    style: TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight:
+                                      FontWeight.w900,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // MENÚ PRINCIPAL
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              await _borrarPartidaGuardada();
+
+                              if (!mounted) return;
+
+                              Navigator.of(dialogContext).pop();
+
+                              Navigator.of(context).popUntil(
+                                    (route) => route.isFirst,
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor:
+                              appWhite.withOpacity(0.78),
+                              side: BorderSide(
+                                color:
+                                appWhite.withOpacity(0.38),
+                                width: 1.4,
+                              ),
+                              shape:
+                              const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 13,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.home_outlined,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 9),
+                                  Text(
+                                    'MENÚ PRINCIPAL',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight:
+                                      FontWeight.w900,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -1349,14 +2009,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.only(left: 28),
-          child: SizedBox(
-            height: 86,
+          child: IntrinsicWidth(
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 14),
                   child: Text(
                     'tablero\nasamblea',
                     style: TextStyle(
@@ -1368,10 +2026,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: 74,
-                  left: 0,
-                  right: -18,
+                  left: -46,
+                  right: 35,
+                  bottom: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),

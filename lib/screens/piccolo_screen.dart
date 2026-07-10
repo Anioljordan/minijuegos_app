@@ -56,7 +56,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   String generarCastigo() {
-    final tragos = random.nextInt(5) + 1;
+    final tragos = random.nextInt(3) + 1;
     final reparte = random.nextBool();
 
     if (reparte) {
