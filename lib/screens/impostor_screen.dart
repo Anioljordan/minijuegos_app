@@ -32,6 +32,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   static const Color accentPink = Color(0xFFFF4D6D);
   static const Color accentOrange = Color(0xFFFFB86C);
   static const Color accentGreen = Color(0xFF22C55E);
+  static const Color accentYellow = Color(0xFFFFD166);
+  static const Color accentPurple = Color(0xFF8B5CF6);
 
   ImpostorMode? selectedMode;
   ImpostorStep currentStep = ImpostorStep.modeSelection;
@@ -44,7 +46,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   int playersCount = 6;
   int impostorsCount = 1;
-
   int currentPlayerIndex = 0;
   bool showHints = true;
 
@@ -55,7 +56,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   String selectedWord = '';
   String selectedCategory = '';
   String selectedHint = '';
-  String selectedFakeFactList = '';
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      showRulesDialog();
+
     });
   }
 
@@ -99,7 +99,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       selectedWord = '';
       selectedCategory = '';
       selectedHint = '';
-      selectedFakeFactList = '';
     });
   }
 
@@ -114,7 +113,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       selectedWord = '';
       selectedCategory = '';
       selectedHint = '';
-      selectedFakeFactList = '';
     });
   }
 
@@ -139,17 +137,21 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     playersCount = parsedPlayers;
     impostorsCount = parsedImpostors;
-
     generatePlayerNames();
 
-    if (selectedMode == ImpostorMode.classic) {
-      setupClassicMode();
-    } else if (selectedMode == ImpostorMode.roles) {
-      setupRolesMode();
-    } else if (selectedMode == ImpostorMode.question) {
-      setupQuestionMode();
-    } else if (selectedMode == ImpostorMode.fakeFact) {
-      setupFakeFactMode();
+    switch (selectedMode!) {
+      case ImpostorMode.classic:
+        setupClassicMode();
+        break;
+      case ImpostorMode.roles:
+        setupRolesMode();
+        break;
+      case ImpostorMode.question:
+        setupQuestionMode();
+        break;
+      case ImpostorMode.fakeFact:
+        setupFakeFactMode();
+        break;
     }
 
     setState(() {
@@ -161,14 +163,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   void generatePlayerNames() {
     final rawNames = namesController.text
         .split('\n')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
         .toList();
 
     playerNames = List.generate(playersCount, (index) {
-      if (index < rawNames.length) {
-        return rawNames[index];
-      }
+      if (index < rawNames.length) return rawNames[index];
       return 'Jugador ${index + 1}';
     });
   }
@@ -178,127 +178,82 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     classicWordsData[_random.nextInt(classicWordsData.length)];
 
     final words = (categoryData['words'] as List)
-        .map(
-          (item) => Map<String, String>.from(item as Map),
-    )
+        .map((item) => Map<String, String>.from(item as Map))
         .toList();
 
-    final selectedData =
-    words[_random.nextInt(words.length)];
+    final selectedData = words[_random.nextInt(words.length)];
 
     selectedCategory = categoryData['category'] as String;
     selectedWord = selectedData['word']!;
     selectedHint = selectedData['hint']!;
 
-    impostorIndexes =
-        generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
     playerSecrets = List.generate(playersCount, (index) {
-      if (impostorIndexes.contains(index)) {
-        return 'IMPOSTOR';
-      }
-
-      return selectedWord;
+      return impostorIndexes.contains(index) ? 'IMPOSTOR' : selectedWord;
     });
   }
 
   void setupRolesMode() {
     final scenario =
-    rolesScenariosData[
-    _random.nextInt(rolesScenariosData.length)
-    ];
+    rolesScenariosData[_random.nextInt(rolesScenariosData.length)];
 
     final place = scenario['place'] as String;
-    final roles = List<String>.from(scenario['roles']);
-
-    roles.shuffle(_random);
+    final roles = List<String>.from(scenario['roles'])..shuffle(_random);
 
     selectedCategory = 'Lugar';
     selectedWord = place;
     selectedHint = scenario['hint'] as String;
 
-    impostorIndexes =
-        generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
     int roleCursor = 0;
-
     playerSecrets = List.generate(playersCount, (index) {
-      if (impostorIndexes.contains(index)) {
-        return 'IMPOSTOR';
-      }
+      if (impostorIndexes.contains(index)) return 'IMPOSTOR';
 
       final role = roles[roleCursor % roles.length];
       roleCursor++;
-
       return '$place|$role';
     });
   }
 
   void setupQuestionMode() {
-    final pair =
-    questionPairsData[
-    _random.nextInt(questionPairsData.length)
-    ];
+    final pair = questionPairsData[_random.nextInt(questionPairsData.length)];
 
     selectedCategory = 'Pregunta';
     selectedWord = pair['normal']!;
-    // selectedHint = pair['hint']!;
+    selectedHint = '';
 
-    impostorIndexes =
-        generateImpostorIndexes(playersCount, impostorsCount);
+    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
     playerSecrets = List.generate(playersCount, (index) {
-      if (impostorIndexes.contains(index)) {
-        return pair['impostor']!;
-      }
-
-      return pair['normal']!;
+      return impostorIndexes.contains(index)
+          ? pair['impostor']!
+          : pair['normal']!;
     });
   }
 
   void setupFakeFactMode() {
-    final facts =
-    List<Map<String, String>>.from(curiousFactsData)
+    final facts = List<Map<String, String>>.from(curiousFactsData)
       ..shuffle(_random);
 
-    impostorIndexes =
-        generateImpostorIndexes(playersCount, impostorsCount);
-
+    impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
     selectedCategory = 'Datos curiosos';
-
-    final List<Map<String, String>> factsAsignados = [];
+    selectedHint = '';
 
     int factCursor = 0;
-
     playerSecrets = List.generate(playersCount, (index) {
       if (impostorIndexes.contains(index)) {
-        return 'ERES EL IMPOSTOR\n\n'
-            'Invéntate un dato curioso falso, '
-            'pero que parezca real.';
+        return 'ERES EL IMPOSTOR\n\nInvéntate un dato curioso falso, pero que parezca real.';
       }
 
       final fact = facts[factCursor % facts.length];
       factCursor++;
-
-      factsAsignados.add(fact);
-
       return fact['fact']!;
     });
 
-    if (factsAsignados.isNotEmpty) {
-      final factParaPista =
-      factsAsignados[
-      _random.nextInt(factsAsignados.length)
-      ];
-
-      // selectedHint = factParaPista['hint']!;
-    } else {
-      selectedHint = '';
-    }
-
     selectedWord =
-    'Impostor(es): '
-        '${impostorIndexes.map((e) => playerNames[e]).join(', ')}';
+    'Impostor(es): ${impostorIndexes.map((index) => playerNames[index]).join(', ')}';
   }
 
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
@@ -337,13 +292,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   void showCustomSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: appBlue,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: appBlue,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
   }
 
   String getModeTitle(ImpostorMode mode) {
@@ -363,8 +320,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final secret = playerSecrets[currentPlayerIndex];
 
     if (selectedMode == ImpostorMode.classic) {
-      if (secret == 'IMPOSTOR') return 'Eres el impostor';
-      return secret;
+      return secret == 'IMPOSTOR' ? 'Eres el impostor' : secret;
     }
 
     if (selectedMode == ImpostorMode.roles) {
@@ -372,94 +328,103 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
       final parts = secret.split('|');
       if (parts.length == 2) {
-        return 'Lugar: ${parts[0]}\nRol: ${parts[1]}';
+        return 'Lugar: ${parts[0]}\n\nRol: ${parts[1]}';
       }
-      return secret;
     }
 
     return secret;
   }
 
-  ButtonStyle mainButtonStyle() {
+  Color get modeColor {
+    switch (selectedMode) {
+      case ImpostorMode.classic:
+        return accentPink;
+      case ImpostorMode.roles:
+        return accentOrange;
+      case ImpostorMode.question:
+        return accentGreen;
+      case ImpostorMode.fakeFact:
+        return accentYellow;
+      case null:
+        return accentPink;
+    }
+  }
+
+  IconData get modeIcon {
+    switch (selectedMode) {
+      case ImpostorMode.classic:
+        return Icons.visibility_off_rounded;
+      case ImpostorMode.roles:
+        return Icons.theater_comedy_rounded;
+      case ImpostorMode.question:
+        return Icons.quiz_rounded;
+      case ImpostorMode.fakeFact:
+        return Icons.fact_check_rounded;
+      case null:
+        return Icons.person_search_rounded;
+    }
+  }
+
+  ButtonStyle mainButtonStyle({Color? background, Color? foreground}) {
     return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
+      backgroundColor: background ?? appWhite,
+      foregroundColor: foreground ?? appBlue,
+      disabledBackgroundColor: appWhite.withOpacity(0.18),
+      disabledForegroundColor: appWhite.withOpacity(0.42),
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
     );
   }
 
   ButtonStyle secondaryButtonStyle() {
     return OutlinedButton.styleFrom(
       foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      side: BorderSide(color: appWhite.withOpacity(0.70), width: 2),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
     );
   }
 
   Widget circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
+    final size = compact ? 44.0 : 50.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
-          ),
+          border: Border.all(color: appWhite.withOpacity(0.85), width: 2.2),
         ),
         child: Center(child: child),
       ),
     );
   }
 
-  Widget buildGlassCard({
-    required Widget child,
-    EdgeInsets? padding,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
-      child: child,
-    );
+  String get currentTitle {
+    switch (currentStep) {
+      case ImpostorStep.modeSelection:
+        return 'juego del impostor';
+      case ImpostorStep.setup:
+        return getModeTitle(selectedMode!).toLowerCase();
+      case ImpostorStep.passPhone:
+        return 'pasa el móvil';
+      case ImpostorStep.reveal:
+        return playerNames[currentPlayerIndex].toLowerCase();
+      case ImpostorStep.finished:
+        return 'todo listo';
+    }
   }
 
-  Widget buildTopBar({
-    required String title,
-    String? subtitle,
-    bool showBack = false,
-  }) {
-    String visualTitle = title.toLowerCase();
-
-    if (visualTitle == 'juego del impostor') {
-      visualTitle = 'juego del\nimpostor';
-    }
-
-    if (visualTitle.length > 18 && !visualTitle.contains('\n')) {
-      visualTitle = visualTitle.replaceFirst(' ', '\n');
-    }
-
-    final bool multiline = visualTitle.contains('\n');
-    final double titleHeight = multiline ? 92 : 60;
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 60.0 : 80.0;
+    final showReset = currentStep != ImpostorStep.modeSelection;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -468,70 +433,67 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             circleButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 '8',
                 style: TextStyle(
                   color: appWhite,
-                  fontSize: 19,
+                  fontSize: compact ? 17 : 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ),
             Row(
               children: [
-                if (showBack) ...[
-                  circleButton(
-                    onTap: resetGame,
-                    child: const Icon(
-                      Icons.arrow_back_rounded,
-                      color: appWhite,
-                      size: 27,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
+                if (showReset) ...[
+
+                  SizedBox(width: compact ? 9 : 12),
                 ],
                 circleButton(
+                  compact: compact,
                   onTap: showRulesDialog,
-                  child: const Icon(
+                  child: Icon(
                     Icons.question_mark_rounded,
                     color: appWhite,
-                    size: 27,
+                    size: compact ? 23 : 27,
                   ),
                 ),
               ],
             ),
           ],
         ),
-
-        const SizedBox(height: 24),
-
+        SizedBox(height: compact ? 14 : 24),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(left: compact ? 18 : 28),
           child: SizedBox(
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Text(
-                    visualTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 40,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        currentTitle,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: titleHeight - 10,
+                  top: lineTop,
                   left: 0,
                   right: -18,
                   child: Container(
@@ -543,59 +505,129 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             ),
           ),
         ),
-
-        if (subtitle != null) ...[
-          const SizedBox(height: 10),
-          buildInfoBar(
-            text: subtitle,
-            color: accentPink,
-          ),
-        ],
       ],
     );
   }
 
-  Widget buildInfoBar({
-    required String text,
-    Color color = accentPink,
+  Widget buildPanel({
+    required Widget child,
+    EdgeInsets? padding,
+    Color? borderColor,
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: BorderSide(
-            color: color,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
+        color: appWhite.withOpacity(0.08),
+        border: Border.all(
+          color: borderColor ?? appWhite.withOpacity(0.28),
+          width: 1.4,
         ),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
+      child: child,
     );
   }
 
-  Widget sectionTitle(String text) {
-    return Text(
-      text.toLowerCase(),
-      style: const TextStyle(
-        color: appWhite,
-        fontSize: 30,
-        height: 0.95,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -0.7,
+  Widget buildProgress({required bool compact}) {
+    final current = currentPlayerIndex + 1;
+    final total = playersCount;
+    final progress = total == 0 ? 0.0 : current / total;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Text(
+              'JUGADOR $current DE $total',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.72),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${(progress * 100).round()}%',
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 12 : 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: compact ? 11 : 14,
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.14),
+            border: Border.all(color: appWhite.withOpacity(0.30), width: 1.2),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Colors.transparent,
+            valueColor: AlwaysStoppedAnimation<Color>(modeColor),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    return SizedBox(
+      height: compact ? 54 : 62,
+      child: Material(
+        color: onTap == null
+            ? backgroundColor.withOpacity(0.30)
+            : backgroundColor,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 14),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: appWhite.withOpacity(onTap == null ? 0.12 : 0.28),
+                width: 2.1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: foregroundColor.withOpacity(onTap == null ? 0.40 : 1),
+                  size: compact ? 24 : 28,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: foregroundColor.withOpacity(
+                        onTap == null ? 0.40 : 1,
+                      ),
+                      fontSize: compact ? 11.5 : 13,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -612,24 +644,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
+        borderSide: BorderSide(color: appWhite.withOpacity(0.28), width: 1.4),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
+        borderSide: BorderSide(color: appWhite.withOpacity(0.28), width: 1.4),
       ),
       focusedBorder: const OutlineInputBorder(
         borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite,
-          width: 2,
-        ),
+        borderSide: BorderSide(color: appWhite, width: 2),
       ),
     );
   }
@@ -644,19 +667,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
+        border: Border.all(color: appWhite.withOpacity(0.26), width: 1.4),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
+          Icon(icon, color: appWhite, size: 22),
           const SizedBox(width: 11),
           Expanded(
             child: Column(
@@ -690,9 +706,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   void showRulesDialog() {
-    final bool generic = selectedMode == null;
-    final String title = generic ? 'Juego del impostor' : getModeTitle(selectedMode!);
-
+    final generic = selectedMode == null;
+    final title = generic ? 'Juego del impostor' : getModeTitle(selectedMode!);
     final List<Map<String, dynamic>> rules = [];
 
     if (generic) {
@@ -705,7 +720,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         {
           'icon': Icons.groups_rounded,
           'title': 'Configura',
-          'text': 'Pon jugadores, impostores y nombres antes de empezar.',
+          'text': 'Indica jugadores, impostores y nombres antes de empezar.',
         },
         {
           'icon': Icons.phone_android_rounded,
@@ -715,7 +730,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         {
           'icon': Icons.visibility_off_rounded,
           'title': 'Disimula',
-          'text': 'El impostor debe intentar no ser descubierto durante la conversación.',
+          'text': 'El impostor debe evitar que lo descubran durante la conversación.',
         },
         {
           'icon': Icons.how_to_vote_rounded,
@@ -735,7 +750,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             {
               'icon': Icons.visibility_off_rounded,
               'title': 'Impostor',
-              'text': 'El impostor no sabe la palabra y debe intentar disimular.',
+              'text': 'El impostor no sabe la palabra y debe disimular.',
             },
             {
               'icon': Icons.question_answer_rounded,
@@ -749,7 +764,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             },
           ]);
           break;
-
         case ImpostorMode.roles:
           rules.addAll([
             {
@@ -765,16 +779,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             {
               'icon': Icons.visibility_off_rounded,
               'title': 'Impostor',
-              'text': 'El impostor no sabe ni el sitio ni el rol.',
+              'text': 'El impostor no conoce ni el lugar ni el rol.',
             },
             {
               'icon': Icons.search_rounded,
               'title': 'Detectad',
-              'text': 'Hay que descubrir quién responde raro.',
+              'text': 'Descubrid quién responde de forma extraña.',
             },
           ]);
           break;
-
         case ImpostorMode.question:
           rules.addAll([
             {
@@ -785,21 +798,20 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             {
               'icon': Icons.compare_arrows_rounded,
               'title': 'Distinta',
-              'text': 'Uno o varios reciben una parecida, pero no igual.',
+              'text': 'Uno o varios reciben una parecida, pero diferente.',
             },
             {
               'icon': Icons.record_voice_over_rounded,
               'title': 'Responded',
-              'text': 'Responded con naturalidad.',
+              'text': 'Responded con naturalidad sin enseñar la pantalla.',
             },
             {
               'icon': Icons.search_rounded,
               'title': 'Detectad',
-              'text': 'Encontrad quién parece estar contestando a otra cosa.',
+              'text': 'Encontrad quién parece estar contestando otra cosa.',
             },
           ]);
           break;
-
         case ImpostorMode.fakeFact:
           rules.addAll([
             {
@@ -810,7 +822,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             {
               'icon': Icons.psychology_rounded,
               'title': 'Dato falso',
-              'text': 'El impostor debe inventarse uno que parezca real.',
+              'text': 'El impostor inventa uno que parezca verdadero.',
             },
             {
               'icon': Icons.record_voice_over_rounded,
@@ -838,10 +850,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
             color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
+            border: Border.all(color: appWhite.withOpacity(0.75), width: 2.2),
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -885,16 +894,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-
+                  Container(height: 3, color: appWhite.withOpacity(0.58)),
                   const SizedBox(height: 18),
-
                   Text(
                     title.toUpperCase(),
                     style: const TextStyle(
@@ -904,9 +906,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       letterSpacing: 1.2,
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   ...rules.map(
                         (rule) => rulesItem(
                       icon: rule['icon'] as IconData,
@@ -914,9 +914,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       text: rule['text'] as String,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -947,230 +945,243 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Widget buildModeCard({
     required String title,
     required String subtitle,
-    required String emoji,
+    required IconData icon,
+    required Color color,
     required VoidCallback onTap,
+    required bool compact,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.08),
-          border: Border(
-            left: const BorderSide(
-              color: accentPink,
-              width: 6,
-            ),
-            bottom: BorderSide(
-              color: appWhite.withOpacity(0.30),
-              width: 2,
-            ),
-            top: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
-            ),
-            right: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 10 : 13,
+            vertical: compact ? 11 : 15,
+          ),
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.08),
+            border: Border(
+              left: BorderSide(color: color, width: compact ? 5 : 7),
+              bottom: BorderSide(color: appWhite.withOpacity(0.30), width: 2),
+              top: BorderSide(color: appWhite.withOpacity(0.18), width: 1),
+              right: BorderSide(color: appWhite.withOpacity(0.18), width: 1),
             ),
           ),
-        ),
-        child: Row(
-          children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 34),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title.toUpperCase(),
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: appWhite.withOpacity(0.68),
-                      fontSize: 12.5,
-                      height: 1.25,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: compact ? 54 : 66,
+                height: compact ? 54 : 66,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color.withOpacity(0.75), width: 2),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: compact ? 30 : 38,
+                ),
               ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: appWhite.withOpacity(0.75),
-            ),
-          ],
+              SizedBox(height: compact ? 8 : 11),
+              Text(
+                title.toUpperCase(),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: compact ? 12 : 14,
+                  height: 1.05,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.35,
+                ),
+              ),
+              SizedBox(height: compact ? 5 : 7),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: compact ? 3 : 4,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.68),
+                  fontSize: compact ? 10.2 : 11.5,
+                  height: 1.22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget buildModeSelection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: 'Juego del Impostor',
-          subtitle: 'Elige el modo y empieza la partida',
-        ),
+  Widget buildModeSelection({required bool compact}) {
+    final cards = [
+      (
+      title: 'Clásico',
+      subtitle: 'Todos tienen una palabra menos el impostor.',
+      icon: Icons.visibility_off_rounded,
+      color: accentPink,
+      mode: ImpostorMode.classic,
+      ),
+      (
+      title: 'Con roles',
+      subtitle: 'Mismo lugar, roles distintos y alguien no sabe nada.',
+      icon: Icons.theater_comedy_rounded,
+      color: accentOrange,
+      mode: ImpostorMode.roles,
+      ),
+      (
+      title: 'Pregunta distinta',
+      subtitle: 'Uno recibe una pregunta parecida, pero diferente.',
+      icon: Icons.quiz_rounded,
+      color: accentGreen,
+      mode: ImpostorMode.question,
+      ),
+      (
+      title: 'Dato falso',
+      subtitle: 'Todos tienen un dato real menos el impostor.',
+      icon: Icons.fact_check_rounded,
+      color: accentYellow,
+      mode: ImpostorMode.fakeFact,
+      ),
+    ];
 
-        const SizedBox(height: 18),
-
-        buildModeCard(
-          title: 'Impostor clásico',
-          subtitle: 'Todos reciben una palabra menos el impostor.',
-          emoji: '🕵️',
-          onTap: () => goToSetup(ImpostorMode.classic),
-        ),
-
-        const SizedBox(height: 12),
-
-        buildModeCard(
-          title: 'Impostor con roles',
-          subtitle: 'Mismo lugar, roles distintos y alguien no sabe nada.',
-          emoji: '🎭',
-          onTap: () => goToSetup(ImpostorMode.roles),
-        ),
-
-        const SizedBox(height: 12),
-
-        buildModeCard(
-          title: 'Pregunta distinta',
-          subtitle: 'Uno recibe una pregunta parecida, pero no igual.',
-          emoji: '❓',
-          onTap: () => goToSetup(ImpostorMode.question),
-        ),
-
-        const SizedBox(height: 12),
-
-        buildModeCard(
-          title: 'Datos curiosos',
-          subtitle: 'Todos reciben un dato real menos el impostor.',
-          emoji: '📚',
-          onTap: () => goToSetup(ImpostorMode.fakeFact),
-        ),
-      ],
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: compact ? 9 : 12,
+        mainAxisSpacing: compact ? 9 : 12,
+        childAspectRatio: compact ? 0.88 : 0.82,
+      ),
+      itemCount: cards.length,
+      itemBuilder: (context, index) {
+        final card = cards[index];
+        return buildModeCard(
+          title: card.title,
+          subtitle: card.subtitle,
+          icon: card.icon,
+          color: card.color,
+          compact: compact,
+          onTap: () => goToSetup(card.mode),
+        );
+      },
     );
   }
 
-  Widget buildSetup() {
+  Widget buildSetup({required bool compact}) {
     final mode = selectedMode!;
-    final showImpostorsInput = mode != ImpostorMode.fakeFact;
+    final showHintSwitch =
+        mode == ImpostorMode.classic || mode == ImpostorMode.roles;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: getModeTitle(mode),
-          subtitle: 'Configura la partida',
-          showBack: true,
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              sectionTitle('Configuración'),
-
-              const SizedBox(height: 16),
-
-              Text(
-                'NÚMERO DE JUGADORES',
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.7,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: playersController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w700,
-                ),
-                cursorColor: appWhite,
-                decoration: inputDecoration('Ejemplo: 6'),
-              ),
-
-              if (showImpostorsInput) ...[
-                const SizedBox(height: 16),
-
-                Text(
-                  'NÚMERO DE IMPOSTORES',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.70),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.7,
+    return SingleChildScrollView(
+      child: buildPanel(
+        padding: EdgeInsets.all(compact ? 13 : 17),
+        borderColor: modeColor.withOpacity(0.65),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: compact ? 50 : 60,
+                  height: compact ? 50 : 60,
+                  decoration: BoxDecoration(
+                    color: modeColor.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: modeColor, width: 2.2),
+                  ),
+                  child: Icon(
+                    modeIcon,
+                    color: modeColor,
+                    size: compact ? 28 : 34,
                   ),
                 ),
-
-                const SizedBox(height: 8),
-
-                TextField(
-                  controller: impostorsController,
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CONFIGURACIÓN',
+                        style: TextStyle(
+                          color: appWhite.withOpacity(0.62),
+                          fontSize: compact ? 10.5 : 12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        getModeTitle(mode),
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: compact ? 21 : 25,
+                          height: 1,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  cursorColor: appWhite,
-                  decoration: inputDecoration('Ejemplo: 1'),
                 ),
               ],
-
-              const SizedBox(height: 16),
-
-              Text(
-                'NOMBRES DE JUGADORES',
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.7,
+            ),
+            SizedBox(height: compact ? 16 : 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildNumberInput(
+                    label: 'JUGADORES',
+                    controller: playersController,
+                    hint: '6',
+                    compact: compact,
+                  ),
                 ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildNumberInput(
+                    label: 'IMPOSTORES',
+                    controller: impostorsController,
+                    hint: '1',
+                    compact: compact,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: compact ? 14 : 17),
+            Text(
+              'NOMBRES DE JUGADORES',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.70),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
               ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: namesController,
-                maxLines: 6,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w700,
-                ),
-                cursorColor: appWhite,
-                decoration: inputDecoration(
-                  'Uno por línea\nAniol\nMartina\nJan',
-                ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: namesController,
+              minLines: compact ? 3 : 4,
+              maxLines: compact ? 4 : 5,
+              style: const TextStyle(
+                color: appWhite,
+                fontWeight: FontWeight.w700,
               ),
-
-              const SizedBox(height: 16),
-
+              cursorColor: appWhite,
+              decoration: inputDecoration(
+                'Opcional · uno por línea\nAniol\nMartina\nJan',
+              ),
+            ),
+            if (showHintSwitch) ...[
+              SizedBox(height: compact ? 13 : 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: appWhite.withOpacity(0.07),
                   border: Border.all(
@@ -1180,423 +1191,455 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
                 child: SwitchListTile(
                   value: showHints,
-                  onChanged: (value) {
-                    setState(() {
-                      showHints = value;
-                    });
-                  },
+                  onChanged: (value) => setState(() => showHints = value),
                   contentPadding: EdgeInsets.zero,
-                  activeColor: appWhite,
+                  activeColor: modeColor,
                   title: const Text(
-                    'Activar pista',
+                    'Pista para el impostor',
                     style: TextStyle(
                       color: appWhite,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   subtitle: Text(
-                    'El impostor recibe una pista de una sola palabra',
+                    'Recibirá una pista corta para poder disimular.',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.60),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: startGame,
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      'EMPEZAR PARTIDA',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
+                      color: appWhite.withOpacity(0.60),
+                      fontSize: 12,
                     ),
                   ),
                 ),
               ),
             ],
-          ),
+            SizedBox(height: compact ? 14 : 18),
+            buildActionButton(
+              icon: Icons.play_arrow_rounded,
+              label: 'EMPEZAR PARTIDA',
+              backgroundColor: modeColor,
+              foregroundColor:
+              mode == ImpostorMode.fakeFact ? appBlue : appWhite,
+              onTap: startGame,
+              compact: compact,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget buildPassPhone() {
-    final playerName = playerNames[currentPlayerIndex];
-
+  Widget _buildNumberInput({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required bool compact,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildTopBar(
-          title: 'Pasa el móvil',
-          subtitle: 'Que nadie más mire la pantalla',
-          showBack: true,
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.phone_android_rounded,
-                  color: appWhite,
-                  size: 39,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              Text(
-                playerName.toLowerCase(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 38,
-                  height: 0.9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Text(
-                'Coge el móvil y pulsa para ver tu información secreta',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.72),
-                  fontSize: 14,
-                  height: 1.35,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 22),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: revealRole,
-                  style: mainButtonStyle(),
-                  icon: const Icon(Icons.visibility_rounded),
-                  label: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      'VER MI INFORMACIÓN',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        Text(
+          label,
+          style: TextStyle(
+            color: appWhite.withOpacity(0.70),
+            fontSize: compact ? 10 : 11.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.6,
           ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: appWhite,
+            fontSize: compact ? 19 : 22,
+            fontWeight: FontWeight.w900,
+          ),
+          cursorColor: appWhite,
+          decoration: inputDecoration(hint),
         ),
       ],
     );
   }
 
-  Widget buildReveal() {
+  Widget buildPassPhone({required bool compact}) {
+    final playerName = playerNames[currentPlayerIndex];
+
+    return Column(
+      children: [
+        buildProgress(compact: compact),
+        SizedBox(height: compact ? 10 : 14),
+        Expanded(
+          child: buildPanel(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 18 : 24,
+              vertical: compact ? 18 : 28,
+            ),
+            borderColor: modeColor.withOpacity(0.65),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: compact ? 78 : 96,
+                      height: compact ? 78 : 96,
+                      decoration: BoxDecoration(
+                        color: modeColor.withOpacity(0.14),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: modeColor, width: 2.6),
+                      ),
+                      child: Icon(
+                        Icons.phone_android_rounded,
+                        color: modeColor,
+                        size: compact ? 39 : 48,
+                      ),
+                    ),
+                    SizedBox(height: compact ? 18 : 26),
+                    Text(
+                      'PASA EL MÓVIL A',
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.62),
+                        fontSize: compact ? 11 : 13,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        playerName.toLowerCase(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: compact ? 38 : 48,
+                          height: 0.95,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: compact ? 16 : 22),
+                    Text(
+                      'Que nadie más mire la pantalla.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.72),
+                        fontSize: compact ? 13 : 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: compact ? 10 : 14),
+        buildActionButton(
+          icon: Icons.visibility_rounded,
+          label: 'VER MI INFORMACIÓN',
+          backgroundColor: modeColor,
+          foregroundColor:
+          selectedMode == ImpostorMode.fakeFact ? appBlue : appWhite,
+          onTap: revealRole,
+          compact: compact,
+        ),
+      ],
+    );
+  }
+
+  Widget buildReveal({required bool compact}) {
     final secret = getPlayerSecretDisplay();
-    final playerName = playerNames[currentPlayerIndex];
+    final isImpostor = currentPlayerIsImpostor();
+    final secretColor = isImpostor ? accentPink : modeColor;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildTopBar(
-          title: playerName,
-          subtitle: 'Lee esto en secreto',
-          showBack: true,
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.28),
-                    width: 1.4,
-                  ),
-                ),
-                child: Text(
-                  secret,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 25,
-                    height: 1.25,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-              ),
-
-              if (showHints &&
-                  selectedHint.isNotEmpty &&
-                  currentPlayerIsImpostor()) ...[
-                const SizedBox(height: 14),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(13),
-                  decoration: BoxDecoration(
-                    color: appWhite.withOpacity(0.08),
-                    border: Border(
-                      left: const BorderSide(
-                        color: accentOrange,
-                        width: 6,
+        buildProgress(compact: compact),
+        SizedBox(height: compact ? 10 : 14),
+        Expanded(
+          child: buildPanel(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 16 : 22,
+              vertical: compact ? 16 : 24,
+            ),
+            borderColor: secretColor.withOpacity(0.75),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: compact ? 74 : 90,
+                      height: compact ? 74 : 90,
+                      decoration: BoxDecoration(
+                        color: secretColor.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: secretColor, width: 2.5),
                       ),
-                      bottom: BorderSide(
-                        color: appWhite.withOpacity(0.28),
-                        width: 2,
+                      child: Icon(
+                        isImpostor ? Icons.visibility_off_rounded : modeIcon,
+                        color: secretColor,
+                        size: compact ? 38 : 46,
                       ),
                     ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.lightbulb_rounded,
-                        color: appWhite,
+                    SizedBox(height: compact ? 16 : 22),
+                    Text(
+                      isImpostor ? 'TU PAPEL' : selectedCategory.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.62),
+                        fontSize: compact ? 10.5 : 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Pista: $selectedHint',
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontSize: 14,
-                            height: 1.35,
-                            fontWeight: FontWeight.w700,
+                    ),
+                    const SizedBox(height: 9),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 260),
+                      child: Text(
+                        secret,
+                        key: ValueKey(secret),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: compact ? 24 : 30,
+                          height: 1.15,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    if (showHints &&
+                        selectedHint.isNotEmpty &&
+                        isImpostor) ...[
+                      SizedBox(height: compact ? 14 : 18),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(compact ? 11 : 14),
+                        decoration: BoxDecoration(
+                          color: accentOrange.withOpacity(0.13),
+                          border: const Border(
+                            left: BorderSide(color: accentOrange, width: 6),
                           ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.lightbulb_rounded,
+                              color: accentOrange,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Pista: $selectedHint',
+                                style: TextStyle(
+                                  color: appWhite,
+                                  fontSize: compact ? 13 : 15,
+                                  height: 1.3,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-              ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: compact ? 10 : 14),
+        Row(
+          children: [
+            Expanded(
+              child: buildActionButton(
+                icon: Icons.visibility_off_rounded,
+                label: 'OCULTAR',
+                backgroundColor: appBlue,
+                foregroundColor: appWhite,
+                onTap: hideRole,
+                compact: compact,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: buildActionButton(
+                icon: currentPlayerIndex == playersCount - 1
+                    ? Icons.flag_rounded
+                    : Icons.arrow_forward_rounded,
+                label: currentPlayerIndex == playersCount - 1
+                    ? 'FINALIZAR'
+                    : 'SIGUIENTE',
+                backgroundColor: modeColor,
+                foregroundColor:
+                selectedMode == ImpostorMode.fakeFact ? appBlue : appWhite,
+                onTap: nextPlayer,
+                compact: compact,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
-              const SizedBox(height: 18),
+  Widget buildFinished({required bool compact}) {
+    String summaryText;
 
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: hideRole,
-                      style: secondaryButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'OCULTAR',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
+    switch (selectedMode!) {
+      case ImpostorMode.classic:
+        summaryText =
+        'Todos conocen su palabra. Haced preguntas sin decirla exactamente y votad quién es el impostor.';
+        break;
+      case ImpostorMode.roles:
+        summaryText =
+        'Todos conocen su lugar y su rol. El impostor debe disimular y descubrir el lugar.';
+        break;
+      case ImpostorMode.question:
+        summaryText =
+        'Las preguntas ya están repartidas. Responded y descubrid quién recibió la pregunta distinta.';
+        break;
+      case ImpostorMode.fakeFact:
+        summaryText =
+        'Cada jugador debe decir su dato. Después debatid quién se lo ha inventado.\n\n$selectedWord';
+        break;
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: buildPanel(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 18 : 24,
+              vertical: compact ? 18 : 28,
+            ),
+            borderColor: accentGreen.withOpacity(0.75),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
+                      width: compact ? 82 : 100,
+                      height: compact ? 82 : 100,
+                      decoration: BoxDecoration(
+                        color: accentGreen.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: accentGreen, width: 2.6),
+                      ),
+                      child: Icon(
+                        Icons.celebration_rounded,
+                        color: accentGreen,
+                        size: compact ? 42 : 52,
+                      ),
+                    ),
+                    SizedBox(height: compact ? 18 : 24),
+                    Text(
+                      'EMPEZAD A JUGAR',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: compact ? 28 : 36,
+                        height: 0.95,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                    SizedBox(height: compact ? 16 : 20),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(compact ? 13 : 16),
+                      decoration: BoxDecoration(
+                        color: appWhite.withOpacity(0.07),
+                        border: Border.all(
+                          color: appWhite.withOpacity(0.25),
+                          width: 1.4,
+                        ),
+                      ),
+                      child: Text(
+                        summaryText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: appWhite.withOpacity(0.84),
+                          fontSize: compact ? 14 : 16,
+                          height: 1.4,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: compact ? 10 : 14),
+        buildActionButton(
+          icon: Icons.replay_rounded,
+          label: 'NUEVA PARTIDA',
+          backgroundColor: accentGreen,
+          foregroundColor: appBlue,
+          onTap: resetGame,
+          compact: compact,
+        ),
+      ],
+    );
+  }
+
+  Widget buildCurrentStep({required bool compact}) {
+    switch (currentStep) {
+      case ImpostorStep.modeSelection:
+        return buildModeSelection(compact: compact);
+      case ImpostorStep.setup:
+        return buildSetup(compact: compact);
+      case ImpostorStep.passPhone:
+        return buildPassPhone(compact: compact);
+      case ImpostorStep.reveal:
+        return buildReveal(compact: compact);
+      case ImpostorStep.finished:
+        return buildFinished(compact: compact);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 13.0 : 18.0;
+            final verticalPadding = compact ? 11.0 : 18.0;
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 11 : 16,
+              ),
+              child: Column(
+                children: [
+                  buildTopBar(compact: compact),
+                  SizedBox(height: compact ? 10 : 14),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: nextPlayer,
-                      style: mainButtonStyle(),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          currentPlayerIndex == playersCount - 1
-                              ? 'FINALIZAR'
-                              : 'SIGUIENTE',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      child: KeyedSubtree(
+                        key: ValueKey(currentStep),
+                        child: buildCurrentStep(compact: compact),
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildFinished() {
-    String summaryText = '';
-
-    if (selectedMode == ImpostorMode.classic) {
-      summaryText =
-      'Todos ya conocen su palabra.\n\nHaced preguntas sin decir la palabra exacta.\nDespués votad quién creéis que es el impostor.';
-    } else if (selectedMode == ImpostorMode.roles) {
-      summaryText =
-      'Todos ya conocen su rol.\n\nEl impostor debe intentar descubrir el lugar.\nLos demás deben descubrir quién no sabe nada.';
-    } else if (selectedMode == ImpostorMode.question) {
-      summaryText =
-      'Las preguntas ya están repartidas.\nAhora debatid y descubrid quién tiene la distinta.';
-    } else if (selectedMode == ImpostorMode.fakeFact) {
-      summaryText =
-      'Cada jugador ha dicho su dato.\nAhora debatid quién se lo ha inventado.\n\n$selectedWord';
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: 'Todo listo',
-          subtitle: 'La partida ya puede empezar',
-          showBack: true,
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.celebration_rounded,
-                  color: appWhite,
-                  size: 39,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              const Text(
-                'empezad\na jugar',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 38,
-                  height: 0.9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.28),
-                    width: 1.4,
-                  ),
-                ),
-                child: Text(
-                  summaryText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 16,
-                    height: 1.42,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: resetGame,
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      'VOLVER AL INICIO',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget bodyContent;
-
-    switch (currentStep) {
-      case ImpostorStep.modeSelection:
-        bodyContent = buildModeSelection();
-        break;
-      case ImpostorStep.setup:
-        bodyContent = buildSetup();
-        break;
-      case ImpostorStep.passPhone:
-        bodyContent = buildPassPhone();
-        break;
-      case ImpostorStep.reveal:
-        bodyContent = buildReveal();
-        break;
-      case ImpostorStep.finished:
-        bodyContent = buildFinished();
-        break;
-    }
-
-    return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: SingleChildScrollView(
-            child: bodyContent,
-          ),
+            );
+          },
         ),
       ),
     );

@@ -238,6 +238,122 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<void> _sacarLeyAleatoria() async {
     if (partidaTerminada) return;
 
+    final confirmado = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.78),
+              width: 2.2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: rightRed.withOpacity(0.18),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: rightRed, width: 2.2),
+                    ),
+                    child: const Icon(
+                      Icons.casino_rounded,
+                      color: appWhite,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Text(
+                      'sacar ley',
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 34,
+                        height: 0.95,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 11),
+              Container(height: 3, color: appWhite.withOpacity(0.58)),
+              const SizedBox(height: 18),
+              Text(
+                '¿Seguro que quieres sacar una ley aleatoria? Una vez confirmada se añadirá directamente al tablero.',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.78),
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(dialogContext, false),
+                      style: secondaryButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'CANCELAR',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(dialogContext, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: rightRed,
+                        foregroundColor: appWhite,
+                        elevation: 0,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'CONFIRMAR',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmado != true || !mounted) return;
+
     _rellenarMazoSiHaceFalta();
     if (mazo.isEmpty) return;
 
@@ -253,32 +369,99 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
     await _guardarPartida();
 
+    if (!mounted) return;
+
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
-        title: const Text(
-          'Ley aleatoria aprobada',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Container(
-          padding: const EdgeInsets.all(14),
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: BoxDecoration(
-            color: _colorLey(ley),
-            borderRadius: BorderRadius.circular(14),
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.78),
+              width: 2.2,
+            ),
           ),
-          child: Text(
-            _textoLey(ley),
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: _colorLey(ley),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: appWhite, width: 2.4),
+                ),
+                child: Icon(
+                  ley == LeyType.izquierda
+                      ? Icons.shield_outlined
+                      : Icons.gavel_rounded,
+                  color: appWhite,
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'ley aprobada',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: 32,
+                  height: 0.95,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(height: 3, color: appWhite.withOpacity(0.58)),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
+                decoration: BoxDecoration(
+                  color: _colorLey(ley),
+                  border: Border.all(color: appWhite, width: 2),
+                ),
+                child: Text(
+                  _textoLey(ley).toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  style: mainButtonStyle(),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    child: Text(
+                      'CONTINUAR',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
       ),
     );
 
@@ -290,7 +473,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       if (partidaTerminada) return;
     }
 
-    _pasarSiguienteTurno();
     await _guardarPartida();
   }
 
@@ -343,7 +525,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         case 3:
           return PoderDerecha.investigarJugador;
         case 4:
-          return PoderDerecha.elegirSiguientePresidente;
+          return PoderDerecha.none;
         case 5:
           return PoderDerecha.eliminarJugador;
         default:
@@ -358,7 +540,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         case 2:
           return PoderDerecha.investigarJugador;
         case 3:
-          return PoderDerecha.elegirSiguientePresidente;
+          return PoderDerecha.none;
         case 4:
         case 5:
           return PoderDerecha.eliminarJugador;
@@ -381,7 +563,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       case PoderDerecha.eliminarJugador:
         return 'Eliminar jugador';
       case PoderDerecha.elegirSiguientePresidente:
-        return 'Elegir siguiente presidente';
+        return 'Sin poder';
     }
   }
 
@@ -406,7 +588,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         case 3:
           return PoderDerecha.investigarJugador;
         case 4:
-          return PoderDerecha.elegirSiguientePresidente;
+          return PoderDerecha.none;
         case 5:
           return PoderDerecha.eliminarJugador;
         default:
@@ -419,7 +601,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         case 2:
           return PoderDerecha.investigarJugador;
         case 3:
-          return PoderDerecha.elegirSiguientePresidente;
+          return PoderDerecha.none;
         case 4:
         case 5:
           return PoderDerecha.eliminarJugador;
@@ -460,7 +642,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         return AlertDialog(
           backgroundColor: const Color(0xFF15112B),
           title: const Text(
-            'Elegir portavoz',
+            'Elegir jugador',
             style: TextStyle(color: Colors.white),
           ),
           content: SizedBox(
@@ -505,7 +687,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       await _guardarPartida();
       await _mostrarGanador(
         '¡Gana la Derecha!',
-        'El Líder Oculto ha sido elegido Portavoz.',
+        'El Líder Oculto ha llegado al poder.',
       );
     }
   }
@@ -567,7 +749,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Presidente: selecciona 2 cartas',
+                      'Primera elección: selecciona 2 cartas',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -611,7 +793,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       cartasVisibles
                           ? cartasSeleccionadas.length == 2
                           ? '2 de 2 seleccionadas · pulsa CONFIRMAR'
-                          : 'Selecciona las 2 cartas que quieres pasar al portavoz'
+                          : 'Selecciona las 2 cartas que pasarán a la siguiente elección'
                           : 'Cartas ocultas para pasar el móvil',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -796,7 +978,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 children: [
                   const Expanded(
                     child: Text(
-                      'Portavoz: elige la ley a aprobar',
+                      'Segunda elección: elige la ley a aprobar',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -1187,7 +1369,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF15112B),
         title: const Text(
-          'Elegir siguiente presidente',
+          'Elegir jugador',
           style: TextStyle(color: Colors.white),
         ),
         content: SizedBox(
@@ -1214,7 +1396,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
     siguientePresidenteForzado = elegido;
     await _guardarPartida();
-    _snack('${players[elegido].name} será el siguiente presidente.');
+    _snack('${players[elegido].name} ha sido seleccionado.');
   }
 
   void _pasarSiguienteTurno() {
@@ -1947,12 +2129,15 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Widget circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
+    final size = compact ? 42.0 : 50.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
@@ -1965,7 +2150,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     );
   }
 
-  Widget buildTopBar() {
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 32.0 : 40.0;
+    final titleHeight = compact ? 68.0 : 90.0;
+    final lineTop = compact ? 58.0 : 78.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1973,12 +2162,13 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             circleButton(
+              compact: compact,
               onTap: _mostrarDialogoSalirTablero,
-              child: const Text(
+              child: Text(
                 '8',
                 style: TextStyle(
                   color: appWhite,
-                  fontSize: 19,
+                  fontSize: compact ? 16 : 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -1986,51 +2176,60 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
             Row(
               children: [
                 circleButton(
+                  compact: compact,
                   onTap: _reiniciarPartida,
-                  child: const Icon(
+                  child: Icon(
                     Icons.restart_alt_rounded,
                     color: appWhite,
-                    size: 27,
+                    size: compact ? 22 : 27,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: compact ? 9 : 12),
                 circleButton(
+                  compact: compact,
                   onTap: _mostrarNormas,
-                  child: const Icon(
+                  child: Icon(
                     Icons.question_mark_rounded,
                     color: appWhite,
-                    size: 27,
+                    size: compact ? 22 : 27,
                   ),
                 ),
               ],
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: compact ? 12 : 22),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: IntrinsicWidth(
+          padding: EdgeInsets.only(left: compact ? 16 : 28),
+          child: SizedBox(
+            height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 14),
-                  child: Text(
-                    'tablero\nasamblea',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'tablero asamblea',
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.90,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-
                 Positioned(
-                  left: -46,
-                  right: 35,
-                  bottom: 0,
+                  top: lineTop,
+                  left: 0,
+                  right: -18,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -2044,37 +2243,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     );
   }
 
-  Widget buildInfoBar({
-    required String text,
-    Color color = leaderGold,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: BorderSide(
-            color: color,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
-    );
-  }
+
 
   Widget buildPanel({
     required Widget child,
@@ -2112,47 +2281,81 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     required int total,
     required int active,
     required Color color,
+    required bool compact,
     bool mostrarAcciones = false,
   }) {
+    final cellHeight = mostrarAcciones
+        ? (compact ? 86.0 : 104.0)
+        : (compact ? 72.0 : 88.0);
+
     return buildPanel(
+      padding: EdgeInsets.fromLTRB(
+        compact ? 12 : 16,
+        compact ? 13 : 17,
+        compact ? 12 : 16,
+        compact ? 14 : 18,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
+              Container(
+                width: compact ? 42 : 50,
+                height: compact ? 42 : 50,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.18),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: color,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  title == 'Izquierda'
+                      ? Icons.shield_outlined
+                      : Icons.gavel_rounded,
+                  color: color,
+                  size: compact ? 23 : 28,
+                ),
+              ),
+              SizedBox(width: compact ? 10 : 13),
               Expanded(
                 child: Text(
                   title.toLowerCase(),
                   style: TextStyle(
                     color: appWhite,
-                    fontSize: 26,
-                    height: 0.95,
+                    fontSize: compact ? 29 : 34,
+                    height: 0.92,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -0.6,
+                    letterSpacing: -0.8,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 11 : 14,
+                  vertical: compact ? 7 : 9,
+                ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.18),
+                  color: color.withOpacity(0.22),
                   border: Border.all(
-                    color: color.withOpacity(0.55),
-                    width: 1.4,
+                    color: color,
+                    width: 1.8,
                   ),
                 ),
                 child: Text(
-                  '$active/$total',
-                  style: const TextStyle(
+                  '$active / $total',
+                  style: TextStyle(
                     color: appWhite,
+                    fontSize: compact ? 15 : 17,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: compact ? 13 : 17),
           Row(
             children: List.generate(total, (index) {
               final filled = index < active;
@@ -2164,16 +2367,29 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
               return Expanded(
                 child: Container(
-                  height: mostrarAcciones ? 74 : 56,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 4, vertical: 6),
+                  height: cellHeight,
+                  margin: EdgeInsets.symmetric(
+                    horizontal: compact ? 2 : 3,
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 3 : 5,
+                    vertical: compact ? 6 : 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: filled ? color : appWhite.withOpacity(0.08),
+                    color: filled ? color : appWhite.withOpacity(0.07),
                     border: Border.all(
-                      color: filled ? color : appWhite.withOpacity(0.26),
-                      width: 1.4,
+                      color: filled ? appWhite : appWhite.withOpacity(0.28),
+                      width: filled ? 2.2 : 1.4,
                     ),
+                    boxShadow: filled
+                        ? [
+                      BoxShadow(
+                        color: color.withOpacity(0.32),
+                        blurRadius: 12,
+                        offset: const Offset(0, 5),
+                      ),
+                    ]
+                        : null,
                   ),
                   child: mostrarAcciones && tienePoder
                       ? Column(
@@ -2182,31 +2398,47 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       Icon(
                         _iconoPoder(poder),
                         color: appWhite,
-                        size: 18,
+                        size: compact ? 22 : 27,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: compact ? 5 : 7),
                       Text(
                         _textoPoder(poder),
                         textAlign: TextAlign.center,
-                        maxLines: 2,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: appWhite.withOpacity(0.86),
-                          fontSize: 8.5,
+                          color: appWhite.withOpacity(
+                            filled ? 1 : 0.80,
+                          ),
+                          fontSize: compact ? 8.2 : 9.5,
                           fontWeight: FontWeight.w900,
                           height: 1.05,
                         ),
                       ),
                     ],
                   )
-                      : Center(
-                    child: Text(
-                      '$casilla',
-                      style: TextStyle(
-                        color: filled ? appWhite : appWhite.withOpacity(0.42),
-                        fontWeight: FontWeight.w900,
+                      : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '$casilla',
+                        style: TextStyle(
+                          color: filled
+                              ? appWhite
+                              : appWhite.withOpacity(0.42),
+                          fontSize: compact ? 22 : 27,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                    ),
+                      if (filled) ...[
+                        SizedBox(height: compact ? 3 : 5),
+                        Icon(
+                          Icons.check_rounded,
+                          color: appWhite,
+                          size: compact ? 16 : 19,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               );
@@ -2218,311 +2450,181 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
 
-    Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
-      return Expanded(
-        child: buildPanel(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-          child: Column(
-            children: [
-              Icon(icon, color: appWhite, size: 28),
-              const SizedBox(height: 8),
-              Text(
-                title.toUpperCase(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.62),
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.6,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                value,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  height: 1.1,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    Widget _buildJugadoresList() {
-      return buildPanel(
+  Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
+    return Expanded(
+      child: buildPanel(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            sectionTitle('Jugadores'),
-            const SizedBox(height: 12),
-            ...players.asMap().entries.map((entry) {
-              final i = entry.key;
-              final player = entry.value;
-              final isPresident = i == presidenteIndex;
-              final isPortavoz = i == portavozIndex;
-
-              Color borderColor = appWhite.withOpacity(0.22);
-              if (isPresident) borderColor = leaderGold;
-              if (isPortavoz) borderColor = accentPurple;
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 9),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: player.isAlive
-                      ? appWhite.withOpacity(0.07)
-                      : appWhite.withOpacity(0.035),
-                  border: Border(
-                    left: BorderSide(
-                      color: borderColor,
-                      width: 5,
-                    ),
-                    bottom: BorderSide(
-                      color: appWhite.withOpacity(0.24),
-                      width: 2,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: appWhite.withOpacity(0.85),
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${i + 1}',
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            player.isAlive ? player.name : '${player.name} (eliminado)',
-                            style: TextStyle(
-                              color: player.isAlive ? appWhite : appWhite.withOpacity(0.45),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 15.5,
-                            ),
-                          ),
-                          if (isPresident || isPortavoz) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              [
-                                if (isPresident) 'PRESIDENTE',
-                                if (isPortavoz) 'PORTAVOZ',
-                              ].join(' · '),
-                              style: TextStyle(
-                                color: appWhite.withOpacity(0.68),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 10.5,
-                                letterSpacing: 0.6,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
+            Icon(icon, color: appWhite, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              title.toUpperCase(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.62),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.6,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                height: 1.1,
+              ),
+            ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    @override
-    Widget build(BuildContext context) {
-      if (!mounted || (players.isEmpty && mazo.isEmpty && descarte.isEmpty)) {
-        return const Scaffold(
-          backgroundColor: appBlue,
-          body: Center(
-            child: CircularProgressIndicator(color: appWhite),
-          ),
-        );
-      }
+  Widget _buildJugadoresList() {
+    return buildPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          sectionTitle('Jugadores'),
+          const SizedBox(height: 12),
+          ...players.asMap().entries.map((entry) {
+            final i = entry.key;
+            final player = entry.value;
 
-      final poderActual = _getPoderDerechaActual();
-
-      return PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) async {
-          if (didPop) return;
-          await _mostrarDialogoSalirTablero();
-        },
-        child: Scaffold(
-          backgroundColor: appBlue,
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-              child: Column(
-                children: [
-                  buildTopBar(),
-                  const SizedBox(height: 14),
-                  buildInfoBar(
-                    text:
-                    "Presidente: ${players[presidenteIndex].name} · Portavoz: ${portavozIndex != null ? players[portavozIndex!].name : 'sin elegir'}",
-                    color: leaderGold,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: player.isAlive
+                    ? appWhite.withOpacity(0.07)
+                    : appWhite.withOpacity(0.035),
+                border: Border(
+                  left: BorderSide(
+                    color: player.isAlive
+                        ? appWhite.withOpacity(0.55)
+                        : rightRed.withOpacity(0.65),
+                    width: 5,
                   ),
-                  const SizedBox(height: 14),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              _buildInfoCard(
-                                'Presidente',
-                                players[presidenteIndex].name,
-                                Icons.account_balance_outlined,
-                                leaderGold,
-                              ),
-                              const SizedBox(width: 10),
-                              _buildInfoCard(
-                                'Portavoz',
-                                portavozIndex != null
-                                    ? players[portavozIndex!].name
-                                    : 'Sin elegir',
-                                Icons.campaign_outlined,
-                                accentPurple,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          _buildLeyTrack(
-                            title: 'Izquierda',
-                            total: 5,
-                            active: leyesIzquierda,
-                            color: leftBlue,
-                          ),
-                          const SizedBox(height: 12),
-                          _buildLeyTrack(
-                            title: 'Derecha',
-                            total: 6,
-                            active: leyesDerecha,
-                            color: rightRed,
-                            mostrarAcciones: true,
-                          ),
-                          const SizedBox(height: 12),
-                          buildPanel(
-                            child: Column(
-                              children: [
-                                Text(
-                                  'PODER ACTUAL DE LA DERECHA',
-                                  style: TextStyle(
-                                    color: appWhite.withOpacity(0.62),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.7,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _textoPoder(poderActual),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: appWhite,
-                                    fontSize: 22,
-                                    height: 0.95,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -0.4,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${players.length} jugadores · Mazo ${mazo.length} · Descarte ${descarte.length}',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: appWhite.withOpacity(0.62),
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildJugadoresList(),
-                        ],
+                  bottom: BorderSide(
+                    color: appWhite.withOpacity(0.24),
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.85),
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${i + 1}',
+                        style: const TextStyle(
+                          color: appWhite,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: partidaTerminada ? null : _seleccionarPortavoz,
-                          style: secondaryButtonStyle(),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 13),
-                            child: Text(
-                              'PORTAVOZ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                          ),
-                        ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      player.isAlive
+                          ? player.name
+                          : '${player.name} (eliminado)',
+                      style: TextStyle(
+                        color: player.isAlive
+                            ? appWhite
+                            : appWhite.withOpacity(0.45),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15.5,
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: partidaTerminada ? null : _sacarLeyAleatoria,
-                          style: secondaryButtonStyle(),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 13),
-                            child: Text(
-                              'LEY RANDOM',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: partidaTerminada ? null : _jugarTurno,
-                      style: mainButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        child: Text(
-                          'JUGAR TURNO',
-                          style: TextStyle(
-                            color: appBlue,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBoardActionButton({
+    required IconData icon,
+    required String label,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    final enabled = onTap != null;
+
+    return Expanded(
+      child: SizedBox(
+        height: compact ? 54 : 62,
+        child: Material(
+          color: enabled
+              ? backgroundColor
+              : backgroundColor.withOpacity(0.30),
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 9 : 12,
+                vertical: compact ? 7 : 9,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: appWhite.withOpacity(enabled ? 0.30 : 0.12),
+                  width: 2,
+                ),
+                boxShadow: enabled
+                    ? [
+                  BoxShadow(
+                    color: backgroundColor.withOpacity(0.22),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: foregroundColor.withOpacity(enabled ? 1 : 0.40),
+                    size: compact ? 22 : 25,
+                  ),
+                  SizedBox(width: compact ? 7 : 9),
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: foregroundColor.withOpacity(
+                          enabled ? 1 : 0.40,
                         ),
+                        fontSize: compact ? 10.5 : 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ),
@@ -2531,7 +2633,105 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    if (!mounted || (players.isEmpty && mazo.isEmpty && descarte.isEmpty)) {
+      return const Scaffold(
+        backgroundColor: appBlue,
+        body: Center(
+          child: CircularProgressIndicator(color: appWhite),
+        ),
+      );
+    }
+
+
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        await _mostrarDialogoSalirTablero();
+      },
+      child: Scaffold(
+        backgroundColor: appBlue,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 760;
+              final horizontalPadding = compact ? 12.0 : 18.0;
+              final verticalPadding = compact ? 10.0 : 18.0;
+
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 10 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
+                    SizedBox(height: compact ? 9 : 13),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildLeyTrack(
+                              title: 'Izquierda',
+                              total: 5,
+                              active: leyesIzquierda,
+                              color: leftBlue,
+                              compact: compact,
+                            ),
+                            SizedBox(height: compact ? 9 : 12),
+                            _buildLeyTrack(
+                              title: 'Derecha',
+                              total: 6,
+                              active: leyesDerecha,
+                              color: rightRed,
+                              compact: compact,
+                              mostrarAcciones: true,
+                            ),
+
+
+                            SizedBox(height: compact ? 9 : 12),
+                            _buildJugadoresList(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: compact ? 6 : 9),
+                    Row(
+                      children: [
+                        _buildBoardActionButton(
+                          icon: Icons.casino_rounded,
+                          label: 'LEY ALEATORIA',
+                          backgroundColor: rightRed,
+                          foregroundColor: appWhite,
+                          onTap: partidaTerminada ? null : _sacarLeyAleatoria,
+                          compact: compact,
+                        ),
+                        const SizedBox(width: 10),
+                        _buildBoardActionButton(
+                          icon: Icons.play_arrow_rounded,
+                          label: 'JUGAR TURNO',
+                          backgroundColor: leaderGold,
+                          foregroundColor: appBlue,
+                          onTap: partidaTerminada ? null : _jugarTurno,
+                          compact: compact,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}

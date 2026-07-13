@@ -19,12 +19,11 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
   static const Color accentPink = Color(0xFFFF4D6D);
   static const Color accentYellow = Color(0xFFFFD166);
 
-  String textoActual = 'Elige Verdad o Prueba';
+  String textoActual = 'Elige Prueba o Verdad';
   String tipoActual = '';
 
   List<String> verdadesDisponibles = [];
   List<String> verdadesUsadas = [];
-
   List<String> pruebasDisponibles = [];
   List<String> pruebasUsadas = [];
 
@@ -35,16 +34,40 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
+
     });
+  }
+
+  int get totalCartas => preguntasVerdad.length + pruebas.length;
+
+  int get cartasRestantes =>
+      verdadesDisponibles.length + pruebasDisponibles.length;
+
+  double get progresoRestante {
+    if (totalCartas == 0) return 0;
+    return (cartasRestantes / totalCartas).clamp(0.0, 1.0);
+  }
+
+  Color get cardAccent {
+    if (tipoActual == 'VERDAD') return accentGreen;
+    if (tipoActual == 'PRUEBA') return accentOrange;
+    return accentPink;
+  }
+
+  IconData get cardIcon {
+    if (tipoActual == 'VERDAD') return Icons.question_answer_rounded;
+    if (tipoActual == 'PRUEBA') {
+      return Icons.local_fire_department_rounded;
+    }
+    return Icons.compare_arrows_rounded;
   }
 
   void reiniciarBarajas() {
     verdadesDisponibles = List<String>.from(preguntasVerdad)..shuffle(random);
-    verdadesUsadas.clear();
+    verdadesUsadas = [];
 
     pruebasDisponibles = List<String>.from(pruebas)..shuffle(random);
-    pruebasUsadas.clear();
+    pruebasUsadas = [];
   }
 
   String generarCastigo() {
@@ -57,6 +80,8 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
       verdadesDisponibles = List<String>.from(verdadesUsadas)..shuffle(random);
       verdadesUsadas.clear();
     }
+
+    if (verdadesDisponibles.isEmpty) return;
 
     final verdad = verdadesDisponibles.removeLast();
 
@@ -73,6 +98,8 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
       pruebasUsadas.clear();
     }
 
+    if (pruebasDisponibles.isEmpty) return;
+
     final prueba = pruebasDisponibles.removeLast();
 
     setState(() {
@@ -82,64 +109,11 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
     });
   }
 
-  void reiniciarJuego() {
-    setState(() {
-      tipoActual = '';
-      textoActual = 'Elige Verdad o Prueba';
-      reiniciarBarajas();
-    });
-  }
-
-  double get progreso {
-    final usadas = verdadesUsadas.length + pruebasUsadas.length;
-    final total =
-        usadas + verdadesDisponibles.length + pruebasDisponibles.length;
-
-    if (total == 0) return 0;
-
-    return usadas / total;
-  }
-
   ButtonStyle mainButtonStyle() {
     return ElevatedButton.styleFrom(
       backgroundColor: appWhite,
       foregroundColor: appBlue,
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  ButtonStyle verdadButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: accentGreen,
-      foregroundColor: appWhite,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  ButtonStyle pruebaButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: accentOrange,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
@@ -195,9 +169,7 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
             ),
           ],
         ),
-
         const SizedBox(height: 24),
-
         Padding(
           padding: const EdgeInsets.only(left: 28),
           child: SizedBox(
@@ -208,21 +180,26 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
                 const Positioned(
                   top: 0,
                   left: 0,
-                  child: Text(
-                    'prueba\no verdad',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                  right: 0,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'prueba o verdad',
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 42,
+                        height: 2.60,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
                   top: 82,
                   left: 0,
-                  right: -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -233,35 +210,6 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget buildInfoBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: const BorderSide(
-            color: accentPink,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        'Elige si quieres responder una verdad o cumplir una prueba',
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
     );
   }
 
@@ -283,11 +231,7 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
+          Icon(icon, color: appWhite, size: 22),
           const SizedBox(width: 11),
           Expanded(
             child: Column(
@@ -379,16 +323,12 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
                   Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
                   ),
-
                   const SizedBox(height: 18),
-
                   const Text(
                     'PRUEBA O VERDAD',
                     style: TextStyle(
@@ -398,46 +338,28 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
                       letterSpacing: 1.2,
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   rulesItem(
                     icon: Icons.question_answer_rounded,
                     title: 'Verdad',
-                    text:
-                    'Si eliges Verdad, tienes que responder sinceramente a la pregunta.',
+                    text: 'Responde sinceramente a la pregunta que aparezca.',
                   ),
-
                   rulesItem(
                     icon: Icons.local_fire_department_rounded,
                     title: 'Prueba',
-                    text:
-                    'Si eliges Prueba, tienes que hacer el reto que aparezca.',
+                    text: 'Haz el reto que aparezca en pantalla.',
                   ),
-
                   rulesItem(
                     icon: Icons.local_bar_rounded,
                     title: 'Si te niegas',
-                    text:
-                    'Cada carta añade un castigo. Si no quieres responder o hacer la prueba, bebes.',
+                    text: 'Bebe los tragos que indique la carta.',
                   ),
-
                   rulesItem(
                     icon: Icons.shuffle_rounded,
                     title: 'Sin repetir',
-                    text:
-                    'Las verdades y pruebas no se repiten hasta que se acaba su baraja.',
+                    text: 'Cada baraja se mezcla de nuevo cuando se termina.',
                   ),
-
-                  rulesItem(
-                    icon: Icons.groups_rounded,
-                    title: 'Turnos',
-                    text:
-                    'Cada ronda juega una persona distinta. El jugador decide si quiere Verdad o Prueba.',
-                  ),
-
                   const SizedBox(height: 8),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -465,109 +387,219 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
     );
   }
 
+  Widget buildCard() {
+    final Color foreground = tipoActual == 'PRUEBA' ? appBlue : appWhite;
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(),
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 94,
+                height: 94,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+
+                  border: Border.all(
+                    color: appWhite,
+                    width: 3,
+                  ),
+                ),
+                child: Icon(
+                  cardIcon,
+                  color: appWhite,
+                  size: 50,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: tipoActual.isEmpty
+                      ? appWhite.withOpacity(0.12)
+                      : cardAccent,
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.26),
+                    width: 1.2,
+                  ),
+                ),
+                child: Text(
+                  tipoActual.isEmpty ? 'ELIGE' : tipoActual,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 13,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                transitionBuilder: (child, animation) {
+                  final slide = Tween<Offset>(
+                    begin: const Offset(0, 0.08),
+                    end: Offset.zero,
+                  ).animate(animation);
+
+                  return SlideTransition(
+                    position: slide,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Text(
+                  textoActual,
+                  key: ValueKey(textoActual),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 31,
+                    height: 1.14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.7,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildProgressInfo() {
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.zero,
-          child: LinearProgressIndicator(
-            value: progreso,
-            minHeight: 8,
-            backgroundColor: appWhite.withOpacity(0.18),
-            valueColor: const AlwaysStoppedAnimation<Color>(accentYellow),
+        Row(
+          children: [
+            Text(
+              'RESTANTES',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.76),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '$cartasRestantes / $totalCartas',
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Verdades ${verdadesDisponibles.length} · Pruebas ${pruebasDisponibles.length}',
+            style: TextStyle(
+              color: appWhite.withOpacity(0.62),
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
-
         const SizedBox(height: 9),
-
-        Text(
-          'Verdades: ${verdadesDisponibles.length} · Pruebas: ${pruebasDisponibles.length}',
-          style: TextStyle(
-            color: appWhite.withOpacity(0.68),
-            fontSize: 12.5,
-            fontWeight: FontWeight.w800,
-          ),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(end: progresoRestante),
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, _) {
+            return Container(
+              height: 14,
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.34),
+                  width: 1.2,
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: LinearProgressIndicator(
+                value: value,
+                minHeight: 14,
+                backgroundColor: Colors.transparent,
+                valueColor: const AlwaysStoppedAnimation<Color>(accentYellow),
+              ),
+            );
+          },
         ),
       ],
     );
   }
 
-  Widget buildCard() {
-    final bool isVerdad = tipoActual == 'VERDAD';
-    final bool isPrueba = tipoActual == 'PRUEBA';
-
-    Color tagColor = appWhite.withOpacity(0.18);
-
-    if (isVerdad) {
-      tagColor = accentGreen;
-    } else if (isPrueba) {
-      tagColor = accentOrange;
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-            decoration: BoxDecoration(
-              color: tagColor,
-              border: Border.all(
-                color: appWhite.withOpacity(0.26),
-                width: 1.2,
-              ),
-            ),
-            child: Text(
-              tipoActual.isEmpty ? 'ELIGE' : tipoActual,
-              style: TextStyle(
-                color: isPrueba ? appBlue : appWhite,
-                fontSize: 13,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            transitionBuilder: (child, animation) {
-              final slide = Tween<Offset>(
-                begin: const Offset(0, 0.08),
-                end: Offset.zero,
-              ).animate(animation);
-
-              return SlideTransition(
-                position: slide,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
+  Widget buildChoiceButton({
+    required String label,
+    required IconData icon,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1.35,
+        child: Material(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.28),
+                  width: 2.4,
                 ),
-              );
-            },
-            child: Text(
-              textoActual,
-              key: ValueKey(textoActual),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: appWhite,
-                fontSize: 29,
-                height: 1.12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.6,
+                boxShadow: [
+                  BoxShadow(
+                    color: backgroundColor.withOpacity(0.28),
+                    blurRadius: 16,
+                    offset: const Offset(0, 7),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: foregroundColor,
+                    size: 42,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: foregroundColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -577,94 +609,49 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              buildTopBar(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool compactHeight = constraints.maxHeight < 700;
 
-              const SizedBox(height: 14),
-
-              buildInfoBar(),
-
-              const SizedBox(height: 16),
-
-              buildProgressInfo(),
-
-              const SizedBox(height: 16),
-
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: buildCard(),
-                  ),
-                ),
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                18,
+                compactHeight ? 12 : 18,
+                18,
+                compactHeight ? 10 : 16,
               ),
-
-              const SizedBox(height: 16),
-
-              Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: sacarVerdad,
-                      style: verdadButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        child: Text(
-                          'VERDAD',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                  buildTopBar(),
+                  SizedBox(height: compactHeight ? 8 : 14),
+                  Expanded(child: buildCard()),
+                  SizedBox(height: compactHeight ? 9 : 14),
+                  buildProgressInfo(),
+                  SizedBox(height: compactHeight ? 9 : 14),
+                  Row(
+                    children: [
+                      buildChoiceButton(
+                        label: 'PRUEBA',
+                        icon: Icons.local_fire_department_rounded,
+                        backgroundColor: accentOrange,
+                        foregroundColor: appBlue,
+                        onTap: sacarPrueba,
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: sacarPrueba,
-                      style: pruebaButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        child: Text(
-                          'PRUEBA',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                      const SizedBox(width: 12),
+                      buildChoiceButton(
+                        label: 'VERDAD',
+                        icon: Icons.question_answer_rounded,
+                        backgroundColor: accentGreen,
+                        foregroundColor: appWhite,
+                        onTap: sacarVerdad,
                       ),
-                    ),
+
+                    ],
                   ),
                 ],
               ),
-
-              const SizedBox(height: 10),
-
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: reiniciarJuego,
-                  style: secondaryButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'REINICIAR',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

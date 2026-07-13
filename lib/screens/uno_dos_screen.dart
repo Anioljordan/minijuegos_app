@@ -15,8 +15,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   static const Color appBlue = Color(0xFF2F4F9C);
   static const Color appWhite = Color(0xFFF7F7F7);
   static const Color accentYellow = Color(0xFFFFD166);
-  static const Color accentPink = Color(0xFFFF4D6D);
-  static const Color accentGreen = Color(0xFF22C55E);
+  static const Color accentTurquoise = Color(0xFF12B8C4);
 
   String accionActual = 'Pulsa siguiente para empezar';
 
@@ -30,13 +29,19 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
     });
+  }
+
+  int get totalAcciones => unoDosAcciones.length;
+
+  double get progresoRestante {
+    if (totalAcciones == 0) return 0;
+    return (accionesDisponibles.length / totalAcciones).clamp(0.0, 1.0);
   }
 
   void reiniciarBaraja() {
     accionesDisponibles = List<String>.from(unoDosAcciones)..shuffle(random);
-    accionesUsadas.clear();
+    accionesUsadas = [];
   }
 
   void reiniciarJuego() {
@@ -72,6 +77,8 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
       accionesUsadas.clear();
     }
 
+    if (accionesDisponibles.isEmpty) return;
+
     final base = accionesDisponibles.removeLast();
     final limpia = limpiarAccion(base);
     final castigo = generarCastigo();
@@ -82,30 +89,11 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     });
   }
 
-  double get progreso {
-    final total = accionesDisponibles.length + accionesUsadas.length;
-    if (total == 0) return 0;
-    return accionesUsadas.length / total;
-  }
-
   ButtonStyle mainButtonStyle() {
     return ElevatedButton.styleFrom(
       backgroundColor: appWhite,
       foregroundColor: appBlue,
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
@@ -161,9 +149,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
             ),
           ],
         ),
-
         const SizedBox(height: 24),
-
         Padding(
           padding: const EdgeInsets.only(left: 28),
           child: SizedBox(
@@ -174,21 +160,27 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                 const Positioned(
                   top: 0,
                   left: 0,
-                  child: Text(
-                    '1 y 2',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 48,
-                      height: 1.90,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                  right: 0,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '1 y 2',
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 48,
+                        height: 1.90,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
                   top: 82,
                   left: 0,
-                  right: -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -202,38 +194,9 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     );
   }
 
-  Widget buildInfoBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: const BorderSide(
-            color: accentYellow,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        'Lee la acción para jugador 1 y jugador 2',
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
-    );
-  }
-
   Widget rulesItem({
     required IconData icon,
-      required String title,
+    required String title,
     required String text,
   }) {
     return Container(
@@ -345,16 +308,12 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
                   Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
                   ),
-
                   const SizedBox(height: 18),
-
                   const Text(
                     '1 Y 2',
                     style: TextStyle(
@@ -364,41 +323,33 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                       letterSpacing: 1.2,
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   rulesItem(
                     icon: Icons.looks_one_rounded,
                     title: 'Jugador 1',
-                    text: 'La acción suele empezar con una persona como jugador 1.',
+                    text: 'La acción empieza con una persona como jugador 1.',
                   ),
-
                   rulesItem(
                     icon: Icons.looks_two_rounded,
                     title: 'Jugador 2',
                     text: 'Después se elige o se menciona otra persona como jugador 2.',
                   ),
-
                   rulesItem(
                     icon: Icons.record_voice_over_rounded,
                     title: 'Lee la acción',
-                    text: 'Lee la carta en voz alta y haced lo que diga.',
+                    text: 'Lee la carta en voz alta y haced lo que indique.',
                   ),
-
                   rulesItem(
                     icon: Icons.local_bar_rounded,
                     title: 'Castigo',
-                    text: 'Cada carta añade beber o repartir de 1 a 5 tragos.',
+                    text: 'Cada carta añade beber o repartir entre 1 y 5 tragos.',
                   ),
-
                   rulesItem(
-                    icon: Icons.shuffle_rounded,
-                    title: 'Sin repetir',
-                    text: 'Las acciones no se repiten hasta que se acabe la baraja.',
+                    icon: Icons.restart_alt_rounded,
+                    title: 'Reiniciar',
+                    text: 'Puedes reiniciar la baraja completa cuando quieras.',
                   ),
-
                   const SizedBox(height: 8),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -429,65 +380,64 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   Widget buildActionCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 76,
-            height: 76,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: appWhite.withOpacity(0.85),
-                width: 2.2,
-              ),
-            ),
-            child: const Icon(
-              Icons.visibility_rounded,
-              color: appWhite,
-              size: 38,
-            ),
-          ),
-
-          const SizedBox(height: 22),
-
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            transitionBuilder: (child, animation) {
-              final slide = Tween<Offset>(
-                begin: const Offset(0, 0.08),
-                end: Offset.zero,
-              ).animate(animation);
-
-              return SlideTransition(
-                position: slide,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
+      height: double.infinity,
+      decoration: const BoxDecoration(),
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 94,
+                height: 94,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: appWhite.withOpacity(0.16),
+                  border: Border.all(
+                    color: appWhite,
+                    width: 3,
+                  ),
                 ),
-              );
-            },
-            child: Text(
-              accionActual,
-              key: ValueKey(accionActual),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: appWhite,
-                fontSize: 30,
-                height: 1.12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.6,
+                child: const Icon(
+                  Icons.visibility_rounded,
+                  color: appWhite,
+                  size: 50,
+                ),
               ),
-            ),
+              const SizedBox(height: 28),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                transitionBuilder: (child, animation) {
+                  final slide = Tween<Offset>(
+                    begin: const Offset(0, 0.08),
+                    end: Offset.zero,
+                  ).animate(animation);
+
+                  return SlideTransition(
+                    position: slide,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Text(
+                  accionActual,
+                  key: ValueKey(accionActual),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 32,
+                    height: 1.14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.7,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -495,27 +445,99 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   Widget buildProgressInfo() {
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.zero,
-          child: LinearProgressIndicator(
-            value: progreso,
-            minHeight: 8,
-            backgroundColor: appWhite.withOpacity(0.18),
-            valueColor: const AlwaysStoppedAnimation<Color>(accentYellow),
-          ),
+        Row(
+          children: [
+            Text(
+              'ACCIONES RESTANTES',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.76),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${accionesDisponibles.length} / $totalAcciones',
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
         ),
-
         const SizedBox(height: 9),
-
-        Text(
-          'Acciones restantes: ${accionesDisponibles.length}',
-          style: TextStyle(
-            color: appWhite.withOpacity(0.68),
-            fontSize: 12.5,
-            fontWeight: FontWeight.w800,
-          ),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(end: progresoRestante),
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, _) {
+            return Container(
+              height: 14,
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.34),
+                  width: 1.2,
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: LinearProgressIndicator(
+                value: value,
+                minHeight: 14,
+                backgroundColor: Colors.transparent,
+                valueColor: const AlwaysStoppedAnimation<Color>(appWhite),
+              ),
+            );
+          },
         ),
       ],
+    );
+  }
+
+  Widget buildActionButton({
+    required IconData icon,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1.35,
+        child: Material(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.28),
+                  width: 2.4,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: backgroundColor.withOpacity(0.28),
+                    blurRadius: 16,
+                    offset: const Offset(0, 7),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  icon,
+                  color: foregroundColor,
+                  size: 54,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -524,74 +546,48 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              buildTopBar(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool compactHeight = constraints.maxHeight < 700;
 
-              const SizedBox(height: 14),
-
-              buildInfoBar(),
-
-              const SizedBox(height: 16),
-
-              buildProgressInfo(),
-
-              const SizedBox(height: 16),
-
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                18,
+                compactHeight ? 12 : 18,
+                18,
+                compactHeight ? 10 : 16,
+              ),
+              child: Column(
+                children: [
+                  buildTopBar(),
+                  SizedBox(height: compactHeight ? 8 : 14),
+                  Expanded(
                     child: buildActionCard(),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: siguienteAccion,
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      'SIGUIENTE',
-                      style: TextStyle(
-                        color: appBlue,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
+                  SizedBox(height: compactHeight ? 9 : 14),
+                  buildProgressInfo(),
+                  SizedBox(height: compactHeight ? 9 : 14),
+                  Row(
+                    children: [
+                      buildActionButton(
+                        icon: Icons.restart_alt_rounded,
+                        backgroundColor: appBlue,
+                        foregroundColor: appWhite,
+                        onTap: reiniciarJuego,
                       ),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: reiniciarJuego,
-                  style: secondaryButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'REINICIAR',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
+                      const SizedBox(width: 12),
+                      buildActionButton(
+                        icon: Icons.arrow_forward_rounded,
+                        backgroundColor: appWhite,
+                        foregroundColor: appBlue,
+                        onTap: siguienteAccion,
                       ),
-                    ),
+                    ],
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

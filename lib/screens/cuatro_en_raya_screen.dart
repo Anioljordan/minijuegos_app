@@ -58,7 +58,6 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
     });
   }
 

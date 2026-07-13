@@ -90,21 +90,27 @@ class YoNuncaModesScreen extends StatelessWidget {
                 const Positioned(
                   top: 0,
                   left: 0,
-                  child: Text(
-                    'yo nunca\nnunca',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                  right: 0,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'yo nunca',
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 42,
+                        height: 2.20,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
                   top: 82,
                   left: 0,
-                  right: -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -118,34 +124,7 @@ class YoNuncaModesScreen extends StatelessWidget {
     );
   }
 
-  Widget buildInfoBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: const BorderSide(
-            color: accentPink,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        'Elige el modo de juego y empieza la ronda',
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
-    );
-  }
+
 
   Widget rulesItem({
     required IconData icon,
@@ -268,7 +247,7 @@ class YoNuncaModesScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   const Text(
-                    'YO NUNCA NUNCA',
+                    'YO NUNCA',
                     style: TextStyle(
                       color: appWhite,
                       fontSize: 15,
@@ -290,21 +269,21 @@ class YoNuncaModesScreen extends StatelessWidget {
                   rulesItem(
                     icon: Icons.chat_bubble_rounded,
                     title: 'Cuenta la historia',
-                    text: 'Si alguien quiere saber qué pasó, puede pedir que cuentes la historia.',
+                    text: 'Para saber la historia deberá beber los tragos que decida el jugador.',
                   ),
                   rulesItem(
                     icon: Icons.spa_rounded,
-                    title: 'Modo chill',
+                    title: 'chill',
                     text: 'Preguntas suaves, graciosas y más tranquilas.',
                   ),
                   rulesItem(
                     icon: Icons.shuffle_rounded,
-                    title: 'Modo mix',
+                    title: 'mix',
                     text: 'Mezcla preguntas suaves con algunas más atrevidas.',
                   ),
                   rulesItem(
                     icon: Icons.local_fire_department_rounded,
-                    title: 'Modo erótico',
+                    title: 'erótico',
                     text: 'Preguntas más picantes para jugar con confianza.',
                   ),
                   const SizedBox(height: 8),
@@ -342,73 +321,92 @@ class YoNuncaModesScreen extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.08),
-          border: Border(
-            left: BorderSide(
-              color: color,
-              width: 6,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool compact = constraints.maxHeight < 170;
+        final double iconBoxSize = compact ? 58 : 82;
+        final double iconSize = compact ? 36 : 52;
+
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 12 : 18,
+              vertical: compact ? 8 : 14,
             ),
-            bottom: BorderSide(
-              color: appWhite.withOpacity(0.30),
-              width: 2,
-            ),
-            top: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
-            ),
-            right: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: appWhite,
-              size: 34,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title.toUpperCase(),
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: appWhite.withOpacity(0.68),
-                      fontSize: 12.5,
-                      height: 1.25,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.08),
+              border: Border(
+                left: BorderSide(
+                  color: color,
+                  width: 7,
+                ),
+                bottom: BorderSide(
+                  color: appWhite.withOpacity(0.30),
+                  width: 2,
+                ),
+                top: BorderSide(
+                  color: appWhite.withOpacity(0.18),
+                  width: 1,
+                ),
+                right: BorderSide(
+                  color: appWhite.withOpacity(0.18),
+                  width: 1,
+                ),
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: appWhite.withOpacity(0.75),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: iconBoxSize,
+                  height: iconBoxSize,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.14),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: color.withOpacity(0.55),
+                      width: 2,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: iconSize,
+                  ),
+                ),
+                SizedBox(height: compact ? 7 : 11),
+                Text(
+                  title.toUpperCase(),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: compact ? 16 : 20,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                SizedBox(height: compact ? 3 : 6),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: compact ? 11 : 13,
+                    height: 1.2,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -417,50 +415,63 @@ class YoNuncaModesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildTopBar(context),
-              const SizedBox(height: 14),
-              buildInfoBar(),
-              const SizedBox(height: 18),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      buildModeCard(
-                        title: 'Modo Chill',
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double availableForCards = constraints.maxHeight - 220;
+            final double cardHeight =
+            ((availableForCards - 24) / 3).clamp(142.0, 210.0);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 34,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildTopBar(context),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      height: cardHeight,
+                      child: buildModeCard(
+                        title: 'Chill',
                         subtitle: 'Preguntas suaves, graciosas y para todos.',
                         icon: Icons.spa_rounded,
                         color: accentGreen,
                         onTap: () => abrirModo(context, 'chill'),
                       ),
-                      const SizedBox(height: 12),
-                      buildModeCard(
-                        title: 'Modo Mix',
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: cardHeight,
+                      child: buildModeCard(
+                        title: 'Mix',
                         subtitle: 'Mezcla de preguntas chill y más picantes.',
                         icon: Icons.shuffle_rounded,
                         color: accentOrange,
                         onTap: () => abrirModo(context, 'mix'),
                       ),
-                      const SizedBox(height: 12),
-                      buildModeCard(
-                        title: 'Modo Erótico',
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: cardHeight,
+                      child: buildModeCard(
+                        title: 'Erótico',
                         subtitle: 'Preguntas más atrevidas para jugar con confianza.',
                         icon: Icons.local_fire_department_rounded,
                         color: accentPink,
                         onTap: () => abrirModo(context, 'erotico'),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
+
 }

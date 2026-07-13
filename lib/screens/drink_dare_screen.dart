@@ -20,7 +20,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
   static const Color accentYellow = Color(0xFFFFD166);
   static const Color accentGreen = Color(0xFF22C55E);
 
-  late AnimationController controller;
+  late final AnimationController controller;
 
   double angle = 0;
   double speed = 0;
@@ -55,8 +55,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
       bool shouldFinish = false;
 
       setState(() {
-        angle += speed;
-        angle %= 2 * pi;
+        angle = (angle + speed) % (2 * pi);
 
         if (stopping) {
           speed *= 0.965;
@@ -74,7 +73,6 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
     });
   }
 
@@ -102,6 +100,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
 
     setState(() {
       stopping = true;
+      resultado = 'Frenando...';
     });
   }
 
@@ -109,34 +108,25 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     controller.stop();
 
     final selectedIndex = getSelectedIndex();
+    final selectedNumber = selectedIndex + 1;
     final selectedText = drinkDareOpciones[selectedIndex];
 
     setState(() {
       spinning = false;
       stopping = false;
       speed = 0;
-      resultado = selectedText;
+      resultado = 'Ha salido el número $selectedNumber';
     });
 
-    mostrarResultado(selectedText);
+    mostrarResultado(selectedNumber, selectedText);
   }
 
   int getSelectedIndex() {
     final total = drinkDareOpciones.length;
     final segmentAngle = 2 * pi / total;
-
     final normalizedAngle = ((-angle) % (2 * pi) + (2 * pi)) % (2 * pi);
 
     return (normalizedAngle / segmentAngle).floor() % total;
-  }
-
-  void reiniciarJuego() {
-    if (spinning) return;
-
-    setState(() {
-      angle = 0;
-      resultado = 'Pulsa girar para empezar';
-    });
   }
 
   ButtonStyle mainButtonStyle() {
@@ -150,39 +140,18 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
-  ButtonStyle stopButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: accentPink,
-      foregroundColor: appWhite,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
   Widget circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
+    final size = compact ? 44.0 : 50.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
@@ -195,7 +164,11 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
-  Widget buildTopBar() {
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 35.0 : 42.0;
+    final titleHeight = compact ? 72.0 : 94.0;
+    final lineTop = compact ? 62.0 : 82.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -203,52 +176,58 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             circleButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 '8',
                 style: TextStyle(
                   color: appWhite,
-                  fontSize: 19,
+                  fontSize: compact ? 17 : 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ),
             circleButton(
+              compact: compact,
               onTap: mostrarNormas,
-              child: const Icon(
+              child: Icon(
                 Icons.question_mark_rounded,
                 color: appWhite,
-                size: 27,
+                size: compact ? 23 : 27,
               ),
             ),
           ],
         ),
-
-        const SizedBox(height: 24),
-
+        SizedBox(height: compact ? 14 : 24),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(left: compact ? 18 : 28),
           child: SizedBox(
-            height: 94,
+            height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Text(
-                    'drink\n& dare',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'drink & dare',
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 2.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 82,
+                  top: lineTop,
                   left: 0,
                   right: -18,
                   child: Container(
@@ -261,45 +240,6 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
           ),
         ),
       ],
-    );
-  }
-
-  Widget buildInfoBar() {
-    String text;
-
-    if (spinning && stopping) {
-      text = 'La ruleta está frenando...';
-    } else if (spinning) {
-      text = 'Pulsa parar cuando quieras';
-    } else {
-      text = 'Gira la ruleta y acepta el reto';
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: const BorderSide(
-            color: accentPink,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
     );
   }
 
@@ -321,11 +261,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
+          Icon(icon, color: appWhite, size: 22),
           const SizedBox(width: 11),
           Expanded(
             child: Column(
@@ -417,16 +353,9 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-
+                  Container(height: 3, color: appWhite.withOpacity(0.58)),
                   const SizedBox(height: 18),
-
                   const Text(
                     'DRINK & DARE',
                     style: TextStyle(
@@ -436,46 +365,33 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                       letterSpacing: 1.2,
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   rulesItem(
                     icon: Icons.rotate_right_rounded,
                     title: 'Gira la ruleta',
-                    text:
-                    'Pulsa GIRAR para que la ruleta empiece a moverse con todas las opciones.',
+                    text: 'Pulsa GIRAR para empezar a mover la ruleta.',
                   ),
-
                   rulesItem(
                     icon: Icons.pan_tool_alt_rounded,
                     title: 'Para cuando quieras',
-                    text:
-                    'Pulsa PARAR en el momento que quieras. La ruleta irá frenando poco a poco.',
+                    text: 'Pulsa PARAR y la ruleta irá frenando poco a poco.',
                   ),
-
                   rulesItem(
                     icon: Icons.casino_rounded,
                     title: 'Acepta el resultado',
-                    text:
-                    'Cuando se detenga, aparecerá el reto o castigo que tiene que hacer el jugador.',
+                    text: 'Cuando se detenga aparecerá el reto o castigo.',
                   ),
-
                   rulesItem(
                     icon: Icons.groups_rounded,
                     title: 'Turnos',
-                    text:
-                    'Los jugadores se van turnando para girar la ruleta.',
+                    text: 'Los jugadores se turnan para girar la ruleta.',
                   ),
-
                   rulesItem(
                     icon: Icons.local_bar_rounded,
-                    title: 'Si no quieres hacerlo',
-                    text:
-                    'Si alguien se niega a cumplir el reto, bebe como castigo.',
+                    title: 'Si te niegas',
+                    text: 'Si alguien no quiere cumplir el reto, bebe.',
                   ),
-
                   const SizedBox(height: 8),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -503,7 +419,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
-  void mostrarResultado(String text) {
+  void mostrarResultado(int number, String text) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -524,48 +440,48 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 58,
-                height: 58,
+                width: 64,
+                height: 64,
                 decoration: BoxDecoration(
+                  color: accentPink.withOpacity(0.18),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.1,
-                  ),
+                  border: Border.all(color: accentPink, width: 2.4),
                 ),
                 child: const Icon(
                   Icons.local_bar_rounded,
-                  color: appWhite,
-                  size: 30,
+                  color: accentPink,
+                  size: 34,
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Text(
-                'te ha\ntocado',
+                'número $number',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
+                  color: accentPink,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'te ha tocado',
+                textAlign: TextAlign.center,
+                style: TextStyle(
                   color: appWhite,
-                  fontSize: 38,
-                  height: 0.9,
+                  fontSize: 34,
+                  height: 0.95,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              Container(
-                height: 3,
-                color: appWhite.withOpacity(0.58),
-              ),
-
+              Container(height: 3, color: appWhite.withOpacity(0.58)),
               const SizedBox(height: 18),
-
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: appWhite.withOpacity(0.08),
                   border: Border.all(
@@ -578,16 +494,14 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: appWhite,
-                    fontSize: 24,
+                    fontSize: 23,
                     height: 1.18,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.4,
                   ),
                 ),
               ),
-
               const SizedBox(height: 18),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -613,10 +527,10 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
-  Widget buildWheel() {
+  Widget buildGameCard({required bool compact}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      height: double.infinity,
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.08),
         border: Border.all(
@@ -624,84 +538,159 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
           width: 1.4,
         ),
       ),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(
-              child: Transform.rotate(
-                angle: angle,
-                child: CustomPaint(
-                  painter: _DrinkWheelPainter(
-                    options: drinkDareOpciones,
-                    colors: wheelColors,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWheel = compact ? 250.0 : 330.0;
+          final availableWheel = min(
+            constraints.maxWidth - 28,
+            constraints.maxHeight * (compact ? 0.66 : 0.72),
+          );
+          final wheelSize = availableWheel.clamp(180.0, maxWheel).toDouble();
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 12 : 18,
+              vertical: compact ? 14 : 20,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight - 28),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: wheelSize,
+                    height: wheelSize,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned.fill(
+                          child: Transform.rotate(
+                            angle: angle,
+                            child: CustomPaint(
+                              painter: _DrinkWheelPainter(
+                                itemCount: drinkDareOpciones.length,
+                                colors: wheelColors,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: compact ? 48 : 58,
+                          height: compact ? 48 : 58,
+                          decoration: BoxDecoration(
+                            color: appBlue,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: appWhite.withOpacity(0.88),
+                              width: 2.2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.local_bar_rounded,
+                            color: appWhite,
+                            size: compact ? 25 : 30,
+                          ),
+                        ),
+                        Positioned(
+                          top: -9,
+                          child: Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: compact ? 64 : 76,
+                            color: appWhite,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.55),
+                                blurRadius: 12,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ),
-
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: appBlue,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: appWhite.withOpacity(0.85),
-                  width: 2.2,
-                ),
-              ),
-              child: const Icon(
-                Icons.local_bar_rounded,
-                color: appWhite,
-                size: 28,
-              ),
-            ),
-
-            Positioned(
-              top: -8,
-              child: Icon(
-                Icons.arrow_drop_down_rounded,
-                size: 76,
-                color: appWhite,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.55),
-                    blurRadius: 12,
+                  SizedBox(height: compact ? 12 : 18),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 260),
+                    child: Text(
+                      resultado,
+                      key: ValueKey(resultado),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: compact ? 18 : 22,
+                        height: 1.18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget buildResultCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 260),
-        child: Text(
-          resultado,
-          key: ValueKey(resultado),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: appWhite,
-            fontSize: 22,
-            height: 1.18,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.4,
+  Widget buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: compact ? 1.55 : 1.45,
+        child: Material(
+          color: onTap == null
+              ? backgroundColor.withOpacity(0.35)
+              : backgroundColor,
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 8 : 12,
+                vertical: compact ? 10 : 14,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: appWhite.withOpacity(onTap == null ? 0.12 : 0.28),
+                  width: 2.4,
+                ),
+                boxShadow: onTap == null
+                    ? null
+                    : [
+                  BoxShadow(
+                    color: backgroundColor.withOpacity(0.30),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: foregroundColor.withOpacity(onTap == null ? 0.45 : 1),
+                    size: compact ? 38 : 48,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: foregroundColor.withOpacity(onTap == null ? 0.45 : 1),
+                      fontSize: compact ? 12.5 : 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -713,97 +702,50 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              buildTopBar(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 14.0 : 18.0;
+            final verticalPadding = compact ? 12.0 : 18.0;
 
-              const SizedBox(height: 14),
-
-              buildInfoBar(),
-
-              const SizedBox(height: 16),
-
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        buildWheel(),
-                        const SizedBox(height: 14),
-                        buildResultCard(),
-                      ],
-                    ),
-                  ),
-                ),
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 12 : 16,
               ),
-
-              const SizedBox(height: 16),
-
-              Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: spinning ? null : girarRuleta,
-                      style: mainButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        child: Text(
-                          'GIRAR',
-                          style: TextStyle(
-                            color: appBlue,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                  buildTopBar(compact: compact),
+                  SizedBox(height: compact ? 10 : 14),
+                  Expanded(child: buildGameCard(compact: compact)),
+                  SizedBox(height: compact ? 10 : 14),
+                  Row(
+                    children: [
+                      buildActionButton(
+                        icon: Icons.rotate_right_rounded,
+                        label: 'GIRAR',
+                        backgroundColor: appBlue,
+                        foregroundColor: appWhite,
+                        onTap: spinning ? null : girarRuleta,
+                        compact: compact,
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: spinning && !stopping ? pararRuleta : null,
-                      style: stopButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        child: Text(
-                          'PARAR',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                      const SizedBox(width: 12),
+                      buildActionButton(
+                        icon: Icons.pan_tool_alt_rounded,
+                        label: stopping ? 'FRENANDO' : 'PARAR',
+                        backgroundColor: appWhite,
+                        foregroundColor: appBlue,
+                        onTap: spinning && !stopping ? pararRuleta : null,
+                        compact: compact,
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-
-              const SizedBox(height: 10),
-
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: spinning ? null : reiniciarJuego,
-                  style: secondaryButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'REINICIAR',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -811,26 +753,26 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
 }
 
 class _DrinkWheelPainter extends CustomPainter {
-  final List<String> options;
+  final int itemCount;
   final List<Color> colors;
 
   const _DrinkWheelPainter({
-    required this.options,
+    required this.itemCount,
     required this.colors,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (options.isEmpty) return;
+    if (itemCount == 0) return;
 
     final radius = size.width / 2;
     final center = Offset(radius, radius);
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    final segmentAngle = 2 * pi / options.length;
+    final segmentAngle = 2 * pi / itemCount;
     double startAngle = -pi / 2;
 
-    for (int i = 0; i < options.length; i++) {
+    for (int i = 0; i < itemCount; i++) {
       final paint = Paint()
         ..color = colors[i % colors.length]
         ..style = PaintingStyle.fill;
@@ -844,12 +786,12 @@ class _DrinkWheelPainter extends CustomPainter {
 
       canvas.drawArc(rect, startAngle, segmentAngle, true, borderPaint);
 
-      _drawText(
+      _drawNumber(
         canvas: canvas,
         center: center,
         radius: radius,
         angle: startAngle + segmentAngle / 2,
-        text: options[i],
+        number: i + 1,
       );
 
       startAngle += segmentAngle;
@@ -863,41 +805,33 @@ class _DrinkWheelPainter extends CustomPainter {
     canvas.drawCircle(center, radius, outerPaint);
   }
 
-  void _drawText({
+  void _drawNumber({
     required Canvas canvas,
     required Offset center,
     required double radius,
     required double angle,
-    required String text,
+    required int number,
   }) {
-    final shortText = text.length > 26 ? '${text.substring(0, 26)}...' : text;
-
     final textPainter = TextPainter(
       text: TextSpan(
-        text: shortText,
-        style: const TextStyle(
+        text: '$number',
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 11,
+          fontSize: radius < 120 ? 18 : 24,
           fontWeight: FontWeight.w900,
-          height: 1.05,
-          shadows: [
+          shadows: const [
             Shadow(
-              color: Colors.black,
-              blurRadius: 6,
+              color: Colors.black54,
+              blurRadius: 5,
             ),
           ],
         ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
-      maxLines: 2,
-      ellipsis: '...',
-    );
+    )..layout();
 
-    textPainter.layout(maxWidth: radius * 0.36);
-
-    final textRadius = radius * 0.74;
-
+    final textRadius = radius * 0.72;
     final offset = Offset(
       center.dx + cos(angle) * textRadius,
       center.dy + sin(angle) * textRadius,
@@ -906,20 +840,15 @@ class _DrinkWheelPainter extends CustomPainter {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
     canvas.rotate(angle + pi / 2);
-
     textPainter.paint(
       canvas,
-      Offset(
-        -textPainter.width / 2,
-        -textPainter.height / 2,
-      ),
+      Offset(-textPainter.width / 2, -textPainter.height / 2),
     );
-
     canvas.restore();
   }
 
   @override
   bool shouldRepaint(covariant _DrinkWheelPainter oldDelegate) {
-    return oldDelegate.options != options || oldDelegate.colors != colors;
+    return oldDelegate.itemCount != itemCount || oldDelegate.colors != colors;
   }
 }

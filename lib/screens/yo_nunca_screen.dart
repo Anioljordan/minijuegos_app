@@ -35,7 +35,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
+
     });
   }
 
@@ -61,21 +61,21 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   }
 
   String tituloModo() {
-    if (widget.modo == 'chill') return 'yo nunca\nchill';
-    if (widget.modo == 'erotico') return 'yo nunca\nerótico';
-    return 'yo nunca\nmix';
+    if (widget.modo == 'chill') return 'yo nunca chill';
+    if (widget.modo == 'erotico') return 'yo nunca erótico';
+    return 'yo nunca mix';
   }
 
-  String subtituloModo() {
-    if (widget.modo == 'chill') {
-      return 'Preguntas suaves, graciosas y para todos';
-    }
+  int get totalPreguntasModo => obtenerListaPreguntas().length;
 
-    if (widget.modo == 'erotico') {
-      return 'Preguntas más atrevidas para jugar con confianza';
-    }
+  double get progresoRestante {
+    if (totalPreguntasModo == 0) return 0;
 
-    return 'Mezcla de preguntas chill y más picantes';
+    return (preguntasRestantes.length / totalPreguntasModo).clamp(0.0, 1.0);
+  }
+
+  Color get nextButtonForeground {
+    return widget.modo == 'erotico' ? appWhite : appBlue;
   }
 
   Future<void> cargarEstado() async {
@@ -215,21 +215,27 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                 Positioned(
                   top: 0,
                   left: 0,
-                  child: Text(
-                    tituloModo(),
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                  right: 0,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      tituloModo(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: appWhite,
+                        fontSize: 42,
+                        height: 2.20,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
                   top: 82,
                   left: 0,
-                  right: -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -243,34 +249,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
     );
   }
 
-  Widget buildInfoBar() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: BorderSide(
-            color: accentColor,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        subtituloModo(),
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
-    );
-  }
+
 
   Widget rulesItem({
     required IconData icon,
@@ -415,7 +394,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                   rulesItem(
                     icon: Icons.chat_bubble_rounded,
                     title: 'Historia',
-                    text: 'Si alguien quiere saber qué pasó, puede pedir la historia.',
+                    text: 'Para saber la historia deberá beber los tragos que decida el jugador.',
                   ),
                   rulesItem(
                     icon: Icons.refresh_rounded,
@@ -458,92 +437,167 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   Widget buildQuestionCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+      height: double.infinity,
       decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 76,
-            height: 76,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: appWhite.withOpacity(0.85),
-                width: 2.2,
-              ),
-            ),
-            child: Icon(
-              modeIcon,
-              color: appWhite,
-              size: 38,
-            ),
-          ),
-          const SizedBox(height: 22),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            transitionBuilder: (child, animation) {
-              final slide = Tween<Offset>(
-                begin: const Offset(0, 0.08),
-                end: Offset.zero,
-              ).animate(animation);
 
-              return SlideTransition(
-                position: slide,
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
+
+      ),
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 94,
+                height: 94,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accentColor.withOpacity(0.15),
+                  border: Border.all(
+                    color: accentColor,
+                    width: 3,
+                  ),
                 ),
-              );
-            },
-            child: Text(
-              preguntaActual,
-              key: ValueKey(preguntaActual),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: appWhite,
-                fontSize: 30,
-                height: 1.12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.6,
+                child: Icon(
+                  modeIcon,
+                  color: accentColor,
+                  size: 50,
+                ),
               ),
-            ),
+              const SizedBox(height: 28),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                transitionBuilder: (child, animation) {
+                  final slide = Tween<Offset>(
+                    begin: const Offset(0, 0.08),
+                    end: Offset.zero,
+                  ).animate(animation);
+
+                  return SlideTransition(
+                    position: slide,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Text(
+                  preguntaActual,
+                  key: ValueKey(preguntaActual),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 32,
+                    height: 1.14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.7,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget buildProgressInfo() {
-    final total = preguntasRestantes.length + 1;
-    final progress = preguntasRestantes.isEmpty ? 0.0 : 1 / total;
-
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.zero,
-          child: LinearProgressIndicator(
-            value: progress,
-            minHeight: 8,
-            backgroundColor: appWhite.withOpacity(0.18),
-            valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-          ),
+        Row(
+          children: [
+            Text(
+              'PREGUNTAS RESTANTES',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.76),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${preguntasRestantes.length} / $totalPreguntasModo',
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 9),
-        Text(
-          'Preguntas restantes: ${preguntasRestantes.length}',
-          style: TextStyle(
-            color: appWhite.withOpacity(0.68),
-            fontSize: 12.5,
-            fontWeight: FontWeight.w800,
-          ),
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(end: progresoRestante),
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, _) {
+            return Container(
+              height: 14,
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.34),
+                  width: 1.2,
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: LinearProgressIndicator(
+                value: value,
+                minHeight: 14,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+              ),
+            );
+          },
         ),
       ],
+    );
+  }
+
+  Widget buildActionButton({
+    required IconData icon,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: AspectRatio(
+        aspectRatio: 1.35,
+        child: Material(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.28),
+                  width: 2.4,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: backgroundColor.withOpacity(0.28),
+                    blurRadius: 16,
+                    offset: const Offset(0, 7),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  icon,
+                  color: foregroundColor,
+                  size: 54,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -563,66 +617,51 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              buildTopBar(),
-              const SizedBox(height: 14),
-              buildInfoBar(),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool compactHeight = constraints.maxHeight < 700;
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                18,
+                compactHeight ? 12 : 18,
+                18,
+                compactHeight ? 10 : 16,
+              ),
+              child: Column(
+                children: [
+                  buildTopBar(),
+                  SizedBox(height: compactHeight ? 8 : 14),
+                  Expanded(
                     child: buildQuestionCard(),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              buildProgressInfo(),
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: siguientePregunta,
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      'SIGUIENTE',
-                      style: TextStyle(
-                        color: appBlue,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
+                  SizedBox(height: compactHeight ? 9 : 14),
+                  buildProgressInfo(),
+                  SizedBox(height: compactHeight ? 9 : 14),
+                  Row(
+                    children: [
+                      buildActionButton(
+                        icon: Icons.restart_alt_rounded,
+                        backgroundColor: appBlue,
+                        foregroundColor: appWhite,
+                        onTap: reiniciar,
                       ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: reiniciar,
-                  style: secondaryButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'REINICIAR PREGUNTAS',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
+                      const SizedBox(width: 12),
+                      buildActionButton(
+                        icon: Icons.arrow_forward_rounded,
+                        backgroundColor: appWhite,
+                        foregroundColor: appBlue,
+                        onTap: siguientePregunta,
                       ),
-                    ),
+                    ],
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
+
 }

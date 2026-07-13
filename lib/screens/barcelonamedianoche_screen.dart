@@ -53,7 +53,6 @@ class _BarcelonaMedianocheScreenState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _showRulesDialog();
     });
   }
 
@@ -106,19 +105,27 @@ class _BarcelonaMedianocheScreenState
     required Widget child,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
+    final compact = MediaQuery.of(context).size.height < 740;
+    final size = compact ? 44.0 : 50.0;
+
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: appWhite.withOpacity(0.85),
+              width: 2.2,
+            ),
           ),
+          child: Center(child: child),
         ),
-        child: Center(child: child),
       ),
     );
   }
@@ -130,9 +137,14 @@ class _BarcelonaMedianocheScreenState
     IconData? extraIcon,
     VoidCallback? onBack,
   }) {
+    final compact = MediaQuery.of(context).size.height < 740;
     final visualTitle = title.toLowerCase();
     final multiline = visualTitle.contains('\n');
-    final titleHeight = multiline ? 94.0 : 58.0;
+    final titleSize = compact ? 33.0 : 40.0;
+    final titleHeight = multiline
+        ? (compact ? 72.0 : 92.0)
+        : (compact ? 54.0 : 64.0);
+    final lineTop = titleHeight - (compact ? 6.0 : 8.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -142,11 +154,11 @@ class _BarcelonaMedianocheScreenState
           children: [
             _circleButton(
               onTap: onBack ?? () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 '8',
                 style: TextStyle(
                   color: appWhite,
-                  fontSize: 19,
+                  fontSize: compact ? 17 : 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -159,50 +171,54 @@ class _BarcelonaMedianocheScreenState
                     child: Icon(
                       extraIcon,
                       color: appWhite,
-                      size: 27,
+                      size: compact ? 23 : 27,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: compact ? 9 : 12),
                 ],
                 _circleButton(
                   onTap: _showRulesDialog,
-                  child: const Icon(
+                  child: Icon(
                     Icons.question_mark_rounded,
                     color: appWhite,
-                    size: 27,
+                    size: compact ? 23 : 27,
                   ),
                 ),
               ],
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: compact ? 14 : 22),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(left: compact ? 18 : 28),
           child: SizedBox(
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Text(
-                    visualTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 40,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        visualTitle,
+                        maxLines: 2,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 0.90,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: multiline ? 82 : 50,
+                  top: lineTop,
                   left: 0,
                   right: -18,
                   child: Container(
@@ -215,7 +231,7 @@ class _BarcelonaMedianocheScreenState
           ),
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: compact ? 8 : 10),
           _infoBar(
             text: subtitle,
             color: accentRed,
@@ -546,8 +562,7 @@ class _BarcelonaMedianocheScreenState
         children: [
           _screenHeader(
             title: 'barcelona\nmedianoche',
-            subtitle:
-            'Una subasta, identidades secretas y una herencia que solo puede ganar un superviviente.',
+
           ),
           const SizedBox(height: 18),
           _panel(
@@ -573,7 +588,7 @@ class _BarcelonaMedianocheScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionTitle('escenario'),
+                _sectionTitle('lugares'),
                 const SizedBox(height: 12),
                 Text(
                   'Personaliza los lugares y los objetos que pueden aparecer en las misiones de los asesinos. Escribe una opción por línea.',
@@ -586,7 +601,7 @@ class _BarcelonaMedianocheScreenState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'HABITACIONES DISPONIBLES',
+                  'LUGARES DISPONIBLES',
                   style: TextStyle(
                     color: appWhite.withOpacity(0.70),
                     fontSize: 12,
@@ -772,199 +787,329 @@ class _BarcelonaMedianocheScreenState
   Widget _buildRevealView() {
     final player = game.revealedPlayer;
     final target = game.findPlayerById(player.currentTargetId);
+    final compact = MediaQuery.of(context).size.height < 740;
+    final roleColor = _roleColor(player.role);
+    final progress =
+    game.players.isEmpty ? 0.0 : (game.revealIndex + 1) / game.players.length;
 
     return SingleChildScrollView(
-      key: ValueKey('reveal_${player.id}'),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+      key: ValueKey('reveal_${player.id}_${game.revealRoleVisible}'),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 14 : 18,
+        compact ? 12 : 18,
+        compact ? 14 : 18,
+        compact ? 18 : 24,
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _screenHeader(
             title: 'reparto\nsecreto',
-            subtitle: 'Solo debe mirar la persona cuyo nombre aparece.',
+
           ),
-          const SizedBox(height: 18),
-          _panel(
-            child: Column(
-              children: [
-                Container(
-                  width: 78,
-                  height: 78,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: appWhite.withOpacity(0.85),
-                      width: 2.2,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.phone_android_rounded,
-                    color: appWhite,
-                    size: 38,
-                  ),
+          SizedBox(height: compact ? 12 : 18),
+          Row(
+            children: [
+              Text(
+                'REPARTO DE ROLES',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.70),
+                  fontSize: compact ? 10.5 : 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
                 ),
-                const SizedBox(height: 18),
-                Text(
-                  player.name.toLowerCase(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 38,
-                    height: 0.9,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.8,
-                  ),
+              ),
+              const Spacer(),
+              Text(
+                '${game.revealIndex + 1}/${game.players.length}',
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w900,
                 ),
-                const SizedBox(height: 14),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      game.revealRoleVisible = !game.revealRoleVisible;
-                    });
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: appWhite.withOpacity(0.08),
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.28),
-                        width: 1.4,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          game.revealRoleVisible
-                              ? Icons.visibility_rounded
-                              : Icons.visibility_off_rounded,
-                          color: appWhite,
-                          size: 32,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          game.revealRoleVisible
-                              ? player.role.label.toLowerCase()
-                              : 'toca para revelar',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        if (game.revealRoleVisible) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            _roleDescription(player.role),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: appWhite.withOpacity(0.76),
-                              fontSize: 13.5,
-                              height: 1.35,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (player.role == BmRole.asesino) ...[
-                            const SizedBox(height: 16),
-                            _secretInfoTile(
-                              'Objetivo',
-                              target?.name ?? 'Sin objetivo',
-                            ),
-                            _secretInfoTile(
-                              'Habitación',
-                              player.currentRoom ?? '-',
-                            ),
-                            _secretInfoTile(
-                              'Objeto',
-                              player.currentWeapon ?? '-',
-                            ),
-                          ],
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => setState(game.nextReveal),
-                    style: _mainButtonStyle(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Text(
-                        game.isLastReveal
-                            ? 'EMPEZAR LA NOCHE'
-                            : 'SIGUIENTE JUGADOR',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: compact ? 8 : 10,
+              backgroundColor: appWhite.withOpacity(0.12),
+              valueColor: const AlwaysStoppedAnimation<Color>(accentGold),
             ),
           ),
+          SizedBox(height: compact ? 12 : 18),
+          Container(
+            width: double.infinity,
+            constraints: BoxConstraints(
+              minHeight: compact ? 360 : 450,
+            ),
+            padding: EdgeInsets.all(compact ? 16 : 20),
+            decoration: BoxDecoration(
+              color: game.revealRoleVisible
+                  ? roleColor.withOpacity(0.16)
+                  : appWhite.withOpacity(0.08),
+              border: Border.all(
+                color: game.revealRoleVisible
+                    ? roleColor
+                    : appWhite.withOpacity(0.28),
+                width: game.revealRoleVisible ? 2.5 : 1.4,
+              ),
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 260),
+              child: game.revealRoleVisible
+                  ? Column(
+                key: const ValueKey('visible'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: compact ? 74 : 88,
+                    height: compact ? 74 : 88,
+                    decoration: BoxDecoration(
+                      color: roleColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: appWhite,
+                        width: 2.4,
+                      ),
+                    ),
+                    child: Icon(
+                      _roleIcon(player.role),
+                      color: appWhite,
+                      size: compact ? 38 : 46,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 14 : 18),
+                  Text(
+                    player.role.label.toLowerCase(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: compact ? 34 : 42,
+                      height: 0.92,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 12 : 16),
+                  Text(
+                    _roleDescription(player.role),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.80),
+                      fontSize: compact ? 13 : 14.5,
+                      height: 1.35,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (player.role == BmRole.asesino) ...[
+                    SizedBox(height: compact ? 14 : 18),
+                    _secretInfoTile(
+                      'Objetivo',
+                      target?.name ?? 'Sin objetivo',
+                    ),
+                    _secretInfoTile(
+                      'Habitación',
+                      player.currentRoom ?? '-',
+                    ),
+                    _secretInfoTile(
+                      'Objeto',
+                      player.currentWeapon ?? '-',
+                    ),
+                  ],
+                ],
+              )
+                  : Column(
+                key: const ValueKey('hidden'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: compact ? 72 : 84,
+                    height: compact ? 72 : 84,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.85),
+                        width: 2.2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.phone_android_rounded,
+                      color: appWhite,
+                      size: compact ? 36 : 42,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 16 : 20),
+                  Text(
+                    player.name.toLowerCase(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: compact ? 36 : 44,
+                      height: 0.92,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 12 : 16),
+                  Text(
+                    'Coge el móvil y toca la tarjeta para descubrir tu identidad.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.72),
+                      fontSize: compact ? 13 : 14,
+                      height: 1.35,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: compact ? 18 : 24),
+                  Material(
+                    color: appWhite,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          game.revealRoleVisible = true;
+                        });
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 18 : 24,
+                          vertical: compact ? 12 : 14,
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.visibility_rounded,
+                              color: appBlue,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'REVELAR IDENTIDAD',
+                              style: TextStyle(
+                                color: appBlue,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: compact ? 10 : 14),
+          if (game.revealRoleVisible)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => setState(game.nextReveal),
+                style: _mainButtonStyle(),
+                icon: Icon(
+                  game.isLastReveal
+                      ? Icons.nightlife_rounded
+                      : Icons.arrow_forward_rounded,
+                ),
+                label: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: compact ? 12 : 14,
+                  ),
+                  child: Text(
+                    game.isLastReveal
+                        ? 'EMPEZAR LA NOCHE'
+                        : 'SIGUIENTE JUGADOR',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
   Widget _buildGameView() {
+    final compact = MediaQuery.of(context).size.height < 740;
+
     return SingleChildScrollView(
       key: const ValueKey('playing'),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 14 : 18,
+        compact ? 12 : 18,
+        compact ? 14 : 18,
+        compact ? 20 : 28,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _screenHeader(
             title: 'barcelona\nmedianoche',
-            subtitle:
-            'La mesa es pública. Las identidades y misiones deben seguir siendo secretas.',
+
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: compact ? 12 : 18),
           _sectionTitle('estado de la noche'),
           const SizedBox(height: 10),
           ...game.players.map(_playerCard),
-          const SizedBox(height: 18),
+          SizedBox(height: compact ? 14 : 18),
           _sectionTitle('acciones'),
           const SizedBox(height: 10),
-          _actionButton(
-            title: 'Registrar asesinato',
-            subtitle:
-            'El jugador que actúa coge el móvil y confirma su misión en secreto.',
-            icon: Icons.local_fire_department_outlined,
-            color: accentRed,
-            onTap: _showKillDialog,
+          Row(
+            children: [
+              Expanded(
+                child: _actionButton(
+                  title: 'Asesinato',
+                  subtitle: 'Confirma una misión en secreto.',
+                  icon: Icons.local_fire_department_outlined,
+                  color: accentRed,
+                  onTap: _showKillDialog,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _actionButton(
+                  title: 'Detención',
+                  subtitle: 'Un agente acusa con pruebas.',
+                  icon: Icons.local_police_outlined,
+                  color: accentBlue,
+                  onTap: _showArrestDialog,
+                ),
+              ),
+            ],
           ),
-          _actionButton(
-            title: 'Registrar detención',
-            subtitle:
-            'Un agente declara una detención con prueba clara o como acusación arriesgada.',
-            icon: Icons.local_police_outlined,
-            color: accentBlue,
-            onTap: _showArrestDialog,
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _actionButton(
+                  title: 'Trato o robo',
+                  subtitle: 'Mueve dinero o bienes.',
+                  icon: Icons.handshake_outlined,
+                  color: accentPurple,
+                  onTap: _showTransferDialog,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _actionButton(
+                  title: 'Subasta final',
+                  subtitle: 'Comienza las pujas secretas.',
+                  icon: Icons.diamond_outlined,
+                  color: accentGold,
+                  onTap: _confirmStartFinalAuction,
+                  darkForeground: true,
+                ),
+              ),
+            ],
           ),
-          _actionButton(
-            title: 'Registrar trato o robo',
-            subtitle:
-            'Actualiza dinero o bienes después de una alianza, intercambio o robo.',
-            icon: Icons.handshake_outlined,
-            color: accentPurple,
-            onTap: _showTransferDialog,
-          ),
-          _actionButton(
-            title: 'Comenzar subasta final',
-            subtitle:
-            'Termina la fase libre y empieza la puja secreta de 5 lotes.',
-            icon: Icons.diamond_outlined,
-            color: accentGold,
-            onTap: _confirmStartFinalAuction,
-          ),
-          const SizedBox(height: 18),
+          SizedBox(height: compact ? 16 : 20),
           _sectionTitle('registro público'),
           const SizedBox(height: 10),
           _panel(
@@ -1584,73 +1729,83 @@ class _BarcelonaMedianocheScreenState
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    bool darkForeground = false,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.08),
-          border: Border(
-            left: BorderSide(
-              color: color,
-              width: 6,
+    final compact = MediaQuery.of(context).size.height < 740;
+    final foreground = darkForeground ? appBlue : appWhite;
+
+    return AspectRatio(
+      aspectRatio: compact ? 1.28 : 1.18,
+      child: Material(
+        color: color,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.all(compact ? 10 : 13),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: appWhite.withOpacity(0.32),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.30),
+                  blurRadius: 16,
+                  offset: const Offset(0, 7),
+                ),
+              ],
             ),
-            bottom: BorderSide(
-              color: appWhite.withOpacity(0.30),
-              width: 2,
-            ),
-            top: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
-            ),
-            right: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: compact ? 46 : 54,
+                  height: compact ? 46 : 54,
+                  decoration: BoxDecoration(
+                    color: darkForeground
+                        ? appBlue.withOpacity(0.12)
+                        : appWhite.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: foreground.withOpacity(0.55),
+                      width: 1.8,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: foreground,
+                    size: compact ? 25 : 29,
+                  ),
+                ),
+                SizedBox(height: compact ? 8 : 10),
+                Text(
+                  title.toUpperCase(),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: compact ? 11.5 : 13,
+                    height: 1.05,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                SizedBox(height: compact ? 4 : 6),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground.withOpacity(0.78),
+                    fontSize: compact ? 9.5 : 10.5,
+                    height: 1.15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: appWhite,
-              size: 27,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title.toUpperCase(),
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.35,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: appWhite.withOpacity(0.66),
-                      fontSize: 12.2,
-                      height: 1.25,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: appWhite.withOpacity(0.70),
-            ),
-          ],
         ),
       ),
     );
@@ -1730,6 +1885,28 @@ class _BarcelonaMedianocheScreenState
         ],
       ),
     );
+  }
+
+  Color _roleColor(BmRole role) {
+    switch (role) {
+      case BmRole.asesino:
+        return accentRed;
+      case BmRole.agente:
+        return accentBlue;
+      case BmRole.invitado:
+        return accentGreen;
+    }
+  }
+
+  IconData _roleIcon(BmRole role) {
+    switch (role) {
+      case BmRole.asesino:
+        return Icons.local_fire_department_rounded;
+      case BmRole.agente:
+        return Icons.local_police_rounded;
+      case BmRole.invitado:
+        return Icons.person_rounded;
+    }
   }
 
   String _roleDescription(BmRole role) {

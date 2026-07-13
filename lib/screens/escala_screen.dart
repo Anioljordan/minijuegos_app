@@ -44,7 +44,6 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
     });
   }
 
@@ -248,9 +247,15 @@ class _EscalaScreenState extends State<EscalaScreen> {
   ButtonStyle mainButtonStyle({
     Color color = appWhite,
   }) {
+    final foreground = color == appWhite || color == accentYellow
+        ? appBlue
+        : appWhite;
+
     return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
+      backgroundColor: color,
+      foregroundColor: foreground,
+      disabledBackgroundColor: color.withOpacity(0.28),
+      disabledForegroundColor: foreground.withOpacity(0.45),
       elevation: 0,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
@@ -274,12 +279,15 @@ class _EscalaScreenState extends State<EscalaScreen> {
   Widget circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
+    final size = compact ? 43.0 : 50.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
@@ -292,7 +300,11 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
-  Widget buildTopBar() {
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 60.0 : 80.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -300,52 +312,58 @@ class _EscalaScreenState extends State<EscalaScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             circleButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 '8',
                 style: TextStyle(
                   color: appWhite,
-                  fontSize: 19,
+                  fontSize: compact ? 16 : 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ),
             circleButton(
+              compact: compact,
               onTap: mostrarNormas,
-              child: const Icon(
+              child: Icon(
                 Icons.question_mark_rounded,
                 color: appWhite,
-                size: 27,
+                size: compact ? 23 : 27,
               ),
             ),
           ],
         ),
-
-        const SizedBox(height: 24),
-
+        SizedBox(height: compact ? 13 : 23),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(left: compact ? 18 : 28),
           child: SizedBox(
-            height: 86,
+            height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Text(
-                    'escala\nmental',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'escala mental',
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.90,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 74,
+                  top: lineTop,
                   left: 0,
                   right: -18,
                   child: Container(
@@ -360,6 +378,28 @@ class _EscalaScreenState extends State<EscalaScreen> {
       ],
     );
   }
+
+
+
+  Color _phaseColor() {
+    switch (fase) {
+      case 0:
+        return accentPurple;
+      case 1:
+      case 2:
+        return accentYellow;
+      case 3:
+        return accentPurple;
+      case 4:
+        return accentGreen;
+      case 5:
+        return accentRed;
+      default:
+        return accentPurple;
+    }
+  }
+
+
 
   Widget buildInfoBar({
     required String text,
@@ -399,7 +439,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(16),
+      padding: padding ?? EdgeInsets.all(MediaQuery.of(context).size.height < 740 ? 13 : 17),
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.08),
         border: Border.all(
@@ -417,43 +457,44 @@ class _EscalaScreenState extends State<EscalaScreen> {
     Color color = appWhite,
     IconData? icon,
   }) {
+    final compact = MediaQuery.of(context).size.height < 740;
+    final foreground = color == appWhite || color == accentYellow
+        ? appBlue
+        : appWhite;
+
     return SizedBox(
       width: double.infinity,
+      height: compact ? 54 : 62,
       child: ElevatedButton(
         onPressed: onPressed,
         style: mainButtonStyle(color: color),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 14,
-            horizontal: 8,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 11 : 15),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(
                   icon,
-                  color: appBlue,
-                  size: 22,
+                  color: foreground,
+                  size: compact ? 21 : 24,
                 ),
                 const SizedBox(width: 9),
               ],
-
-              Expanded(
+              Flexible(
                 child: Text(
                   text.toUpperCase(),
                   textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    height: 1.05,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: compact ? 12.5 : 14.5,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
+                    letterSpacing: 0.35,
                   ),
                 ),
               ),
-
-              if (icon != null)
-                const SizedBox(width: 31),
             ],
           ),
         ),
@@ -502,11 +543,14 @@ class _EscalaScreenState extends State<EscalaScreen> {
   }
 
   Widget sectionTitle(String text) {
+    final compact = MediaQuery.of(context).size.height < 740;
+
     return Text(
       text.toLowerCase(),
-      style: const TextStyle(
+      textAlign: TextAlign.center,
+      style: TextStyle(
         color: appWhite,
-        fontSize: 30,
+        fontSize: compact ? 25 : 30,
         height: 0.95,
         fontWeight: FontWeight.w900,
         letterSpacing: -0.7,
@@ -866,19 +910,28 @@ class _EscalaScreenState extends State<EscalaScreen> {
     bool mostrarZonasPuntuacion = false,
     int? centroZonas,
   }) {
+    final compact = MediaQuery.of(context).size.height < 740;
+    final gaugeHeight = compact ? 168.0 : 225.0;
+
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(
+            compact ? 5 : 8,
+            compact ? 8 : 12,
+            compact ? 5 : 8,
+            compact ? 4 : 6,
+          ),
           decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.08),
+            color: appWhite.withOpacity(0.075),
             border: Border.all(
-              color: appWhite.withOpacity(0.28),
-              width: 1.4,
+              color: appWhite.withOpacity(0.32),
+              width: 1.6,
             ),
           ),
           child: SizedBox(
-            height: 210,
+            height: gaugeHeight,
             width: double.infinity,
             child: CustomPaint(
               painter: NeedleGaugePainter(
@@ -891,52 +944,59 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ),
           ),
         ),
-
-        const SizedBox(height: 10),
-
+        SizedBox(height: compact ? 8 : 11),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Text(
                 escalaActual['izquierda']!,
-                style: const TextStyle(
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
                   color: appWhite,
                   fontWeight: FontWeight.w900,
-                  fontSize: 13,
+                  fontSize: compact ? 11.5 : 13.5,
+                  height: 1.1,
                 ),
               ),
             ),
+            SizedBox(width: compact ? 14 : 20),
             Expanded(
               child: Text(
                 escalaActual['derecha']!,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.right,
-                style: const TextStyle(
+                style: TextStyle(
                   color: appWhite,
                   fontWeight: FontWeight.w900,
-                  fontSize: 13,
+                  fontSize: compact ? 11.5 : 13.5,
+                  height: 1.1,
                 ),
               ),
             ),
           ],
         ),
-
-        const SizedBox(height: 8),
-
+        SizedBox(height: compact ? 7 : 9),
         if (mostrarNumero && valor != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 12 : 16,
+              vertical: compact ? 7 : 9,
+            ),
             decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.08),
+              color: accentYellow,
               border: Border.all(
-                color: appWhite.withOpacity(0.26),
-                width: 1.4,
+                color: appWhite.withOpacity(0.55),
+                width: 1.5,
               ),
             ),
             child: Text(
-              'POSICIÓN: $valor',
-              style: const TextStyle(
-                color: appWhite,
-                fontSize: 14,
+              'POSICIÓN $valor',
+              style: TextStyle(
+                color: appBlue,
+                fontSize: compact ? 13 : 15,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.5,
               ),
@@ -999,22 +1059,10 @@ class _EscalaScreenState extends State<EscalaScreen> {
         children: [
           sectionTitle('Crea una escala'),
 
-          const SizedBox(height: 8),
-
-          Text(
-            'Elige una escala aleatoria o crea una personalizada.',
-            style: TextStyle(
-              color: appWhite.withOpacity(0.70),
-              fontSize: 13,
-              height: 1.3,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-
-
           const SizedBox(height: 14),
           buildFancyButton(
             text: 'Usar escala aleatoria',
+            color: accentPurple,
             icon: Icons.casino_rounded,
             onPressed: usarEscalaAleatoria,
           ),
@@ -1056,6 +1104,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
                 buildFancyButton(
                   text: 'Usar esta escala',
+                  color: accentYellow,
                   icon: Icons.play_arrow_rounded,
                   onPressed: usarEscalaPersonalizada,
                 ),
@@ -1140,6 +1189,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
         buildFancyButton(
           text: 'Continuar',
+          color: accentYellow,
           icon: Icons.arrow_forward_rounded,
           onPressed: pasarAEscribirRespuesta,
         ),
@@ -1190,6 +1240,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
         buildFancyButton(
           text: 'Confirmar respuesta',
+          color: accentYellow,
           icon: Icons.check_rounded,
           onPressed: confirmarRespuesta,
         ),
@@ -1255,6 +1306,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
         buildFancyButton(
           text: 'Estoy listo',
+          color: accentPurple,
           icon: Icons.visibility_rounded,
           onPressed: pasarAJugador2,
         ),
@@ -1343,6 +1395,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
         buildFancyButton(
           text: 'Confirmar',
+          color: accentGreen,
           icon: Icons.check_circle_rounded,
           onPressed: confirmarAdivinanza,
         ),
@@ -1449,6 +1502,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
         buildFancyButton(
           text: 'Terminar ronda',
+          color: accentRed,
           icon: Icons.flag_rounded,
           onPressed: mostrarDialogoFinRonda,
         ),
@@ -1463,40 +1517,42 @@ class _EscalaScreenState extends State<EscalaScreen> {
       case 0:
         contenido = buildPantallaElegirEscala();
         break;
-
       case 1:
         contenido = buildPantallaInicioJugador1();
         break;
-
       case 2:
         contenido = buildPantallaRespuesta();
         break;
-
       case 3:
         contenido = buildPantallaPasarMovil();
         break;
-
       case 4:
         contenido = buildPantallaAdivinar();
         break;
-
       case 5:
         contenido = buildPantallaResultado();
         break;
-
       default:
         contenido = const SizedBox.shrink();
     }
 
-    // La configuración ya tiene su propio scroll.
-    if (fase == 0) {
-      return contenido;
-    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final slide = Tween<Offset>(
+          begin: const Offset(0.04, 0),
+          end: Offset.zero,
+        ).animate(animation);
 
-    // El resto de pantallas pueden desplazarse
-    // si el móvil es demasiado pequeño.
-    return SingleChildScrollView(
-      child: Padding(
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(position: slide, child: child),
+        );
+      },
+      child: SingleChildScrollView(
+        key: ValueKey(fase),
         padding: const EdgeInsets.only(bottom: 4),
         child: contenido,
       ),
@@ -1508,23 +1564,29 @@ class _EscalaScreenState extends State<EscalaScreen> {
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              buildTopBar(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 13.0 : 18.0;
+            final verticalPadding = compact ? 11.0 : 18.0;
 
-              const SizedBox(height: 14),
-
-
-
-              const SizedBox(height: 14),
-
-              Expanded(
-                child: buildContenido(),
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 10 : 16,
               ),
-            ],
-          ),
+              child: Column(
+                children: [
+                  buildTopBar(compact: compact),
+
+
+                  Expanded(child: buildContenido()),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

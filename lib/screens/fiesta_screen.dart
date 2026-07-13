@@ -69,7 +69,7 @@ class FiestaScreen extends StatelessWidget {
               top: 0,
               left: 0,
               child: Text(
-                'party',
+                'fiesta',
                 style: TextStyle(
                   color: white,
                   fontSize: 66,
