@@ -161,7 +161,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      showRulesDialog();
     });
   }
 
@@ -551,10 +550,15 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     return sorted;
   }
 
-  ButtonStyle mainButtonStyle() {
+  ButtonStyle mainButtonStyle({
+    Color backgroundColor = appWhite,
+    Color foregroundColor = appBlue,
+  }) {
     return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      disabledBackgroundColor: backgroundColor.withOpacity(0.25),
+      disabledForegroundColor: foregroundColor.withOpacity(0.45),
       elevation: 0,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
@@ -578,40 +582,39 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   Widget circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
+    final size = compact ? 42.0 : 50.0;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: appWhite.withOpacity(0.85),
+              width: 2.2,
+            ),
           ),
+          child: Center(child: child),
         ),
-        child: Center(child: child),
       ),
     );
   }
 
   Widget buildTopBar({
-    required String title,
+    required bool compact,
     String? subtitle,
+    bool showReset = false,
   }) {
-    String visualTitle = title.toLowerCase();
-
-    if (visualTitle == 'describe la palabra') {
-      visualTitle = 'describe\nla palabra';
-    }
-
-    if (visualTitle.length > 18 && !visualTitle.contains('\n')) {
-      visualTitle = visualTitle.replaceFirst(' ', '\n');
-    }
-
-    final bool multiline = visualTitle.contains('\n');
-    final double titleHeight = multiline ? 86 : 58;
+    final titleSize = compact ? 31.0 : 40.0;
+    final titleHeight = compact ? 62.0 : 82.0;
+    final lineTop = compact ? 53.0 : 70.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -620,55 +623,74 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             circleButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 '8',
                 style: TextStyle(
                   color: appWhite,
-                  fontSize: 19,
+                  fontSize: compact ? 16 : 19,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ),
-            circleButton(
-              onTap: showRulesDialog,
-              child: const Icon(
-                Icons.question_mark_rounded,
-                color: appWhite,
-                size: 27,
-              ),
+            Row(
+              children: [
+                if (showReset) ...[
+                  circleButton(
+                    compact: compact,
+                    onTap: resetAll,
+                    child: Icon(
+                      Icons.restart_alt_rounded,
+                      color: appWhite,
+                      size: compact ? 22 : 27,
+                    ),
+                  ),
+                  SizedBox(width: compact ? 9 : 12),
+                ],
+                circleButton(
+                  compact: compact,
+                  onTap: showRulesDialog,
+                  child: Icon(
+                    Icons.question_mark_rounded,
+                    color: appWhite,
+                    size: compact ? 22 : 27,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-
-        const SizedBox(height: 24),
-
+        SizedBox(height: compact ? 12 : 22),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(left: compact ? 16 : 28),
           child: SizedBox(
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Text(
-                    visualTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 39,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        'describe la palabra',
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.65,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: titleHeight - 10,
+                  top: lineTop,
                   left: 0,
                   right: -18,
                   child: Container(
@@ -680,12 +702,14 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             ),
           ),
         ),
-
         if (subtitle != null) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: compact ? 6 : 10),
           buildInfoBar(
             text: subtitle,
-            color: getRoundAccent(currentRound),
+            color: currentStep == DescribeStep.setup
+                ? accentCyan
+                : getRoundAccent(currentRound),
+            compact: compact,
           ),
         ],
       ],
@@ -694,18 +718,19 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
 
   Widget buildInfoBar({
     required String text,
-    Color color = accentCyan,
+    required Color color,
+    required bool compact,
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: compact ? 8 : 10,
+      ),
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.06),
         border: Border(
-          left: BorderSide(
-            color: color,
-            width: 6,
-          ),
+          left: BorderSide(color: color, width: 6),
           bottom: BorderSide(
             color: appWhite.withOpacity(0.36),
             width: 2,
@@ -715,8 +740,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       child: Text(
         text,
         style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
+          color: appWhite.withOpacity(0.78),
+          fontSize: compact ? 11.5 : 12.5,
           fontWeight: FontWeight.w700,
           height: 1.25,
         ),
@@ -724,34 +749,53 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     );
   }
 
-  Widget buildGlassCard({
+  Widget buildPanel({
     required Widget child,
     EdgeInsets? padding,
+    Color? accent,
   }) {
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(16),
+      padding: padding ?? const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
+        border: Border(
+          left: BorderSide(
+            color: accent ?? appWhite.withOpacity(0.28),
+            width: accent == null ? 1.4 : 6,
+          ),
+          top: BorderSide(
+            color: appWhite.withOpacity(0.22),
+            width: 1.2,
+          ),
+          right: BorderSide(
+            color: appWhite.withOpacity(0.22),
+            width: 1.2,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.32),
+            width: 2,
+          ),
         ),
       ),
       child: child,
     );
   }
 
-  InputDecoration inputDecoration(String hint) {
+  InputDecoration inputDecoration(String hint, {bool dense = false}) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
-        color: appWhite.withOpacity(0.45),
+        color: appWhite.withOpacity(0.43),
         fontWeight: FontWeight.w600,
       ),
       filled: true,
       fillColor: appWhite.withOpacity(0.07),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      isDense: dense,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: dense ? 11 : 14,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(
@@ -768,24 +812,405 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       ),
       focusedBorder: const OutlineInputBorder(
         borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite,
-          width: 2,
+        borderSide: BorderSide(color: appWhite, width: 2),
+      ),
+    );
+  }
+
+  Widget sectionTitle(String text, {bool compact = false}) {
+    return Text(
+      text.toLowerCase(),
+      style: TextStyle(
+        color: appWhite,
+        fontSize: compact ? 24 : 29,
+        height: 0.95,
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.7,
+      ),
+    );
+  }
+
+  int get _roundNumber {
+    switch (currentRound) {
+      case DescribeRoundType.describe:
+        return 1;
+      case DescribeRoundType.mime:
+        return 2;
+      case DescribeRoundType.sounds:
+        return 3;
+    }
+  }
+
+  String get _roundShortName {
+    switch (currentRound) {
+      case DescribeRoundType.describe:
+        return 'DESCRIBIR';
+      case DescribeRoundType.mime:
+        return 'MÍMICA';
+      case DescribeRoundType.sounds:
+        return 'SONIDOS';
+    }
+  }
+
+  Widget buildRoundProgress({required bool compact}) {
+    return Row(
+      children: List.generate(3, (index) {
+        final number = index + 1;
+        final active = number == _roundNumber;
+        final completed = number < _roundNumber;
+        final Color color = index == 0
+            ? accentCyan
+            : index == 1
+            ? accentYellow
+            : accentPurple;
+
+        return Expanded(
+          child: Container(
+            height: compact ? 7 : 9,
+            margin: EdgeInsets.only(right: index == 2 ? 0 : 7),
+            decoration: BoxDecoration(
+              color: active || completed
+                  ? color
+                  : appWhite.withOpacity(0.14),
+              border: Border.all(
+                color: active
+                    ? appWhite.withOpacity(0.80)
+                    : appWhite.withOpacity(0.16),
+                width: active ? 1.6 : 1,
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _smallLabel(String text) {
+    return Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        color: appWhite.withOpacity(0.67),
+        fontSize: 10.5,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 0.7,
+      ),
+    );
+  }
+
+  Widget _compactActionButton({
+    required IconData icon,
+    required String label,
+    required Color backgroundColor,
+    required Color foregroundColor,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    return Expanded(
+      child: SizedBox(
+        height: compact ? 52 : 60,
+        child: Material(
+          color: onTap == null
+              ? backgroundColor.withOpacity(0.28)
+              : backgroundColor,
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: compact ? 7 : 10),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: appWhite.withOpacity(onTap == null ? 0.12 : 0.28),
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: foregroundColor.withOpacity(onTap == null ? 0.4 : 1),
+                    size: compact ? 22 : 25,
+                  ),
+                  SizedBox(width: compact ? 6 : 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: foregroundColor.withOpacity(onTap == null ? 0.4 : 1),
+                        fontSize: compact ? 10.5 : 12,
+                        height: 1.05,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.25,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget sectionTitle(String text) {
-    return Text(
-      text.toLowerCase(),
-      style: const TextStyle(
-        color: appWhite,
-        fontSize: 29,
-        height: 0.95,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -0.7,
+  Widget _sourceSelector({required bool compact}) {
+    Widget option({
+      required WordsSource value,
+      required String label,
+      required IconData icon,
+    }) {
+      final selected = wordsSource == value;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => setState(() => wordsSource = value),
+          child: Container(
+            height: compact ? 58 : 66,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: selected
+                  ? accentPurple
+                  : appWhite.withOpacity(0.07),
+              border: Border.all(
+                color: selected
+                    ? appWhite
+                    : appWhite.withOpacity(0.24),
+                width: selected ? 2 : 1.3,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: appWhite, size: compact ? 21 : 24),
+                const SizedBox(width: 7),
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: compact ? 10.5 : 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        option(
+          value: WordsSource.app,
+          label: 'PALABRAS APP',
+          icon: Icons.auto_awesome_rounded,
+        ),
+        const SizedBox(width: 9),
+        option(
+          value: WordsSource.custom,
+          label: 'MI LISTA',
+          icon: Icons.edit_note_rounded,
+        ),
+      ],
+    );
+  }
+
+  Widget _teamSummaryCard(DescribeTeam team, int index) {
+    final colors = [accentCyan, accentYellow, accentPurple, accentGreen];
+    final color = colors[index % colors.length];
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.07),
+        border: Border(
+          left: BorderSide(color: color, width: 5),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.25),
+            width: 2,
+          ),
+        ),
       ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(0.20),
+              border: Border.all(color: color, width: 1.5),
+            ),
+            child: Center(
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  team.name.toUpperCase(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  team.players.isEmpty
+                      ? 'Sin jugadores'
+                      : team.players.join(' · '),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.66),
+                    fontSize: 11.5,
+                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scoreStrip({required bool compact}) {
+    final colors = [accentCyan, accentYellow, accentPurple, accentGreen];
+
+    return SizedBox(
+      height: compact ? 58 : 66,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: sortedTeams.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (_, index) {
+          final team = sortedTeams[index];
+          final color = colors[index % colors.length];
+          return Container(
+            width: compact ? 105 : 118,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.08),
+              border: Border(
+                left: BorderSide(color: color, width: 5),
+                bottom: BorderSide(
+                  color: appWhite.withOpacity(0.26),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  team.name.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.70),
+                    fontSize: compact ? 9 : 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${team.points} pts',
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: compact ? 17 : 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildScoreBoard({bool compact = false}) {
+    final colors = [accentCyan, accentYellow, accentPurple, accentGreen];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        sectionTitle('Puntuación', compact: compact),
+        SizedBox(height: compact ? 9 : 12),
+        ...sortedTeams.asMap().entries.map((entry) {
+          final index = entry.key;
+          final team = entry.value;
+          final color = colors[index % colors.length];
+
+          return Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: compact ? 9 : 11,
+            ),
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.07),
+              border: Border(
+                left: BorderSide(color: color, width: 5),
+                bottom: BorderSide(
+                  color: appWhite.withOpacity(0.25),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  '${index + 1}',
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.58),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    team.name,
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${team.points} pts',
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 
@@ -807,11 +1232,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
+          Icon(icon, color: appWhite, size: 22),
           const SizedBox(width: 11),
           Expanded(
             child: Column(
@@ -848,7 +1269,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withOpacity(0.50),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
@@ -857,13 +1278,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           decoration: BoxDecoration(
             color: appBlue,
             border: Border.all(
-              color: appWhite.withOpacity(0.75),
+              color: appWhite.withOpacity(0.78),
               width: 2.2,
             ),
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.78,
+              maxHeight: MediaQuery.of(context).size.height * 0.80,
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -903,16 +1324,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-
+                  Container(height: 3, color: appWhite.withOpacity(0.58)),
                   const SizedBox(height: 18),
-
                   const Text(
                     'DESCRIBE LA PALABRA',
                     style: TextStyle(
@@ -922,53 +1336,44 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       letterSpacing: 1.2,
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   rulesItem(
                     icon: Icons.groups_rounded,
                     title: 'Cread equipos',
                     text:
                     'Añadid jugadores, cread equipos y asignad a cada persona a un equipo.',
                   ),
-
                   rulesItem(
                     icon: Icons.list_alt_rounded,
                     title: 'Elegid palabras',
                     text:
                     'Podéis usar palabras de la app o escribir vuestra propia lista.',
                   ),
-
                   rulesItem(
                     icon: Icons.chat_bubble_rounded,
                     title: 'Ronda 1',
                     text:
                     'Describe palabras hablando, pero sin decir la palabra exacta.',
                   ),
-
                   rulesItem(
                     icon: Icons.accessibility_new_rounded,
                     title: 'Ronda 2',
                     text:
                     'Se usan las palabras acertadas de la ronda 1, pero solo con mímica.',
                   ),
-
                   rulesItem(
                     icon: Icons.graphic_eq_rounded,
                     title: 'Ronda 3',
                     text:
                     'Se usan las mismas palabras, pero solo puedes hacer sonidos.',
                   ),
-
                   rulesItem(
                     icon: Icons.emoji_events_rounded,
                     title: 'Puntuación',
                     text:
                     'Cada palabra acertada suma 1 punto. Gana el equipo con más puntos.',
                   ),
-
                   const SizedBox(height: 8),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -996,898 +1401,952 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     );
   }
 
-  Widget buildSetup() {
+  Widget buildSetup({required bool compact}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildTopBar(
-          title: 'Describe la palabra',
-          subtitle: 'Jugadores, equipos y palabras',
+          compact: compact,
+
         ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              sectionTitle('Añadir jugadores'),
-
-              const SizedBox(height: 14),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: playerController,
-                      style: const TextStyle(
-                        color: appWhite,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      cursorColor: appWhite,
-                      decoration: inputDecoration('Nombre del jugador'),
-                      onSubmitted: (_) => addPlayer(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: addPlayer,
-                    style: mainButtonStyle(),
-                    child: const Padding(
-                      padding:
-                      EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                      child: Icon(Icons.add_rounded),
-                    ),
-                  ),
-                ],
-              ),
-
-              if (allPlayers.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: List.generate(allPlayers.length, (index) {
-                    return Chip(
-                      backgroundColor: appWhite.withOpacity(0.10),
-                      side: BorderSide(
-                        color: appWhite.withOpacity(0.28),
-                      ),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      label: Text(
-                        allPlayers[index],
-                        style: const TextStyle(
-                          color: appWhite,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      deleteIconColor: appWhite.withOpacity(0.8),
-                      onDeleted: () => removePlayer(index),
-                    );
-                  }),
-                ),
-              ],
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 14),
-
-        buildGlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              sectionTitle('Equipos'),
-
-              const SizedBox(height: 14),
-
-              Text(
-                'NÚMERO DE EQUIPOS',
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.7,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: teamCountController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w700,
-                ),
-                cursorColor: appWhite,
-                decoration: inputDecoration('Ejemplo: 2'),
-              ),
-
-              const SizedBox(height: 14),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: createEmptyTeams,
-                      style: mainButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'CREAR',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
+        SizedBox(height: compact ? 10 : 14),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buildPanel(
+                  accent: accentCyan,
+                  padding: EdgeInsets.all(compact ? 12 : 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: compact ? 42 : 48,
+                            height: compact ? 42 : 48,
+                            decoration: BoxDecoration(
+                              color: accentCyan.withOpacity(0.18),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: accentCyan, width: 1.8),
+                            ),
+                            child: Icon(
+                              Icons.person_add_alt_1_rounded,
+                              color: appWhite,
+                              size: compact ? 22 : 26,
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: autoDistributePlayers,
-                      style: secondaryButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'ALEATORIO',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
+                          const SizedBox(width: 11),
+                          Expanded(
+                            child: sectionTitle(
+                              'Jugadores',
+                              compact: compact,
+                            ),
                           ),
-                        ),
+                          Text(
+                            '${allPlayers.length}',
+                            style: TextStyle(
+                              color: accentCyan,
+                              fontSize: compact ? 24 : 28,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
-
-              if (teams.isNotEmpty) ...[
-                const SizedBox(height: 18),
-
-                Text(
-                  'ASIGNAR JUGADORES',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.70),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.7,
+                      SizedBox(height: compact ? 11 : 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: playerController,
+                              style: const TextStyle(
+                                color: appWhite,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              cursorColor: appWhite,
+                              decoration: inputDecoration(
+                                'Nombre del jugador',
+                                dense: compact,
+                              ),
+                              onSubmitted: (_) => addPlayer(),
+                            ),
+                          ),
+                          const SizedBox(width: 9),
+                          SizedBox(
+                            width: compact ? 48 : 54,
+                            height: compact ? 48 : 54,
+                            child: ElevatedButton(
+                              onPressed: addPlayer,
+                              style: mainButtonStyle(
+                                backgroundColor: accentCyan,
+                                foregroundColor: appBlue,
+                              ),
+                              child: const Icon(Icons.add_rounded),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (allPlayers.isNotEmpty) ...[
+                        const SizedBox(height: 11),
+                        Wrap(
+                          spacing: 7,
+                          runSpacing: 7,
+                          children: List.generate(allPlayers.length, (index) {
+                            return InputChip(
+                              backgroundColor: appWhite.withOpacity(0.09),
+                              side: BorderSide(
+                                color: appWhite.withOpacity(0.25),
+                              ),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
+                              label: Text(
+                                allPlayers[index],
+                                style: const TextStyle(
+                                  color: appWhite,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              deleteIconColor: appWhite.withOpacity(0.8),
+                              onDeleted: () => removePlayer(index),
+                            );
+                          }),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
+                SizedBox(height: compact ? 9 : 12),
+                buildPanel(
+                  accent: accentYellow,
+                  padding: EdgeInsets.all(compact ? 12 : 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      sectionTitle('Equipos', compact: compact),
+                      SizedBox(height: compact ? 10 : 13),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final narrow = constraints.maxWidth < 390;
 
-                const SizedBox(height: 10),
-
-                ...allPlayers.map((player) {
-                  final assignedTeam = getPlayerAssignedTeamIndex(player);
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: appWhite.withOpacity(0.07),
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.22),
-                        width: 1.3,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            player,
+                          final teamCountField = TextField(
+                            controller: teamCountController,
+                            keyboardType: TextInputType.number,
                             style: const TextStyle(
                               color: appWhite,
                               fontWeight: FontWeight.w800,
                             ),
+                            cursorColor: appWhite,
+                            decoration: inputDecoration(
+                              'Número de equipos',
+                              dense: compact,
+                            ),
+                          );
+
+                          final createButton = SizedBox(
+                            height: compact ? 48 : 54,
+                            child: ElevatedButton(
+                              onPressed: createEmptyTeams,
+                              style: mainButtonStyle(
+                                backgroundColor: accentYellow,
+                                foregroundColor: appBlue,
+                              ),
+                              child: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'CREAR',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+
+                          final shuffleButton = SizedBox(
+                            height: compact ? 48 : 54,
+                            child: OutlinedButton.icon(
+                              onPressed: autoDistributePlayers,
+                              style: secondaryButtonStyle(),
+                              icon: Icon(
+                                Icons.shuffle_rounded,
+                                size: compact ? 20 : 23,
+                              ),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'REPARTIR',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+
+                          if (narrow) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                teamCountField,
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Expanded(child: createButton),
+                                    const SizedBox(width: 8),
+                                    Expanded(child: shuffleButton),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: teamCountField,
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 92,
+                                child: createButton,
+                              ),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 118,
+                                child: shuffleButton,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      if (teams.isNotEmpty) ...[
+                        SizedBox(height: compact ? 12 : 15),
+                        _smallLabel('Asignar jugadores'),
+                        const SizedBox(height: 8),
+                        ...allPlayers.map((player) {
+                          final assignedTeam =
+                          getPlayerAssignedTeamIndex(player);
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: appWhite.withOpacity(0.06),
+                              border: Border.all(
+                                color: appWhite.withOpacity(0.20),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    player,
+                                    style: const TextStyle(
+                                      color: appWhite,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                DropdownButton<int>(
+                                  value: assignedTeam,
+                                  dropdownColor: appBlue,
+                                  hint: Text(
+                                    'Equipo',
+                                    style: TextStyle(
+                                      color: appWhite.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  style: const TextStyle(
+                                    color: appWhite,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  underline: const SizedBox.shrink(),
+                                  iconEnabledColor: appWhite,
+                                  items: List.generate(
+                                    teams.length,
+                                        (index) => DropdownMenuItem(
+                                      value: index,
+                                      child: Text(
+                                        teams[index].name,
+                                        style: const TextStyle(
+                                          color: appWhite,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      assignPlayerToTeam(player, value);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        SizedBox(height: compact ? 6 : 9),
+                        ...teams.asMap().entries.map(
+                              (entry) => _teamSummaryCard(
+                            entry.value,
+                            entry.key,
                           ),
                         ),
-                        DropdownButton<int>(
-                          value: assignedTeam,
-                          dropdownColor: appBlue,
-                          hint: Text(
-                            'Equipo',
-                            style: TextStyle(
-                              color: appWhite.withOpacity(0.7),
-                            ),
-                          ),
+                      ],
+                    ],
+                  ),
+                ),
+                SizedBox(height: compact ? 9 : 12),
+                buildPanel(
+                  accent: accentPurple,
+                  padding: EdgeInsets.all(compact ? 12 : 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      sectionTitle('Palabras y tiempo', compact: compact),
+                      SizedBox(height: compact ? 10 : 13),
+                      _sourceSelector(compact: compact),
+                      if (wordsSource == WordsSource.custom) ...[
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: customWordsController,
+                          minLines: 4,
+                          maxLines: 7,
                           style: const TextStyle(
                             color: appWhite,
                             fontWeight: FontWeight.w700,
                           ),
-                          underline: const SizedBox(),
-                          iconEnabledColor: appWhite,
-                          items: List.generate(
-                            teams.length,
-                                (index) => DropdownMenuItem(
-                              value: index,
-                              child: Text(
-                                teams[index].name,
-                                style: const TextStyle(color: appWhite),
+                          cursorColor: appWhite,
+                          decoration: inputDecoration(
+                            'Una palabra por línea\nPerro\nAvión\nPizza',
+                            dense: compact,
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: compact ? 11 : 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _smallLabel('Segundos por turno'),
+                                const SizedBox(height: 7),
+                                TextField(
+                                  controller: secondsController,
+                                  keyboardType: TextInputType.number,
+                                  style: const TextStyle(
+                                    color: appWhite,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                  cursorColor: appWhite,
+                                  decoration: inputDecoration(
+                                    '30',
+                                    dense: compact,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              height: compact ? 67 : 74,
+                              decoration: BoxDecoration(
+                                color: appWhite.withOpacity(0.06),
+                                border: Border.all(
+                                  color: appWhite.withOpacity(0.20),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.layers_rounded,
+                                    color: appWhite,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '3 RONDAS',
+                                    style: TextStyle(
+                                      color: appWhite.withOpacity(0.76),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          onChanged: (value) {
-                            if (value != null) {
-                              assignPlayerToTeam(player, value);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-
-                const SizedBox(height: 8),
-
-                ...teams.map(
-                      (team) => Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: appWhite.withOpacity(0.07),
-                      border: Border(
-                        left: BorderSide(
-                          color: accentCyan,
-                          width: 6,
-                        ),
-                        bottom: BorderSide(
-                          color: appWhite.withOpacity(0.28),
-                          width: 2,
-                        ),
+                        ],
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          team.name.toUpperCase(),
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          team.players.isEmpty
-                              ? 'Sin jugadores'
-                              : team.players.join(', '),
-                          style: TextStyle(
-                            color: appWhite.withOpacity(0.72),
-                            height: 1.35,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ]
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 14),
-
-        buildGlassCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              sectionTitle('Palabras y tiempo'),
-
-              const SizedBox(height: 14),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.07),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.22),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    RadioListTile<WordsSource>(
-                      value: WordsSource.app,
-                      groupValue: wordsSource,
-                      activeColor: appWhite,
-                      title: const Text(
-                        'Palabras de la app',
-                        style: TextStyle(
-                          color: appWhite,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          wordsSource = value!;
-                        });
-                      },
-                    ),
-                    RadioListTile<WordsSource>(
-                      value: WordsSource.custom,
-                      groupValue: wordsSource,
-                      activeColor: appWhite,
-                      title: const Text(
-                        'Escribir mi lista',
-                        style: TextStyle(
-                          color: appWhite,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          wordsSource = value!;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              if (wordsSource == WordsSource.custom) ...[
-                const SizedBox(height: 12),
-                TextField(
-                  controller: customWordsController,
-                  maxLines: 8,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: appWhite,
-                  decoration: inputDecoration(
-                    'Una palabra por línea\nPerro\nAvión\nPizza',
+                    ],
                   ),
                 ),
               ],
-
-              const SizedBox(height: 14),
-
-              Text(
-                'SEGUNDOS POR TURNO',
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.7,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: secondsController,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w700,
-                ),
-                cursorColor: appWhite,
-                decoration: inputDecoration('Ejemplo: 30'),
-              ),
-
-              const SizedBox(height: 18),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: startGame,
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      'EMPEZAR JUEGO',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget buildRoundIntro() {
-    final team = teams[currentTeamIndex];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: getRoundTitle(currentRound),
-          subtitle: getRoundDescription(currentRound),
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: Icon(
-                  getRoundIcon(currentRound),
-                  color: appWhite,
-                  size: 38,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                team.name.toLowerCase(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 38,
-                  height: 0.9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Text(
-                'DESCRIBE: ${team.currentDescriber}'.toUpperCase(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.78),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.5,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                'Palabras restantes: ${currentRoundWords.length}',
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.65),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 22),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: startTurn,
-                  style: mainButtonStyle(),
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      'EMPEZAR TURNO',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 14),
-
-        buildScoreCard(),
-      ],
-    );
-  }
-
-  Widget buildTurn() {
-    final team = teams[currentTeamIndex];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: team.name,
-          subtitle: 'Describe: ${team.currentDescriber}',
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: 92,
-                height: 92,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    '$remainingSeconds',
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 38,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 28,
-                ),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.30),
-                    width: 1.4,
-                  ),
-                ),
-                child: Text(
-                  currentWord.toLowerCase(),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 39,
-                    height: 0.95,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: passWord,
-                      style: secondaryButtonStyle(),
-                      icon: const Icon(Icons.skip_next_rounded),
-                      label: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'PASAR',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: markCorrect,
-                      style: mainButtonStyle(),
-                      icon: const Icon(Icons.check_rounded),
-                      label: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'ACIERTO',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 14),
-
-        buildScoreCard(),
-      ],
-    );
-  }
-
-  Widget buildRoundFinished() {
-    final isLastRound = currentRound == DescribeRoundType.sounds;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: '${getRoundTitle(currentRound)} terminada',
-          subtitle: 'Resumen de puntuaciones',
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.flag_rounded,
-                  color: appWhite,
-                  size: 36,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Text(
-                currentRound == DescribeRoundType.describe
-                    ? 'Las palabras acertadas pasan a la ronda 2'
-                    : currentRound == DescribeRoundType.mime
-                    ? 'Las mismas palabras pasan a la ronda 3'
-                    : 'Habéis terminado el juego',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.82),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  height: 1.35,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              buildScoreBoard(),
-
-              const SizedBox(height: 18),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: goToNextRound,
-                  style: mainButtonStyle(),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      isLastRound ? 'VER GANADOR' : 'SIGUIENTE RONDA',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildGameFinished() {
-    final winner = winningTeam;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTopBar(
-          title: 'Juego terminado',
-          subtitle: 'Ya tenemos ganador',
-        ),
-
-        const SizedBox(height: 18),
-
-        buildGlassCard(
-          child: Column(
-            children: [
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.emoji_events_rounded,
-                  color: appWhite,
-                  size: 39,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              const Text(
-                'ganador',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 38,
-                  height: 0.9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Text(
-                winner.name.toLowerCase(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 34,
-                  height: 0.95,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.7,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                '${winner.points} puntos',
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.75),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              buildScoreBoard(),
-
-              const SizedBox(height: 18),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: secondaryButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'MENÚ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: resetAll,
-                      style: mainButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 13),
-                        child: Text(
-                          'OTRA VEZ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildScoreCard() {
-    return buildGlassCard(
-      padding: const EdgeInsets.all(14),
-      child: buildScoreBoard(),
-    );
-  }
-
-  Widget buildScoreBoard() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'puntuación',
-          style: TextStyle(
-            color: appWhite,
-            fontSize: 25,
-            height: 0.95,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        ...sortedTeams.map(
-              (team) => Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.07),
-              border: Border(
-                left: BorderSide(
-                  color: accentGreen,
-                  width: 5,
-                ),
-                bottom: BorderSide(
-                  color: appWhite.withOpacity(0.25),
-                  width: 2,
-                ),
+        SizedBox(height: compact ? 8 : 12),
+        SizedBox(
+          width: double.infinity,
+          height: compact ? 54 : 62,
+          child: ElevatedButton.icon(
+            onPressed: startGame,
+            style: mainButtonStyle(
+              backgroundColor: accentGreen,
+              foregroundColor: appBlue,
+            ),
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: const Text(
+              'EMPEZAR JUEGO',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
               ),
             ),
-            child: Row(
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildRoundIntro({required bool compact}) {
+    final team = teams[currentTeamIndex];
+    final accent = getRoundAccent(currentRound);
+
+    return Column(
+      children: [
+        buildTopBar(
+          compact: compact,
+          subtitle: getRoundDescription(currentRound),
+          showReset: true,
+        ),
+        SizedBox(height: compact ? 9 : 12),
+        buildRoundProgress(compact: compact),
+        SizedBox(height: compact ? 9 : 13),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
               children: [
+                buildPanel(
+                  accent: accent,
+                  padding: EdgeInsets.all(compact ? 15 : 20),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: compact ? 68 : 82,
+                        height: compact ? 68 : 82,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accent.withOpacity(0.20),
+                          border: Border.all(color: accent, width: 2.2),
+                        ),
+                        child: Icon(
+                          getRoundIcon(currentRound),
+                          color: appWhite,
+                          size: compact ? 34 : 41,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 12 : 16),
+                      Text(
+                        'RONDA $_roundNumber · $_roundShortName',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: accent,
+                          fontSize: compact ? 12 : 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 7 : 10),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          team.name.toLowerCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: compact ? 37 : 46,
+                            height: 0.92,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: compact ? 12 : 16),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 13,
+                          vertical: compact ? 11 : 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: appWhite.withOpacity(0.07),
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.24),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.record_voice_over_rounded,
+                              color: appWhite,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _smallLabel('Le toca a'),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    team.currentDescriber,
+                                    style: TextStyle(
+                                      color: appWhite,
+                                      fontSize: compact ? 17 : 20,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _smallLabel('Palabras'),
+                                const SizedBox(height: 3),
+                                Text(
+                                  '${currentRoundWords.length}',
+                                  style: TextStyle(
+                                    color: accent,
+                                    fontSize: compact ? 22 : 26,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: compact ? 9 : 12),
+                _scoreStrip(compact: compact),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: compact ? 8 : 12),
+        SizedBox(
+          width: double.infinity,
+          height: compact ? 54 : 62,
+          child: ElevatedButton.icon(
+            onPressed: startTurn,
+            style: mainButtonStyle(
+              backgroundColor: accent,
+              foregroundColor: currentRound == DescribeRoundType.mime
+                  ? appBlue
+                  : appWhite,
+            ),
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: const Text(
+              'EMPEZAR TURNO',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildTurn({required bool compact}) {
+    final team = teams[currentTeamIndex];
+    final accent = getRoundAccent(currentRound);
+    final danger = remainingSeconds <= 5;
+
+    return Column(
+      children: [
+        buildTopBar(
+          compact: compact,
+          subtitle: '${team.name} · ${team.currentDescriber}',
+          showReset: true,
+        ),
+        SizedBox(height: compact ? 8 : 11),
+        buildRoundProgress(compact: compact),
+        SizedBox(height: compact ? 8 : 11),
+        _scoreStrip(compact: compact),
+        SizedBox(height: compact ? 8 : 11),
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(compact ? 13 : 18),
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.08),
+              border: Border.all(
+                color: accent.withOpacity(0.88),
+                width: 2.2,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 10 : 13,
+                        vertical: compact ? 7 : 9,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accent.withOpacity(0.18),
+                        border: Border.all(color: accent, width: 1.5),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            getRoundIcon(currentRound),
+                            color: appWhite,
+                            size: compact ? 18 : 21,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _roundShortName,
+                            style: TextStyle(
+                              color: appWhite,
+                              fontSize: compact ? 10 : 11.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: compact ? 62 : 72,
+                      height: compact ? 62 : 72,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (danger ? const Color(0xFFFF4D6D) : accent)
+                            .withOpacity(0.20),
+                        border: Border.all(
+                          color: danger ? const Color(0xFFFF4D6D) : accent,
+                          width: 2.6,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$remainingSeconds',
+                          style: TextStyle(
+                            color: danger
+                                ? const Color(0xFFFF8FA3)
+                                : appWhite,
+                            fontSize: compact ? 27 : 32,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 Expanded(
-                  child: Text(
-                    team.name,
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontWeight: FontWeight.w800,
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          currentWord.toLowerCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: compact ? 43 : 56,
+                            height: 0.92,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.4,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Text(
-                  '${team.points} pts',
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontWeight: FontWeight.w900,
+                  'Quedan ${currentRoundWords.length} palabras',
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.60),
+                    fontSize: compact ? 11 : 12.5,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
             ),
           ),
+        ),
+        SizedBox(height: compact ? 8 : 12),
+        Row(
+          children: [
+            _compactActionButton(
+              icon: Icons.skip_next_rounded,
+              label: 'PASAR',
+              backgroundColor: appWhite.withOpacity(0.10),
+              foregroundColor: appWhite,
+              onTap: passWord,
+              compact: compact,
+            ),
+            const SizedBox(width: 9),
+            _compactActionButton(
+              icon: Icons.check_rounded,
+              label: 'ACIERTO',
+              backgroundColor: accentGreen,
+              foregroundColor: appWhite,
+              onTap: markCorrect,
+              compact: compact,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget buildRoundFinished({required bool compact}) {
+    final isLastRound = currentRound == DescribeRoundType.sounds;
+    final accent = getRoundAccent(currentRound);
+
+    return Column(
+      children: [
+        buildTopBar(
+          compact: compact,
+          subtitle: 'Ronda $_roundNumber completada',
+          showReset: true,
+        ),
+        SizedBox(height: compact ? 9 : 12),
+        buildRoundProgress(compact: compact),
+        SizedBox(height: compact ? 9 : 13),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                buildPanel(
+                  accent: accent,
+                  padding: EdgeInsets.all(compact ? 15 : 19),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: compact ? 68 : 80,
+                        height: compact ? 68 : 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accent.withOpacity(0.20),
+                          border: Border.all(color: accent, width: 2.2),
+                        ),
+                        child: Icon(
+                          Icons.flag_rounded,
+                          color: appWhite,
+                          size: compact ? 34 : 40,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 12 : 16),
+                      Text(
+                        isLastRound ? 'juego completado' : 'ronda completada',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: compact ? 31 : 39,
+                          height: 0.92,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.9,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 10 : 13),
+                      Text(
+                        currentRound == DescribeRoundType.describe
+                            ? 'Las palabras acertadas pasan ahora a la ronda de mímica.'
+                            : currentRound == DescribeRoundType.mime
+                            ? 'Las mismas palabras pasan ahora a la ronda de sonidos.'
+                            : 'Las tres rondas han terminado. Ya podéis ver el ganador.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: appWhite.withOpacity(0.76),
+                          fontSize: compact ? 12.5 : 14,
+                          height: 1.35,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: compact ? 9 : 12),
+                buildPanel(
+                  padding: EdgeInsets.all(compact ? 12 : 15),
+                  child: buildScoreBoard(compact: compact),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: compact ? 8 : 12),
+        SizedBox(
+          width: double.infinity,
+          height: compact ? 54 : 62,
+          child: ElevatedButton.icon(
+            onPressed: goToNextRound,
+            style: mainButtonStyle(
+              backgroundColor: isLastRound ? accentGreen : accent,
+              foregroundColor: currentRound == DescribeRoundType.mime
+                  ? appBlue
+                  : appWhite,
+            ),
+            icon: Icon(
+              isLastRound
+                  ? Icons.emoji_events_rounded
+                  : Icons.arrow_forward_rounded,
+            ),
+            label: Text(
+              isLastRound ? 'VER GANADOR' : 'SIGUIENTE RONDA',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildGameFinished({required bool compact}) {
+    final winner = winningTeam;
+
+    return Column(
+      children: [
+        buildTopBar(
+          compact: compact,
+          subtitle: 'La partida ha terminado',
+          showReset: true,
+        ),
+        SizedBox(height: compact ? 9 : 13),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    compact ? 20 : 26,
+                    16,
+                    compact ? 18 : 23,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accentYellow,
+                    border: Border.all(color: appWhite, width: 2.5),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: compact ? 72 : 86,
+                        height: compact ? 72 : 86,
+                        decoration: const BoxDecoration(
+                          color: appWhite,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.emoji_events_rounded,
+                          color: appBlue,
+                          size: compact ? 43 : 52,
+                        ),
+                      ),
+                      SizedBox(height: compact ? 11 : 15),
+                      const Text(
+                        'EQUIPO GANADOR',
+                        style: TextStyle(
+                          color: appBlue,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          winner.name.toLowerCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: appBlue,
+                            fontSize: compact ? 40 : 48,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1.2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${winner.points} PUNTOS',
+                        style: TextStyle(
+                          color: appBlue,
+                          fontSize: compact ? 15 : 17,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: compact ? 9 : 13),
+                buildPanel(
+                  padding: EdgeInsets.all(compact ? 12 : 15),
+                  child: buildScoreBoard(compact: compact),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: compact ? 8 : 12),
+        Row(
+          children: [
+            _compactActionButton(
+              icon: Icons.home_outlined,
+              label: 'MENÚ',
+              backgroundColor: appWhite.withOpacity(0.10),
+              foregroundColor: appWhite,
+              onTap: () => Navigator.pop(context),
+              compact: compact,
+            ),
+            const SizedBox(width: 9),
+            _compactActionButton(
+              icon: Icons.replay_rounded,
+              label: 'OTRA VEZ',
+              backgroundColor: accentGreen,
+              foregroundColor: appWhite,
+              onTap: resetAll,
+              compact: compact,
+            ),
+          ],
         ),
       ],
     );
@@ -1895,34 +2354,54 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Widget body;
-
-    switch (currentStep) {
-      case DescribeStep.setup:
-        body = buildSetup();
-        break;
-      case DescribeStep.roundIntro:
-        body = buildRoundIntro();
-        break;
-      case DescribeStep.turn:
-        body = buildTurn();
-        break;
-      case DescribeStep.roundFinished:
-        body = buildRoundFinished();
-        break;
-      case DescribeStep.gameFinished:
-        body = buildGameFinished();
-        break;
-    }
-
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: SingleChildScrollView(
-            child: body,
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 760;
+            final horizontalPadding = compact ? 12.0 : 18.0;
+            final verticalPadding = compact ? 10.0 : 18.0;
+
+            Widget body;
+            switch (currentStep) {
+              case DescribeStep.setup:
+                body = buildSetup(compact: compact);
+                break;
+              case DescribeStep.roundIntro:
+                body = buildRoundIntro(compact: compact);
+                break;
+              case DescribeStep.turn:
+                body = buildTurn(compact: compact);
+                break;
+              case DescribeStep.roundFinished:
+                body = buildRoundFinished(compact: compact);
+                break;
+              case DescribeStep.gameFinished:
+                body = buildGameFinished(compact: compact);
+                break;
+            }
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 10 : 16,
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: KeyedSubtree(
+                  key: ValueKey(
+                    '${currentStep.name}_${currentRound.name}_$currentTeamIndex',
+                  ),
+                  child: body,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

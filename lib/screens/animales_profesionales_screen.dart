@@ -27,7 +27,6 @@ class _AnimalesProfesionalesScreenState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      mostrarNormas();
     });
   }
 

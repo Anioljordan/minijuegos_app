@@ -135,33 +135,34 @@ class ChillScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final juegos = [
-      {
-        'title': 'La Asamblea',
-        'screen': const AsambleaSetupScreen(),
-      },
+
       {
         'title': 'Impostor',
         'screen': const ImpostorScreen(),
+      },
+      {
+        'title': 'La Asamblea',
+        'screen': const AsambleaSetupScreen(),
       },
       {
         'title': 'BCN Medianoche',
         'screen': const BarcelonaMedianocheScreen(),
       },
       {
-        'title': 'Escala mental',
-        'screen': const EscalaScreen(),
-      },
-      {
-        'title': '4 en raya',
-        'screen': const CuatroEnRayaScreen(),
-      },
-      {
         'title': 'Describe la palabra',
         'screen': const DescribeLaPalabraScreen(),
       },
       {
+        'title': 'Escala mental',
+        'screen': const EscalaScreen(),
+      },
+      {
         'title': 'Color Memory',
         'screen': const ColorDuelScreen(),
+      },
+      {
+        'title': '4 en raya',
+        'screen': const CuatroEnRayaScreen(),
       },
       {
         'title': 'Animales Prof',

@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     AppSettings.instance.load();
 
-    Timer(const Duration(milliseconds: 1800), () {
+    Timer(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
       setState(() {
         showSplash = false;
@@ -528,38 +528,214 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   Widget buildSplash() {
     return Scaffold(
+      key: const ValueKey('splash'),
       backgroundColor: blue,
-      body: Stack(
-        children: [
-          buildTopIcons(),
-          Positioned(
-            left: 28,
-            bottom: 330,
-            child: Text(
-              'Ready\nto play?',
-              style: TextStyle(
-                color: white,
-                fontSize: 66,
-                height: 0.95,
-                fontWeight: FontWeight.w900,
-                shadows: [
-                  Shadow(
-                    color: Colors.white.withOpacity(0.22),
-                    blurRadius: 4,
+      body: SizedBox.expand(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final height = constraints.maxHeight;
+              final shortestSide = width < height ? width : height;
+
+              final compact = height < 680;
+              final logoSize = (shortestSide * 0.40)
+                  .clamp(compact ? 132.0 : 150.0, 240.0)
+                  .toDouble();
+              final titleSize =
+              (width * 0.145).clamp(48.0, 88.0).toDouble();
+              final contentWidth =
+              (width * 0.82).clamp(280.0, 620.0).toDouble();
+              final progressWidth =
+              (width * 0.62).clamp(230.0, 430.0).toDouble();
+              final decorationSize =
+              (shortestSide * 0.72).clamp(260.0, 560.0).toDouble();
+
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    top: -decorationSize * 0.42,
+                    right: -decorationSize * 0.34,
+                    child: Container(
+                      width: decorationSize,
+                      height: decorationSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: white.withOpacity(0.08),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -decorationSize * 0.48,
+                    left: -decorationSize * 0.36,
+                    child: Container(
+                      width: decorationSize * 1.12,
+                      height: decorationSize * 1.12,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: white.withOpacity(0.035),
+                        border: Border.all(
+                          color: white.withOpacity(0.07),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: SizedBox(
+                      width: contentWidth,
+                      height: height,
+                      child: Column(
+                        children: [
+                          const Spacer(flex: 2),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.76, end: 1.0),
+                            duration: const Duration(milliseconds: 950),
+                            curve: Curves.easeOutBack,
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value.clamp(0.0, 1.0).toDouble(),
+                                child: Transform.scale(
+                                  scale: value,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  width: logoSize,
+                                  height: logoSize,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox.expand(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: logoSize * 0.027,
+                                          color: white.withOpacity(0.96),
+                                          backgroundColor:
+                                          white.withOpacity(0.11),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: logoSize * 0.84,
+                                        height: logoSize * 0.84,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: blue,
+                                          border: Border.all(
+                                            color: white.withOpacity(0.78),
+                                            width: logoSize * 0.018,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                              Colors.black.withOpacity(0.20),
+                                              blurRadius: logoSize * 0.20,
+                                              offset: Offset(
+                                                0,
+                                                logoSize * 0.08,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '8',
+                                            style: TextStyle(
+                                              color: white,
+                                              fontSize: logoSize * 0.43,
+                                              height: 1,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: height * 0.035),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'CUBO',
+                                    style: TextStyle(
+                                      color: white,
+                                      fontSize: titleSize,
+                                      height: 0.9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing:
+                                      (titleSize * 0.12).clamp(5.0, 10.0).toDouble(),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: height * 0.018),
+
+                              ],
+                            ),
+                          ),
+                          const Spacer(flex: 2),
+                          SizedBox(
+                            width: progressWidth,
+                            child: Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(999),
+                                  child: LinearProgressIndicator(
+                                    minHeight: (height * 0.007)
+                                        .clamp(5.0, 8.0)
+                                        .toDouble(),
+                                    backgroundColor:
+                                    white.withOpacity(0.12),
+                                    valueColor:
+                                    const AlwaysStoppedAnimation<Color>(
+                                      white,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: height * 0.020),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: compact ? 16 : 20,
+                                      height: compact ? 16 : 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.2,
+                                        color: white.withOpacity(0.76),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 11),
+                                    Text(
+                                      'CARGANDO JUEGOS',
+                                      style: TextStyle(
+                                        color: white.withOpacity(0.80),
+                                        fontSize: (width * 0.027)
+                                            .clamp(11.0, 15.0)
+                                            .toDouble(),
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 1.25,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: height * 0.075),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
-              ),
-            ),
+              );
+            },
           ),
-          Positioned(
-            right: 20,
-            bottom: 0,
-            child: CustomPaint(
-              size: const Size(260, 120),
-              painter: PeopleLinePainter(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -673,6 +849,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildMoodScreen() {
     return Scaffold(
+      key: const ValueKey('mood'),
       backgroundColor: blue,
       body: Stack(
         children: [
@@ -759,7 +936,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 72),
 
                   buildMoodOption(
-                      title: AppSettings.instance.t('chill'),
+                    title: AppSettings.instance.t('chill'),
                     alignment: Alignment.centerRight,
                     onTap: () {
                       Navigator.push(
@@ -793,68 +970,4 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-}
-
-class PeopleLinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.45)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final baseY = size.height * 0.78;
-
-    void person(double x, double scale) {
-      canvas.drawCircle(Offset(x, baseY - 52 * scale), 10 * scale, paint);
-
-      final body = Path()
-        ..moveTo(x, baseY - 42 * scale)
-        ..lineTo(x - 10 * scale, baseY - 10 * scale)
-        ..lineTo(x + 10 * scale, baseY - 10 * scale)
-        ..close();
-
-      canvas.drawPath(body, paint);
-
-      canvas.drawLine(
-        Offset(x - 7 * scale, baseY - 30 * scale),
-        Offset(x - 25 * scale, baseY - 20 * scale),
-        paint,
-      );
-
-      canvas.drawLine(
-        Offset(x + 7 * scale, baseY - 30 * scale),
-        Offset(x + 28 * scale, baseY - 20 * scale),
-        paint,
-      );
-
-      canvas.drawLine(
-        Offset(x - 7 * scale, baseY - 10 * scale),
-        Offset(x - 18 * scale, baseY + 18 * scale),
-        paint,
-      );
-
-      canvas.drawLine(
-        Offset(x + 7 * scale, baseY - 10 * scale),
-        Offset(x + 18 * scale, baseY + 18 * scale),
-        paint,
-      );
-    }
-
-    person(45, 0.85);
-    person(88, 1.0);
-    person(132, 0.9);
-    person(178, 0.95);
-    person(220, 1.1);
-
-    canvas.drawLine(
-      Offset(20, baseY + 18),
-      Offset(size.width - 15, baseY + 18),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

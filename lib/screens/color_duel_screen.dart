@@ -48,17 +48,14 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
   ColorDuelPhase _phase = ColorDuelPhase.setup;
 
-  final TextEditingController _playersCountController =
-  TextEditingController(text: '2');
+  final TextEditingController _playerNameController =
+  TextEditingController();
   final TextEditingController _roundsController =
   TextEditingController(text: '5');
   final TextEditingController _memorizeSecondsController =
   TextEditingController(text: '3');
 
-  List<TextEditingController> _nameControllers = [
-    TextEditingController(text: 'Jugador 1'),
-    TextEditingController(text: 'Jugador 2'),
-  ];
+  final List<String> _setupPlayerNames = [];
 
   List<ColorDuelPlayer> _players = [];
 
@@ -84,21 +81,15 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _showRulesDialog();
     });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _playersCountController.dispose();
+    _playerNameController.dispose();
     _roundsController.dispose();
     _memorizeSecondsController.dispose();
-
-    for (final controller in _nameControllers) {
-      controller.dispose();
-    }
-
     super.dispose();
   }
 
@@ -535,35 +526,50 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  void _updatePlayerControllers() {
-    final count = int.tryParse(_playersCountController.text) ?? 2;
-    final safeCount = count.clamp(1, 12);
-
-    if (_nameControllers.length < safeCount) {
-      for (int i = _nameControllers.length; i < safeCount; i++) {
-        _nameControllers.add(
-          TextEditingController(text: 'Jugador ${i + 1}'),
-        );
-      }
-    } else if (_nameControllers.length > safeCount) {
-      final extra = _nameControllers.sublist(safeCount);
-
-      for (final controller in extra) {
-        controller.dispose();
-      }
-
-      _nameControllers = _nameControllers.sublist(0, safeCount);
-    }
-
-    setState(() {});
+  void _showSetupMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: appBlue,
+        ),
+      );
   }
 
-  void _changePlayersCount(int delta) {
-    final current = int.tryParse(_playersCountController.text) ?? 2;
-    final next = (current + delta).clamp(1, 12);
+  void _addSetupPlayer() {
+    final name = _playerNameController.text.trim();
 
-    _playersCountController.text = next.toString();
-    _updatePlayerControllers();
+    if (name.isEmpty) {
+      _showSetupMessage('Escribe el nombre del jugador.');
+      return;
+    }
+
+    if (_setupPlayerNames.length >= 12) {
+      _showSetupMessage('El máximo es de 12 jugadores.');
+      return;
+    }
+
+    final duplicated = _setupPlayerNames.any(
+          (playerName) => playerName.toLowerCase() == name.toLowerCase(),
+    );
+
+    if (duplicated) {
+      _showSetupMessage('Ese jugador ya está añadido.');
+      return;
+    }
+
+    setState(() {
+      _setupPlayerNames.add(name);
+      _playerNameController.clear();
+    });
+  }
+
+  void _removeSetupPlayer(int index) {
+    setState(() {
+      _setupPlayerNames.removeAt(index);
+    });
   }
 
   void _changeRounds(int delta) {
@@ -625,8 +631,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   );
 
   void _startGame() {
-    final count =
-    (int.tryParse(_playersCountController.text) ?? 2).clamp(1, 12);
+    if (_setupPlayerNames.length < 2) {
+      _showSetupMessage('Añade al menos 2 jugadores.');
+      return;
+    }
 
     _totalRounds =
         (int.tryParse(_roundsController.text) ?? 5).clamp(1, 20);
@@ -634,13 +642,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     _memorizeSeconds =
         (int.tryParse(_memorizeSecondsController.text) ?? 3).clamp(1, 10);
 
-    _players = List.generate(count, (index) {
-      final name = _nameControllers[index].text.trim().isEmpty
-          ? 'Jugador ${index + 1}'
-          : _nameControllers[index].text.trim();
-
-      return ColorDuelPlayer(name: name);
-    });
+    _players = _setupPlayerNames
+        .map((name) => ColorDuelPlayer(name: name))
+        .toList();
 
     _currentRound = 1;
     _currentPlayerIndex = 0;
@@ -943,30 +947,158 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _sectionTitle('Configura la partida'),
+
+
+          _sectionTitle('Jugadores'),
 
           const SizedBox(height: 8),
 
-          Text(
-            'Elige jugadores, rondas, tiempo y modo de juego.',
-            style: TextStyle(
-              color: appWhite.withOpacity(0.70),
-              fontSize: 13,
-              height: 1.3,
-              fontWeight: FontWeight.w700,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Añade entre 2 y 12 jugadores.',
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.70),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Text(
+                '${_setupPlayerNames.length}/12',
+                style: const TextStyle(
+                  color: appWhite,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _playerNameController,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _addSetupPlayer(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  cursorColor: appWhite,
+                  decoration: _fancyInput('Nombre del jugador'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 54,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: _addSetupPlayer,
+                  style: mainButtonStyle(),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    color: appBlue,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          if (_setupPlayerNames.isEmpty)
+            _glassCard(
+              child: Text(
+                'Todavía no has añadido jugadores.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.62),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+          else
+            Column(
+              children: List.generate(_setupPlayerNames.length, (index) {
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.fromLTRB(12, 9, 6, 9),
+                  decoration: BoxDecoration(
+                    color: appWhite.withOpacity(0.08),
+                    border: Border(
+                      left: const BorderSide(
+                        color: accentPurple,
+                        width: 6,
+                      ),
+                      bottom: BorderSide(
+                        color: appWhite.withOpacity(0.26),
+                        width: 2,
+                      ),
+                      top: BorderSide(
+                        color: appWhite.withOpacity(0.16),
+                      ),
+                      right: BorderSide(
+                        color: appWhite.withOpacity(0.16),
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.70),
+                            width: 1.8,
+                          ),
+                        ),
+                        child: Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 11),
+                      Expanded(
+                        child: Text(
+                          _setupPlayerNames[index],
+                          style: const TextStyle(
+                            color: appWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => _removeSetupPlayer(index),
+                        tooltip: 'Eliminar jugador',
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: appWhite.withOpacity(0.78),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
             ),
-          ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          _stepperCard(
-            title: 'Jugadores',
-            subtitle: 'Personas que jugarán',
-            value: _playersCountController.text,
-            icon: Icons.groups_rounded,
-            onMinus: () => _changePlayersCount(-1),
-            onPlus: () => _changePlayersCount(1),
-          ),
+          _sectionTitle('Partida'),
 
           const SizedBox(height: 10),
 
@@ -1020,33 +1152,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 _gameMode = ColorDuelMode.differentColorPerPlayer;
               });
             },
-          ),
-
-          const SizedBox(height: 18),
-
-          _sectionTitle('Nombres'),
-
-          const SizedBox(height: 10),
-
-          _glassCard(
-            child: Column(
-              children: List.generate(_nameControllers.length, (index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: index == _nameControllers.length - 1 ? 0 : 12,
-                  ),
-                  child: TextField(
-                    controller: _nameControllers[index],
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    cursorColor: appWhite,
-                    decoration: _fancyInput('Jugador ${index + 1}'),
-                  ),
-                );
-              }),
-            ),
           ),
 
           const SizedBox(height: 18),

@@ -22,9 +22,7 @@ class _BarcelonaMedianocheScreenState
   static const Color accentGreen = Color(0xFF22C55E);
   static const Color accentPurple = Color(0xFF8B5CF6);
 
-  final TextEditingController namesController = TextEditingController(
-    text: 'Aniol\nMartina\nAlex\nJúlia\nMarc\nPaula',
-  );
+  final TextEditingController namesController = TextEditingController();
 
   final TextEditingController roomsController = TextEditingController(
     text: BarcelonaMedianocheGame.defaultRooms.join('\n'),
@@ -53,6 +51,7 @@ class _BarcelonaMedianocheScreenState
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _showInvitationDialog();
     });
   }
 
@@ -538,6 +537,354 @@ class _BarcelonaMedianocheScreenState
     );
   }
 
+
+  Future<void> _showInvitationDialog() {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.62),
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.82),
+              width: 2.2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.88),
+                        width: 2.1,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.mail_outline_rounded,
+                      color: appWhite,
+                      size: 29,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Text(
+                      'la invitación',
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: 36,
+                        height: 0.92,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                height: 3,
+                color: appWhite.withOpacity(0.58),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Habéis sido convocados a una subasta privada. Algunos han venido por dinero. Otros por venganza. Y entre vosotros hay asesinos y agentes encubiertos.',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.82),
+                  fontSize: 14,
+                  height: 1.45,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: _mainButtonStyle(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    'ACEPTAR INVITACIÓN',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showMissionListDialog({
+    required bool editingRooms,
+  }) async {
+    final title = editingRooms ? 'mis lugares' : 'mis armas';
+    final label = editingRooms ? 'LUGARES DISPONIBLES' : 'OBJETOS DEL CRIMEN';
+    final hint = editingRooms
+        ? 'Biblioteca\nSalón\nJardín\nBodega'
+        : 'Copa\nAbrecartas\nCandelabro\nBufanda';
+    final defaults = editingRooms
+        ? BarcelonaMedianocheGame.defaultRooms
+        : BarcelonaMedianocheGame.defaultWeapons;
+    final sourceController =
+    editingRooms ? roomsController : weaponsController;
+    final editorController = TextEditingController(
+      text: sourceController.text,
+    );
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.58),
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: appWhite.withOpacity(0.80),
+              width: 2.2,
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _dialogTitle(
+                  icon: editingRooms
+                      ? Icons.place_outlined
+                      : Icons.hardware_rounded,
+                  title: title,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Escribe una opción por línea. Estas opciones se usarán en las misiones de los asesinos.',
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.72),
+                    fontSize: 12.5,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.70),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.7,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: editorController,
+                  minLines: 6,
+                  maxLines: 12,
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  cursorColor: appWhite,
+                  decoration: _setupInputDecoration(hint),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    editorController.text = defaults.join('\n');
+                  },
+                  style: _secondaryButtonStyle(),
+                  icon: const Icon(Icons.restart_alt_rounded),
+                  label: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      'RESTAURAR ORIGINALES',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    final cleaned = editorController.text
+                        .split('\n')
+                        .map((item) => item.trim())
+                        .where((item) => item.isNotEmpty)
+                        .toList();
+
+                    if (cleaned.isEmpty) {
+                      _snack(
+                        editingRooms
+                            ? 'Añade al menos un lugar.'
+                            : 'Añade al menos un objeto del crimen.',
+                      );
+                      return;
+                    }
+
+                    setState(() {
+                      sourceController.text = cleaned.join('\n');
+                      game.setMissionOptions(
+                        roomNames: roomsController.text.split('\n'),
+                        weaponNames: weaponsController.text.split('\n'),
+                      );
+                    });
+
+                    Navigator.pop(dialogContext);
+                    _snack(
+                      editingRooms
+                          ? 'Lugares guardados.'
+                          : 'Armas guardadas.',
+                    );
+                  },
+                  style: _mainButtonStyle(),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    child: Text(
+                      'GUARDAR',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(
+                    'CANCELAR',
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.72),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    editorController.dispose();
+  }
+
+  void _addSetupPlayer() {
+    final name = namesController.text.trim();
+    if (name.isEmpty) return;
+
+    final names = game.players.map((player) => player.name).toList();
+    final alreadyExists = names.any(
+          (playerName) => playerName.toLowerCase() == name.toLowerCase(),
+    );
+
+    if (alreadyExists) {
+      _snack('Ese jugador ya está añadido.');
+      return;
+    }
+
+    names.add(name);
+
+    setState(() {
+      game.setPlayersFromNames(names);
+      namesController.clear();
+    });
+  }
+
+  void _removeSetupPlayer(int index) {
+    final names = game.players.map((player) => player.name).toList();
+
+    if (index < 0 || index >= names.length) return;
+
+    names.removeAt(index);
+
+    setState(() {
+      game.setPlayersFromNames(names);
+    });
+  }
+
+  Widget _setupPlayerTile(BmPlayer player, int index) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 9),
+      padding: const EdgeInsets.fromLTRB(11, 9, 7, 9),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.07),
+        border: Border(
+          left: const BorderSide(
+            color: accentGold,
+            width: 5,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.24),
+            width: 2,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: appWhite.withOpacity(0.68),
+                width: 1.5,
+              ),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: const TextStyle(
+                color: appWhite,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Text(
+              player.name,
+              style: const TextStyle(
+                color: appWhite,
+                fontSize: 15.5,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () => _removeSetupPlayer(index),
+            icon: const Icon(
+              Icons.close_rounded,
+              color: accentRed,
+            ),
+            tooltip: 'Eliminar jugador',
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCurrentPhase() {
     switch (game.phase) {
       case BmPhase.setup:
@@ -554,6 +901,8 @@ class _BarcelonaMedianocheScreenState
   }
 
   Widget _buildSetupView() {
+    final playerCount = game.players.length;
+
     return SingleChildScrollView(
       key: const ValueKey('setup'),
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
@@ -562,36 +911,16 @@ class _BarcelonaMedianocheScreenState
         children: [
           _screenHeader(
             title: 'barcelona\nmedianoche',
-
           ),
           const SizedBox(height: 18),
           _panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionTitle('la invitación'),
-                const SizedBox(height: 12),
+                _sectionTitle('personaliza la noche'),
+                const SizedBox(height: 10),
                 Text(
-                  'Habéis sido convocados a una subasta privada. Algunos han venido por dinero. Otros por venganza. Y entre vosotros hay asesinos y agentes encubiertos.',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.78),
-                    fontSize: 14,
-                    height: 1.4,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          _panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionTitle('lugares'),
-                const SizedBox(height: 12),
-                Text(
-                  'Personaliza los lugares y los objetos que pueden aparecer en las misiones de los asesinos. Escribe una opción por línea.',
+                  'Puedes usar el escenario original o añadir tus propios lugares y objetos del crimen.',
                   style: TextStyle(
                     color: appWhite.withOpacity(0.68),
                     fontSize: 12.5,
@@ -599,73 +928,51 @@ class _BarcelonaMedianocheScreenState
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'LUGARES DISPONIBLES',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.70),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.7,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: roomsController,
-                  minLines: 4,
-                  maxLines: 8,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: appWhite,
-                  decoration: _setupInputDecoration(
-                    'Biblioteca\nSalón\nJardín\nBodega',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'OBJETOS DEL CRIMEN',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.70),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.7,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: weaponsController,
-                  minLines: 4,
-                  maxLines: 8,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: appWhite,
-                  decoration: _setupInputDecoration(
-                    'Copa\nAbrecartas\nCandelabro\nBufanda',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _restoreDefaultMissionOptions,
-                    style: _secondaryButtonStyle(),
-                    icon: const Icon(Icons.restart_alt_rounded),
-                    label: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        'RESTAURAR ESCENARIO ORIGINAL',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.3,
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showMissionListDialog(
+                          editingRooms: true,
+                        ),
+                        style: _secondaryButtonStyle(),
+                        icon: const Icon(Icons.place_outlined),
+                        label: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 13),
+                          child: Text(
+                            'AÑADIR MIS\nLUGARES',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              height: 1.05,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showMissionListDialog(
+                          editingRooms: false,
+                        ),
+                        style: _secondaryButtonStyle(),
+                        icon: const Icon(Icons.hardware_rounded),
+                        label: const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 13),
+                          child: Text(
+                            'AÑADIR MIS\nARMAS',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              height: 1.05,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -675,109 +982,101 @@ class _BarcelonaMedianocheScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionTitle('jugadores'),
-                const SizedBox(height: 12),
-                Text(
-                  'Un nombre por línea. Mínimo 4 jugadores.',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.68),
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Row(
+                  children: [
+                    Expanded(child: _sectionTitle('jugadores')),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: appWhite.withOpacity(0.08),
+                        border: Border.all(
+                          color: appWhite.withOpacity(0.24),
+                        ),
+                      ),
+                      child: Text(
+                        '$playerCount / 4 mínimo',
+                        style: const TextStyle(
+                          color: appWhite,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                TextField(
-                  controller: namesController,
-                  maxLines: 8,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: appWhite,
-                  decoration: InputDecoration(
-                    hintText: 'Aniol\nMartina\nAlex\nJúlia',
-                    hintStyle: TextStyle(
-                      color: appWhite.withOpacity(0.38),
-                    ),
-                    filled: true,
-                    fillColor: appWhite.withOpacity(0.07),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.zero,
-                      borderSide: BorderSide(
-                        color: appWhite.withOpacity(0.28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: namesController,
+                        textInputAction: TextInputAction.done,
+                        style: const TextStyle(
+                          color: appWhite,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        cursorColor: appWhite,
+                        onSubmitted: (_) => _addSetupPlayer(),
+                        decoration: _setupInputDecoration(
+                          'Nombre del jugador',
+                        ),
                       ),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.zero,
-                      borderSide: BorderSide(
-                        color: appWhite.withOpacity(0.28),
+                    const SizedBox(width: 9),
+                    SizedBox(
+                      width: 54,
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: _addSetupPlayer,
+                        style: _mainButtonStyle(),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          size: 28,
+                        ),
                       ),
                     ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.zero,
-                      borderSide: BorderSide(
-                        color: appWhite,
-                        width: 2,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 14),
+                if (game.players.isEmpty)
+                  _dialogNotice(
+                    'Añade al menos 4 jugadores para comenzar.',
+                    accentGold,
+                  )
+                else
+                  ...game.players.asMap().entries.map(
+                        (entry) => _setupPlayerTile(
+                      entry.value,
+                      entry.key,
+                    ),
+                  ),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: _preparePlayers,
-                    style: _secondaryButtonStyle(),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 13),
+                  child: ElevatedButton.icon(
+                    onPressed: game.canStart ? _startGame : null,
+                    style: _mainButtonStyle(),
+                    icon: const Icon(Icons.visibility_off_rounded),
+                    label: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                       child: Text(
-                        'PREPARAR JUGADORES',
-                        style: TextStyle(
+                        game.canStart
+                            ? 'COMENZAR REPARTO SECRETO'
+                            : 'FALTAN ${4 - playerCount} JUGADORES',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 0.4,
+                          letterSpacing: 0.35,
                         ),
                       ),
                     ),
                   ),
                 ),
-                if (game.players.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: game.players
-                        .map((player) => _chip(player.name))
-                        .toList(),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: game.canStart ? _startGame : null,
-                      style: _mainButtonStyle(),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        child: Text(
-                          game.canStart
-                              ? 'COMENZAR REPARTO SECRETO'
-                              : 'FALTAN JUGADORES',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
-          ),
-          const SizedBox(height: 14),
-          _infoBar(
-            text:
-            'Recomendado: 5–10 jugadores y una partida de 30–60 minutos antes de iniciar la subasta final.',
-            color: accentGold,
           ),
         ],
       ),
