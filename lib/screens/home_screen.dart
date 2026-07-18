@@ -5,6 +5,9 @@ import 'chill_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_settings_button.dart';
 import '../core/app_settings.dart';
+import '../widgets/app_logo_button.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:math' as math;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,8 +16,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   bool showSplash = true;
+  late final AnimationController _splashController;
 
   String selectedLanguage = 'es';
   double volume = 0.8;
@@ -30,12 +35,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
     AppSettings.instance.load();
 
+    _splashController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..forward();
+
     Timer(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
+
       setState(() {
         showSplash = false;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _splashController.dispose();
+    super.dispose();
   }
 
   Future<void> loadSettings() async {
@@ -119,51 +136,46 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildTopIcons() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: white.withOpacity(0.85),
-                width: 2.2,
-              ),
+    final compact = MediaQuery.of(context).size.height < 740;
+    final size = compact ? 44.0 : 50.0;
+
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          compact ? 13 : 18,
+          compact ? 11 : 18,
+          compact ? 13 : 18,
+          0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            AppLogoButton(
+              compact: compact,
+              onTap: () {},
             ),
-            child: const Center(
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
+
+            GestureDetector(
+              onTap: showSettingsSheet,
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: white.withOpacity(0.85),
+                    width: 2.2,
+                  ),
+                ),
+                child: const AppSettingsButton(
+                  blue: blue,
+                  white: white,
                 ),
               ),
             ),
-          ),
-          GestureDetector(
-            onTap: showSettingsSheet,
-            child: Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: white.withOpacity(0.85),
-                  width: 2.2,
-                ),
-              ),
-              child: const AppSettingsButton(
-                blue: blue,
-                white: white,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -643,14 +655,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           ],
                                         ),
-                                        child: Center(
-                                          child: Text(
-                                            '8',
-                                            style: TextStyle(
-                                              color: white,
-                                              fontSize: logoSize * 0.43,
-                                              height: 1,
-                                              fontWeight: FontWeight.w900,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(logoSize * 0.16),
+                                          child: SvgPicture.asset(
+                                            'assets/images/CUBO0white.svg',
+                                            fit: BoxFit.contain,
+                                            colorFilter: const ColorFilter.mode(
+                                              white,
+                                              BlendMode.srcIn,
                                             ),
                                           ),
                                         ),

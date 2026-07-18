@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/barcelonamedianoche_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class BarcelonaMedianocheScreen extends StatefulWidget {
   const BarcelonaMedianocheScreen({super.key});
@@ -137,13 +138,14 @@ class _BarcelonaMedianocheScreenState
     VoidCallback? onBack,
   }) {
     final compact = MediaQuery.of(context).size.height < 740;
-    final visualTitle = title.toLowerCase();
-    final multiline = visualTitle.contains('\n');
-    final titleSize = compact ? 33.0 : 40.0;
-    final titleHeight = multiline
-        ? (compact ? 72.0 : 92.0)
-        : (compact ? 54.0 : 64.0);
-    final lineTop = titleHeight - (compact ? 6.0 : 8.0);
+
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
+
+    // Convierte los títulos de dos líneas en una sola línea,
+    // igual que en Impostor.
+    final visualTitle = title.replaceAll('\n', ' ').toLowerCase();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -151,16 +153,9 @@ class _BarcelonaMedianocheScreenState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _circleButton(
-              onTap: onBack ?? () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 17 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+            AppLogoButton(
+              compact: compact,
+              onTap: () => Navigator.pop(context),
             ),
             Row(
               children: [
@@ -187,10 +182,15 @@ class _BarcelonaMedianocheScreenState
             ),
           ],
         ),
-        SizedBox(height: compact ? 14 : 22),
+
+        SizedBox(height: compact ? 14 : 24),
+
         Padding(
-          padding: EdgeInsets.only(left: compact ? 18 : 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
+            width: double.infinity,
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
@@ -198,17 +198,18 @@ class _BarcelonaMedianocheScreenState
                 Positioned.fill(
                   bottom: 10,
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Text(
                         visualTitle,
-                        maxLines: 2,
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 0.90,
+                          height: 1.9,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -218,8 +219,8 @@ class _BarcelonaMedianocheScreenState
                 ),
                 Positioned(
                   top: lineTop,
-                  left: 0,
-                  right: -18,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -229,6 +230,7 @@ class _BarcelonaMedianocheScreenState
             ),
           ),
         ),
+
         if (subtitle != null) ...[
           SizedBox(height: compact ? 8 : 10),
           _infoBar(
@@ -430,6 +432,7 @@ class _BarcelonaMedianocheScreenState
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
+
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -901,16 +904,23 @@ class _BarcelonaMedianocheScreenState
   }
 
   Widget _buildSetupView() {
+    final compact = MediaQuery.of(context).size.height < 740;
     final playerCount = game.players.length;
 
     return SingleChildScrollView(
       key: const ValueKey('setup'),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 13 : 18,
+        compact ? 11 : 18,
+        compact ? 13 : 18,
+        compact ? 18 : 24,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _screenHeader(
             title: 'barcelona\nmedianoche',
+
           ),
           const SizedBox(height: 18),
           _panel(
@@ -1094,9 +1104,9 @@ class _BarcelonaMedianocheScreenState
     return SingleChildScrollView(
       key: ValueKey('reveal_${player.id}_${game.revealRoleVisible}'),
       padding: EdgeInsets.fromLTRB(
-        compact ? 14 : 18,
-        compact ? 12 : 18,
-        compact ? 14 : 18,
+        compact ? 13 : 18,
+        compact ? 11 : 18,
+        compact ? 13 : 18,
         compact ? 18 : 24,
       ),
       child: Column(
@@ -1341,9 +1351,9 @@ class _BarcelonaMedianocheScreenState
     return SingleChildScrollView(
       key: const ValueKey('playing'),
       padding: EdgeInsets.fromLTRB(
-        compact ? 14 : 18,
-        compact ? 12 : 18,
-        compact ? 14 : 18,
+        compact ? 13 : 18,
+        compact ? 11 : 18,
+        compact ? 13 : 18,
         compact ? 20 : 28,
       ),
       child: Column(
@@ -1460,6 +1470,7 @@ class _BarcelonaMedianocheScreenState
   }
 
   Widget _buildAuctionView() {
+    final compact = MediaQuery.of(context).size.height < 740;
     final lot = game.currentAuctionLot;
     final bidder = game.currentBidder;
 
@@ -1467,7 +1478,12 @@ class _BarcelonaMedianocheScreenState
       key: ValueKey(
         'auction_${game.currentLotIndex}_${game.currentBidderIndex}_${game.auctionRoundResolved}',
       ),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 13 : 18,
+        compact ? 11 : 18,
+        compact ? 13 : 18,
+        compact ? 20 : 28,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1662,12 +1678,18 @@ class _BarcelonaMedianocheScreenState
   }
 
   Widget _buildEndView() {
+    final compact = MediaQuery.of(context).size.height < 740;
     final ranking = game.ranking;
     final winner = ranking.isNotEmpty ? ranking.first : null;
 
     return SingleChildScrollView(
       key: const ValueKey('ended'),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 13 : 18,
+        compact ? 11 : 18,
+        compact ? 13 : 18,
+        compact ? 20 : 28,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

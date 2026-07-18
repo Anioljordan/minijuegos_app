@@ -6,6 +6,7 @@ import 'prueba_verdad_screen.dart';
 import 'drink_dare_screen.dart';
 import 'ping_pong_screen.dart';
 import '../widgets/app_settings_button.dart';
+import '../widgets/app_logo_button.dart';
 
 class FiestaScreen extends StatelessWidget {
   const FiestaScreen({super.key});
@@ -14,34 +15,16 @@ class FiestaScreen extends StatelessWidget {
   static const Color white = Color(0xFFF7F7F7);
 
   Widget buildTopIcons(BuildContext context) {
+    final compact = MediaQuery.of(context).size.height < 740;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
+          AppLogoButton(
+            compact: compact,
             onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: white.withOpacity(0.85),
-                  width: 2.2,
-                ),
-              ),
-              child: const Center(
-                child: Text(
-                  '8',
-                  style: TextStyle(
-                    color: white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ),
           ),
 
           const AppSettingsButton(

@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../core/app_settings.dart';
+import '../widgets/app_logo_button.dart';
 
 class CuatroEnRayaScreen extends StatefulWidget {
   const CuatroEnRayaScreen({super.key});
@@ -873,88 +874,96 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       },
     );
   }
+  Widget circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+    required bool compact,
+  }) {
+    final size = compact ? 44.0 : 50.0;
 
-  Widget buildTopBar() {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: appWhite.withOpacity(0.85),
+            width: 2.2,
+          ),
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            GestureDetector(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Center(
-                  child: Text(
-                    '8',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
             ),
 
-            GestureDetector(
+            circleButton(
+              compact: compact,
               onTap: mostrarNormas,
-              child: Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.question_mark_rounded,
-                  color: appWhite,
-                  size: 28,
-                ),
+              child: Icon(
+                Icons.question_mark_rounded,
+                color: appWhite,
+                size: compact ? 23 : 27,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 72),
+        SizedBox(height: compact ? 14 : 24),
 
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
-            height: 82,
+            width: double.infinity,
+            height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Text(
-                    '4 en raya',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 58,
-                      height: 0.9,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.2,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topRight,
+                      child: Text(
+                        '4 en raya',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: 62,
-                  left: 0,
-                  right: -30,
+                  top: lineTop,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -1264,80 +1273,95 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         return Scaffold(
           backgroundColor: appBlue,
           body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-              child: Column(
-                children: [
-                  buildTopBar(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 740;
+                final horizontalPadding = compact ? 13.0 : 18.0;
+                final verticalPadding = compact ? 11.0 : 18.0;
 
-                  const SizedBox(height: 14),
-
-                  buildMarcador(),
-
-                  const SizedBox(height: 8),
-
-                  buildTurnCard(),
-
-                  const SizedBox(height: 4),
-
-                  buildPreviewRow(),
-
-                  const SizedBox(height: 4),
-
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: buildBoardCard(),
-                    ),
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    verticalPadding,
+                    horizontalPadding,
+                    compact ? 11 : 16,
                   ),
-
-                  const SizedBox(height: 12),
-
-                  Row(
+                  child: Column(
                     children: [
+                      buildTopBar(compact: compact),
+
+                      SizedBox(height: compact ? 10 : 14),
+
+                      buildMarcador(),
+
+                      const SizedBox(height: 8),
+
+                      buildTurnCard(),
+
+                      const SizedBox(height: 4),
+
+                      buildPreviewRow(),
+
+                      const SizedBox(height: 4),
+
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: historialJugadas.isEmpty ||
-                              animando ||
-                              juegoTerminado
-                              ? null
-                              : deshacerJugada,
-                          style: secondaryButtonStyle(),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 13),
-                            child: Text(
-                              'DESHACER',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                          ),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: buildBoardCard(),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: reiniciarJuego,
-                          style: mainButtonStyle(appWhite),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 13),
-                            child: Text(
-                              'REINICIAR',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.4,
+
+                      const SizedBox(height: 12),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: historialJugadas.isEmpty ||
+                                  animando ||
+                                  juegoTerminado
+                                  ? null
+                                  : deshacerJugada,
+                              style: secondaryButtonStyle(),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 13),
+                                child: Text(
+                                  'DESHACER',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+
+                          const SizedBox(width: 12),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: reiniciarJuego,
+                              style: mainButtonStyle(appWhite),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 13),
+                                child: Text(
+                                  'REINICIAR',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'yo_nunca_screen.dart';
+import '../widgets/app_logo_button.dart';
 
 class YoNuncaModesScreen extends StatelessWidget {
   const YoNuncaModesScreen({super.key});
@@ -52,22 +53,17 @@ class YoNuncaModesScreen extends StatelessWidget {
   }
 
   Widget buildTopBar(BuildContext context) {
+    final compact = MediaQuery.of(context).size.height < 740;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               onTap: () => mostrarNormas(context),

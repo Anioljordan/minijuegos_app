@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../widgets/color_wheel_picker.dart';
+import '../widgets/app_logo_button.dart';
 
 enum ColorDuelPhase {
   setup,
@@ -120,12 +121,15 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   Widget _circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
+    final size = compact ? 44.0 : 50.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
@@ -225,7 +229,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar({required bool compact}) {
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
+
     final bool showRound = _phase != ColorDuelPhase.setup;
 
     return Column(
@@ -234,55 +242,61 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _circleButton(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             _circleButton(
+              compact: compact,
               onTap: _showRulesDialog,
-              child: const Icon(
+              child: Icon(
                 Icons.question_mark_rounded,
                 color: appWhite,
-                size: 27,
+                size: compact ? 23 : 27,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 24),
+        SizedBox(height: compact ? 14 : 24),
 
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
-            height: 102,
+            width: double.infinity,
+            height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Text(
-                    'memoria\nfotográfica',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topRight,
+                      child: Text(
+                        'memoria fotográfica',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: 90,
-                  left: 0,
-                  right: -18,
+                  top: lineTop,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -294,14 +308,17 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         ),
 
         if (showRound) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: compact ? 6 : 10),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            padding: EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: compact ? 8 : 9,
+            ),
             decoration: BoxDecoration(
               color: appWhite.withOpacity(0.06),
               border: Border(
-                left: BorderSide(
+                left: const BorderSide(
                   color: accentPurple,
                   width: 6,
                 ),
@@ -315,7 +332,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               'RONDA $_currentRound DE $_totalRounds',
               style: TextStyle(
                 color: appWhite.withOpacity(0.82),
-                fontSize: 12,
+                fontSize: compact ? 11.5 : 12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.1,
               ),
@@ -1801,19 +1818,35 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              _buildTopBar(),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _buildCurrentPhase(),
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 13.0 : 18.0;
+            final verticalPadding = compact ? 11.0 : 18.0;
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 11 : 16,
               ),
-            ],
-          ),
+              child: Column(
+                children: [
+                  _buildTopBar(compact: compact),
+
+                  SizedBox(height: compact ? 10 : 14),
+
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _buildCurrentPhase(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_roles_screen.dart';
 import 'asamblea_board_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
+import '../widgets/app_logo_button.dart';
 
 enum AsambleaRole {
   izquierda,
@@ -458,9 +459,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 35.0 : 42.0;
-    final titleHeight = compact ? 72.0 : 94.0;
-    final lineTop = compact ? 62.0 : 82.0;
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -468,17 +469,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 17 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               compact: compact,
@@ -491,10 +484,15 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             ),
           ],
         ),
+
         SizedBox(height: compact ? 14 : 24),
+
         Padding(
-          padding: EdgeInsets.only(left: compact ? 18 : 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
+            width: double.infinity,
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
@@ -502,16 +500,18 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                 Positioned.fill(
                   bottom: 10,
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Text(
                         'la asamblea',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.90,
+                          height: 1.9,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -519,10 +519,11 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     ),
                   ),
                 ),
+
                 Positioned(
                   top: lineTop,
-                  left: 0,
-                  right: -18,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -715,16 +716,16 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxHeight < 760;
-            final horizontalPadding = compact ? 14.0 : 18.0;
-            final verticalPadding = compact ? 12.0 : 18.0;
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 13.0 : 18.0;
+            final verticalPadding = compact ? 11.0 : 18.0;
 
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
                 verticalPadding,
                 horizontalPadding,
-                compact ? 12 : 16,
+                compact ? 11 : 16,
               ),
               child: Column(
                 children: [

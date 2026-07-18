@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/escala_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class EscalaScreen extends StatefulWidget {
   const EscalaScreen({super.key});
@@ -281,7 +282,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
     required VoidCallback onTap,
     required bool compact,
   }) {
-    final size = compact ? 43.0 : 50.0;
+    final size = compact ? 44.0 : 50.0;
 
     return GestureDetector(
       onTap: onTap,
@@ -303,7 +304,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
   Widget buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
     final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 60.0 : 80.0;
+    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -311,18 +312,11 @@ class _EscalaScreenState extends State<EscalaScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 16 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
+
             circleButton(
               compact: compact,
               onTap: mostrarNormas,
@@ -334,10 +328,15 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ),
           ],
         ),
-        SizedBox(height: compact ? 13 : 23),
+
+        SizedBox(height: compact ? 14 : 24),
+
         Padding(
-          padding: EdgeInsets.only(left: compact ? 18 : 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
+            width: double.infinity,
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
@@ -345,16 +344,18 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 Positioned.fill(
                   bottom: 10,
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Text(
                         'escala mental',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.90,
+                          height: 1.9,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -362,10 +363,11 @@ class _EscalaScreenState extends State<EscalaScreen> {
                     ),
                   ),
                 ),
+
                 Positioned(
                   top: lineTop,
-                  left: 0,
-                  right: -18,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -1057,12 +1059,12 @@ class _EscalaScreenState extends State<EscalaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          sectionTitle('Crea una escala'),
+
 
           const SizedBox(height: 14),
           buildFancyButton(
             text: 'Usar escala aleatoria',
-            color: accentPurple,
+            color: appWhite,
             icon: Icons.casino_rounded,
             onPressed: usarEscalaAleatoria,
           ),
@@ -1104,7 +1106,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
                 buildFancyButton(
                   text: 'Usar esta escala',
-                  color: accentYellow,
+                  color: appBlue,
                   icon: Icons.play_arrow_rounded,
                   onPressed: usarEscalaPersonalizada,
                 ),
@@ -1575,14 +1577,17 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 horizontalPadding,
                 verticalPadding,
                 horizontalPadding,
-                compact ? 10 : 16,
+                compact ? 11 : 16,
               ),
               child: Column(
                 children: [
                   buildTopBar(compact: compact),
 
+                  SizedBox(height: compact ? 10 : 14),
 
-                  Expanded(child: buildContenido()),
+                  Expanded(
+                    child: buildContenido(),
+                  ),
                 ],
               ),
             );

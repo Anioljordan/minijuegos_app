@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/drink_dare_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class DrinkDareScreen extends StatefulWidget {
   const DrinkDareScreen({super.key});
@@ -175,17 +176,9 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 17 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               compact: compact,

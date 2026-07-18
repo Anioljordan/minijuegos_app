@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/uno_dos_data.dart';
-
+import '../widgets/app_logo_button.dart';
 class UnoDosScreen extends StatefulWidget {
   const UnoDosScreen({super.key});
 
@@ -122,22 +122,16 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   }
 
   Widget buildTopBar() {
+    final compact = MediaQuery.of(context).size.height < 740;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               onTap: mostrarNormas,

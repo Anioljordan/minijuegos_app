@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/ping_pong_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class PingPongScreen extends StatefulWidget {
   const PingPongScreen({super.key});
@@ -137,17 +138,9 @@ class _PingPongScreenState extends State<PingPongScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 17 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               compact: compact,

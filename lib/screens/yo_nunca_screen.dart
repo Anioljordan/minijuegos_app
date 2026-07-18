@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/yo_nunca_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class YoNuncaScreen extends StatefulWidget {
   final String modo;
@@ -177,22 +178,16 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   }
 
   Widget buildTopBar() {
+    final compact = MediaQuery.of(context).size.height < 740;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               onTap: mostrarNormas,

@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/impostor_data.dart';
-
+import '../widgets/app_logo_button.dart';
 enum ImpostorMode {
   classic,
   roles,
@@ -91,6 +91,27 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       playersController.text = '6';
       impostorsController.text = '1';
       namesController.clear();
+
+      playerSecrets = [];
+      impostorIndexes = [];
+      playerNames = [];
+
+      selectedWord = '';
+      selectedCategory = '';
+      selectedHint = '';
+    });
+  }
+
+  void _goBack() {
+    if (currentStep == ImpostorStep.modeSelection) {
+      Navigator.pop(context);
+      return;
+    }
+
+    setState(() {
+      selectedMode = null;
+      currentStep = ImpostorStep.modeSelection;
+      currentPlayerIndex = 0;
 
       playerSecrets = [];
       impostorIndexes = [];
@@ -423,7 +444,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Widget buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
     final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 60.0 : 80.0;
+    final lineTop = compact ? 40.0 : 60.0;
     final showReset = currentStep != ImpostorStep.modeSelection;
 
     return Column(
@@ -432,17 +453,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 17 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             Row(
               children: [
@@ -465,8 +478,11 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         ),
         SizedBox(height: compact ? 14 : 24),
         Padding(
-          padding: EdgeInsets.only(left: compact ? 18 : 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
+            width: double.infinity,
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
@@ -474,13 +490,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 Positioned.fill(
                   bottom: 10,
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Text(
                         currentTitle,
                         maxLines: 1,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
@@ -494,8 +511,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
                 Positioned(
                   top: lineTop,
-                  left: 0,
-                  right: -18,
+
+                  // Cancela el padding horizontal general de la pantalla
+                  // para que la línea empiece en el borde izquierdo.
+                  left: compact ? -13 : -18,
+
+                  // Termina antes del borde derecho,
+                  // igual que en la pantalla Chill.
+                  right: 0,
+
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -1607,39 +1631,46 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 13.0 : 18.0;
-            final verticalPadding = compact ? 11.0 : 18.0;
+    return PopScope<void>(
+      canPop: currentStep == ImpostorStep.modeSelection,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _goBack();
+      },
+      child: Scaffold(
+        backgroundColor: appBlue,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 740;
+              final horizontalPadding = compact ? 13.0 : 18.0;
+              final verticalPadding = compact ? 11.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 11 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(compact: compact),
-                  SizedBox(height: compact ? 10 : 14),
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      child: KeyedSubtree(
-                        key: ValueKey(currentStep),
-                        child: buildCurrentStep(compact: compact),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 11 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
+                    SizedBox(height: compact ? 10 : 14),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: KeyedSubtree(
+                          key: ValueKey(currentStep),
+                          child: buildCurrentStep(compact: compact),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

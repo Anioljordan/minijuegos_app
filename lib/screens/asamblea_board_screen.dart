@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_setup_screen.dart';
 import 'asamblea_roles_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
+import '../widgets/app_logo_button.dart';
 
 enum LeyType {
   izquierda,
@@ -2131,7 +2132,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     required VoidCallback onTap,
     required bool compact,
   }) {
-    final size = compact ? 42.0 : 50.0;
+    final size = compact ? 44.0 : 50.0;
 
     return GestureDetector(
       onTap: onTap,
@@ -2151,9 +2152,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 32.0 : 40.0;
-    final titleHeight = compact ? 68.0 : 90.0;
-    final lineTop = compact ? 58.0 : 78.0;
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2161,18 +2162,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
-              onTap: _mostrarDialogoSalirTablero,
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 16 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              onTap: () => Navigator.pop(context),
             ),
+
             Row(
               children: [
                 circleButton(
@@ -2181,27 +2175,34 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                   child: Icon(
                     Icons.restart_alt_rounded,
                     color: appWhite,
-                    size: compact ? 22 : 27,
+                    size: compact ? 23 : 27,
                   ),
                 ),
+
                 SizedBox(width: compact ? 9 : 12),
+
                 circleButton(
                   compact: compact,
                   onTap: _mostrarNormas,
                   child: Icon(
                     Icons.question_mark_rounded,
                     color: appWhite,
-                    size: compact ? 22 : 27,
+                    size: compact ? 23 : 27,
                   ),
                 ),
               ],
             ),
           ],
         ),
-        SizedBox(height: compact ? 12 : 22),
+
+        SizedBox(height: compact ? 14 : 24),
+
         Padding(
-          padding: EdgeInsets.only(left: compact ? 16 : 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
+            width: double.infinity,
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
@@ -2209,16 +2210,18 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 Positioned.fill(
                   bottom: 10,
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Text(
                         'tablero asamblea',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.90,
+                          height: 1.9,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -2226,10 +2229,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     ),
                   ),
                 ),
+
                 Positioned(
                   top: lineTop,
-                  left: 0,
-                  right: -18,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -2660,16 +2664,16 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final compact = constraints.maxHeight < 760;
-              final horizontalPadding = compact ? 12.0 : 18.0;
-              final verticalPadding = compact ? 10.0 : 18.0;
+              final compact = constraints.maxHeight < 740;
+              final horizontalPadding = compact ? 13.0 : 18.0;
+              final verticalPadding = compact ? 11.0 : 18.0;
 
               return Padding(
                 padding: EdgeInsets.fromLTRB(
                   horizontalPadding,
                   verticalPadding,
                   horizontalPadding,
-                  compact ? 10 : 16,
+                  compact ? 11 : 16,
                 ),
                 child: Column(
                   children: [

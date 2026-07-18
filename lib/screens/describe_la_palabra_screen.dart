@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../widgets/app_logo_button.dart';
 
 enum DescribeStep {
   setup,
@@ -584,7 +585,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     required VoidCallback onTap,
     required bool compact,
   }) {
-    final size = compact ? 42.0 : 50.0;
+    final size = compact ? 44.0 : 50.0;
 
     return Material(
       color: Colors.transparent,
@@ -612,9 +613,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     String? subtitle,
     bool showReset = false,
   }) {
-    final titleSize = compact ? 31.0 : 40.0;
-    final titleHeight = compact ? 62.0 : 82.0;
-    final lineTop = compact ? 53.0 : 70.0;
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -622,17 +623,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
               compact: compact,
               onTap: () => Navigator.pop(context),
-              child: Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: compact ? 16 : 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             Row(
               children: [
@@ -643,7 +636,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     child: Icon(
                       Icons.restart_alt_rounded,
                       color: appWhite,
-                      size: compact ? 22 : 27,
+                      size: compact ? 23 : 27,
                     ),
                   ),
                   SizedBox(width: compact ? 9 : 12),
@@ -654,17 +647,22 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   child: Icon(
                     Icons.question_mark_rounded,
                     color: appWhite,
-                    size: compact ? 22 : 27,
+                    size: compact ? 23 : 27,
                   ),
                 ),
               ],
             ),
           ],
         ),
-        SizedBox(height: compact ? 12 : 22),
+
+        SizedBox(height: compact ? 14 : 24),
+
         Padding(
-          padding: EdgeInsets.only(left: compact ? 16 : 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
+            width: double.infinity,
             height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
@@ -672,16 +670,18 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                 Positioned.fill(
                   bottom: 10,
                   child: Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Text(
                         'describe la palabra',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.65,
+                          height: 1.9,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -689,10 +689,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     ),
                   ),
                 ),
+
                 Positioned(
                   top: lineTop,
-                  left: 0,
-                  right: -18,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -702,6 +703,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             ),
           ),
         ),
+
         if (subtitle != null) ...[
           SizedBox(height: compact ? 6 : 10),
           buildInfoBar(
@@ -970,7 +972,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: selected
-                  ? accentPurple
+                  ? appBlue
                   : appWhite.withOpacity(0.07),
               border: Border.all(
                 color: selected
@@ -1479,7 +1481,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                             child: ElevatedButton(
                               onPressed: addPlayer,
                               style: mainButtonStyle(
-                                backgroundColor: accentCyan,
+                                backgroundColor: appWhite,
                                 foregroundColor: appBlue,
                               ),
                               child: const Icon(Icons.add_rounded),
@@ -1550,7 +1552,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                             child: ElevatedButton(
                               onPressed: createEmptyTeams,
                               style: mainButtonStyle(
-                                backgroundColor: accentYellow,
+                                backgroundColor: appWhite,
                                 foregroundColor: appBlue,
                               ),
                               child: const FittedBox(
@@ -1811,7 +1813,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           child: ElevatedButton.icon(
             onPressed: startGame,
             style: mainButtonStyle(
-              backgroundColor: accentGreen,
+              backgroundColor: appWhite,
               foregroundColor: appBlue,
             ),
             icon: const Icon(Icons.play_arrow_rounded),
@@ -2119,8 +2121,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             _compactActionButton(
               icon: Icons.check_rounded,
               label: 'ACIERTO',
-              backgroundColor: accentGreen,
-              foregroundColor: appWhite,
+              backgroundColor: appWhite,
+              foregroundColor: appBlue,
               onTap: markCorrect,
               compact: compact,
             ),
@@ -2341,8 +2343,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             _compactActionButton(
               icon: Icons.replay_rounded,
               label: 'OTRA VEZ',
-              backgroundColor: accentGreen,
-              foregroundColor: appWhite,
+              backgroundColor: appWhite,
+              foregroundColor: appBlue,
               onTap: resetAll,
               compact: compact,
             ),
@@ -2359,9 +2361,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxHeight < 760;
-            final horizontalPadding = compact ? 12.0 : 18.0;
-            final verticalPadding = compact ? 10.0 : 18.0;
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 13.0 : 18.0;
+            final verticalPadding = compact ? 11.0 : 18.0;
 
             Widget body;
             switch (currentStep) {
@@ -2387,7 +2389,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                 horizontalPadding,
                 verticalPadding,
                 horizontalPadding,
-                compact ? 10 : 16,
+                compact ? 11 : 16,
               ),
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 280),

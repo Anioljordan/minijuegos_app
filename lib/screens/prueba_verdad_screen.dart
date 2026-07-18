@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/prueba_verdad_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class PruebaVerdadScreen extends StatefulWidget {
   const PruebaVerdadScreen({super.key});
@@ -142,22 +143,16 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
   }
 
   Widget buildTopBar() {
+    final compact = MediaQuery.of(context).size.height < 740;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            circleButton(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
             circleButton(
               onTap: mostrarNormas,
@@ -633,16 +628,16 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
                       buildChoiceButton(
                         label: 'PRUEBA',
                         icon: Icons.local_fire_department_rounded,
-                        backgroundColor: accentOrange,
-                        foregroundColor: appBlue,
+                        backgroundColor: appBlue,
+                        foregroundColor: appWhite,
                         onTap: sacarPrueba,
                       ),
                       const SizedBox(width: 12),
                       buildChoiceButton(
                         label: 'VERDAD',
                         icon: Icons.question_answer_rounded,
-                        backgroundColor: accentGreen,
-                        foregroundColor: appWhite,
+                        backgroundColor: appWhite,
+                        foregroundColor: appBlue,
                         onTap: sacarVerdad,
                       ),
 

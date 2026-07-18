@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/animales_profesionales_data.dart';
+import '../widgets/app_logo_button.dart';
 
 class AnimalesProfesionalesScreen extends StatefulWidget {
   const AnimalesProfesionalesScreen({super.key});
@@ -83,12 +84,15 @@ class _AnimalesProfesionalesScreenState
   Widget _circleButton({
     required Widget child,
     required VoidCallback onTap,
+    required bool compact,
   }) {
+    final size = compact ? 44.0 : 50.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
@@ -101,62 +105,73 @@ class _AnimalesProfesionalesScreenState
     );
   }
 
-  Widget buildTopBar() {
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 34.0 : 42.0;
+    final titleHeight = compact ? 70.0 : 92.0;
+    final lineTop = compact ? 40.0 : 60.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _circleButton(
+            AppLogoButton(
+              compact: compact,
               onTap: () => Navigator.pop(context),
-              child: const Text(
-                '8',
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
+
             _circleButton(
+              compact: compact,
               onTap: mostrarNormas,
-              child: const Icon(
+              child: Icon(
                 Icons.question_mark_rounded,
                 color: appWhite,
-                size: 27,
+                size: compact ? 23 : 27,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 24),
+        SizedBox(height: compact ? 14 : 24),
 
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: EdgeInsets.only(
+            right: compact ? 18 : 28,
+          ),
           child: SizedBox(
-            height: 102,
+            width: double.infinity,
+            height: titleHeight,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Text(
-                    'animales\nprofesionales',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 42,
-                      height: 0.88,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                Positioned.fill(
+                  bottom: 10,
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topRight,
+                      child: Text(
+                        'animales profesionales',
+                        maxLines: 1,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: titleSize,
+                          height: 1.9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: 90,
-                  left: 0,
-                  right: -18,
+                  top: lineTop,
+                  left: compact ? -13 : -18,
+                  right: 0,
                   child: Container(
                     height: 3,
                     color: appWhite.withOpacity(0.58),
@@ -434,33 +449,42 @@ class _AnimalesProfesionalesScreenState
     return Scaffold(
       backgroundColor: appBlue,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Column(
-            children: [
-              buildTopBar(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 740;
+            final horizontalPadding = compact ? 13.0 : 18.0;
+            final verticalPadding = compact ? 11.0 : 18.0;
 
-              const SizedBox(height: 14),
-
-
-              const SizedBox(height: 14),
-
-              Expanded(
-                child: Center(
-                  child: buildMainCard(),
-                ),
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 11 : 16,
               ),
+              child: Column(
+                children: [
+                  buildTopBar(compact: compact),
 
-              const SizedBox(height: 14),
+                  SizedBox(height: compact ? 10 : 14),
 
-              buildButtons(),
-            ],
-          ),
+                  Expanded(
+                    child: Center(
+                      child: buildMainCard(),
+                    ),
+                  ),
+
+                  SizedBox(height: compact ? 10 : 14),
+
+                  buildButtons(),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
-
   Widget _buildContenido() {
     if (_itemActual == null) {
       return const Column(
