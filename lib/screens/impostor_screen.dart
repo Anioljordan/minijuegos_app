@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../data/impostor_data.dart';
 import '../widgets/app_logo_button.dart';
@@ -25,7 +25,7 @@ class ImpostorScreen extends StatefulWidget {
 }
 
 class _ImpostorScreenState extends State<ImpostorScreen> {
-  final Random _random = Random();
+  final math.Random _random = math.Random();
 
   static const Color appBlue = Color(0xFF2F4F9C);
   static const Color appWhite = Color(0xFFF7F7F7);
@@ -38,20 +38,20 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   ImpostorMode? selectedMode;
   ImpostorStep currentStep = ImpostorStep.modeSelection;
 
-  final TextEditingController playersController =
-  TextEditingController(text: '6');
-  final TextEditingController impostorsController =
-  TextEditingController(text: '1');
-  final TextEditingController namesController = TextEditingController();
+  final TextEditingController playerNameController =
+  TextEditingController();
 
-  int playersCount = 6;
+  static const int maxPlayers = 12;
+
   int impostorsCount = 1;
+
   int currentPlayerIndex = 0;
   bool showHints = true;
 
   List<String> playerSecrets = [];
   List<int> impostorIndexes = [];
   List<String> playerNames = [];
+  int get playersCount => playerNames.length;
 
   String selectedWord = '';
   String selectedCategory = '';
@@ -69,9 +69,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   @override
   void dispose() {
-    playersController.dispose();
-    impostorsController.dispose();
-    namesController.dispose();
+    playerNameController.dispose();
     super.dispose();
   }
 
@@ -83,14 +81,11 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     setState(() {
       selectedMode = null;
       currentStep = ImpostorStep.modeSelection;
-      playersCount = 6;
       impostorsCount = 1;
       currentPlayerIndex = 0;
       showHints = true;
 
-      playersController.text = '6';
-      impostorsController.text = '1';
-      namesController.clear();
+      playerNameController.clear();
 
       playerSecrets = [];
       impostorIndexes = [];
@@ -137,39 +132,137 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
   }
 
+  String _nextAutomaticPlayerName() {
+    int number = 1;
+
+    while (
+    playerNames.any(
+          (name) => name.toLowerCase() == 'jugador $number',
+    )
+    ) {
+      number++;
+    }
+
+    return 'Jugador $number';
+  }
+
+  void _addPlayer() {
+    if (playerNames.length >= maxPlayers) {
+      showCustomSnackBar(
+        'El máximo es de $maxPlayers jugadores',
+      );
+      return;
+    }
+
+    final typedName = playerNameController.text.trim();
+
+    final newName = typedName.isEmpty
+        ? _nextAutomaticPlayerName()
+        : typedName;
+
+    final duplicated = playerNames.any(
+          (name) => name.toLowerCase() == newName.toLowerCase(),
+    );
+
+    if (duplicated) {
+      showCustomSnackBar('Ese jugador ya está añadido');
+      return;
+    }
+
+    setState(() {
+      playerNames.add(newName);
+      playerNameController.clear();
+
+      if (impostorsCount >= playerNames.length) {
+        impostorsCount = math.max(
+          1,
+          playerNames.length - 1,
+        );
+      }
+    });
+  }
+
+  void _removePlayer(int index) {
+    if (index < 0 || index >= playerNames.length) return;
+
+    setState(() {
+      playerNames.removeAt(index);
+
+      final maxImpostors = math.max(
+        1,
+        playerNames.length - 1,
+      );
+
+      impostorsCount = impostorsCount
+          .clamp(1, maxImpostors)
+          .toInt();
+    });
+  }
+
+  void _changePlayers(int change) {
+    if (change > 0) {
+      playerNameController.clear();
+      _addPlayer();
+      return;
+    }
+
+    if (playerNames.isEmpty) return;
+
+    _removePlayer(playerNames.length - 1);
+  }
+
+  void _changeImpostors(int change) {
+    if (playerNames.length < 2) {
+      showCustomSnackBar(
+        'Añade jugadores antes de cambiar los impostores',
+      );
+      return;
+    }
+
+    final maxImpostors = playerNames.length - 1;
+
+    setState(() {
+      impostorsCount = (impostorsCount + change)
+          .clamp(1, maxImpostors)
+          .toInt();
+    });
+  }
+
   void startGame() {
-    final parsedPlayers = int.tryParse(playersController.text) ?? 0;
-    final parsedImpostors = int.tryParse(impostorsController.text) ?? 0;
-
-    if (parsedPlayers < 3) {
-      showCustomSnackBar('Tiene que haber al menos 3 jugadores');
+    if (playersCount < 3) {
+      showCustomSnackBar(
+        'Tiene que haber al menos 3 jugadores',
+      );
       return;
     }
 
-    if (parsedImpostors < 1) {
-      showCustomSnackBar('Tiene que haber al menos 1 impostor');
+    if (impostorsCount < 1) {
+      showCustomSnackBar(
+        'Tiene que haber al menos 1 impostor',
+      );
       return;
     }
 
-    if (parsedImpostors >= parsedPlayers) {
-      showCustomSnackBar('No puede haber tantos impostores como jugadores');
+    if (impostorsCount >= playersCount) {
+      showCustomSnackBar(
+        'No puede haber tantos impostores como jugadores',
+      );
       return;
     }
-
-    playersCount = parsedPlayers;
-    impostorsCount = parsedImpostors;
-    generatePlayerNames();
 
     switch (selectedMode!) {
       case ImpostorMode.classic:
         setupClassicMode();
         break;
+
       case ImpostorMode.roles:
         setupRolesMode();
         break;
+
       case ImpostorMode.question:
         setupQuestionMode();
         break;
+
       case ImpostorMode.fakeFact:
         setupFakeFactMode();
         break;
@@ -181,18 +274,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
   }
 
-  void generatePlayerNames() {
-    final rawNames = namesController.text
-        .split('\n')
-        .map((name) => name.trim())
-        .where((name) => name.isNotEmpty)
-        .toList();
 
-    playerNames = List.generate(playersCount, (index) {
-      if (index < rawNames.length) return rawNames[index];
-      return 'Jugador ${index + 1}';
-    });
-  }
 
   void setupClassicMode() {
     final categoryData =
@@ -501,7 +583,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.9,
+                          height: 1.4,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -632,12 +714,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   size: compact ? 24 : 28,
                 ),
                 const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
+                Expanded(
+                  child: _singleLineResponsiveText(
                     label,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    alignment: Alignment.center,
                     style: TextStyle(
                       color: foregroundColor.withOpacity(
                         onTap == null ? 0.40 : 1,
@@ -1098,6 +1178,425 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
+  Widget _singleLineResponsiveText(
+      String text, {
+        required TextStyle style,
+        Alignment alignment = Alignment.centerLeft,
+      }) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: alignment,
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        style: style,
+      ),
+    );
+  }
+
+  Widget _buildCounterButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final veryNarrow = screenWidth < 350;
+
+    final size = veryNarrow
+        ? 34.0
+        : compact
+        ? 38.0
+        : 44.0;
+
+    return Material(
+      color: onTap == null
+          ? appWhite.withOpacity(0.04)
+          : appWhite.withOpacity(0.10),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: appWhite.withOpacity(
+                onTap == null ? 0.12 : 0.35,
+              ),
+              width: 1.5,
+            ),
+          ),
+          child: Icon(
+            icon,
+            color: appWhite.withOpacity(
+              onTap == null ? 0.28 : 1,
+            ),
+            size: veryNarrow
+                ? 19
+                : compact
+                ? 21
+                : 24,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCounter({
+    required String title,
+    required IconData icon,
+    required int value,
+    required VoidCallback? onMinus,
+    required VoidCallback? onPlus,
+    required bool compact,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final veryNarrow = constraints.maxWidth < 330;
+
+        final iconSize = veryNarrow
+            ? 34.0
+            : compact
+            ? 38.0
+            : 44.0;
+
+        final horizontalGap = veryNarrow ? 6.0 : 9.0;
+        final valueWidth = veryNarrow
+            ? 27.0
+            : compact
+            ? 33.0
+            : 40.0;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(
+            veryNarrow
+                ? 8
+                : compact
+                ? 10
+                : 12,
+          ),
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.07),
+            border: Border.all(
+              color: appWhite.withOpacity(0.24),
+              width: 1.4,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: iconSize,
+                height: iconSize,
+                decoration: BoxDecoration(
+                  color: modeColor.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: modeColor.withOpacity(0.75),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: modeColor,
+                  size: veryNarrow
+                      ? 19
+                      : compact
+                      ? 21
+                      : 24,
+                ),
+              ),
+
+              SizedBox(width: horizontalGap),
+
+              Expanded(
+                child: _singleLineResponsiveText(
+                  title.toUpperCase(),
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 10.5
+                        : compact
+                        ? 12
+                        : 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: veryNarrow ? 0.1 : 0.4,
+                  ),
+                ),
+              ),
+
+              SizedBox(width: horizontalGap),
+
+              _buildCounterButton(
+                icon: Icons.remove_rounded,
+                onTap: onMinus,
+                compact: compact,
+              ),
+
+              SizedBox(
+                width: valueWidth,
+                child: Text(
+                  '$value',
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 18
+                        : compact
+                        ? 20
+                        : 23,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+
+              _buildCounterButton(
+                icon: Icons.add_rounded,
+                onTap: onPlus,
+                compact: compact,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPlayersEditor({
+    required bool compact,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildCounter(
+          title: 'Jugadores',
+          icon: Icons.groups_rounded,
+          value: playersCount,
+          onMinus: playerNames.isEmpty
+              ? null
+              : () => _changePlayers(-1),
+          onPlus: playerNames.length >= maxPlayers
+              ? null
+              : () => _changePlayers(1),
+          compact: compact,
+        ),
+
+        SizedBox(height: compact ? 12 : 14),
+
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _singleLineResponsiveText(
+            'AÑADIR JUGADOR',
+            style: TextStyle(
+              color: appWhite.withOpacity(0.70),
+              fontSize: compact ? 10.5 : 12,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: playerNameController,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _addPlayer(),
+                style: const TextStyle(
+                  color: appWhite,
+                  fontWeight: FontWeight.w700,
+                ),
+                cursorColor: appWhite,
+                decoration: inputDecoration(
+                  'Nombre opcional',
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 9),
+
+            SizedBox(
+              width: compact ? 50 : 54,
+              height: compact ? 50 : 54,
+              child: ElevatedButton(
+                onPressed: playerNames.length >= maxPlayers
+                    ? null
+                    : _addPlayer,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: modeColor,
+                  foregroundColor: selectedMode == ImpostorMode.fakeFact
+                      ? appBlue
+                      : appWhite,
+                  disabledBackgroundColor: appWhite.withOpacity(0.18),
+                  disabledForegroundColor: appWhite.withOpacity(0.42),
+                  elevation: 0,
+
+                  // Esto centra correctamente el +
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  alignment: Alignment.center,
+
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.add_rounded,
+                    size: 29,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: compact ? 12 : 14),
+
+        if (playerNames.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: compact ? 16 : 20,
+            ),
+            decoration: BoxDecoration(
+              color: appWhite.withOpacity(0.05),
+              border: Border.all(
+                color: appWhite.withOpacity(0.18),
+                width: 1.3,
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.person_add_alt_1_rounded,
+                  color: appWhite.withOpacity(0.48),
+                  size: compact ? 28 : 34,
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Todavía no has añadido jugadores',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.66),
+                    fontSize: compact ? 12 : 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.44),
+                    fontSize: compact ? 10.5 : 11.5,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Column(
+            children: playerNames.asMap().entries.map((entry) {
+              final index = entry.key;
+              final name = entry.value;
+
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.fromLTRB(
+                  compact ? 9 : 11,
+                  compact ? 7 : 8,
+                  5,
+                  compact ? 7 : 8,
+                ),
+                decoration: BoxDecoration(
+                  color: appWhite.withOpacity(0.07),
+                  border: Border(
+                    left: BorderSide(
+                      color: modeColor,
+                      width: 6,
+                    ),
+                    bottom: BorderSide(
+                      color: appWhite.withOpacity(0.25),
+                      width: 2,
+                    ),
+                    top: BorderSide(
+                      color: appWhite.withOpacity(0.15),
+                    ),
+                    right: BorderSide(
+                      color: appWhite.withOpacity(0.15),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: compact ? 31 : 35,
+                      height: compact ? 31 : 35,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: appWhite.withOpacity(0.68),
+                          width: 1.6,
+                        ),
+                      ),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: compact ? 12 : 13,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    Expanded(
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: compact ? 14 : 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+
+                    IconButton(
+                      tooltip: 'Eliminar jugador',
+                      onPressed: () => _removePlayer(index),
+                      icon: Icon(
+                        Icons.delete_outline_rounded,
+                        color: appWhite.withOpacity(0.78),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+      ],
+    );
+  }
+
   Widget buildSetup({required bool compact}) {
     final mode = selectedMode!;
     final showHintSwitch =
@@ -1128,79 +1627,38 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'CONFIGURACIÓN',
-                        style: TextStyle(
-                          color: appWhite.withOpacity(0.62),
-                          fontSize: compact ? 10.5 : 12,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        getModeTitle(mode),
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: compact ? 21 : 25,
-                          height: 1,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
+                  child: _singleLineResponsiveText(
+                    getModeTitle(mode),
+                    style: TextStyle(
+                      color: appWhite,
+                      fontSize: compact ? 20 : 25,
+                      height: 1,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ),
               ],
             ),
             SizedBox(height: compact ? 16 : 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildNumberInput(
-                    label: 'JUGADORES',
-                    controller: playersController,
-                    hint: '6',
-                    compact: compact,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _buildNumberInput(
-                    label: 'IMPOSTORES',
-                    controller: impostorsController,
-                    hint: '1',
-                    compact: compact,
-                  ),
-                ),
-              ],
+            _buildPlayersEditor(
+              compact: compact,
             ),
+
             SizedBox(height: compact ? 14 : 17),
-            Text(
-              'NOMBRES DE JUGADORES',
-              style: TextStyle(
-                color: appWhite.withOpacity(0.70),
-                fontSize: compact ? 10.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.7,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: namesController,
-              minLines: compact ? 3 : 4,
-              maxLines: compact ? 4 : 5,
-              style: const TextStyle(
-                color: appWhite,
-                fontWeight: FontWeight.w700,
-              ),
-              cursorColor: appWhite,
-              decoration: inputDecoration(
-                'Opcional · uno por línea\nAniol\nMartina\nJan',
-              ),
+
+            _buildCounter(
+              title: 'Impostores',
+              icon: Icons.visibility_off_rounded,
+              value: impostorsCount,
+              onMinus: impostorsCount <= 1
+                  ? null
+                  : () => _changeImpostors(-1),
+              onPlus: playersCount < 2 ||
+                  impostorsCount >= playersCount - 1
+                  ? null
+                  : () => _changeImpostors(1),
+              compact: compact,
             ),
             if (showHintSwitch) ...[
               SizedBox(height: compact ? 13 : 16),
@@ -1225,13 +1683,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  subtitle: Text(
-                    'Recibirá una pista corta para poder disimular.',
-                    style: TextStyle(
-                      color: appWhite.withOpacity(0.60),
-                      fontSize: 12,
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -1251,40 +1702,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _buildNumberInput({
-    required String label,
-    required TextEditingController controller,
-    required String hint,
-    required bool compact,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: appWhite.withOpacity(0.70),
-            fontSize: compact ? 10 : 11.5,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.6,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: appWhite,
-            fontSize: compact ? 19 : 22,
-            fontWeight: FontWeight.w900,
-          ),
-          cursorColor: appWhite,
-          decoration: inputDecoration(hint),
-        ),
-      ],
-    );
-  }
 
   Widget buildPassPhone({required bool compact}) {
     final playerName = playerNames[currentPlayerIndex];
@@ -1642,9 +2059,19 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final compact = constraints.maxHeight < 740;
-              final horizontalPadding = compact ? 13.0 : 18.0;
-              final verticalPadding = compact ? 11.0 : 18.0;
+              final narrow = constraints.maxWidth < 380;
+              final veryNarrow = constraints.maxWidth < 340;
+
+              final compact =
+                  constraints.maxHeight < 740 || narrow;
+
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
+
+              final verticalPadding = compact ? 10.0 : 18.0;
 
               return Padding(
                 padding: EdgeInsets.fromLTRB(

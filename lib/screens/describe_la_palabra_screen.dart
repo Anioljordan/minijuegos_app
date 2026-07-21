@@ -65,6 +65,37 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   static const Color accentPurple = Color(0xFF8B5CF6);
   static const Color accentYellow = Color(0xFFFFD166);
 
+  static const int minPlayers = 2;
+  static const int maxPlayers = 12;
+
+  bool get _isNarrowScreen =>
+      MediaQuery.sizeOf(context).width < 380;
+
+  bool get _isVeryNarrowScreen =>
+      MediaQuery.sizeOf(context).width < 340;
+
+  bool get _isCompactScreen =>
+      MediaQuery.sizeOf(context).height < 740 ||
+          _isNarrowScreen;
+
+  Widget _singleLineResponsiveText(
+      String text, {
+        required TextStyle style,
+        Alignment alignment = Alignment.centerLeft,
+      }) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: alignment,
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.visible,
+        style: style,
+      ),
+    );
+  }
+
   DescribeStep currentStep = DescribeStep.setup;
   DescribeRoundType currentRound = DescribeRoundType.describe;
   WordsSource wordsSource = WordsSource.app;
@@ -257,10 +288,38 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     }
   }
 
+  String _nextAutomaticPlayerName() {
+    int number = 1;
+
+    while (
+    allPlayers.any(
+          (player) =>
+      player.toLowerCase() == 'jugador $number',
+    )
+    ) {
+      number++;
+    }
+
+    return 'Jugador $number';
+  }
+
   void addPlayer() {
-    final name = playerController.text.trim();
-    if (name.isEmpty) return;
-    if (allPlayers.contains(name)) {
+    if (allPlayers.length >= maxPlayers) {
+      showSnack('El máximo es de $maxPlayers jugadores');
+      return;
+    }
+
+    final typedName = playerController.text.trim();
+
+    final name = typedName.isEmpty
+        ? _nextAutomaticPlayerName()
+        : typedName;
+
+    final duplicated = allPlayers.any(
+          (player) => player.toLowerCase() == name.toLowerCase(),
+    );
+
+    if (duplicated) {
       showSnack('Ese jugador ya está añadido');
       return;
     }
@@ -268,35 +327,58 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     setState(() {
       allPlayers.add(name);
       playerController.clear();
+
+      // Los equipos anteriores ya no coinciden con los jugadores.
+      teams.clear();
     });
   }
 
   void removePlayer(int index) {
-    final player = allPlayers[index];
+    if (index < 0 || index >= allPlayers.length) return;
 
     setState(() {
       allPlayers.removeAt(index);
-      for (final team in teams) {
-        team.players.remove(player);
-      }
+
+      // Al cambiar la lista, se deben crear los equipos otra vez.
+      teams.clear();
     });
   }
 
-  void createEmptyTeams() {
-    final teamCount = int.tryParse(teamCountController.text) ?? 0;
+  void _changePlayers(int change) {
+    if (change > 0) {
+      // El + del contador siempre crea un jugador automático.
+      playerController.clear();
+      addPlayer();
+      return;
+    }
 
-    if (allPlayers.length < 2) {
-      showSnack('Añade al menos 2 jugadores');
+    if (allPlayers.isEmpty) return;
+
+    removePlayer(allPlayers.length - 1);
+  }
+
+  void createEmptyTeams() {
+    final teamCount =
+        int.tryParse(teamCountController.text.trim()) ?? 0;
+
+    if (allPlayers.length < minPlayers) {
+      showSnack(
+        'Añade al menos $minPlayers jugadores',
+      );
       return;
     }
 
     if (teamCount < 2) {
-      showSnack('Tiene que haber al menos 2 equipos');
+      showSnack(
+        'Tiene que haber al menos 2 equipos',
+      );
       return;
     }
 
     if (teamCount > allPlayers.length) {
-      showSnack('No puede haber más equipos que jugadores');
+      showSnack(
+        'No puede haber más equipos que jugadores',
+      );
       return;
     }
 
@@ -317,17 +399,22 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       return;
     }
 
-    final shuffledPlayers = List<String>.from(allPlayers)..shuffle();
+    final shuffledPlayers =
+    List<String>.from(allPlayers)..shuffle(_random);
 
-    for (final team in teams) {
-      team.players.clear();
-    }
+    setState(() {
+      for (final team in teams) {
+        team.players.clear();
+      }
 
-    for (int i = 0; i < shuffledPlayers.length; i++) {
-      teams[i % teams.length].players.add(shuffledPlayers[i]);
-    }
-
-    setState(() {});
+      for (int index = 0;
+      index < shuffledPlayers.length;
+      index++) {
+        teams[index % teams.length]
+            .players
+            .add(shuffledPlayers[index]);
+      }
+    });
   }
 
   void assignPlayerToTeam(String player, int teamIndex) {
@@ -389,19 +476,33 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   }
 
   void startGame() {
-    final seconds = int.tryParse(secondsController.text) ?? 0;
+    final seconds =
+        int.tryParse(secondsController.text.trim()) ?? 0;
+
     turnsPlayedInRound = 0;
+
+    if (allPlayers.length < minPlayers) {
+      showSnack(
+        'Añade al menos $minPlayers jugadores',
+      );
+      return;
+    }
+
     if (!validateTeams()) return;
 
     if (seconds < 10) {
-      showSnack('Pon al menos 10 segundos por turno');
+      showSnack(
+        'Pon al menos 10 segundos por turno',
+      );
       return;
     }
 
     final words = getPreparedWords();
 
     if (words.length < 8) {
-      showSnack('Necesitas al menos 8 palabras');
+      showSnack(
+        'Necesitas al menos 8 palabras',
+      );
       return;
     }
 
@@ -409,8 +510,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       turnSeconds = seconds;
       remainingSeconds = seconds;
       currentRound = DescribeRoundType.describe;
+
       baseWords = words;
-      currentRoundWords = List<String>.from(words)..shuffle();
+      currentRoundWords =
+      List<String>.from(words)..shuffle(_random);
+
       roundOneWords = [];
       guessedThisTurn = [];
       currentTeamIndex = 0;
@@ -681,7 +785,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.9,
+                          height: 1.4,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -888,13 +992,16 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   }
 
   Widget _smallLabel(String text) {
-    return Text(
-      text.toUpperCase(),
-      style: TextStyle(
-        color: appWhite.withOpacity(0.67),
-        fontSize: 10.5,
-        fontWeight: FontWeight.w900,
-        letterSpacing: 0.7,
+    return SizedBox(
+      width: double.infinity,
+      child: _singleLineResponsiveText(
+        text.toUpperCase(),
+        style: TextStyle(
+          color: appWhite.withOpacity(0.67),
+          fontSize: 10.5,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.7,
+        ),
       ),
     );
   }
@@ -907,6 +1014,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     required VoidCallback? onTap,
     required bool compact,
   }) {
+    final veryNarrow = _isVeryNarrowScreen;
+
     return Expanded(
       child: SizedBox(
         height: compact ? 52 : 60,
@@ -917,32 +1026,52 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           child: InkWell(
             onTap: onTap,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: compact ? 7 : 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: veryNarrow
+                    ? 5
+                    : compact
+                    ? 7
+                    : 10,
+              ),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: appWhite.withOpacity(onTap == null ? 0.12 : 0.28),
+                  color: appWhite.withOpacity(
+                    onTap == null ? 0.12 : 0.28,
+                  ),
                   width: 2,
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     icon,
-                    color: foregroundColor.withOpacity(onTap == null ? 0.4 : 1),
-                    size: compact ? 22 : 25,
+                    color: foregroundColor.withOpacity(
+                      onTap == null ? 0.4 : 1,
+                    ),
+                    size: veryNarrow
+                        ? 19
+                        : compact
+                        ? 22
+                        : 25,
                   ),
-                  SizedBox(width: compact ? 6 : 8),
-                  Flexible(
-                    child: Text(
+
+                  SizedBox(
+                    width: veryNarrow
+                        ? 4
+                        : compact
+                        ? 6
+                        : 8,
+                  ),
+
+                  Expanded(
+                    child: _singleLineResponsiveText(
                       label,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      alignment: Alignment.center,
                       style: TextStyle(
-                        color: foregroundColor.withOpacity(onTap == null ? 0.4 : 1),
+                        color: foregroundColor.withOpacity(
+                          onTap == null ? 0.4 : 1,
+                        ),
                         fontSize: compact ? 10.5 : 12,
-                        height: 1.05,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.25,
                       ),
@@ -985,11 +1114,13 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, color: appWhite, size: compact ? 21 : 24),
-                const SizedBox(width: 7),
-                Flexible(
-                  child: Text(
+                SizedBox(
+                  width: _isVeryNarrowScreen ? 5 : 7,
+                ),
+                Expanded(
+                  child: _singleLineResponsiveText(
                     label,
-                    textAlign: TextAlign.center,
+                    alignment: Alignment.center,
                     style: TextStyle(
                       color: appWhite,
                       fontSize: compact ? 10.5 : 12,
@@ -1403,6 +1534,446 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     );
   }
 
+  Widget _buildPlayerCounterButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
+
+    final size = veryNarrow
+        ? 34.0
+        : compact
+        ? 38.0
+        : 44.0;
+
+    return Material(
+      color: onTap == null
+          ? appWhite.withOpacity(0.04)
+          : appWhite.withOpacity(0.10),
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Center(
+            child: Icon(
+              icon,
+              color: appWhite.withOpacity(
+                onTap == null ? 0.28 : 1,
+              ),
+              size: veryNarrow
+                  ? 19
+                  : compact
+                  ? 21
+                  : 24,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayersCounter({
+    required bool compact,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final veryNarrow = constraints.maxWidth < 330;
+
+        final leadingSize = veryNarrow
+            ? 34.0
+            : compact
+            ? 38.0
+            : 44.0;
+
+        final gap = veryNarrow ? 6.0 : 9.0;
+
+        final valueWidth = veryNarrow
+            ? 27.0
+            : compact
+            ? 33.0
+            : 40.0;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(
+            veryNarrow
+                ? 8
+                : compact
+                ? 10
+                : 12,
+          ),
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.07),
+            border: Border.all(
+              color: appWhite.withOpacity(0.24),
+              width: 1.4,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: leadingSize,
+                height: leadingSize,
+                decoration: BoxDecoration(
+                  color: accentCyan.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: accentCyan.withOpacity(0.75),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.groups_rounded,
+                  color: accentCyan,
+                  size: veryNarrow
+                      ? 19
+                      : compact
+                      ? 21
+                      : 24,
+                ),
+              ),
+
+              SizedBox(width: gap),
+
+              Expanded(
+                child: _singleLineResponsiveText(
+                  'JUGADORES',
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 10.5
+                        : compact
+                        ? 12
+                        : 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing:
+                    veryNarrow ? 0.1 : 0.4,
+                  ),
+                ),
+              ),
+
+              SizedBox(width: gap),
+
+              _buildPlayerCounterButton(
+                icon: Icons.remove_rounded,
+                onTap: allPlayers.isEmpty
+                    ? null
+                    : () => _changePlayers(-1),
+                compact: compact,
+              ),
+
+              SizedBox(
+                width: valueWidth,
+                child: Text(
+                  '${allPlayers.length}',
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 18
+                        : compact
+                        ? 20
+                        : 23,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+
+              _buildPlayerCounterButton(
+                icon: Icons.add_rounded,
+                onTap: allPlayers.length >= maxPlayers
+                    ? null
+                    : () => _changePlayers(1),
+                compact: compact,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPlayerTile({
+    required String player,
+    required int index,
+    required bool compact,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 9 : 11,
+        compact ? 7 : 8,
+        5,
+        compact ? 7 : 8,
+      ),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.07),
+        border: Border(
+          left: const BorderSide(
+            color: accentCyan,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.25),
+            width: 2,
+          ),
+          top: BorderSide(
+            color: appWhite.withOpacity(0.15),
+          ),
+          right: BorderSide(
+            color: appWhite.withOpacity(0.15),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: compact ? 31 : 35,
+            height: compact ? 31 : 35,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: appWhite.withOpacity(0.68),
+                width: 1.6,
+              ),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 12 : 13,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Text(
+              player,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 14 : 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+
+          IconButton(
+            tooltip: 'Eliminar jugador',
+            onPressed: () => removePlayer(index),
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              color: appWhite.withOpacity(0.78),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayersEditor({
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
+    return buildPanel(
+      accent: accentCyan,
+      padding: EdgeInsets.all(compact ? 12 : 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildPlayersCounter(
+            compact: compact,
+          ),
+
+          SizedBox(height: compact ? 12 : 14),
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _singleLineResponsiveText(
+              'AÑADIR JUGADOR',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.70),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: playerController,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => addPlayer(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  cursorColor: appWhite,
+                  decoration: inputDecoration(
+                    'Nombre opcional',
+                    dense: compact,
+                  ),
+                ),
+              ),
+
+              SizedBox(
+                width: veryNarrow ? 6 : 9,
+              ),
+
+              SizedBox(
+                width: veryNarrow
+                    ? 44
+                    : compact
+                    ? 50
+                    : 54,
+                height: veryNarrow
+                    ? 48
+                    : compact
+                    ? 50
+                    : 54,
+                child: ElevatedButton(
+                  onPressed: allPlayers.length >= maxPlayers
+                      ? null
+                      : addPlayer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentCyan,
+                    foregroundColor: appBlue,
+                    disabledBackgroundColor:
+                    appWhite.withOpacity(0.18),
+                    disabledForegroundColor:
+                    appWhite.withOpacity(0.42),
+                    elevation: 0,
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize:
+                    MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment.center,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.add_rounded,
+                      size: 29,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: compact ? 12 : 14),
+
+          if (allPlayers.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: compact ? 16 : 20,
+              ),
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.05),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.18),
+                  width: 1.3,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.person_add_alt_1_rounded,
+                    color: appWhite.withOpacity(0.48),
+                    size: compact ? 28 : 34,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'Todavía no has añadido jugadores',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.66),
+                      fontSize: compact ? 12 : 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.44),
+                      fontSize: compact ? 10.5 : 11.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _singleLineResponsiveText(
+                    'LISTA DE JUGADORES',
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.70),
+                      fontSize: compact ? 10.5 : 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.7,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                Text(
+                  '${allPlayers.length} / $maxPlayers',
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.62),
+                    fontSize: compact ? 11 : 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 9),
+
+            ...allPlayers.asMap().entries.map(
+                  (entry) => _buildPlayerTile(
+                player: entry.value,
+                index: entry.key,
+                compact: compact,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget buildSetup({required bool compact}) {
     return Column(
       children: [
@@ -1417,108 +1988,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                buildPanel(
-                  accent: accentCyan,
-                  padding: EdgeInsets.all(compact ? 12 : 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: compact ? 42 : 48,
-                            height: compact ? 42 : 48,
-                            decoration: BoxDecoration(
-                              color: accentCyan.withOpacity(0.18),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: accentCyan, width: 1.8),
-                            ),
-                            child: Icon(
-                              Icons.person_add_alt_1_rounded,
-                              color: appWhite,
-                              size: compact ? 22 : 26,
-                            ),
-                          ),
-                          const SizedBox(width: 11),
-                          Expanded(
-                            child: sectionTitle(
-                              'Jugadores',
-                              compact: compact,
-                            ),
-                          ),
-                          Text(
-                            '${allPlayers.length}',
-                            style: TextStyle(
-                              color: accentCyan,
-                              fontSize: compact ? 24 : 28,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: compact ? 11 : 14),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: playerController,
-                              style: const TextStyle(
-                                color: appWhite,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              cursorColor: appWhite,
-                              decoration: inputDecoration(
-                                'Nombre del jugador',
-                                dense: compact,
-                              ),
-                              onSubmitted: (_) => addPlayer(),
-                            ),
-                          ),
-                          const SizedBox(width: 9),
-                          SizedBox(
-                            width: compact ? 48 : 54,
-                            height: compact ? 48 : 54,
-                            child: ElevatedButton(
-                              onPressed: addPlayer,
-                              style: mainButtonStyle(
-                                backgroundColor: appWhite,
-                                foregroundColor: appBlue,
-                              ),
-                              child: const Icon(Icons.add_rounded),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (allPlayers.isNotEmpty) ...[
-                        const SizedBox(height: 11),
-                        Wrap(
-                          spacing: 7,
-                          runSpacing: 7,
-                          children: List.generate(allPlayers.length, (index) {
-                            return InputChip(
-                              backgroundColor: appWhite.withOpacity(0.09),
-                              side: BorderSide(
-                                color: appWhite.withOpacity(0.25),
-                              ),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
-                              label: Text(
-                                allPlayers[index],
-                                style: const TextStyle(
-                                  color: appWhite,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              deleteIconColor: appWhite.withOpacity(0.8),
-                              onDeleted: () => removePlayer(index),
-                            );
-                          }),
-                        ),
-                      ],
-                    ],
-                  ),
+                _buildPlayersEditor(
+                  compact: compact,
                 ),
                 SizedBox(height: compact ? 9 : 12),
                 buildPanel(
@@ -1658,6 +2129,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                                 Expanded(
                                   child: Text(
                                     player,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       color: appWhite,
                                       fontSize: 13,
@@ -1817,9 +2291,10 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
               foregroundColor: appBlue,
             ),
             icon: const Icon(Icons.play_arrow_rounded),
-            label: const Text(
-              'EMPEZAR JUEGO',
-              style: TextStyle(
+            label: _singleLineResponsiveText(
+              'EMPEZAR TURNO',
+              alignment: Alignment.center,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.4,
@@ -1922,6 +2397,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                                   const SizedBox(height: 3),
                                   Text(
                                     team.currentDescriber,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: appWhite,
                                       fontSize: compact ? 17 : 20,
@@ -2034,13 +2512,15 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                             size: compact ? 18 : 21,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            _roundShortName,
-                            style: TextStyle(
-                              color: appWhite,
-                              fontSize: compact ? 10 : 11.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
+                          Flexible(
+                            child: _singleLineResponsiveText(
+                              _roundShortName,
+                              style: TextStyle(
+                                color: appWhite,
+                                fontSize: compact ? 10 : 11.5,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ],
@@ -2225,8 +2705,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                   ? Icons.emoji_events_rounded
                   : Icons.arrow_forward_rounded,
             ),
-            label: Text(
-              isLastRound ? 'VER GANADOR' : 'SIGUIENTE RONDA',
+            label: _singleLineResponsiveText(
+              isLastRound
+                  ? 'VER GANADOR'
+                  : 'SIGUIENTE RONDA',
+              alignment: Alignment.center,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w900,
@@ -2361,9 +2844,19 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 13.0 : 18.0;
-            final verticalPadding = compact ? 11.0 : 18.0;
+            final narrow = constraints.maxWidth < 380;
+            final veryNarrow = constraints.maxWidth < 340;
+
+            final compact =
+                constraints.maxHeight < 740 || narrow;
+
+            final horizontalPadding = veryNarrow
+                ? 8.0
+                : compact
+                ? 12.0
+                : 18.0;
+
+            final verticalPadding = compact ? 10.0 : 18.0;
 
             Widget body;
             switch (currentStep) {

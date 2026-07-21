@@ -1,7 +1,6 @@
 import '../core/app_settings.dart';
 
 import 'package:flutter/material.dart';
-import '../core/app_settings.dart';
 
 class AppSettingsButton extends StatelessWidget {
   final Color blue;
@@ -93,12 +92,18 @@ class AppSettingsSheet {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            settings.t('settings'),
-                            style: TextStyle(
-                              color: white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.w900,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              settings.t('settings'),
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TextStyle(
+                                color: white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
                         ),
@@ -125,32 +130,57 @@ class AppSettingsSheet {
 
                     const SizedBox(height: 10),
 
-                    Row(
-                      children: [
-                        _languageButton(
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final veryNarrow = constraints.maxWidth < 310;
+
+                        final spanishButton = _languageButton(
                           settings: settings,
                           blue: blue,
                           white: white,
-                          label: settings.t('spanish'),
+                          label: 'Español',
                           value: 'es',
-                        ),
-                        const SizedBox(width: 8),
-                        _languageButton(
+                        );
+
+                        final catalanButton = _languageButton(
                           settings: settings,
                           blue: blue,
                           white: white,
-                          label: settings.t('catalan'),
+                          label: 'Català',
                           value: 'ca',
-                        ),
-                        const SizedBox(width: 8),
-                        _languageButton(
+                        );
+
+                        final englishButton = _languageButton(
                           settings: settings,
                           blue: blue,
                           white: white,
-                          label: settings.t('english'),
+                          label: 'English',
                           value: 'en',
-                        ),
-                      ],
+                        );
+
+                        if (veryNarrow) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              spanishButton,
+                              const SizedBox(height: 8),
+                              catalanButton,
+                              const SizedBox(height: 8),
+                              englishButton,
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(child: spanishButton),
+                            const SizedBox(width: 8),
+                            Expanded(child: catalanButton),
+                            const SizedBox(width: 8),
+                            Expanded(child: englishButton),
+                          ],
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 24),
@@ -175,12 +205,18 @@ class AppSettingsSheet {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            settings.t('volume'),
-                            style: TextStyle(
-                              color: white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              settings.t('volume'),
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TextStyle(
+                                color: white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
@@ -218,17 +254,6 @@ class AppSettingsSheet {
                       onChanged: settings.setVibrationEnabled,
                     ),
 
-                    const SizedBox(height: 18),
-
-                    _settingsAction(
-                      white: white,
-                      icon: Icons.delete_outline_rounded,
-                      title: settings.t('resetData'),
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await settings.resetSavedGameData(context);
-                      },
-                    ),
 
                     const SizedBox(height: 10),
 
@@ -239,9 +264,9 @@ class AppSettingsSheet {
                       onTap: () {
                         showAboutDialog(
                           context: context,
-                          applicationName: 'MiniGames',
-                          applicationVersion: '1.0.0',
-                          applicationLegalese: '© 2026 MiniGames',
+                          applicationName: 'Cubo',
+                          applicationVersion: '1.0.5',
+                          applicationLegalese: '© 2026 Cubo',
                         );
                       },
                     ),
@@ -264,29 +289,60 @@ class AppSettingsSheet {
     required String label,
     required String value,
   }) {
-    final bool selected = settings.language == value;
+    final selected = settings.language == value;
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => settings.setLanguage(value),
-        child: Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: selected ? white : Colors.transparent,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: white.withOpacity(0.65),
-              width: 1.5,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: selected ? blue : white,
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: label,
+      child: Material(
+        color: selected ? white : Colors.transparent,
+        borderRadius: BorderRadius.circular(999),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999),
+          onTap: () async {
+            if (selected) return;
+            await settings.setLanguage(value);
+          },
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: selected
+                    ? white
+                    : white.withOpacity(0.65),
+                width: 1.5,
               ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (selected) ...[
+                  Icon(
+                    Icons.check_rounded,
+                    color: blue,
+                    size: 17,
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: TextStyle(
+                        color: selected ? blue : white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -311,12 +367,20 @@ class AppSettingsSheet {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-              color: white,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
+          child: Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  color: white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ),
         ),

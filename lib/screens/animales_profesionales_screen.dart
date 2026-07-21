@@ -159,7 +159,7 @@ class _AnimalesProfesionalesScreenState
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.9,
+                          height: 2.6,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),

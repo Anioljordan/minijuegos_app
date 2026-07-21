@@ -42,8 +42,13 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   static const Color accentGold = Color(0xFFFFD166);
   static const Color accentGreen = Color(0xFF22C55E);
 
+  static const int minPlayers = 5;
+  static const int maxPlayers = 10;
+
   final TextEditingController _controller = TextEditingController();
   final List<AsambleaPlayer> _players = [];
+
+  int get playersCount => _players.length;
 
   bool _startupDialogShown = false;
 
@@ -169,11 +174,16 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     icon: const Icon(Icons.history_rounded),
                     label: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 13),
-                      child: Text(
-                        'ÚLTIMOS JUGADORES',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.4,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'ÚLTIMOS JUGADORES',
+                          maxLines: 1,
+                          softWrap: false,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
@@ -189,11 +199,16 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                   icon: const Icon(Icons.restart_alt_rounded),
                   label: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      'EMPEZAR DESDE CERO',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'EMPEZAR DESDE CERO',
+                        maxLines: 1,
+                        softWrap: false,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ),
                   ),
@@ -219,12 +234,17 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         icon: Icon(icon, color: appBlue),
         label: Padding(
           padding: const EdgeInsets.symmetric(vertical: 13),
-          child: Text(
-            text.toUpperCase(),
-            style: const TextStyle(
-              color: appBlue,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.4,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text.toUpperCase(),
+              maxLines: 1,
+              softWrap: false,
+              style: const TextStyle(
+                color: appBlue,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+              ),
             ),
           ),
         ),
@@ -260,6 +280,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
     setState(() {
       _players.clear();
+      _controller.clear();
     });
 
     if (!mounted) return;
@@ -298,18 +319,48 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     await prefs.remove(lastPlayersKey);
   }
 
+  String _nextAutomaticPlayerName() {
+    int number = 1;
+
+    while (
+    _players.any(
+          (player) =>
+      player.name.toLowerCase() == 'jugador $number',
+    )
+    ) {
+      number++;
+    }
+
+    return 'Jugador $number';
+  }
+
   Future<void> _addPlayer() async {
-    final name = _controller.text.trim();
+    if (_players.length >= maxPlayers) {
+      _snack('El máximo es de $maxPlayers jugadores');
+      return;
+    }
 
-    if (name.isEmpty) return;
+    final typedName = _controller.text.trim();
 
-    if (_players.any((p) => p.name.toLowerCase() == name.toLowerCase())) {
-      _snack('Ese nombre ya existe');
+    final name = typedName.isEmpty
+        ? _nextAutomaticPlayerName()
+        : typedName;
+
+    final duplicated = _players.any(
+          (player) =>
+      player.name.toLowerCase() == name.toLowerCase(),
+    );
+
+    if (duplicated) {
+      _snack('Ese jugador ya está añadido');
       return;
     }
 
     setState(() {
-      _players.add(AsambleaPlayer(name: name));
+      _players.add(
+        AsambleaPlayer(name: name),
+      );
+
       _controller.clear();
     });
 
@@ -326,6 +377,19 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     } else {
       await _saveLastPlayers();
     }
+  }
+
+  Future<void> _changePlayers(int change) async {
+    if (change > 0) {
+      // El + del contador siempre añade un nombre automático.
+      _controller.clear();
+      await _addPlayer();
+      return;
+    }
+
+    if (_players.isEmpty) return;
+
+    await _removePlayer(_players.length - 1);
   }
 
   Future<void> _restoreLastPlayers() async {
@@ -346,8 +410,12 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   }
 
   void _startGame() {
-    if (_players.length < 5 || _players.length > 10) {
-      _snack('La Asamblea necesita entre 5 y 10 jugadores');
+    if (_players.length < minPlayers ||
+        _players.length > maxPlayers) {
+      _snack(
+        'La Asamblea necesita entre '
+            '$minPlayers y $maxPlayers jugadores',
+      );
       return;
     }
 
@@ -356,7 +424,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AsambleaRolesScreen(players: playersWithRoles),
+        builder: (_) => AsambleaRolesScreen(
+          players: playersWithRoles,
+        ),
       ),
     );
   }
@@ -511,7 +581,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.9,
+                          height: 1.4,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -652,62 +722,462 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     );
   }
 
-  Widget _playerTile(AsambleaPlayer player, int index) {
+  Widget _playerTile(
+      AsambleaPlayer player,
+      int index, {
+        required bool compact,
+      }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 9),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 9 : 11,
+        compact ? 7 : 8,
+        5,
+        compact ? 7 : 8,
+      ),
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.07),
-        border: Border.all(
-          color: appWhite.withOpacity(0.22),
-          width: 1.3,
+        border: Border(
+          left: const BorderSide(
+            color: accentGreen,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.25),
+            width: 2,
+          ),
+          top: BorderSide(
+            color: appWhite.withOpacity(0.15),
+          ),
+          right: BorderSide(
+            color: appWhite.withOpacity(0.15),
+          ),
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: compact ? 31 : 35,
+            height: compact ? 31 : 35,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: appWhite.withOpacity(0.85),
-                width: 2,
+                color: appWhite.withOpacity(0.68),
+                width: 1.6,
               ),
             ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: const TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w900,
-                ),
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 12 : 13,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+
+          const SizedBox(width: 10),
+
           Expanded(
             child: Text(
               player.name,
-              style: const TextStyle(
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
                 color: appWhite,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
+                fontSize: compact ? 14 : 16,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
+
           IconButton(
+            tooltip: 'Eliminar jugador',
             onPressed: () => _removePlayer(index),
-            icon: const Icon(
+            icon: Icon(
               Icons.delete_outline_rounded,
-              color: appWhite,
+              color: appWhite.withOpacity(0.78),
             ),
           ),
         ],
       ),
     );
   }
+  Widget _singleLineResponsiveText(
+      String text, {
+        required TextStyle style,
+        Alignment alignment = Alignment.centerLeft,
+      }) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: alignment,
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.visible,
+        style: style,
+      ),
+    );
+  }
 
+  Widget _buildCounterButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final veryNarrow = screenWidth < 350;
+
+    final size = veryNarrow
+        ? 34.0
+        : compact
+        ? 38.0
+        : 44.0;
+
+    return Material(
+      color: onTap == null
+          ? appWhite.withOpacity(0.04)
+          : appWhite.withOpacity(0.10),
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Center(
+            child: Icon(
+              icon,
+              color: appWhite.withOpacity(
+                onTap == null ? 0.28 : 1,
+              ),
+              size: veryNarrow
+                  ? 19
+                  : compact
+                  ? 21
+                  : 24,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayersCounter({
+    required bool compact,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final veryNarrow = constraints.maxWidth < 330;
+
+        final leadingSize = veryNarrow
+            ? 34.0
+            : compact
+            ? 38.0
+            : 44.0;
+
+        final gap = veryNarrow ? 6.0 : 9.0;
+
+        final valueWidth = veryNarrow
+            ? 27.0
+            : compact
+            ? 33.0
+            : 40.0;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(
+            veryNarrow
+                ? 8
+                : compact
+                ? 10
+                : 12,
+          ),
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.07),
+            border: Border.all(
+              color: appWhite.withOpacity(0.24),
+              width: 1.4,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: leadingSize,
+                height: leadingSize,
+                decoration: BoxDecoration(
+                  color: accentGreen.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: accentGreen.withOpacity(0.75),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.groups_rounded,
+                  color: accentGreen,
+                  size: veryNarrow
+                      ? 19
+                      : compact
+                      ? 21
+                      : 24,
+                ),
+              ),
+
+              SizedBox(width: gap),
+
+              Expanded(
+                child: _singleLineResponsiveText(
+                  'JUGADORES',
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 10.5
+                        : compact
+                        ? 12
+                        : 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: veryNarrow ? 0.1 : 0.4,
+                  ),
+                ),
+              ),
+
+              SizedBox(width: gap),
+
+              _buildCounterButton(
+                icon: Icons.remove_rounded,
+                onTap: _players.isEmpty
+                    ? null
+                    : () => _changePlayers(-1),
+                compact: compact,
+              ),
+
+              SizedBox(
+                width: valueWidth,
+                child: Text(
+                  '$playersCount',
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 18
+                        : compact
+                        ? 20
+                        : 23,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+
+              _buildCounterButton(
+                icon: Icons.add_rounded,
+                onTap: _players.length >= maxPlayers
+                    ? null
+                    : () => _changePlayers(1),
+                compact: compact,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPlayersEditor({
+    required bool compact,
+  }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final veryNarrow = screenWidth < 350;
+    return buildGlassCard(
+      padding: EdgeInsets.all(compact ? 13 : 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildPlayersCounter(
+            compact: compact,
+          ),
+
+          SizedBox(height: compact ? 12 : 14),
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _singleLineResponsiveText(
+              'AÑADIR JUGADOR',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.70),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _addPlayer(),
+                  style: const TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  cursorColor: appWhite,
+                  decoration: inputDecoration(
+                    'Nombre opcional',
+                  ),
+                ),
+              ),
+
+              SizedBox(width: veryNarrow ? 6 : 9),
+
+              SizedBox(
+                width: veryNarrow
+                    ? 44
+                    : compact
+                    ? 50
+                    : 54,
+                height: veryNarrow
+                    ? 48
+                    : compact
+                    ? 50
+                    : 54,
+                child: ElevatedButton(
+                  onPressed: _players.length >= maxPlayers
+                      ? null
+                      : _addPlayer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentGreen,
+                    foregroundColor: appWhite,
+                    disabledBackgroundColor:
+                    appWhite.withOpacity(0.18),
+                    disabledForegroundColor:
+                    appWhite.withOpacity(0.42),
+                    elevation: 0,
+
+                    // Centra correctamente el símbolo +
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize:
+                    MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment.center,
+
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.add_rounded,
+                      size: 29,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: compact ? 12 : 14),
+
+          if (_players.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: compact ? 16 : 20,
+              ),
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.05),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.18),
+                  width: 1.3,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.person_add_alt_1_rounded,
+                    color: appWhite.withOpacity(0.48),
+                    size: compact ? 28 : 34,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'Todavía no has añadido jugadores',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.66),
+                      fontSize: compact ? 12 : 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.44),
+                      fontSize: compact ? 10.5 : 11.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _singleLineResponsiveText(
+                    'LISTA DE JUGADORES',
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.70),
+                      fontSize: compact ? 10.5 : 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.7,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                Text(
+                  '$playersCount / $maxPlayers',
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.62),
+                    fontSize: compact ? 11 : 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 9),
+
+            ..._players.asMap().entries.map(
+                  (entry) => _playerTile(
+                entry.value,
+                entry.key,
+                compact: compact,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -716,9 +1186,19 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 13.0 : 18.0;
-            final verticalPadding = compact ? 11.0 : 18.0;
+            final narrow = constraints.maxWidth < 380;
+            final veryNarrow = constraints.maxWidth < 340;
+
+            final compact =
+                constraints.maxHeight < 740 || narrow;
+
+            final horizontalPadding = veryNarrow
+                ? 8.0
+                : compact
+                ? 12.0
+                : 18.0;
+
+            final verticalPadding = compact ? 10.0 : 18.0;
 
             return Padding(
               padding: EdgeInsets.fromLTRB(
@@ -729,134 +1209,33 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               ),
               child: Column(
                 children: [
-                  buildTopBar(compact: compact),
-                  SizedBox(height: compact ? 9 : 14),
+                  buildTopBar(
+                    compact: compact,
+                  ),
 
+                  SizedBox(
+                    height: compact ? 9 : 14,
+                  ),
 
                   Expanded(
                     child: SingleChildScrollView(
+                      keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          buildGlassCard(
-                            padding: EdgeInsets.all(compact ? 13 : 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                sectionTitle('Jugadores'),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Añade entre 5 y 10 personas',
-                                  style: TextStyle(
-                                    color: appWhite.withOpacity(0.68),
-                                    fontSize: compact ? 12 : 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                SizedBox(height: compact ? 12 : 16),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _controller,
-                                        style: const TextStyle(
-                                          color: appWhite,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                        cursorColor: appWhite,
-                                        decoration: inputDecoration('Nombre del jugador'),
-                                        onSubmitted: (_) => _addPlayer(),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    SizedBox(
-                                      width: compact ? 50 : 56,
-                                      height: compact ? 50 : 56,
-                                      child: ElevatedButton(
-                                        onPressed: _addPlayer,
-                                        style: ElevatedButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                          backgroundColor: accentGreen,
-                                          foregroundColor: appWhite,
-                                          elevation: 0,
-                                          shape: const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.zero,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.add_rounded,
-                                          size: compact ? 29 : 34,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: compact ? 11 : 14),
-
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: compact ? 10 : 14),
-                          buildGlassCard(
-                            padding: EdgeInsets.all(compact ? 13 : 16),
-                            child: _players.isEmpty
-                                ? Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: compact ? 18 : 26,
-                              ),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: compact ? 60 : 72,
-                                    height: compact ? 60 : 72,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: accentGold.withOpacity(0.14),
-                                      border: Border.all(
-                                        color: accentGold,
-                                        width: 2.2,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.groups_rounded,
-                                      color: accentGold,
-                                      size: compact ? 31 : 36,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 14),
-                                  Text(
-                                    'Todavía no hay jugadores',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: appWhite.withOpacity(0.72),
-                                      fontSize: compact ? 14 : 15,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                                : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                sectionTitle('Lista'),
-                                const SizedBox(height: 12),
-                                ..._players.asMap().entries.map(
-                                      (entry) => _playerTile(
-                                    entry.value,
-                                    entry.key,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _buildPlayersEditor(
+                            compact: compact,
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(height: compact ? 10 : 14),
 
-                  SizedBox(height: compact ? 9 : 12),
+                  SizedBox(
+                    height: compact ? 10 : 14,
+                  ),
+
                   SizedBox(
                     width: double.infinity,
                     height: compact ? 62 : 72,
@@ -865,6 +1244,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appWhite,
                         foregroundColor: appBlue,
+                        disabledBackgroundColor:
+                        appWhite.withOpacity(0.18),
+                        disabledForegroundColor:
+                        appWhite.withOpacity(0.42),
                         elevation: 0,
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.zero,
@@ -874,12 +1257,17 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                         Icons.play_arrow_rounded,
                         size: compact ? 30 : 36,
                       ),
-                      label: Text(
-                        'EMPEZAR PARTIDA',
-                        style: TextStyle(
-                          fontSize: compact ? 14 : 16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'EMPEZAR PARTIDA',
+                          maxLines: 1,
+                          softWrap: false,
+                          style: TextStyle(
+                            fontSize: compact ? 14 : 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),

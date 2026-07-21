@@ -7,7 +7,6 @@ import '../widgets/app_logo_button.dart';
 enum ColorDuelPhase {
   setup,
   memorize,
-  passPhone,
   pick,
   roundResult,
   finalResult,
@@ -46,6 +45,37 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   static const Color appWhite = Color(0xFFF7F7F7);
   static const Color accentPurple = Color(0xFF8B5CF6);
   static const Color accentGreen = Color(0xFF22C55E);
+
+  static const int minPlayers = 2;
+  static const int maxPlayers = 12;
+
+  bool get _isNarrowScreen =>
+      MediaQuery.sizeOf(context).width < 380;
+
+  bool get _isVeryNarrowScreen =>
+      MediaQuery.sizeOf(context).width < 340;
+
+  bool get _isCompactScreen =>
+      MediaQuery.sizeOf(context).height < 740 ||
+          _isNarrowScreen;
+
+  Widget _singleLineResponsiveText(
+      String text, {
+        required TextStyle style,
+        Alignment alignment = Alignment.centerLeft,
+      }) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: alignment,
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.visible,
+        style: style,
+      ),
+    );
+  }
 
   ColorDuelPhase _phase = ColorDuelPhase.setup;
 
@@ -165,27 +195,47 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     required VoidCallback onPressed,
     IconData? icon,
   }) {
+    final compact = _isCompactScreen;
+    final veryNarrow = _isVeryNarrowScreen;
+
     return SizedBox(
       width: double.infinity,
+      height: compact ? 54 : 62,
       child: ElevatedButton(
         onPressed: onPressed,
         style: mainButtonStyle(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          padding: EdgeInsets.symmetric(
+            horizontal: veryNarrow ? 7 : 14,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon, color: appBlue, size: 22),
-                const SizedBox(width: 9),
-              ],
-              Text(
-                text.toUpperCase(),
-                style: const TextStyle(
+                Icon(
+                  icon,
                   color: appBlue,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.4,
+                  size: veryNarrow
+                      ? 19
+                      : compact
+                      ? 21
+                      : 24,
+                ),
+                SizedBox(
+                  width: veryNarrow ? 5 : 9,
+                ),
+              ],
+
+              Expanded(
+                child: _singleLineResponsiveText(
+                  text.toUpperCase(),
+                  alignment: Alignment.center,
+                  style: TextStyle(
+                    color: appBlue,
+                    fontSize: compact ? 13.5 : 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
+                  ),
                 ),
               ),
             ],
@@ -284,7 +334,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
-                          height: 1.9,
+                          height: 1.4,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
                         ),
@@ -483,15 +533,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     icon: Icons.visibility_rounded,
                     title: 'Memoriza',
                     text:
-                    'Cada jugador verá un color durante unos segundos. Intenta recordarlo lo mejor posible.',
+                    'Cada jugador verá un color durante unos segundos. Cuando termine el tiempo aparecerá directamente la ruleta para recrearlo.',
                   ),
 
-                  _rulesItem(
-                    icon: Icons.phone_android_rounded,
-                    title: 'Pasa el móvil',
-                    text:
-                    'Cuando termine el tiempo, pasa el móvil al jugador correspondiente sin enseñar el color.',
-                  ),
 
                   _rulesItem(
                     icon: Icons.palette_rounded,
@@ -555,25 +599,43 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       );
   }
 
+  String _nextAutomaticPlayerName() {
+    int number = 1;
+
+    while (
+    _setupPlayerNames.any(
+          (name) => name.toLowerCase() == 'jugador $number',
+    )
+    ) {
+      number++;
+    }
+
+    return 'Jugador $number';
+  }
+
   void _addSetupPlayer() {
-    final name = _playerNameController.text.trim();
-
-    if (name.isEmpty) {
-      _showSetupMessage('Escribe el nombre del jugador.');
+    if (_setupPlayerNames.length >= maxPlayers) {
+      _showSetupMessage(
+        'El máximo es de $maxPlayers jugadores.',
+      );
       return;
     }
 
-    if (_setupPlayerNames.length >= 12) {
-      _showSetupMessage('El máximo es de 12 jugadores.');
-      return;
-    }
+    final typedName = _playerNameController.text.trim();
+
+    final name = typedName.isEmpty
+        ? _nextAutomaticPlayerName()
+        : typedName;
 
     final duplicated = _setupPlayerNames.any(
-          (playerName) => playerName.toLowerCase() == name.toLowerCase(),
+          (playerName) =>
+      playerName.toLowerCase() == name.toLowerCase(),
     );
 
     if (duplicated) {
-      _showSetupMessage('Ese jugador ya está añadido.');
+      _showSetupMessage(
+        'Ese jugador ya está añadido.',
+      );
       return;
     }
 
@@ -584,9 +646,27 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   }
 
   void _removeSetupPlayer(int index) {
+    if (index < 0 || index >= _setupPlayerNames.length) {
+      return;
+    }
+
     setState(() {
       _setupPlayerNames.removeAt(index);
     });
+  }
+
+  void _changeSetupPlayers(int change) {
+    if (change > 0) {
+      _playerNameController.clear();
+      _addSetupPlayer();
+      return;
+    }
+
+    if (_setupPlayerNames.isEmpty) return;
+
+    _removeSetupPlayer(
+      _setupPlayerNames.length - 1,
+    );
   }
 
   void _changeRounds(int delta) {
@@ -648,8 +728,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   );
 
   void _startGame() {
-    if (_setupPlayerNames.length < 2) {
-      _showSetupMessage('Añade al menos 2 jugadores.');
+    if (_setupPlayerNames.length < minPlayers) {
+      _showSetupMessage(
+        'Añade al menos $minPlayers jugadores.',
+      );
       return;
     }
 
@@ -699,23 +781,22 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   void _startMemorizeCountdown() {
     _timer?.cancel();
 
-    timerCallback(Timer timer) {
-      if (_secondsLeft <= 1) {
-        timer.cancel();
-
-        setState(() {
-          _phase = ColorDuelPhase.passPhone;
-        });
-      } else {
-        setState(() {
-          _secondsLeft--;
-        });
-      }
-    }
-
     _timer = Timer.periodic(
       const Duration(seconds: 1),
-      timerCallback,
+          (timer) {
+        if (_secondsLeft <= 1) {
+          timer.cancel();
+
+          if (!mounted) return;
+
+          // Al terminar, abre directamente el selector de color.
+          _goToPickPhase();
+        } else {
+          setState(() {
+            _secondsLeft--;
+          });
+        }
+      },
     );
   }
 
@@ -724,8 +805,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     _green = 128;
     _blue = 128;
 
-    if (_gameMode == ColorDuelMode.differentColorPerPlayer) {
-      _targetColor = _playerTargetColors[_currentPlayerIndex]!;
+    if (_gameMode ==
+        ColorDuelMode.differentColorPerPlayer) {
+      _targetColor =
+      _playerTargetColors[_currentPlayerIndex]!;
     }
 
     setState(() {
@@ -945,58 +1028,302 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   }
 
   Widget _sectionTitle(String text) {
-    return Text(
-      text.toLowerCase(),
-      style: const TextStyle(
-        color: appWhite,
-        fontSize: 30,
-        height: 0.95,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -0.7,
+    return SizedBox(
+      width: double.infinity,
+      child: _singleLineResponsiveText(
+        text.toLowerCase(),
+        style: TextStyle(
+          color: appWhite,
+          fontSize: _isCompactScreen ? 24 : 30,
+          height: 0.95,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.7,
+        ),
       ),
     );
   }
 
-  Widget _buildSetupPhase() {
-    return SingleChildScrollView(
-      key: const ValueKey('setup'),
-      padding: const EdgeInsets.only(top: 14, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+  Widget _buildSetupCounterButton({
+    required IconData icon,
+    required VoidCallback? onTap,
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
 
+    final size = veryNarrow
+        ? 34.0
+        : compact
+        ? 38.0
+        : 44.0;
 
-          _sectionTitle('Jugadores'),
+    return Material(
+      color: onTap == null
+          ? appWhite.withOpacity(0.04)
+          : appWhite.withOpacity(0.10),
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Center(
+            child: Icon(
+              icon,
+              color: appWhite.withOpacity(
+                onTap == null ? 0.28 : 1,
+              ),
+              size: veryNarrow
+                  ? 19
+                  : compact
+                  ? 21
+                  : 24,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-          const SizedBox(height: 8),
+  Widget _buildSetupPlayersCounter({
+    required bool compact,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final veryNarrow = constraints.maxWidth < 330;
 
-          Row(
+        final leadingSize = veryNarrow
+            ? 34.0
+            : compact
+            ? 38.0
+            : 44.0;
+
+        final gap = veryNarrow ? 6.0 : 9.0;
+
+        final valueWidth = veryNarrow
+            ? 27.0
+            : compact
+            ? 33.0
+            : 40.0;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(
+            veryNarrow
+                ? 8
+                : compact
+                ? 10
+                : 12,
+          ),
+          decoration: BoxDecoration(
+            color: appWhite.withOpacity(0.07),
+            border: Border.all(
+              color: appWhite.withOpacity(0.24),
+              width: 1.4,
+            ),
+          ),
+          child: Row(
             children: [
+              Container(
+                width: leadingSize,
+                height: leadingSize,
+                decoration: BoxDecoration(
+                  color: accentPurple.withOpacity(0.14),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: accentPurple.withOpacity(0.75),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.groups_rounded,
+                  color: accentPurple,
+                  size: veryNarrow
+                      ? 19
+                      : compact
+                      ? 21
+                      : 24,
+                ),
+              ),
+
+              SizedBox(width: gap),
+
               Expanded(
-                child: Text(
-                  'Añade entre 2 y 12 jugadores.',
+                child: _singleLineResponsiveText(
+                  'JUGADORES',
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.70),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 10.5
+                        : compact
+                        ? 12
+                        : 13.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing:
+                    veryNarrow ? 0.1 : 0.4,
                   ),
                 ),
               ),
-              Text(
-                '${_setupPlayerNames.length}/12',
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
+
+              SizedBox(width: gap),
+
+              _buildSetupCounterButton(
+                icon: Icons.remove_rounded,
+                onTap: _setupPlayerNames.isEmpty
+                    ? null
+                    : () => _changeSetupPlayers(-1),
+                compact: compact,
+              ),
+
+              SizedBox(
+                width: valueWidth,
+                child: Text(
+                  '${_setupPlayerNames.length}',
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 18
+                        : compact
+                        ? 20
+                        : 23,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
+              ),
+
+              _buildSetupCounterButton(
+                icon: Icons.add_rounded,
+                onTap:
+                _setupPlayerNames.length >= maxPlayers
+                    ? null
+                    : () => _changeSetupPlayers(1),
+                compact: compact,
               ),
             ],
           ),
+        );
+      },
+    );
+  }
 
-          const SizedBox(height: 10),
+  Widget _buildSetupPlayerTile({
+    required String player,
+    required int index,
+    required bool compact,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 9 : 11,
+        compact ? 7 : 8,
+        5,
+        compact ? 7 : 8,
+      ),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.07),
+        border: Border(
+          left: const BorderSide(
+            color: accentPurple,
+            width: 6,
+          ),
+          bottom: BorderSide(
+            color: appWhite.withOpacity(0.25),
+            width: 2,
+          ),
+          top: BorderSide(
+            color: appWhite.withOpacity(0.15),
+          ),
+          right: BorderSide(
+            color: appWhite.withOpacity(0.15),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: compact ? 31 : 35,
+            height: compact ? 31 : 35,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: appWhite.withOpacity(0.68),
+                width: 1.6,
+              ),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 12 : 13,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Text(
+              player,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 14 : 16,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+
+          IconButton(
+            tooltip: 'Eliminar jugador',
+            onPressed: () => _removeSetupPlayer(index),
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              color: appWhite.withOpacity(0.78),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSetupPlayersEditor({
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
+
+    return _glassCard(
+      padding: EdgeInsets.all(compact ? 13 : 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSetupPlayersCounter(
+            compact: compact,
+          ),
+
+          SizedBox(height: compact ? 12 : 14),
+
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _singleLineResponsiveText(
+              'AÑADIR JUGADOR',
+              style: TextStyle(
+                color: appWhite.withOpacity(0.70),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
+            ),
+          ),
+
+          SizedBox(width: veryNarrow ? 6 : 9),
 
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: TextField(
@@ -1008,170 +1335,548 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                   cursorColor: appWhite,
-                  decoration: _fancyInput('Nombre del jugador'),
+                  decoration: _fancyInput(
+                    'Nombre opcional',
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
+
+              const SizedBox(width: 9),
+
               SizedBox(
-                width: 54,
-                height: 54,
+                width: veryNarrow
+                    ? 44
+                    : compact
+                    ? 50
+                    : 54,
+                height: veryNarrow
+                    ? 48
+                    : compact
+                    ? 50
+                    : 54,
                 child: ElevatedButton(
-                  onPressed: _addSetupPlayer,
-                  style: mainButtonStyle(),
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: appBlue,
-                    size: 28,
+                  onPressed:
+                  _setupPlayerNames.length >= maxPlayers
+                      ? null
+                      : _addSetupPlayer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentPurple,
+                    foregroundColor: appWhite,
+                    disabledBackgroundColor:
+                    appWhite.withOpacity(0.18),
+                    disabledForegroundColor:
+                    appWhite.withOpacity(0.42),
+                    elevation: 0,
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize:
+                    MaterialTapTargetSize.shrinkWrap,
+                    alignment: Alignment.center,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.add_rounded,
+                      size: 29,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 10),
+          SizedBox(height: compact ? 12 : 14),
 
           if (_setupPlayerNames.isEmpty)
-            _glassCard(
-              child: Text(
-                'Todavía no has añadido jugadores.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.62),
-                  fontWeight: FontWeight.w700,
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: compact ? 16 : 20,
+              ),
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.05),
+                border: Border.all(
+                  color: appWhite.withOpacity(0.18),
+                  width: 1.3,
                 ),
               ),
-            )
-          else
-            Column(
-              children: List.generate(_setupPlayerNames.length, (index) {
-                return Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.fromLTRB(12, 9, 6, 9),
-                  decoration: BoxDecoration(
-                    color: appWhite.withOpacity(0.08),
-                    border: Border(
-                      left: const BorderSide(
-                        color: accentPurple,
-                        width: 6,
-                      ),
-                      bottom: BorderSide(
-                        color: appWhite.withOpacity(0.26),
-                        width: 2,
-                      ),
-                      top: BorderSide(
-                        color: appWhite.withOpacity(0.16),
-                      ),
-                      right: BorderSide(
-                        color: appWhite.withOpacity(0.16),
-                      ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.person_add_alt_1_rounded,
+                    color: appWhite.withOpacity(0.48),
+                    size: compact ? 28 : 34,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'Todavía no has añadido jugadores',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.66),
+                      fontSize: compact ? 12 : 13,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.70),
-                            width: 1.8,
-                          ),
-                        ),
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 11),
-                      Expanded(
-                        child: Text(
-                          _setupPlayerNames[index],
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => _removeSetupPlayer(index),
-                        tooltip: 'Eliminar jugador',
-                        icon: Icon(
-                          Icons.close_rounded,
-                          color: appWhite.withOpacity(0.78),
-                        ),
-                      ),
-                    ],
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.44),
+                      fontSize: compact ? 10.5 : 11.5,
+                      height: 1.3,
+                    ),
                   ),
-                );
-              }),
+                ],
+              ),
+            )
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _singleLineResponsiveText(
+                    'LISTA DE JUGADORES',
+                    style: TextStyle(
+                      color: appWhite.withOpacity(0.70),
+                      fontSize: compact ? 10.5 : 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.7,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                Text(
+                  '${_setupPlayerNames.length} / $maxPlayers',
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    color: appWhite.withOpacity(0.62),
+                    fontSize: compact ? 11 : 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
 
-          const SizedBox(height: 18),
+            const SizedBox(height: 9),
 
-          _sectionTitle('Partida'),
+            ..._setupPlayerNames.asMap().entries.map(
+                  (entry) => _buildSetupPlayerTile(
+                player: entry.value,
+                index: entry.key,
+                compact: compact,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
-          const SizedBox(height: 10),
+  Widget _buildCompactModeCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
 
-          _stepperCard(
-            title: 'Rondas',
-            subtitle: 'Cuántas veces jugaréis',
-            value: _roundsController.text,
-            icon: Icons.flag_rounded,
-            onMinus: () => _changeRounds(-1),
-            onPlus: () => _changeRounds(1),
+    return Material(
+      color: selected
+          ? accentPurple.withOpacity(0.24)
+          : appWhite.withOpacity(0.06),
+      child: InkWell(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: veryNarrow
+              ? 94
+              : compact
+              ? 104
+              : 112,
+          padding: EdgeInsets.all(
+            veryNarrow
+                ? 7
+                : compact
+                ? 9
+                : 11,
+          ),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selected
+                  ? accentPurple
+                  : appWhite.withOpacity(0.22),
+              width: selected ? 2.2 : 1.3,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: selected
+                        ? accentPurple
+                        : appWhite.withOpacity(0.75),
+                    size: veryNarrow
+                        ? 20
+                        : compact
+                        ? 23
+                        : 27,
+                  ),
+
+                  if (selected) ...[
+                    SizedBox(width: veryNarrow ? 3 : 5),
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: accentGreen,
+                      size: veryNarrow ? 15 : 18,
+                    ),
+                  ],
+                ],
+              ),
+
+              SizedBox(
+                height: veryNarrow
+                    ? 5
+                    : compact
+                    ? 7
+                    : 9,
+              ),
+
+              SizedBox(
+                width: double.infinity,
+                child: _singleLineResponsiveText(
+                  title.toUpperCase(),
+                  alignment: Alignment.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: compact ? 10.5 : 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.58),
+                  fontSize: veryNarrow
+                      ? 8
+                      : compact
+                      ? 8.5
+                      : 9.5,
+                  height: 1.12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameConfiguration({
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
+    return _glassCard(
+      padding: EdgeInsets.all(compact ? 12 : 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _singleLineResponsiveText(
+            'CONFIGURACIÓN',
+            style: TextStyle(
+              color: appWhite,
+              fontSize: compact ? 14 : 16,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
           ),
 
-          const SizedBox(height: 10),
-
-          _stepperCard(
-            title: 'Memoria',
-            subtitle: 'Segundos para ver el color',
-            value: '${_memorizeSecondsController.text}s',
-            icon: Icons.timer_rounded,
-            onMinus: () => _changeSeconds(-1),
-            onPlus: () => _changeSeconds(1),
+          SizedBox(
+            width: veryNarrow
+                ? 6
+                : compact
+                ? 8
+                : 10,
           ),
 
-          const SizedBox(height: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildCompactStepperCard(
+                  title: 'Rondas',
+                  value: _roundsController.text,
+                  icon: Icons.flag_rounded,
+                  onMinus: () => _changeRounds(-1),
+                  onPlus: () => _changeRounds(1),
+                  compact: compact,
+                ),
+              ),
 
-          _sectionTitle('Modo'),
+              SizedBox(
+                width: veryNarrow
+                    ? 6
+                    : compact
+                    ? 8
+                    : 10,
+              ),
 
-          const SizedBox(height: 10),
-
-          _modeCard(
-            title: 'Mismo color',
-            subtitle: 'Todos memorizan el mismo color en cada ronda.',
-            icon: Icons.group_work_rounded,
-            selected: _gameMode == ColorDuelMode.sameColorForAll,
-            onTap: () {
-              setState(() {
-                _gameMode = ColorDuelMode.sameColorForAll;
-              });
-            },
+              Expanded(
+                child: _buildCompactStepperCard(
+                  title: 'Memoria',
+                  value: '${_memorizeSecondsController.text}s',
+                  icon: Icons.timer_rounded,
+                  onMinus: () => _changeSeconds(-1),
+                  onPlus: () => _changeSeconds(1),
+                  compact: compact,
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 10),
-
-          _modeCard(
-            title: 'Color distinto',
-            subtitle: 'Cada jugador tendrá un color diferente.',
-            icon: Icons.auto_awesome_rounded,
-            selected: _gameMode == ColorDuelMode.differentColorPerPlayer,
-            onTap: () {
-              setState(() {
-                _gameMode = ColorDuelMode.differentColorPerPlayer;
-              });
-            },
+          SizedBox(
+            width: veryNarrow
+                ? 6
+                : compact
+                ? 8
+                : 10,
           ),
 
-          const SizedBox(height: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildCompactModeCard(
+                  title: 'Mismo color',
+                  subtitle: 'Uno para todos',
+                  icon: Icons.group_work_rounded,
+                  selected:
+                  _gameMode == ColorDuelMode.sameColorForAll,
+                  onTap: () {
+                    setState(() {
+                      _gameMode =
+                          ColorDuelMode.sameColorForAll;
+                    });
+                  },
+                  compact: compact,
+                ),
+              ),
+
+              SizedBox(
+                width: veryNarrow
+                    ? 6
+                    : compact
+                    ? 8
+                    : 10,
+              ),
+
+              Expanded(
+                child: _buildCompactModeCard(
+                  title: 'Color distinto',
+                  subtitle: 'Uno por jugador',
+                  icon: Icons.auto_awesome_rounded,
+                  selected:
+                  _gameMode ==
+                      ColorDuelMode.differentColorPerPlayer,
+                  onTap: () {
+                    setState(() {
+                      _gameMode =
+                          ColorDuelMode.differentColorPerPlayer;
+                    });
+                  },
+                  compact: compact,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmallConfigButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
+
+    final size = veryNarrow
+        ? 27.0
+        : compact
+        ? 31.0
+        : 35.0;
+
+    return Material(
+      color: appWhite.withOpacity(0.10),
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Icon(
+            icon,
+            color: appWhite,
+            size: veryNarrow
+                ? 17
+                : compact
+                ? 19
+                : 21,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactStepperCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required VoidCallback onMinus,
+    required VoidCallback onPlus,
+    required bool compact,
+  }) {
+    final veryNarrow = _isVeryNarrowScreen;
+
+    return Container(
+      height: veryNarrow
+          ? 94
+          : compact
+          ? 104
+          : 112,
+      padding: EdgeInsets.all(
+        veryNarrow
+            ? 7
+            : compact
+            ? 9
+            : 11,
+      ),
+      decoration: BoxDecoration(
+        color: appWhite.withOpacity(0.06),
+        border: Border.all(
+          color: appWhite.withOpacity(0.22),
+          width: 1.3,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: accentPurple,
+                size: veryNarrow
+                    ? 17
+                    : compact
+                    ? 19
+                    : 22,
+              ),
+
+              SizedBox(width: veryNarrow ? 4 : 6),
+
+              Expanded(
+                child: _singleLineResponsiveText(
+                  title.toUpperCase(),
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: compact ? 10.5 : 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.25,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const Spacer(),
+
+          Row(
+            children: [
+              _buildSmallConfigButton(
+                icon: Icons.remove_rounded,
+                onTap: onMinus,
+                compact: compact,
+              ),
+
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: veryNarrow
+                        ? 18
+                        : compact
+                        ? 21
+                        : 24,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+
+              _buildSmallConfigButton(
+                icon: Icons.add_rounded,
+                onTap: onPlus,
+                compact: compact,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSetupPhase() {
+    final compact = _isCompactScreen;
+
+    return SingleChildScrollView(
+      key: const ValueKey('setup'),
+      keyboardDismissBehavior:
+      ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: EdgeInsets.only(
+        top: compact ? 6 : 10,
+        bottom: compact ? 14 : 18,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSetupPlayersEditor(
+            compact: compact,
+          ),
+
+          SizedBox(height: compact ? 10 : 14),
+
+          _buildGameConfiguration(
+            compact: compact,
+          ),
+
+          SizedBox(height: compact ? 12 : 16),
 
           _primaryButton(
             text: 'Empezar partida',
@@ -1189,8 +1894,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         return _buildSetupPhase();
       case ColorDuelPhase.memorize:
         return _buildMemorizePhase();
-      case ColorDuelPhase.passPhone:
-        return _buildPassPhonePhase();
       case ColorDuelPhase.pick:
         return _buildPickPhase();
       case ColorDuelPhase.roundResult:
@@ -1210,15 +1913,18 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Turno de ${_players[_currentPlayerIndex].name}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 25,
-                  height: 0.95,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.4,
+              SizedBox(
+                width: double.infinity,
+                child: _singleLineResponsiveText(
+                  'Turno de ${_players[_currentPlayerIndex].name}',
+                  alignment: Alignment.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: _isCompactScreen ? 21 : 25,
+                    height: 0.95,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.4,
+                  ),
                 ),
               ),
 
@@ -1238,16 +1944,25 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
               const SizedBox(height: 20),
 
-              Container(
-                width: 230,
-                height: 230,
-                decoration: BoxDecoration(
-                  color: _targetColor,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.75),
-                    width: 3,
-                  ),
-                ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final size = min(
+                    _isVeryNarrowScreen ? 190.0 : 230.0,
+                    constraints.maxWidth,
+                  );
+
+                  return Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: _targetColor,
+                      border: Border.all(
+                        color: appWhite.withOpacity(0.75),
+                        width: 3,
+                      ),
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 20),
@@ -1280,86 +1995,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _buildPassPhonePhase() {
-    final player = _players[_currentPlayerIndex];
-
-    return Padding(
-      key: const ValueKey('passPhone'),
-      padding: const EdgeInsets.only(top: 14, bottom: 16),
-      child: Center(
-        child: _glassCard(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.85),
-                    width: 2.2,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.phone_android_rounded,
-                  color: appWhite,
-                  size: 39,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              const Text(
-                'pasa\nel móvil',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: 38,
-                  height: 0.9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.9,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Text(
-                'Turno de ${player.name}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                'Que nadie más mire la pantalla',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 22),
-
-              _primaryButton(
-                text: 'Estoy listo',
-                icon: Icons.visibility_outlined,
-                onPressed: _goToPickPhase,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildPickPhase() {
     final player = _players[_currentPlayerIndex];
@@ -1370,14 +2005,17 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       child: _glassCard(
         child: Column(
           children: [
-            Text(
-              'Turno de ${player.name}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: appWhite,
-                fontSize: 25,
-                height: 0.95,
-                fontWeight: FontWeight.w900,
+            SizedBox(
+              width: double.infinity,
+              child: _singleLineResponsiveText(
+                'Turno de ${player.name}',
+                alignment: Alignment.center,
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: _isCompactScreen ? 21 : 25,
+                  height: 0.95,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
 
@@ -1463,13 +2101,17 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return Expanded(
       child: Column(
         children: [
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: appWhite.withOpacity(0.72),
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.7,
+          SizedBox(
+            width: double.infinity,
+            child: _singleLineResponsiveText(
+              label.toUpperCase(),
+              alignment: Alignment.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.72),
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.7,
+              ),
             ),
           ),
           const SizedBox(height: 7),
@@ -1504,13 +2146,17 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         ),
         child: Column(
           children: [
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                color: appWhite.withOpacity(0.62),
-                fontSize: 10.5,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.7,
+            SizedBox(
+              width: double.infinity,
+              child: _singleLineResponsiveText(
+                label.toUpperCase(),
+                alignment: Alignment.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.62),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
+                ),
               ),
             ),
             const SizedBox(height: 4),
@@ -1820,26 +2466,46 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 13.0 : 18.0;
-            final verticalPadding = compact ? 11.0 : 18.0;
+            final narrow =
+                constraints.maxWidth < 380;
+
+            final veryNarrow =
+                constraints.maxWidth < 340;
+
+            final compact =
+                constraints.maxHeight < 740 ||
+                    narrow;
+
+            final horizontalPadding = veryNarrow
+                ? 8.0
+                : compact
+                ? 12.0
+                : 18.0;
+
+            final verticalPadding =
+            compact ? 10.0 : 18.0;
 
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
                 verticalPadding,
                 horizontalPadding,
-                compact ? 11 : 16,
+                compact ? 10 : 16,
               ),
               child: Column(
                 children: [
-                  _buildTopBar(compact: compact),
+                  _buildTopBar(
+                    compact: compact,
+                  ),
 
-                  SizedBox(height: compact ? 10 : 14),
+                  SizedBox(
+                    height: compact ? 8 : 14,
+                  ),
 
                   Expanded(
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
+                      duration:
+                      const Duration(milliseconds: 300),
                       child: _buildCurrentPhase(),
                     ),
                   ),
