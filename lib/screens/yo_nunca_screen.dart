@@ -42,8 +42,8 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
 
   List<String> obtenerListaPreguntas() {
     if (widget.modo == 'chill') return List<String>.from(yoNuncaChill);
-    if (widget.modo == 'erotico') return List<String>.from(yoNuncaErotico);
-    return [...yoNuncaChill, ...yoNuncaErotico];
+    if (widget.modo == 'picante') return List<String>.from(yoNuncaPicante);
+    return [...yoNuncaChill, ...yoNuncaPicante];
   }
 
   String get storageKeyPreguntas => 'yo_nunca_${widget.modo}_restantes';
@@ -51,19 +51,19 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
 
   Color get accentColor {
     if (widget.modo == 'chill') return accentGreen;
-    if (widget.modo == 'erotico') return accentPink;
+    if (widget.modo == 'picante') return accentPink;
     return accentOrange;
   }
 
   IconData get modeIcon {
     if (widget.modo == 'chill') return Icons.spa_rounded;
-    if (widget.modo == 'erotico') return Icons.local_fire_department_rounded;
+    if (widget.modo == 'picante') return Icons.local_fire_department_rounded;
     return Icons.shuffle_rounded;
   }
 
   String tituloModo() {
     if (widget.modo == 'chill') return 'yo nunca chill';
-    if (widget.modo == 'erotico') return 'yo nunca erótico';
+    if (widget.modo == 'picante') return 'yo nunca picante';
     return 'yo nunca mix';
   }
 
@@ -76,7 +76,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   }
 
   Color get nextButtonForeground {
-    return widget.modo == 'erotico' ? appWhite : appBlue;
+    return widget.modo == 'picante' ? appWhite : appBlue;
   }
 
   Future<void> cargarEstado() async {

@@ -279,7 +279,7 @@ class YoNuncaModesScreen extends StatelessWidget {
                   ),
                   rulesItem(
                     icon: Icons.local_fire_department_rounded,
-                    title: 'erótico',
+                    title: 'picante',
                     text: 'Preguntas más picantes para jugar con confianza.',
                   ),
                   const SizedBox(height: 8),
@@ -443,7 +443,7 @@ class YoNuncaModesScreen extends StatelessWidget {
                       height: cardHeight,
                       child: buildModeCard(
                         title: 'Mix',
-                        subtitle: 'Mezcla de preguntas chill y más picantes.',
+                        subtitle: 'Mezcla de preguntas chill y más atrevidas.',
                         icon: Icons.shuffle_rounded,
                         color: accentOrange,
                         onTap: () => abrirModo(context, 'mix'),
@@ -453,11 +453,11 @@ class YoNuncaModesScreen extends StatelessWidget {
                     SizedBox(
                       height: cardHeight,
                       child: buildModeCard(
-                        title: 'Erótico',
-                        subtitle: 'Preguntas más atrevidas para jugar con confianza.',
+                        title: 'Picante',
+                        subtitle: 'Preguntas para jugar con mas confianza.',
                         icon: Icons.local_fire_department_rounded,
                         color: accentPink,
-                        onTap: () => abrirModo(context, 'erotico'),
+                        onTap: () => abrirModo(context, 'picante'),
                       ),
                     ),
                   ],

@@ -118,7 +118,7 @@ const List<String> yoNuncaChill = [
 
 ];
 
-const List<String> yoNuncaErotico = [
+const List<String> yoNuncaPicante = [
 "Yo nunca lo he hecho sin haber querido.",
 "Yo nunca lo he hecho con mas de una persona en un mismo dia.",
 "Yo nunca he querido tirarme a la madre de un amigo/a.",
