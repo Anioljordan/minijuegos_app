@@ -73,7 +73,7 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
 
   String generarCastigo() {
     final tragos = random.nextInt(5) + 1;
-    return 'Si no lo haces, bebe $tragos ${tragos == 1 ? 'trago' : 'tragos'}.';
+    return 'Si no lo haces, $tragos ${tragos == 1 ? 'Castigo' : 'Castigos'}.';
   }
 
   void sacarVerdad() {
@@ -347,7 +347,7 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
                   rulesItem(
                     icon: Icons.local_bar_rounded,
                     title: 'Si te niegas',
-                    text: 'Bebe los tragos que indique la carta.',
+                    text: 'cumple los castigos que indique la carta.',
                   ),
                   rulesItem(
                     icon: Icons.shuffle_rounded,

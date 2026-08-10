@@ -1,3 +1,4 @@
+import 'package:cubo/screens/moneda_screen.dart';
 import 'package:flutter/material.dart';
 import 'yo_nunca_modes_screen.dart';
 import 'piccolo_screen.dart';
@@ -119,7 +120,7 @@ class FiestaScreen extends StatelessWidget {
         'screen': const YoNuncaModesScreen(),
       },
       {
-        'title': 'Señala y bebe',
+        'title': 'Señala al mas probable',
         'screen': const PiccoloScreen(),
       },
       {
@@ -131,8 +132,12 @@ class FiestaScreen extends StatelessWidget {
         'screen': const PruebaVerdadScreen(),
       },
       {
-        'title': 'Drink & Dare',
+        'title': 'La Ruleta',
         'screen': const DrinkDareScreen(),
+      },
+      {
+        'title': 'Moneda',
+        'screen': const MonedaScreen(),
       },
       {
         'title': 'Ping Pong',

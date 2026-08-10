@@ -60,16 +60,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
         .trim();
   }
 
-  String generarCastigo() {
-    final tragos = random.nextInt(5) + 1;
-    final repartir = random.nextBool();
 
-    if (repartir) {
-      return 'Reparte $tragos ${tragos == 1 ? 'trago' : 'tragos'}.';
-    }
-
-    return 'Bebe $tragos ${tragos == 1 ? 'trago' : 'tragos'}.';
-  }
 
   void siguienteAccion() {
     if (accionesDisponibles.isEmpty) {
@@ -81,10 +72,10 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
 
     final base = accionesDisponibles.removeLast();
     final limpia = limpiarAccion(base);
-    final castigo = generarCastigo();
+
 
     setState(() {
-      accionActual = '$limpia\n\n$castigo';
+      accionActual = '$limpia\n\n';
       accionesUsadas.add(base);
     });
   }
@@ -333,11 +324,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                     title: 'Lee la acción',
                     text: 'Lee la carta en voz alta y haced lo que indique.',
                   ),
-                  rulesItem(
-                    icon: Icons.local_bar_rounded,
-                    title: 'Castigo',
-                    text: 'Cada carta añade beber o repartir entre 1 y 5 tragos.',
-                  ),
+
                   rulesItem(
                     icon: Icons.restart_alt_rounded,
                     title: 'Reiniciar',

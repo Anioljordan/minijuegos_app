@@ -207,7 +207,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.topLeft,
                       child: Text(
-                        'drink & dare',
+                        'la ruleta',
                         style: TextStyle(
                           color: appWhite,
                           fontSize: titleSize,
@@ -379,11 +379,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     title: 'Turnos',
                     text: 'Los jugadores se turnan para girar la ruleta.',
                   ),
-                  rulesItem(
-                    icon: Icons.local_bar_rounded,
-                    title: 'Si te niegas',
-                    text: 'Si alguien no quiere cumplir el reto, bebe.',
-                  ),
+
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,

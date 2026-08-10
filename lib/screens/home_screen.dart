@@ -933,21 +933,6 @@ class _HomeScreenState extends State<HomeScreen>
                   const Spacer(flex: 2),
 
                   buildMoodOption(
-                    title: AppSettings.instance.t('party'),
-                    alignment: Alignment.centerLeft,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const FiestaScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 72),
-
-                  buildMoodOption(
                     title: AppSettings.instance.t('chill'),
                     alignment: Alignment.centerRight,
                     onTap: () {
@@ -955,6 +940,23 @@ class _HomeScreenState extends State<HomeScreen>
                         context,
                         MaterialPageRoute(
                           builder: (_) => const ChillScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+
+
+                  const SizedBox(height: 72),
+
+                  buildMoodOption(
+                    title: AppSettings.instance.t('party'),
+                    alignment: Alignment.centerLeft,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FiestaScreen(),
                         ),
                       );
                     },

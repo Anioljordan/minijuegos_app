@@ -153,20 +153,16 @@ const List<String> preguntasPingPong = [
 
 const List<String> castigosPingPong = [
 
-  'Bebe 2 tragos.',
-  'Bebe 3 tragos.',
-  'Bebe 5 tragos.',
-  'Te bebes un chupito.',
-  'Reparte 2 tragos.',
-  'Reparte 3 tragos.',
-  'Reparte 5 tragos.',
-  'Bebe durante 4 segundos.',
+  '2 castigos.',
+  '3 castigos.',
+  '4 castigos.',
+  'un castigazo.',
+  'Reparte 2 castigos.',
+  'Reparte 3 castigos.',
+  'Reparte 4 castigos.',
+  'castigo durante 4 segundos.',
   'El de tu derecha te pone un castigo.',
   'El de tu izquierda elige tu castigo.',
-  'Haz un brindis y bebe.',
-  'Bebe sin usar las manos.',
-  'Elige a alguien para beber contigo.',
-  'Bebe el doble del numero que diga el de tu izquierda.',
-  'Todos beben menos tú.',
-  'Da un trago largo.'
+  'Elige a alguien para castigar contigo.',
+  'Todos castigos menos tú.',
 ];
