@@ -127,10 +127,6 @@ class ChillScreen extends StatelessWidget {
         'screen': const AsambleaSetupScreen(),
       },
       {
-        'title': 'BCN Medianoche',
-        'screen': const BarcelonaMedianocheScreen(),
-      },
-      {
         'title': 'Describe la palabra',
         'screen': const DescribeLaPalabraScreen(),
       },
@@ -149,6 +145,10 @@ class ChillScreen extends StatelessWidget {
       {
         'title': 'Animales Prof',
         'screen': const AnimalesProfesionalesScreen(),
+      },
+      {
+        'title': 'BCN Medianoche',
+        'screen': const BarcelonaMedianocheScreen(),
       },
     ];
 

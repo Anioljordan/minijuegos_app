@@ -951,12 +951,51 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
+  double _valorDesdePosicion(
+      Offset position,
+      Size size,
+      ) {
+    final center = Offset(
+      size.width / 2,
+      size.height - 10,
+    );
+
+    final dx = position.dx - center.dx;
+    final dy = position.dy - center.dy;
+
+    double angle = math.atan2(dy, dx);
+
+    // atan2 devuelve valores negativos en la parte superior.
+    // Los convertimos al rango 0 -> 2π.
+    if (angle < 0) {
+      angle += math.pi * 2;
+    }
+
+    // Nuestro medidor va desde:
+    // izquierda = π
+    // derecha   = 2π
+    //
+    // Si el dedo baja por debajo del semicírculo,
+    // lo llevamos al extremo más cercano.
+    if (angle < math.pi) {
+      angle = dx < 0
+          ? math.pi
+          : math.pi * 2;
+    }
+
+    final value =
+        ((angle - math.pi) / math.pi) * 100;
+
+    return value.clamp(0.0, 100.0);
+  }
+
   Widget buildMedidorSemicircular({
     int? valor,
     required bool mostrarNumero,
     int? valorSecundario,
     bool mostrarZonasPuntuacion = false,
     int? centroZonas,
+    bool interactivo = false,
   }) {
     final compact = _isCompactScreen;
     final veryNarrow = _isVeryNarrowScreen;
@@ -987,14 +1026,77 @@ class _EscalaScreenState extends State<EscalaScreen> {
           child: SizedBox(
             height: gaugeHeight,
             width: double.infinity,
-            child: CustomPaint(
-              painter: NeedleGaugePainter(
-                valorPrincipal: valor?.toDouble(),
-                valorSecundario: valorSecundario?.toDouble(),
-                mostrarZonasPuntuacion: mostrarZonasPuntuacion,
-                centroZonas:
-                (centroZonas ?? valor ?? valorSecundario ?? 50).toDouble(),
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final gaugeSize = Size(
+                  constraints.maxWidth,
+                  gaugeHeight,
+                );
+
+                void actualizar(Offset position) {
+                  if (!interactivo) return;
+
+                  final nuevoValor =
+                  _valorDesdePosicion(
+                    position,
+                    gaugeSize,
+                  );
+
+                  setState(() {
+                    valorAdivinado =
+                        nuevoValor;
+                  });
+                }
+
+                return GestureDetector(
+                  behavior:
+                  HitTestBehavior.opaque,
+
+                  onTapDown: interactivo
+                      ? (details) {
+                    actualizar(
+                      details.localPosition,
+                    );
+                  }
+                      : null,
+
+                  onPanStart: interactivo
+                      ? (details) {
+                    actualizar(
+                      details.localPosition,
+                    );
+                  }
+                      : null,
+
+                  onPanUpdate: interactivo
+                      ? (details) {
+                    actualizar(
+                      details.localPosition,
+                    );
+                  }
+                      : null,
+
+                  child: CustomPaint(
+                    size: gaugeSize,
+                    painter:
+                    NeedleGaugePainter(
+                      valorPrincipal:
+                      valor?.toDouble(),
+                      valorSecundario:
+                      valorSecundario
+                          ?.toDouble(),
+                      mostrarZonasPuntuacion:
+                      mostrarZonasPuntuacion,
+                      centroZonas:
+                      (centroZonas ??
+                          valor ??
+                          valorSecundario ??
+                          50)
+                          .toDouble(),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -1033,6 +1135,43 @@ class _EscalaScreenState extends State<EscalaScreen> {
           ],
         ),
         SizedBox(height: compact ? 7 : 9),
+
+        if (interactivo) ...[
+          Row(
+            mainAxisAlignment:
+            MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.touch_app_rounded,
+                color:
+                appWhite.withOpacity(0.48),
+                size: compact ? 15 : 17,
+              ),
+
+              const SizedBox(width: 6),
+
+              Text(
+                'ARRASTRA LA AGUJA',
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  color:
+                  appWhite.withOpacity(0.48),
+                  fontSize:
+                  compact ? 10 : 11,
+                  fontWeight:
+                  FontWeight.w900,
+                  letterSpacing: 0.7,
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(
+            height: compact ? 7 : 9,
+          ),
+        ],
+
         if (mostrarNumero && valor != null)
           Container(
             padding: EdgeInsets.symmetric(
@@ -1377,29 +1516,9 @@ class _EscalaScreenState extends State<EscalaScreen> {
               buildMedidorSemicircular(
                 valor: valorAdivinado.round(),
                 mostrarNumero: true,
+                interactivo: true,
               ),
 
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: appWhite,
-                  inactiveTrackColor: appWhite.withOpacity(0.18),
-                  thumbColor: appWhite,
-                  overlayColor: appWhite.withOpacity(0.12),
-                  trackHeight: 7,
-                ),
-                child: Slider(
-                  value: valorAdivinado,
-                  min: 0,
-                  max: 100,
-                  divisions: 100,
-                  label: valorAdivinado.round().toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      valorAdivinado = value;
-                    });
-                  },
-                ),
-              ),
             ],
           ),
         ),
@@ -1971,6 +2090,7 @@ class NeedleGaugePainter extends CustomPainter {
 
     canvas.drawLine(center, end, glowPaint);
     canvas.drawLine(center, end, needlePaint);
+
   }
 
   double valueToAngle(double value) {

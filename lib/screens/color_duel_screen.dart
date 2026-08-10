@@ -1997,99 +1997,245 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
 
   Widget _buildPickPhase() {
-    final player = _players[_currentPlayerIndex];
+    final player =
+    _players[_currentPlayerIndex];
 
-    return SingleChildScrollView(
+    final compact =
+        _isCompactScreen;
+
+    return Padding(
       key: const ValueKey('pick'),
-      padding: const EdgeInsets.only(top: 14, bottom: 16),
-      child: _glassCard(
-        child: Column(
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: _singleLineResponsiveText(
-                'Turno de ${player.name}',
-                alignment: Alignment.center,
-                style: TextStyle(
-                  color: appWhite,
-                  fontSize: _isCompactScreen ? 21 : 25,
-                  height: 0.95,
-                  fontWeight: FontWeight.w900,
-                ),
+      padding: EdgeInsets.only(
+        top: compact ? 6 : 10,
+        bottom: compact ? 8 : 12,
+      ),
+      child: Column(
+        children: [
+          Expanded(
+            child: _glassCard(
+              padding: EdgeInsets.all(
+                compact ? 11 : 15,
+              ),
+              child: LayoutBuilder(
+                builder:
+                    (
+                    context,
+                    constraints,
+                    ) {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        width:
+                        double.infinity,
+                        child:
+                        _singleLineResponsiveText(
+                          'Turno de ${player.name}',
+                          alignment:
+                          Alignment
+                              .center,
+                          style: TextStyle(
+                            color:
+                            appWhite,
+                            fontSize:
+                            compact
+                                ? 19
+                                : 24,
+                            height: 0.95,
+                            fontWeight:
+                            FontWeight
+                                .w900,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(
+                        height:
+                        compact
+                            ? 5
+                            : 7,
+                      ),
+
+                      Text(
+                        'Recrea el color que acabas de memorizar',
+                        textAlign:
+                        TextAlign.center,
+                        maxLines: 1,
+                        overflow:
+                        TextOverflow
+                            .ellipsis,
+                        style: TextStyle(
+                          color: appWhite
+                              .withOpacity(
+                            0.65,
+                          ),
+                          fontSize:
+                          compact
+                              ? 11
+                              : 12.5,
+                          fontWeight:
+                          FontWeight
+                              .w700,
+                        ),
+                      ),
+
+                      SizedBox(
+                        height:
+                        compact
+                            ? 9
+                            : 12,
+                      ),
+
+                      // PREVISUALIZACIÓN MÁS PEQUEÑA
+                      Container(
+                        width:
+                        double.infinity,
+                        height:
+                        compact
+                            ? 52
+                            : 68,
+                        decoration:
+                        BoxDecoration(
+                          color:
+                          _currentSelectedColor,
+                          border:
+                          Border.all(
+                            color: appWhite
+                                .withOpacity(
+                              0.70,
+                            ),
+                            width: 2.4,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(
+                        height:
+                        compact
+                            ? 9
+                            : 13,
+                      ),
+
+                      Expanded(
+                        child: Center(
+                          child:
+                          ColorWheelPicker(
+                            // Fuerza un selector
+                            // nuevo para cada turno.
+                            key: ValueKey(
+                              'color_picker_${_currentRound}_${_currentPlayerIndex}',
+                            ),
+
+                            maxWheelSize:
+                            compact
+                                ? 185
+                                : 225,
+
+                            // Coincide con el gris
+                            // inicial RGB(128,128,128)
+                            initialHue: 0,
+                            initialSaturation:
+                            0,
+                            initialValue:
+                            128 / 255,
+
+                            onColorChanged:
+                                (color) {
+                              setState(() {
+                                _red = color
+                                    .red
+                                    .toDouble();
+
+                                _green = color
+                                    .green
+                                    .toDouble();
+
+                                _blue = color
+                                    .blue
+                                    .toDouble();
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(
+                        height:
+                        compact
+                            ? 5
+                            : 8,
+                      ),
+
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment
+                            .center,
+                        children: [
+                          Icon(
+                            Icons
+                                .touch_app_rounded,
+                            color: appWhite
+                                .withOpacity(
+                              0.42,
+                            ),
+                            size:
+                            compact
+                                ? 14
+                                : 16,
+                          ),
+
+                          const SizedBox(
+                            width: 5,
+                          ),
+
+                          Flexible(
+                            child: Text(
+                              'Toca para elegir · arrastra el punto para afinar',
+                              maxLines: 1,
+                              overflow:
+                              TextOverflow
+                                  .ellipsis,
+                              textAlign:
+                              TextAlign
+                                  .center,
+                              style:
+                              TextStyle(
+                                color: appWhite
+                                    .withOpacity(
+                                  0.44,
+                                ),
+                                fontSize:
+                                compact
+                                    ? 9.5
+                                    : 10.5,
+                                fontWeight:
+                                FontWeight
+                                    .w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
+          ),
 
-            const SizedBox(height: 8),
+          SizedBox(
+            height:
+            compact ? 8 : 12,
+          ),
 
-            Text(
-              'Elige el color que más se parezca',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: appWhite.withOpacity(0.70),
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            Container(
-              width: double.infinity,
-              height: 130,
-              decoration: BoxDecoration(
-                color: _currentSelectedColor,
-                border: Border.all(
-                  color: appWhite.withOpacity(0.75),
-                  width: 3,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 18),
-
-            ColorWheelPicker(
-              onColorChanged: (color) {
-                setState(() {
-                  _red = color.red.toDouble();
-                  _green = color.green.toDouble();
-                  _blue = color.blue.toDouble();
-                });
-              },
-            ),
-
-            const SizedBox(height: 14),
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: appWhite.withOpacity(0.08),
-                border: Border.all(
-                  color: appWhite.withOpacity(0.26),
-                  width: 1.4,
-                ),
-              ),
-              child: Text(
-                'RGB(${_red.round()}, ${_green.round()}, ${_blue.round()})',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.4,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            _primaryButton(
-              text: 'Confirmar color',
-              icon: Icons.check_circle_outline_rounded,
-              onPressed: _confirmCurrentPlayerColor,
-            ),
-          ],
-        ),
+          // SIEMPRE VISIBLE
+          _primaryButton(
+            text: 'Confirmar color',
+            icon: Icons
+                .check_circle_outline_rounded,
+            onPressed:
+            _confirmCurrentPlayerColor,
+          ),
+        ],
       ),
     );
   }

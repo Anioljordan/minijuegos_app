@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 
 class MonedaScreen extends StatefulWidget {
@@ -25,6 +26,12 @@ class _CaraCruzScreenState extends State<MonedaScreen>
 
   String _result = '';
   bool _isFlipping = false;
+  static const String _probabilityStorageKey =
+      'moneda_porcentaje_cara';
+
+  double _caraPercent = 50;
+
+  double get _cruzPercent => 100 - _caraPercent;
 
   bool get _isNarrowScreen =>
       MediaQuery.sizeOf(context).width < 380;
@@ -47,6 +54,35 @@ class _CaraCruzScreenState extends State<MonedaScreen>
 
     _coinAnimation = AlwaysStoppedAnimation(
       _currentAngle,
+    );
+    _cargarProbabilidad();
+  }
+  Future<void> _cargarProbabilidad() async {
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final guardado =
+    prefs.getDouble(
+      _probabilityStorageKey,
+    );
+
+    if (!mounted || guardado == null) {
+      return;
+    }
+
+    setState(() {
+      _caraPercent =
+          guardado.clamp(0.0, 100.0);
+    });
+  }
+
+  Future<void> _guardarProbabilidad() async {
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    await prefs.setDouble(
+      _probabilityStorageKey,
+      _caraPercent,
     );
   }
 
@@ -432,7 +468,9 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   Future<void> lanzarMoneda() async {
     if (_isFlipping) return;
 
-    final bool cara = _random.nextBool();
+    final bool cara =
+        _random.nextDouble() <
+            (_caraPercent / 100);
 
     final bool currentlyShowingCara =
         math.cos(_currentAngle) >= 0;
@@ -473,6 +511,499 @@ class _CaraCruzScreenState extends State<MonedaScreen>
       _result = cara ? 'CARA' : 'CRUZ';
       _isFlipping = false;
     });
+  }
+
+  Widget buildProbabilityControl({
+    required bool compact,
+  }) {
+    return Row(
+      mainAxisAlignment:
+      MainAxisAlignment.center,
+      children: [
+        Flexible(
+          child: _singleLineResponsiveText(
+            'CARA ${_caraPercent.round()}%  ·  CRUZ ${_cruzPercent.round()}%',
+            alignment: Alignment.center,
+            style: TextStyle(
+              color:
+              appWhite.withOpacity(0.48),
+              fontSize:
+              compact ? 10.5 : 11.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 6),
+
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap:
+            mostrarEditarProbabilidades,
+            customBorder:
+            const CircleBorder(),
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color:
+                  appWhite.withOpacity(
+                    0.24,
+                  ),
+                  width: 1.1,
+                ),
+              ),
+              child: Icon(
+                Icons.edit_rounded,
+                color:
+                appWhite.withOpacity(
+                  0.55,
+                ),
+                size: 13,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void>
+  mostrarEditarProbabilidades() async {
+    double temporal = _caraPercent;
+
+    final resultado =
+    await showDialog<double>(
+      context: context,
+      barrierColor:
+      Colors.black.withOpacity(0.50),
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder:
+              (context, setDialogState) {
+            final cara =
+            temporal.round();
+
+            final cruz =
+                100 - cara;
+
+            return Dialog(
+              backgroundColor:
+              Colors.transparent,
+              insetPadding:
+              EdgeInsets.symmetric(
+                horizontal:
+                _isVeryNarrowScreen
+                    ? 12
+                    : 22,
+              ),
+              child: Container(
+                padding:
+                const EdgeInsets
+                    .fromLTRB(
+                  18,
+                  18,
+                  18,
+                  16,
+                ),
+                decoration:
+                BoxDecoration(
+                  color: appBlue,
+                  border: Border.all(
+                    color: appWhite
+                        .withOpacity(
+                      0.75,
+                    ),
+                    width: 2.2,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize:
+                  MainAxisSize.min,
+                  crossAxisAlignment:
+                  CrossAxisAlignment
+                      .stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration:
+                          BoxDecoration(
+                            shape:
+                            BoxShape.circle,
+                            color:
+                            accentYellow
+                                .withOpacity(
+                              0.14,
+                            ),
+                            border:
+                            Border.all(
+                              color:
+                              accentYellow,
+                              width: 2,
+                            ),
+                          ),
+                          child:
+                          const Icon(
+                            Icons
+                                .tune_rounded,
+                            color:
+                            accentYellow,
+                            size: 23,
+                          ),
+                        ),
+
+                        const SizedBox(
+                          width: 11,
+                        ),
+
+                        Expanded(
+                          child:
+                          _singleLineResponsiveText(
+                            'PROBABILIDADES',
+                            alignment:
+                            Alignment
+                                .centerLeft,
+                            style:
+                            const TextStyle(
+                              color:
+                              appWhite,
+                              fontSize: 22,
+                              fontWeight:
+                              FontWeight
+                                  .w900,
+                              letterSpacing:
+                              -0.4,
+                            ),
+                          ),
+                        ),
+
+                        IconButton(
+                          onPressed: () =>
+                              Navigator.pop(
+                                dialogContext,
+                              ),
+                          icon:
+                          const Icon(
+                            Icons
+                                .close_rounded,
+                            color:
+                            appWhite,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    Container(
+                      height: 3,
+                      color: appWhite
+                          .withOpacity(
+                        0.58,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 22,
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding:
+                            const EdgeInsets
+                                .symmetric(
+                              vertical: 16,
+                              horizontal: 8,
+                            ),
+                            decoration:
+                            BoxDecoration(
+                              color: appWhite
+                                  .withOpacity(
+                                0.07,
+                              ),
+                              border:
+                              Border.all(
+                                color: appWhite
+                                    .withOpacity(
+                                  0.20,
+                                ),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'CARA',
+                                  style:
+                                  TextStyle(
+                                    color: appWhite
+                                        .withOpacity(
+                                      0.65,
+                                    ),
+                                    fontSize: 12,
+                                    fontWeight:
+                                    FontWeight
+                                        .w900,
+                                    letterSpacing:
+                                    0.8,
+                                  ),
+                                ),
+
+                                const SizedBox(
+                                  height: 5,
+                                ),
+
+                                Text(
+                                  '$cara%',
+                                  style:
+                                  const TextStyle(
+                                    color:
+                                    accentYellow,
+                                    fontSize: 31,
+                                    fontWeight:
+                                    FontWeight
+                                        .w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(
+                          width: 10,
+                        ),
+
+                        Expanded(
+                          child: Container(
+                            padding:
+                            const EdgeInsets
+                                .symmetric(
+                              vertical: 16,
+                              horizontal: 8,
+                            ),
+                            decoration:
+                            BoxDecoration(
+                              color: appWhite
+                                  .withOpacity(
+                                0.07,
+                              ),
+                              border:
+                              Border.all(
+                                color: appWhite
+                                    .withOpacity(
+                                  0.20,
+                                ),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'CRUZ',
+                                  style:
+                                  TextStyle(
+                                    color: appWhite
+                                        .withOpacity(
+                                      0.65,
+                                    ),
+                                    fontSize: 12,
+                                    fontWeight:
+                                    FontWeight
+                                        .w900,
+                                    letterSpacing:
+                                    0.8,
+                                  ),
+                                ),
+
+                                const SizedBox(
+                                  height: 5,
+                                ),
+
+                                Text(
+                                  '$cruz%',
+                                  style:
+                                  const TextStyle(
+                                    color:
+                                    appWhite,
+                                    fontSize: 31,
+                                    fontWeight:
+                                    FontWeight
+                                        .w900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    Text(
+                      'PROBABILIDAD DE CARA',
+                      style: TextStyle(
+                        color: appWhite
+                            .withOpacity(
+                          0.58,
+                        ),
+                        fontSize: 11,
+                        fontWeight:
+                        FontWeight.w900,
+                        letterSpacing: 0.7,
+                      ),
+                    ),
+
+                    Slider(
+                      value: temporal,
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      activeColor:
+                      accentYellow,
+                      inactiveColor:
+                      appWhite.withOpacity(
+                        0.18,
+                      ),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          temporal =
+                              value;
+                        });
+                      },
+                    ),
+
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment
+                          .spaceBetween,
+                      children: [
+                        Text(
+                          '0%',
+                          style:
+                          TextStyle(
+                            color: appWhite
+                                .withOpacity(
+                              0.38,
+                            ),
+                            fontSize: 11,
+                            fontWeight:
+                            FontWeight
+                                .w700,
+                          ),
+                        ),
+
+                        TextButton(
+                          onPressed: () {
+                            setDialogState(
+                                  () {
+                                temporal =
+                                50;
+                              },
+                            );
+                          },
+                          child:
+                          const Text(
+                            '50 / 50',
+                            style:
+                            TextStyle(
+                              color:
+                              appWhite,
+                              fontWeight:
+                              FontWeight
+                                  .w900,
+                            ),
+                          ),
+                        ),
+
+                        Text(
+                          '100%',
+                          style:
+                          TextStyle(
+                            color: appWhite
+                                .withOpacity(
+                              0.38,
+                            ),
+                            fontSize: 11,
+                            fontWeight:
+                            FontWeight
+                                .w700,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(
+                      height: 12,
+                    ),
+
+                    SizedBox(
+                      height: 54,
+                      child:
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(
+                            dialogContext,
+                            temporal,
+                          );
+                        },
+                        style:
+                        mainButtonStyle(),
+                        child:
+                        const FittedBox(
+                          fit:
+                          BoxFit.scaleDown,
+                          child: Text(
+                            'GUARDAR',
+                            maxLines: 1,
+                            style:
+                            TextStyle(
+                              fontSize: 15,
+                              fontWeight:
+                              FontWeight
+                                  .w900,
+                              letterSpacing:
+                              0.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted ||
+        resultado == null) {
+      return;
+    }
+
+    setState(() {
+      _caraPercent =
+          resultado.clamp(
+            0.0,
+            100.0,
+          );
+    });
+
+    await _guardarProbabilidad();
   }
 
   Widget _coinFace({
@@ -624,7 +1155,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                 SizedBox(height: size * 0.018),
 
                 Text(
-                  cara ? 'SE DICE' : 'SECRETO',
+                  cara ? '' : '',
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -793,6 +1324,13 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                     ),
                   ],
                 ),
+              ),
+              SizedBox(
+                height: compact ? 11 : 14,
+              ),
+
+              buildProbabilityControl(
+                compact: compact,
               ),
             ],
           ),
