@@ -19,7 +19,7 @@ class ChillScreen extends StatelessWidget {
   Widget buildTopIcons(BuildContext context) {
     final compact = MediaQuery.of(context).size.height < 740;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 35, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

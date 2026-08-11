@@ -361,23 +361,51 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                   const SizedBox(height: 14),
                   rulesItem(
                     icon: Icons.rotate_right_rounded,
-                    title: 'Gira la ruleta',
-                    text: 'Pulsa GIRAR para empezar a mover la ruleta.',
+                    title: 'Cómo jugar',
+                    text:
+                    'Por turnos, gira la ruleta y pulsa PARAR cuando quieras. Cuando se detenga, cumple lo que indique el número que haya salido.',
                   ),
+
                   rulesItem(
-                    icon: Icons.pan_tool_alt_rounded,
-                    title: 'Para cuando quieras',
-                    text: 'Pulsa PARAR y la ruleta irá frenando poco a poco.',
+                    icon: Icons.water_drop_rounded,
+                    title: 'Cascada',
+                    text:
+                    'Quien saque CASCADA empieza el castigo. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
                   ),
+
                   rulesItem(
-                    icon: Icons.casino_rounded,
-                    title: 'Acepta el resultado',
-                    text: 'Cuando se detenga aparecerá el reto o castigo.',
+                    icon: Icons.visibility_rounded,
+                    title: 'Medusa',
+                    text:
+                    'Todos cierran los ojos. A la cuenta de 3, cada uno mira a un jugador cualquiera. Si dos personas cruzan la mirada, quedan eliminadas. Se repite hasta que quede un único ganador o solo dos jugadores en pie.',
                   ),
+
                   rulesItem(
-                    icon: Icons.groups_rounded,
-                    title: 'Turnos',
-                    text: 'Los jugadores se turnan para girar la ruleta.',
+                    icon: Icons.category_rounded,
+                    title: 'Saco lleno de…',
+                    text:
+                    'Elige una temática, por ejemplo marcas de ropa. Por turnos, cada jugador debe decir algo de esa categoría sin repetir. El primero que no sepa qué decir recibe un castigo.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.rule_rounded,
+                    title: 'Poner una norma',
+                    text:
+                    'Crea una norma que todos deberán cumplir durante toda la noche. Por ejemplo: solo se puede utilizar la mano izquierda.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.comments_disabled_rounded,
+                    title: 'Prohibir palabra',
+                    text:
+                    'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un castigo.',
+                  ),
+
+                  rulesItem(
+                    icon: Icons.flash_on_rounded,
+                    title: 'ZAS',
+                    text:
+                    'Si te toca ZAS consigues este poder y puedes usarlo cuando quieras y tantas veces como quieras. Grita “ZAS” y haz 🤙 poniéndote la mano en la frente. El último jugador en imitarte recibe un castigo.',
                   ),
 
                   const SizedBox(height: 8),

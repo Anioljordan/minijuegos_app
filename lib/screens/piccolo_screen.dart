@@ -543,7 +543,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
                     Alignment
                         .centerLeft,
                     child: Text(
-                      'señala al mas probable',
+                      'señala al mas...',
                       maxLines: 1,
                       style:
                       TextStyle(

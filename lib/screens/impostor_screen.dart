@@ -2048,56 +2048,68 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope<void>(
-      canPop: currentStep == ImpostorStep.modeSelection,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _goBack();
-      },
-      child: Scaffold(
-        backgroundColor: appBlue,
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final narrow = constraints.maxWidth < 380;
-              final veryNarrow = constraints.maxWidth < 340;
+    return Scaffold(
+      backgroundColor: appBlue,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final narrow =
+                constraints.maxWidth < 380;
 
-              final compact =
-                  constraints.maxHeight < 740 || narrow;
+            final veryNarrow =
+                constraints.maxWidth < 340;
 
-              final horizontalPadding = veryNarrow
-                  ? 8.0
-                  : compact
-                  ? 12.0
-                  : 18.0;
+            final compact =
+                constraints.maxHeight < 740 ||
+                    narrow;
 
-              final verticalPadding = compact ? 10.0 : 18.0;
+            final horizontalPadding =
+            veryNarrow
+                ? 8.0
+                : compact
+                ? 12.0
+                : 18.0;
 
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  verticalPadding,
-                  horizontalPadding,
-                  compact ? 11 : 16,
-                ),
-                child: Column(
-                  children: [
-                    buildTopBar(compact: compact),
-                    SizedBox(height: compact ? 10 : 14),
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
-                        child: KeyedSubtree(
-                          key: ValueKey(currentStep),
-                          child: buildCurrentStep(compact: compact),
+            final verticalPadding =
+            compact ? 10.0 : 18.0;
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                verticalPadding,
+                horizontalPadding,
+                compact ? 11 : 16,
+              ),
+              child: Column(
+                children: [
+                  buildTopBar(
+                    compact: compact,
+                  ),
+
+                  SizedBox(
+                    height: compact ? 10 : 14,
+                  ),
+
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration:
+                      const Duration(
+                        milliseconds: 220,
+                      ),
+                      child: KeyedSubtree(
+                        key:
+                        ValueKey(currentStep),
+                        child:
+                        buildCurrentStep(
+                          compact: compact,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

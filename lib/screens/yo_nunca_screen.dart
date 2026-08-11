@@ -1067,48 +1067,109 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                     height: 14,
                   ),
 
-                  rulesItem(
-                    icon:
-                    Icons.edit_rounded,
-                    title:
-                    'Crea tus frases',
-                    text:
-                    'Antes de jugar, escribe tus propias frases de “Yo nunca...”.',
-                  ),
+                  if (widget.modo == 'normal') ...[
+                    rulesItem(
+                      icon: Icons.record_voice_over_rounded,
+                      title: 'Lee el Yo Nunca',
+                      text:
+                      'Una persona lee en voz alta la frase de “Yo nunca...”.',
+                    ),
 
-                  rulesItem(
-                    icon: modeIcon,
-                    title: 'Baraja propia',
-                    text:
-                    'Este modo tiene su propia lista. Las frases que añadas aquí no aparecerán en los otros modos.',
-                  ),
+                    rulesItem(
+                      icon: Icons.pan_tool_alt_rounded,
+                      title: '¿Lo has hecho?',
+                      text:
+                      'Todos los que sí lo hayan hecho cumplen un castigo. Los que no, se libran.',
+                    ),
 
-                  rulesItem(
-                    icon: Icons
-                        .record_voice_over_rounded,
-                    title:
-                    'Lee la frase',
-                    text:
-                    'Cada frase se muestra de forma aleatoria y se lee en voz alta.',
-                  ),
+                    rulesItem(
+                      icon: Icons.arrow_forward_rounded,
+                      title: 'Siguiente',
+                      text:
+                      'Pasad a la siguiente frase y seguid jugando. El clásico Yo Nunca de toda la vida.',
+                    ),
+                  ],
 
-                  rulesItem(
-                    icon:
-                    Icons.shuffle_rounded,
-                    title:
-                    'Sin repetir',
-                    text:
-                    'Las frases no se repiten hasta que se haya terminado la baraja.',
-                  ),
+                  if (widget.modo == 'equipos') ...[
+                    rulesItem(
+                      icon: Icons.groups_rounded,
+                      title: 'Dos equipos',
+                      text:
+                      'Dividíos en dos equipos. Un equipo lanza una frase de “Yo nunca...” al equipo contrario.',
+                    ),
 
-                  rulesItem(
-                    icon:
-                    Icons.save_rounded,
-                    title:
-                    'Se guardan',
-                    text:
-                    'Tus frases quedan guardadas en el móvil para la próxima partida.',
-                  ),
+                    rulesItem(
+                      icon: Icons.hearing_rounded,
+                      title: 'Pasad el número',
+                      text:
+                      'El otro equipo se coloca en orden. El primero susurra “1” si lo ha hecho o “0” si no. Cada jugador suma 1 si también lo ha hecho o repite el número si no.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.tag_rounded,
+                      title: 'Solo sabéis cuántos',
+                      text:
+                      'El número va pasando de jugador en jugador hasta el último. Así se sabe cuántos lo han hecho, pero no quiénes.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.psychology_alt_rounded,
+                      title: 'Adivinad quién',
+                      text:
+                      'El equipo que lanzó la pregunta debe adivinar exactamente qué jugadores sí lo han hecho y cuáles no.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.swap_horiz_rounded,
+                      title: 'Cambiad de equipo',
+                      text:
+                      'Después se intercambian los papeles y el otro equipo lanza la siguiente frase.',
+                    ),
+                  ],
+
+                  if (widget.modo == 'lobo') ...[
+                    rulesItem(
+                      icon: Icons.nightlight_round,
+                      title: 'El pueblo duerme',
+                      text:
+                      'En cada ronda hay un narrador. Todos cierran los ojos y el narrador lee una frase de “Yo nunca...”.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.visibility_rounded,
+                      title: 'Despiertan los lobos',
+                      text:
+                      'Solo se levantan o abren los ojos quienes sí hayan hecho lo que dice la frase. Ellos son los lobos de esa ronda.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.gps_fixed_rounded,
+                      title: 'Los lobos matan',
+                      text:
+                      'Sin hablar, los lobos eligen a una persona que no se haya levantado. Esa persona será la víctima.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.search_rounded,
+                      title: 'Descubre los lobos',
+                      text:
+                      'Todos despiertan. El narrador dice cuántos lobos había y la víctima intenta adivinar quiénes eran.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.auto_stories_rounded,
+                      title: 'Compra historias',
+                      text:
+                      'Si la víctima acierta, puede pedir la mitad de las historias de los lobos: deberán contar qué pasó para haber hecho ese “Yo nunca”.',
+                    ),
+
+                    rulesItem(
+                      icon: Icons.campaign_rounded,
+                      title: 'Nuevo narrador',
+                      text:
+                      'La persona que ha muerto pasa a ser el narrador de la siguiente ronda y lanza el próximo “Yo nunca”.',
+                    ),
+                  ],
 
                   const SizedBox(height: 8),
 

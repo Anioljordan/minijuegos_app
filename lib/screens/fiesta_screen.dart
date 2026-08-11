@@ -19,7 +19,7 @@ class FiestaScreen extends StatelessWidget {
     final compact = MediaQuery.of(context).size.height < 740;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 35, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -120,7 +120,7 @@ class FiestaScreen extends StatelessWidget {
         'screen': const YoNuncaModesScreen(),
       },
       {
-        'title': 'Señala al mas probable',
+        'title': 'Señala al mas...',
         'screen': const PiccoloScreen(),
       },
       {

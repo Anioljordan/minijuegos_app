@@ -1270,12 +1270,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
 
-          buildFancyButton(
-            text: 'Usar escala aleatoria',
-            color: appWhite,
-            icon: Icons.casino_rounded,
-            onPressed: usarEscalaAleatoria,
-          ),
+
 
           const SizedBox(height: 14),
 
@@ -1283,7 +1278,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                sectionTitle('Personalizada'),
+                sectionTitle('Escala personalizada'),
 
                 const SizedBox(height: 8),
 
@@ -1320,6 +1315,14 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 14),
+
+          buildFancyButton(
+            text: 'Usar escala aleatoria',
+            color: appWhite,
+            icon: Icons.casino_rounded,
+            onPressed: usarEscalaAleatoria,
           ),
 
           if (escalasGuardadas.isNotEmpty) ...[
