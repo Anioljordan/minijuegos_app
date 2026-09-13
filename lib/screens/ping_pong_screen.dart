@@ -21,7 +21,6 @@ class _PingPongScreenState extends State<PingPongScreen> {
   static const Color accentYellow = Color(0xFFFFD166);
 
   String preguntaActual = 'Pulsa empezar para jugar';
-  String castigoActual = '';
   int tiempoRestante = 10;
   Timer? timer;
   bool juegoIniciado = false;
@@ -46,7 +45,6 @@ class _PingPongScreenState extends State<PingPongScreen> {
 
     setState(() {
       juegoIniciado = true;
-      castigoActual = '';
       preguntaActual =
       preguntasPingPong[random.nextInt(preguntasPingPong.length)];
       tiempoRestante = 10;
@@ -81,16 +79,6 @@ class _PingPongScreenState extends State<PingPongScreen> {
     });
   }
 
-  void sacarCastigo() {
-    if (!juegoIniciado) return;
-
-    timer?.cancel();
-
-    setState(() {
-      castigoActual =
-      castigosPingPong[random.nextInt(castigosPingPong.length)];
-    });
-  }
 
   ButtonStyle mainButtonStyle() {
     return ElevatedButton.styleFrom(
@@ -335,12 +323,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
                   rulesItem(
                     icon: Icons.warning_rounded,
                     title: 'Si falla o duda',
-                    text: 'Pulsa CASTIGO si no responde, falla o tarda demasiado.',
-                  ),
-                  rulesItem(
-                    icon: Icons.local_bar_rounded,
-                    title: 'Castigo',
-                    text: 'Aparecerá una penalización aleatoria para el jugador.',
+                    text: 'Si duda, falla o tarda demasiado PIERDE y tiene que hacer un reto.',
                   ),
                   rulesItem(
                     icon: Icons.arrow_forward_rounded,
@@ -481,48 +464,6 @@ class _PingPongScreenState extends State<PingPongScreen> {
                       ),
                     ),
                   ),
-                  if (castigoActual.isNotEmpty) ...[
-                    SizedBox(height: compact ? 16 : 22),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      child: Container(
-                        key: ValueKey(castigoActual),
-                        width: double.infinity,
-                        padding: EdgeInsets.all(compact ? 13 : 16),
-                        decoration: BoxDecoration(
-                          color: accentPink.withOpacity(0.20),
-                          border: Border.all(
-                            color: accentPink,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'CASTIGO',
-                              style: TextStyle(
-                                color: accentPink,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 7),
-                            Text(
-                              castigoActual,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: appWhite,
-                                fontSize: compact ? 18 : 22,
-                                height: 1.16,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -621,29 +562,27 @@ class _PingPongScreenState extends State<PingPongScreen> {
                   SizedBox(height: compact ? 8 : 14),
                   Expanded(child: buildGameCard(compact: compact)),
                   SizedBox(height: compact ? 9 : 14),
-                  Row(
-                    children: [
-                      buildActionButton(
-                        icon: juegoIniciado
+                  SizedBox(
+                    width: double.infinity,
+                    height: compact ? 72 : 82,
+                    child: ElevatedButton.icon(
+                      onPressed: juegoIniciado ? siguientePregunta : empezarRonda,
+                      style: mainButtonStyle(),
+                      icon: Icon(
+                        juegoIniciado
                             ? Icons.arrow_forward_rounded
                             : Icons.play_arrow_rounded,
-                        label: juegoIniciado ? 'SIGUIENTE' : 'EMPEZAR',
-                        backgroundColor: appBlue,
-                        foregroundColor: appWhite,
-                        onTap:
-                        juegoIniciado ? siguientePregunta : empezarRonda,
-                        compact: compact,
+                        size: compact ? 24 : 28,
                       ),
-                      const SizedBox(width: 12),
-                      buildActionButton(
-                        icon: Icons.warning_rounded,
-                        label: 'CASTIGO',
-                        backgroundColor: appWhite,
-                        foregroundColor: appBlue,
-                        onTap: juegoIniciado ? sacarCastigo : null,
-                        compact: compact,
+                      label: Text(
+                        juegoIniciado ? 'SIGUIENTE PREGUNTA' : 'EMPEZAR',
+                        style: TextStyle(
+                          fontSize: compact ? 15 : 17,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

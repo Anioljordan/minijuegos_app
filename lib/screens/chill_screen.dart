@@ -146,10 +146,10 @@ class ChillScreen extends StatelessWidget {
         'title': 'Animales Prof',
         'screen': const AnimalesProfesionalesScreen(),
       },
-      {
-        'title': 'BCN Medianoche',
-        'screen': const BarcelonaMedianocheScreen(),
-      },
+      // {
+      //   'title': 'BCN Medianoche',
+      //   'screen': const BarcelonaMedianocheScreen(),
+      // },
     ];
 
     return Scaffold(

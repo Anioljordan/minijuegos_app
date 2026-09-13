@@ -376,12 +376,6 @@ class _PruebaVerdadScreenState
     }
   }
 
-  String generarCastigo() {
-    final castigos =
-        random.nextInt(5) + 1;
-
-    return 'Si no lo haces, $castigos ${castigos == 1 ? 'Castigo' : 'Castigos'}.';
-  }
 
   void sacarVerdad() {
     if (verdades.isEmpty) {
@@ -416,9 +410,7 @@ class _PruebaVerdadScreenState
     setState(() {
       tipoActual = 'VERDAD';
       cartaActualBase = verdad;
-
-      textoActual =
-      '$verdad\n\n${generarCastigo()}';
+      textoActual = verdad;
 
       verdadesUsadas.add(verdad);
     });
@@ -457,9 +449,7 @@ class _PruebaVerdadScreenState
     setState(() {
       tipoActual = 'PRUEBA';
       cartaActualBase = prueba;
-
-      textoActual =
-      '$prueba\n\n${generarCastigo()}';
+      textoActual = prueba;
 
       pruebasUsadas.add(prueba);
     });
@@ -851,13 +841,6 @@ class _PruebaVerdadScreenState
                     'Puedes pegar listas completas con cientos de pruebas o verdades.',
                   ),
 
-                  rulesItem(
-                    icon:
-                    Icons.local_bar_rounded,
-                    title: 'Si te niegas',
-                    text:
-                    'Cumple los castigos que indique la carta.',
-                  ),
 
                   const SizedBox(height: 8),
 

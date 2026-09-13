@@ -93,9 +93,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
     if (baraja.isNotEmpty) {
       actualBase = baraja.removeLast();
-
-      actual =
-      '$actualBase\n\n${generarCastigo()}';
+      actual = actualBase;
     }
 
     setState(() {
@@ -309,19 +307,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     await guardarFrases();
   }
 
-  String generarCastigo() {
-    final castigos =
-        random.nextInt(3) + 1;
 
-    final reparte =
-    random.nextBool();
-
-    if (reparte) {
-      return 'Reparte $castigos ${castigos == 1 ? 'Castigo' : 'Castigos'}.';
-    }
-
-    return '$castigos ${castigos == 1 ? 'Castigo' : 'Castigos'}.';
-  }
 
   void siguienteFrase() {
     if (frases.isEmpty) {
@@ -351,28 +337,18 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
       setState(() {
         fraseActualBase = base;
-
-        fraseActual =
-        '$base\n\n${generarCastigo()}';
-
+        fraseActual = base;
         frasesUsadas = [base];
       });
 
       return;
     }
 
-    final base =
-    frasesDisponibles.removeLast();
-
-    final castigo =
-    generarCastigo();
+    final base = frasesDisponibles.removeLast();
 
     setState(() {
       fraseActualBase = base;
-
-      fraseActual =
-      '$base\n\n$castigo';
-
+      fraseActual = base;
       frasesUsadas.add(base);
     });
   }
@@ -412,9 +388,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
       setState(() {
         fraseActualBase = primera;
-
-        fraseActual =
-        '$primera\n\n${generarCastigo()}';
+        fraseActual = primera;
 
         frasesDisponibles = baraja;
         frasesUsadas = [primera];
@@ -860,7 +834,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
                     title:
                     'El más señalado',
                     text:
-                    'La persona con más votos cumple el castigo que aparezca.',
+                    'La persona con más votos tendra castigo.',
                   ),
 
                   const SizedBox(

@@ -18,13 +18,24 @@ class AsambleaRolesScreen extends StatefulWidget {
 
 class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   int currentIndex = 0;
-  bool revealed = false;
+
+  double secretCardDragOffset = 0;
+
+  static const double maxRevealOffset = 260;
 
   static const Color appBlue = Color(0xFF2F4F9C);
   static const Color appWhite = Color(0xFFF7F7F7);
   static const Color leftBlue = Color(0xFF60A5FA);
   static const Color rightRed = Color(0xFFE63946);
   static const Color leaderGold = Color(0xFFFFD166);
+
+  double get secretRevealProgress {
+    return (-secretCardDragOffset / maxRevealOffset).clamp(0.0, 1.0);
+  }
+
+  bool get roleVisibleEnough {
+    return secretRevealProgress >= 0.88;
+  }
 
   String _roleTitle(AsambleaRole? role) {
     switch (role) {
@@ -76,6 +87,41 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
       default:
         return Icons.help_outline;
     }
+  }
+
+  void _updateSecretCardDrag(DragUpdateDetails details) {
+    setState(() {
+      secretCardDragOffset =
+          (secretCardDragOffset + details.delta.dy).clamp(
+            -maxRevealOffset,
+            0.0,
+          );
+    });
+  }
+
+  void _finishSecretCardDrag(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+
+    setState(() {
+      if (velocity < -700) {
+        secretCardDragOffset = -maxRevealOffset;
+        return;
+      }
+
+      if (velocity > 700) {
+        secretCardDragOffset = 0;
+        return;
+      }
+
+      if (secretCardDragOffset <= -235) {
+        secretCardDragOffset = -maxRevealOffset;
+        return;
+      }
+
+      if (secretCardDragOffset >= -25) {
+        secretCardDragOffset = 0;
+      }
+    });
   }
 
   ButtonStyle mainButtonStyle() {
@@ -141,7 +187,6 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
               compact: compact,
               onTap: () => Navigator.pop(context),
             ),
-
             Row(
               children: [
                 circleButton(
@@ -210,7 +255,268 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     );
   }
 
+  Widget _buildSecretRoleContent({
+    required AsambleaPlayer player,
+    required AsambleaRole? role,
+    required bool compact,
+  }) {
+    final roleColor = _roleColor(role);
+    final progress = secretRevealProgress;
 
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 110),
+      opacity: 0.08 + (progress * 0.92),
+      child: Transform.scale(
+        scale: 0.96 + (progress * 0.04),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: compact ? 78 : 98,
+              height: compact ? 78 : 98,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: roleColor.withOpacity(0.18),
+                border: Border.all(
+                  color: roleColor,
+                  width: 2.7,
+                ),
+              ),
+              child: Icon(
+                _roleIcon(role),
+                color: roleColor,
+                size: compact ? 40 : 50,
+              ),
+            ),
+
+            SizedBox(height: compact ? 16 : 22),
+
+            Text(
+              'TU ROL',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.62),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.9,
+              ),
+            ),
+
+            const SizedBox(height: 9),
+
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                _roleTitle(role).toLowerCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite,
+                  fontSize: compact ? 35 : 44,
+                  height: 0.94,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+            ),
+
+            SizedBox(height: compact ? 14 : 18),
+
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(compact ? 12 : 15),
+              decoration: BoxDecoration(
+                color: appWhite.withOpacity(0.08),
+                border: Border(
+                  left: BorderSide(
+                    color: roleColor,
+                    width: 6,
+                  ),
+                  bottom: BorderSide(
+                    color: appWhite.withOpacity(0.28),
+                    width: 2,
+                  ),
+                  top: BorderSide(
+                    color: appWhite.withOpacity(0.16),
+                  ),
+                  right: BorderSide(
+                    color: appWhite.withOpacity(0.16),
+                  ),
+                ),
+              ),
+              child: Text(
+                _roleDescription(role),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.82),
+                  fontSize: compact ? 13 : 14,
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+
+            SizedBox(height: compact ? 12 : 16),
+
+            Text(
+              'Baja la tarjeta para ocultarlo antes de pasar el móvil.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.52),
+                fontSize: compact ? 11.5 : 12.5,
+                height: 1.25,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecretCover({
+    required AsambleaPlayer player,
+    required AsambleaRole? role,
+    required bool compact,
+  }) {
+    final roleColor = _roleColor(role);
+    final progress = secretRevealProgress;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: _updateSecretCardDrag,
+      onVerticalDragEnd: _finishSecretCardDrag,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOutCubic,
+        offset: Offset(0, -0.92 * progress),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 16 : 22,
+            vertical: compact ? 18 : 24,
+          ),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: roleColor.withOpacity(0.88),
+              width: 2.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: roleColor.withOpacity(0.23),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: compact ? 78 : 96,
+                height: compact ? 78 : 96,
+                decoration: BoxDecoration(
+                  color: roleColor.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: roleColor,
+                    width: 2.6,
+                  ),
+                ),
+                child: Icon(
+                  Icons.lock_rounded,
+                  color: roleColor,
+                  size: compact ? 39 : 48,
+                ),
+              ),
+
+              SizedBox(height: compact ? 18 : 24),
+
+              Text(
+                'TARJETA SECRETA',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.58),
+                  fontSize: compact ? 11 : 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
+              ),
+
+              const SizedBox(height: 9),
+
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  player.name.toLowerCase(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: compact ? 40 : 52,
+                    height: 0.95,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.2,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: compact ? 20 : 26),
+
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 15,
+                  vertical: compact ? 12 : 14,
+                ),
+                decoration: BoxDecoration(
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.26),
+                    width: 1.4,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.keyboard_double_arrow_up_rounded,
+                      color: appWhite.withOpacity(0.88),
+                      size: compact ? 30 : 34,
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      'ARRASTRA DESDE AQUÍ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite,
+                        fontSize: compact ? 13 : 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      'sube para revelar · baja para ocultar',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.62),
+                        fontSize: compact ? 11.5 : 12.5,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget buildMainCard(
       AsambleaPlayer player,
@@ -225,173 +531,50 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
       decoration: BoxDecoration(
         color: appWhite.withOpacity(0.08),
         border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
+          color: roleColor.withOpacity(0.65),
+          width: 1.6,
         ),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 18 : 24,
-              vertical: compact ? 18 : 28,
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: (constraints.maxHeight - (compact ? 36 : 56))
-                    .clamp(0.0, double.infinity).toDouble(),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 18 : 24,
+                vertical: compact ? 18 : 28,
               ),
-              child: Center(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 260),
-                  child: !revealed
-                      ? Column(
-                    key: const ValueKey('hidden'),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'PASA EL MÓVIL A',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: appWhite.withOpacity(0.68),
-                          fontSize: compact ? 11.5 : 13,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.9,
-                        ),
-                      ),
-                      SizedBox(height: compact ? 10 : 14),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          player.name.toLowerCase(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: compact ? 34 : 43,
-                            height: 0.94,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: compact ? 20 : 28),
-                      Container(
-                        width: compact ? 76 : 92,
-                        height: compact ? 76 : 92,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: appWhite.withOpacity(0.14),
-                          border: Border.all(
-                            color: appWhite,
-                            width: 2.5,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.phone_android_rounded,
-                          color: appWhite,
-                          size: compact ? 38 : 47,
-                        ),
-                      ),
-                      SizedBox(height: compact ? 16 : 20),
-                      Text(
-                        'Cuando esté listo, pulsa para revelar su rol.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: appWhite.withOpacity(0.72),
-                          fontSize: compact ? 13 : 14,
-                          height: 1.3,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  )
-                      : Column(
-                    key: const ValueKey('revealed'),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: compact ? 80 : 98,
-                        height: compact ? 80 : 98,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: roleColor.withOpacity(0.18),
-                          border: Border.all(
-                            color: roleColor,
-                            width: 2.7,
-                          ),
-                        ),
-                        child: Icon(
-                          _roleIcon(role),
-                          color: roleColor,
-                          size: compact ? 40 : 50,
-                        ),
-                      ),
-                      SizedBox(height: compact ? 16 : 22),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          _roleTitle(role).toLowerCase(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: compact ? 35 : 44,
-                            height: 0.94,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: compact ? 14 : 18),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(compact ? 12 : 15),
-                        decoration: BoxDecoration(
-                          color: appWhite.withOpacity(0.08),
-                          border: Border(
-                            left: BorderSide(
-                              color: roleColor,
-                              width: 6,
-                            ),
-                            bottom: BorderSide(
-                              color: appWhite.withOpacity(0.28),
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          _roleDescription(role),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: appWhite.withOpacity(0.80),
-                            fontSize: compact ? 13 : 14,
-                            height: 1.35,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              child: SizedBox(
+                height: compact ? 430 : 500,
+                child: _buildSecretRoleContent(
+                  player: player,
+                  role: role,
+                  compact: compact,
                 ),
               ),
             ),
-          );
-        },
+          ),
+
+          Positioned.fill(
+            child: _buildSecretCover(
+              player: player,
+              role: role,
+              compact: compact,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   void _nextStep() {
-    if (!revealed) {
-      setState(() {
-        revealed = true;
-      });
+    if (!roleVisibleEnough) {
       return;
     }
 
     if (currentIndex < widget.players.length - 1) {
       setState(() {
         currentIndex++;
-        revealed = false;
+        secretCardDragOffset = 0;
       });
       return;
     }
@@ -408,14 +591,27 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     required bool compact,
     required AsambleaRole? role,
   }) {
-    final color = revealed ? _roleColor(role) : appWhite;
-    final icon = !revealed
-        ? Icons.visibility_rounded
+    final enabled = roleVisibleEnough;
+    final roleColor = _roleColor(role);
+
+    final color = enabled
+        ? roleColor
+        : appWhite.withOpacity(0.16);
+
+    final foreground = enabled
+        ? role == AsambleaRole.derecha
+        ? appWhite
+        : appBlue
+        : appWhite.withOpacity(0.50);
+
+    final icon = !enabled
+        ? Icons.keyboard_double_arrow_up_rounded
         : currentIndex == widget.players.length - 1
         ? Icons.play_arrow_rounded
         : Icons.arrow_forward_rounded;
-    final label = !revealed
-        ? 'VER ROL'
+
+    final label = !enabled
+        ? 'ARRASTRA LA TARJETA'
         : currentIndex == widget.players.length - 1
         ? 'EMPEZAR PARTIDA'
         : 'SIGUIENTE JUGADOR';
@@ -426,27 +622,29 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
       child: Material(
         color: color,
         child: InkWell(
-          onTap: _nextStep,
+          onTap: enabled ? _nextStep : null,
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: appWhite.withOpacity(0.30),
+                color: appWhite.withOpacity(enabled ? 0.30 : 0.16),
                 width: 2.3,
               ),
-              boxShadow: [
+              boxShadow: enabled
+                  ? [
                 BoxShadow(
-                  color: color.withOpacity(0.28),
+                  color: roleColor.withOpacity(0.28),
                   blurRadius: 17,
                   offset: const Offset(0, 8),
                 ),
-              ],
+              ]
+                  : null,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   icon,
-                  color: role == AsambleaRole.derecha ? appWhite : appBlue,
+                  color: foreground,
                   size: compact ? 31 : 37,
                 ),
                 const SizedBox(width: 10),
@@ -455,7 +653,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
                     label,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: role == AsambleaRole.derecha ? appWhite : appBlue,
+                      color: foreground,
                       fontSize: compact ? 13.5 : 15.5,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.4,
@@ -496,6 +694,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
                   buildTopBar(compact: compact),
 
                   SizedBox(height: compact ? 10 : 16),
+
                   Expanded(
                     child: buildMainCard(
                       player,
@@ -503,7 +702,9 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
                       compact: compact,
                     ),
                   ),
+
                   SizedBox(height: compact ? 10 : 14),
+
                   _buildNextButton(
                     compact: compact,
                     role: role,

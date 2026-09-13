@@ -370,7 +370,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     icon: Icons.water_drop_rounded,
                     title: 'Cascada',
                     text:
-                    'Quien saque CASCADA empieza el castigo. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
+                    'Quien saque CASCADA empieza el reto. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
                   ),
 
                   rulesItem(
@@ -384,7 +384,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     icon: Icons.category_rounded,
                     title: 'Saco lleno de…',
                     text:
-                    'Elige una temática, por ejemplo marcas de ropa. Por turnos, cada jugador debe decir algo de esa categoría sin repetir. El primero que no sepa qué decir recibe un castigo.',
+                    'Elige una temática, por ejemplo marcas de ropa. Por turnos, cada jugador debe decir algo de esa categoría sin repetir. El primero que no sepa qué decir recibe un reto.',
                   ),
 
                   rulesItem(
@@ -398,14 +398,14 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     icon: Icons.comments_disabled_rounded,
                     title: 'Prohibir palabra',
                     text:
-                    'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un castigo.',
+                    'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un reto.',
                   ),
 
                   rulesItem(
                     icon: Icons.flash_on_rounded,
                     title: 'ZAS',
                     text:
-                    'Si te toca ZAS consigues este poder y puedes usarlo cuando quieras y tantas veces como quieras. Grita “ZAS” y haz 🤙 poniéndote la mano en la frente. El último jugador en imitarte recibe un castigo.',
+                    'Si te toca ZAS consigues este poder y puedes usarlo cuando quieras y tantas veces como quieras. Grita “ZAS” y haz 🤙 poniéndote la mano en la frente. El último jugador en imitarte recibe un reto.',
                   ),
 
                   const SizedBox(height: 8),

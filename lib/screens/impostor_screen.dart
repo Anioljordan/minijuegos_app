@@ -48,6 +48,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   int currentPlayerIndex = 0;
   bool showHints = true;
 
+  bool secretCardOpen = false;
+  double secretCardDragOffset = 0;
+
+  double get secretRevealProgress {
+    return (-secretCardDragOffset / 260).clamp(0.0, 1.0);
+  }
+
   List<String> playerSecrets = [];
   List<int> impostorIndexes = [];
   List<String> playerNames = [];
@@ -84,6 +91,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       impostorsCount = 1;
       currentPlayerIndex = 0;
       showHints = true;
+      secretCardOpen = false;
+      secretCardDragOffset = 0;
 
       playerNameController.clear();
 
@@ -107,6 +116,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       selectedMode = null;
       currentStep = ImpostorStep.modeSelection;
       currentPlayerIndex = 0;
+      secretCardOpen = false;
+      secretCardDragOffset = 0;
 
       playerSecrets = [];
       impostorIndexes = [];
@@ -123,6 +134,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       selectedMode = mode;
       currentStep = ImpostorStep.setup;
       currentPlayerIndex = 0;
+      secretCardOpen = false;
+      secretCardDragOffset = 0;
       playerSecrets = [];
       impostorIndexes = [];
       playerNames = [];
@@ -270,6 +283,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     setState(() {
       currentPlayerIndex = 0;
+      secretCardOpen = false;
+      secretCardDragOffset = 0;
       currentStep = ImpostorStep.passPhone;
     });
   }
@@ -371,13 +386,44 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void revealRole() {
     setState(() {
-      currentStep = ImpostorStep.reveal;
+      secretCardDragOffset = -260;
+      secretCardOpen = true;
+      currentStep = ImpostorStep.passPhone;
     });
   }
 
   void hideRole() {
     setState(() {
+      secretCardDragOffset = 0;
+      secretCardOpen = false;
       currentStep = ImpostorStep.passPhone;
+    });
+  }
+
+  void _updateSecretCardDrag(DragUpdateDetails details) {
+    setState(() {
+      secretCardDragOffset =
+          (secretCardDragOffset + details.delta.dy).clamp(-260.0, 0.0);
+
+      secretCardOpen = secretCardDragOffset <= -235;
+    });
+  }
+
+  void _finishSecretCardDrag(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+
+    setState(() {
+      if (velocity < -700) {
+        secretCardDragOffset = -260;
+      } else if (velocity > 700) {
+        secretCardDragOffset = 0;
+      } else if (secretCardDragOffset <= -235) {
+        secretCardDragOffset = -260;
+      } else if (secretCardDragOffset >= -25) {
+        secretCardDragOffset = 0;
+      }
+
+      secretCardOpen = secretCardDragOffset <= -235;
     });
   }
 
@@ -385,10 +431,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     if (currentPlayerIndex < playersCount - 1) {
       setState(() {
         currentPlayerIndex++;
+        secretCardOpen = false;
+        secretCardDragOffset = 0;
         currentStep = ImpostorStep.passPhone;
       });
     } else {
       setState(() {
+        secretCardOpen = false;
+        secretCardDragOffset = 0;
         currentStep = ImpostorStep.finished;
       });
     }
@@ -1703,88 +1753,302 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
 
-  Widget buildPassPhone({required bool compact}) {
-    final playerName = playerNames[currentPlayerIndex];
+  Widget buildSecretContent({required bool compact}) {
+    final secret = getPlayerSecretDisplay();
+    final isImpostor = currentPlayerIsImpostor();
+    final secretColor = isImpostor ? accentPink : modeColor;
+    final progress = secretRevealProgress;
 
-    return Column(
-      children: [
-        buildProgress(compact: compact),
-        SizedBox(height: compact ? 10 : 14),
-        Expanded(
-          child: buildPanel(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 18 : 24,
-              vertical: compact ? 18 : 28,
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 120),
+      opacity: 0.08 + (progress * 0.92),
+      child: Transform.scale(
+        scale: 0.96 + (progress * 0.04),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: compact ? 72 : 88,
+              height: compact ? 72 : 88,
+              decoration: BoxDecoration(
+                color: secretColor.withOpacity(0.15),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: secretColor,
+                  width: 2.5,
+                ),
+              ),
+              child: Icon(
+                isImpostor ? Icons.visibility_off_rounded : modeIcon,
+                color: secretColor,
+                size: compact ? 37 : 45,
+              ),
             ),
-            borderColor: modeColor.withOpacity(0.65),
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+
+            SizedBox(height: compact ? 14 : 20),
+
+            Text(
+              isImpostor ? 'TU PAPEL' : selectedCategory.toUpperCase(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite.withOpacity(0.62),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.9,
+              ),
+            ),
+
+            const SizedBox(height: 9),
+
+            Text(
+              secret,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 24 : 30,
+                height: 1.15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+
+            if (showHints && selectedHint.isNotEmpty && isImpostor) ...[
+              SizedBox(height: compact ? 14 : 18),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(compact ? 11 : 14),
+                decoration: BoxDecoration(
+                  color: accentOrange.withOpacity(0.13),
+                  border: const Border(
+                    left: BorderSide(
+                      color: accentOrange,
+                      width: 6,
+                    ),
+                  ),
+                ),
+                child: Row(
                   children: [
-                    Container(
-                      width: compact ? 78 : 96,
-                      height: compact ? 78 : 96,
-                      decoration: BoxDecoration(
-                        color: modeColor.withOpacity(0.14),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: modeColor, width: 2.6),
-                      ),
-                      child: Icon(
-                        Icons.phone_android_rounded,
-                        color: modeColor,
-                        size: compact ? 39 : 48,
-                      ),
+                    const Icon(
+                      Icons.lightbulb_rounded,
+                      color: accentOrange,
                     ),
-                    SizedBox(height: compact ? 18 : 26),
-                    Text(
-                      'PASA EL MÓVIL A',
-                      style: TextStyle(
-                        color: appWhite.withOpacity(0.62),
-                        fontSize: compact ? 11 : 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 9),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
+                    const SizedBox(width: 10),
+                    Expanded(
                       child: Text(
-                        playerName.toLowerCase(),
-                        textAlign: TextAlign.center,
+                        'Pista: $selectedHint',
                         style: TextStyle(
                           color: appWhite,
-                          fontSize: compact ? 38 : 48,
-                          height: 0.95,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
+                          fontSize: compact ? 13 : 15,
+                          height: 1.3,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
-                    SizedBox(height: compact ? 16 : 22),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildSecretCover({
+    required bool compact,
+    required String playerName,
+  }) {
+    final progress = secretRevealProgress;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: _updateSecretCardDrag,
+      onVerticalDragEnd: _finishSecretCardDrag,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOutCubic,
+        offset: Offset(0, -0.92 * progress),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 16 : 22,
+            vertical: compact ? 18 : 24,
+          ),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(
+              color: modeColor.withOpacity(0.85),
+              width: 2.4,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: modeColor.withOpacity(0.22),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: compact ? 78 : 96,
+                height: compact ? 78 : 96,
+                decoration: BoxDecoration(
+                  color: modeColor.withOpacity(0.16),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: modeColor,
+                    width: 2.6,
+                  ),
+                ),
+                child: Icon(
+                  Icons.lock_rounded,
+                  color: modeColor,
+                  size: compact ? 39 : 48,
+                ),
+              ),
+
+              SizedBox(height: compact ? 18 : 24),
+
+              Text(
+                'TARJETA SECRETA',
+                style: TextStyle(
+                  color: appWhite.withOpacity(0.58),
+                  fontSize: compact ? 11 : 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
+              ),
+
+              const SizedBox(height: 9),
+
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  playerName.toLowerCase(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontSize: compact ? 40 : 52,
+                    height: 0.95,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.2,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: compact ? 20 : 26),
+
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  horizontal: compact ? 12 : 15,
+                  vertical: compact ? 12 : 14,
+                ),
+                decoration: BoxDecoration(
+                  color: appWhite.withOpacity(0.08),
+                  border: Border.all(
+                    color: appWhite.withOpacity(0.26),
+                    width: 1.4,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.keyboard_double_arrow_up_rounded,
+                      color: appWhite.withOpacity(0.88),
+                      size: compact ? 30 : 34,
+                    ),
+
+                    const SizedBox(height: 5),
+
                     Text(
-                      'Que nadie más mire la pantalla.',
+                      'ARRASTRA DESDE AQUÍ',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: appWhite.withOpacity(0.72),
+                        color: appWhite,
                         fontSize: compact ? 13 : 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      'sube para revelar · baja para ocultar',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: appWhite.withOpacity(0.62),
+                        fontSize: compact ? 11.5 : 12.5,
+                        height: 1.25,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildPassPhone({required bool compact}) {
+    final playerName = playerNames[currentPlayerIndex];
+
+    return Column(
+      children: [
+        buildProgress(compact: compact),
+
+        SizedBox(height: compact ? 10 : 14),
+
+        Expanded(
+          child: buildPanel(
+            padding: EdgeInsets.all(compact ? 10 : 14),
+            borderColor: modeColor.withOpacity(0.65),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 8 : 12,
+                      vertical: compact ? 10 : 14,
+                    ),
+                    child: SizedBox(
+                      height: compact ? 430 : 500,
+                      child: buildSecretContent(compact: compact),
+                    ),
+                  ),
+                ),
+
+                Positioned.fill(
+                  child: buildSecretCover(
+                    compact: compact,
+                    playerName: playerName,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+
         SizedBox(height: compact ? 10 : 14),
+
         buildActionButton(
-          icon: Icons.visibility_rounded,
-          label: 'VER MI INFORMACIÓN',
+          icon: currentPlayerIndex == playersCount - 1
+              ? Icons.flag_rounded
+              : Icons.arrow_forward_rounded,
+          label: currentPlayerIndex == playersCount - 1
+              ? 'FINALIZAR'
+              : 'SIGUIENTE JUGADOR',
           backgroundColor: modeColor,
           foregroundColor:
           selectedMode == ImpostorMode.fakeFact ? appBlue : appWhite,
-          onTap: revealRole,
+          onTap: nextPlayer,
           compact: compact,
         ),
       ],
