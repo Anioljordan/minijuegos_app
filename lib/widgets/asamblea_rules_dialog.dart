@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'i18n_text.dart';
 
 const Color _appBlue = Color(0xFF2F4F9C);
 const Color _appWhite = Color(0xFFF7F7F7);
@@ -47,7 +48,7 @@ Widget _rulesItem({
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title.toUpperCase(),
+                tr(title).toUpperCase(),
                 style: const TextStyle(
                   color: _appWhite,
                   fontSize: 13.5,

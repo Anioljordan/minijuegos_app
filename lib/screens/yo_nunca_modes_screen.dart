@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'yo_nunca_screen.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -183,7 +184,7 @@ class YoNuncaModesScreen extends StatelessWidget {
                   alignment:
                   Alignment.centerLeft,
                   child: Text(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     maxLines: 1,
                     softWrap: false,
                     style: const TextStyle(
@@ -491,7 +492,7 @@ class YoNuncaModesScreen extends StatelessWidget {
                       fit:
                       BoxFit.scaleDown,
                       child: Text(
-                        title
+                        tr(title)
                             .toUpperCase(),
                         maxLines: 1,
                         softWrap: false,

@@ -1,5 +1,6 @@
 import 'package:cubo/screens/moneda_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'yo_nunca_modes_screen.dart';
 import 'piccolo_screen.dart';
 import 'uno_dos_screen.dart';
@@ -8,6 +9,7 @@ import 'drink_dare_screen.dart';
 import 'ping_pong_screen.dart';
 import '../widgets/app_settings_button.dart';
 import '../widgets/app_logo_button.dart';
+import '../core/app_settings.dart';
 
 class FiestaScreen extends StatelessWidget {
   const FiestaScreen({super.key});
@@ -96,7 +98,7 @@ class FiestaScreen extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              title.toUpperCase(),
+              tr(title).toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -114,77 +116,83 @@ class FiestaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final juegos = [
-      {
-        'title': 'Yo Nunca',
-        'screen': const YoNuncaModesScreen(),
-      },
-      {
-        'title': 'Señala al mas...',
-        'screen': const PiccoloScreen(),
-      },
-      {
-        'title': '1 & 2',
-        'screen': const UnoDosScreen(),
-      },
-      {
-        'title': 'Prueba o verdad',
-        'screen': const PruebaVerdadScreen(),
-      },
-      {
-        'title': 'La Ruleta',
-        'screen': const DrinkDareScreen(),
-      },
-      {
-        'title': 'Moneda',
-        'screen': const MonedaScreen(),
-      },
-      {
-        'title': 'Ping Pong',
-        'screen': const PingPongScreen(),
-      },
-    ];
+    return AnimatedBuilder(
+      animation: AppSettings.instance,
+      builder: (context, _) {
+        final juegos = [
+          {
+            'title': 'Yo Nunca',
+            'screen': const YoNuncaModesScreen(),
+          },
+          {
+            'title': 'Señala al mas...',
+            'screen': const PiccoloScreen(),
+          },
+          {
+            'title': '1 & 2',
+            'screen': const UnoDosScreen(),
+          },
+          {
+            'title': 'Prueba o verdad',
+            'screen': const PruebaVerdadScreen(),
+          },
+          {
+            'title': 'La Ruleta',
+            'screen': const DrinkDareScreen(),
+          },
+          {
+            'title': 'Moneda',
+            'screen': const MonedaScreen(),
+          },
+          {
+            'title': 'Ping Pong',
+            'screen': const PingPongScreen(),
+          },
+        ];
 
-    return Scaffold(
-      backgroundColor: blue,
-      body: Stack(
-        children: [
-          buildTopIcons(context),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(30, 180, 30, 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  buildTitle(),
-                  const SizedBox(height: 105),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: juegos.length,
-                      itemBuilder: (context, index) {
-                        final juego = juegos[index];
+        return Scaffold(
+          backgroundColor: blue,
+          body: Stack(
+            children: [
+              buildTopIcons(context),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 180, 30, 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildTitle(),
+                      const SizedBox(height: 105),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: juegos.length,
+                          itemBuilder: (context, index) {
+                            final juego = juegos[index];
 
-                        return buildGameButton(
-                          title: juego['title'] as String,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => juego['screen'] as Widget,
-                              ),
+                            return buildGameButton(
+                              title: juego['title'] as String,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                    juego['screen'] as Widget,
+                                  ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

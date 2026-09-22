@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import '../data/drink_dare_data.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -261,7 +262,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_roles_screen.dart';
 import 'asamblea_board_screen.dart';
@@ -237,7 +238,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              text.toUpperCase(),
+              tr(text).toUpperCase(),
               maxLines: 1,
               softWrap: false,
               style: const TextStyle(
@@ -629,7 +630,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
   InputDecoration inputDecoration(String hint) {
     return InputDecoration(
-      hintText: hint,
+      hintText: tr(hint),
       hintStyle: TextStyle(
         color: appWhite.withOpacity(0.45),
         fontWeight: FontWeight.w600,
@@ -663,7 +664,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
   Widget sectionTitle(String text) {
     return Text(
-      text.toLowerCase(),
+      tr(text).toLowerCase(),
       style: const TextStyle(
         color: appWhite,
         fontSize: 30,
@@ -699,7 +700,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title.toUpperCase(),
+              tr(title).toUpperCase(),
               style: TextStyle(
                 color: appWhite.withOpacity(0.62),
                 fontSize: 10.5,
@@ -794,7 +795,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
           ),
 
           IconButton(
-            tooltip: 'Eliminar jugador',
+            tooltip: tr('Eliminar jugador'),
             onPressed: () => _removePlayer(index),
             icon: Icon(
               Icons.delete_outline_rounded,

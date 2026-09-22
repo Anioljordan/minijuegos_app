@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'i18n_text.dart';
 
 class GameCard extends StatelessWidget {
   final String title;
@@ -52,7 +53,7 @@ class GameCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      title.toUpperCase(),
+                      tr(title).toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,

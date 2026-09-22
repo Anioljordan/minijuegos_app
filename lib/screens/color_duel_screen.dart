@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import '../widgets/color_wheel_picker.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -228,7 +229,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
               Expanded(
                 child: _singleLineResponsiveText(
-                  text.toUpperCase(),
+                  tr(text).toUpperCase(),
                   alignment: Alignment.center,
                   style: TextStyle(
                     color: appBlue,
@@ -247,7 +248,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
   InputDecoration _fancyInput(String label) {
     return InputDecoration(
-      labelText: label,
+      labelText: tr(label),
       labelStyle: TextStyle(
         color: appWhite.withOpacity(0.65),
         fontWeight: FontWeight.w700,
@@ -422,7 +423,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,
@@ -910,7 +911,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 14,
@@ -995,7 +996,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     style: const TextStyle(
                       color: appWhite,
                       fontSize: 15,
@@ -1031,7 +1032,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return SizedBox(
       width: double.infinity,
       child: _singleLineResponsiveText(
-        text.toLowerCase(),
+        tr(text).toLowerCase(),
         style: TextStyle(
           color: appWhite,
           fontSize: _isCompactScreen ? 24 : 30,
@@ -1279,7 +1280,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ),
 
           IconButton(
-            tooltip: 'Eliminar jugador',
+            tooltip: tr('Eliminar jugador'),
             onPressed: () => _removeSetupPlayer(index),
             icon: Icon(
               Icons.delete_outline_rounded,
@@ -1560,7 +1561,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               SizedBox(
                 width: double.infinity,
                 child: _singleLineResponsiveText(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   alignment: Alignment.center,
                   style: TextStyle(
                     color: appWhite,
@@ -1800,7 +1801,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
               Expanded(
                 child: _singleLineResponsiveText(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: TextStyle(
                     color: appWhite,
                     fontSize: compact ? 10.5 : 12,
@@ -2250,7 +2251,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           SizedBox(
             width: double.infinity,
             child: _singleLineResponsiveText(
-              label.toUpperCase(),
+              tr(label).toUpperCase(),
               alignment: Alignment.center,
               style: TextStyle(
                 color: appWhite.withOpacity(0.72),
@@ -2295,7 +2296,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             SizedBox(
               width: double.infinity,
               child: _singleLineResponsiveText(
-                label.toUpperCase(),
+                tr(label).toUpperCase(),
                 alignment: Alignment.center,
                 style: TextStyle(
                   color: appWhite.withOpacity(0.62),
@@ -2333,36 +2334,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
           const SizedBox(height: 14),
 
-          if (_gameMode == ColorDuelMode.sameColorForAll) ...[
-            _glassCard(
-              child: Column(
-                children: [
-                  Text(
-                    'COLOR OBJETIVO',
-                    style: TextStyle(
-                      color: appWhite.withOpacity(0.72),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: _targetColor,
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.65),
-                        width: 2.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
+
 
           ...roundRanking.map((player) {
             final playerIndex = _players.indexOf(player);

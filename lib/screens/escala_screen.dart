@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/escala_data.dart';
 import '../widgets/app_logo_button.dart';
@@ -531,7 +532,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
               Expanded(
                 child: _singleLineResponsiveText(
-                  text.toUpperCase(),
+                  tr(text).toUpperCase(),
                   alignment: Alignment.center,
                   style: TextStyle(
                     color: foreground,
@@ -562,7 +563,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       ),
       cursorColor: appWhite,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: tr(label),
         labelStyle: TextStyle(
           color: appWhite.withOpacity(0.62),
           fontWeight: FontWeight.w700,
@@ -594,7 +595,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
     return SizedBox(
       width: double.infinity,
       child: _singleLineResponsiveText(
-        text.toLowerCase(),
+        tr(text).toLowerCase(),
         alignment: Alignment.center,
         style: TextStyle(
           color: appWhite,
@@ -635,7 +636,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,
@@ -1233,7 +1234,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
             SizedBox(
               width: double.infinity,
               child: _singleLineResponsiveText(
-                title.toUpperCase(),
+                tr(title).toUpperCase(),
                 alignment: Alignment.center,
                 style: const TextStyle(
                   color: appWhite,
@@ -2046,7 +2047,7 @@ class NeedleGaugePainter extends CustomPainter {
 
     final textPainter = TextPainter(
       text: TextSpan(
-        text: texto,
+        text: tr(texto),
         style: const TextStyle(
           color: Colors.black87,
           fontSize: 16,

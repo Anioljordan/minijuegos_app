@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'i18n_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_settings.dart';
 import '../widgets/app_logo_button.dart';
@@ -361,6 +362,50 @@ class AppSettingsSheet {
 
                     const SizedBox(height: 22),
 
+                    Text(
+                      settings.t('language'),
+                      style: TextStyle(
+                        color: white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _languageButton(
+                            settings: settings,
+                            blue: blue,
+                            white: white,
+                            label: settings.t('spanish'),
+                            value: 'es',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _languageButton(
+                            settings: settings,
+                            blue: blue,
+                            white: white,
+                            label: settings.t('catalan'),
+                            value: 'ca',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _languageButton(
+                            settings: settings,
+                            blue: blue,
+                            white: white,
+                            label: settings.t('english'),
+                            value: 'en',
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
 
                     _settingsSwitch(
                       settings: settings,
@@ -597,8 +642,7 @@ class AppSettingsSheet {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Expanded(
-            child: FittedBox(
+          child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
@@ -612,7 +656,6 @@ class AppSettingsSheet {
                 ),
               ),
             ),
-          ),
         ),
         Switch(
           value: value,

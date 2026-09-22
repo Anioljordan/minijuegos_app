@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -669,7 +670,7 @@ class _PruebaVerdadScreenState
                   width: double.infinity,
                   child:
                   _singleLineResponsiveText(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     style:
                     const TextStyle(
                       color: appWhite,
@@ -879,9 +880,9 @@ class _PruebaVerdadScreenState
 
   InputDecoration inputDecoration() {
     return InputDecoration(
-      hintText: tipoEditor == 'VERDAD'
+      hintText: tr(tipoEditor == 'VERDAD'
           ? 'Ej: ¿Cuál ha sido tu peor cita?'
-          : 'Ej: Imita a alguien del grupo',
+          : 'Ej: Imita a alguien del grupo'),
       hintStyle: TextStyle(
         color:
         appWhite.withOpacity(0.42),
@@ -1087,7 +1088,7 @@ class _PruebaVerdadScreenState
           ),
 
           IconButton(
-            tooltip: 'Eliminar',
+            tooltip: tr('Eliminar'),
             onPressed: () =>
                 eliminarTexto(index),
             icon: Icon(
@@ -1289,9 +1290,9 @@ class _PruebaVerdadScreenState
                       decoration:
                       InputDecoration(
                         hintText:
-                        tipo == 'VERDAD'
+                        tr(tipo == 'VERDAD'
                             ? '¿Cuál es...?\n¿Alguna vez...?\n¿Quién del grupo...?'
-                            : 'Haz...\nImita...\nDeja que alguien...',
+                            : 'Haz...\nImita...\nDeja que alguien...'),
                         hintStyle:
                         TextStyle(
                           color: appWhite

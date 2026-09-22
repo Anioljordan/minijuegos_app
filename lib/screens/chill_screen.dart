@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'impostor_screen.dart';
 import 'cuatro_en_raya_screen.dart';
 import 'escala_screen.dart';
@@ -9,6 +10,7 @@ import 'barcelonamedianoche_screen.dart';
 import 'describe_la_palabra_screen.dart';
 import '../widgets/app_settings_button.dart';
 import '../widgets/app_logo_button.dart';
+import '../core/app_settings.dart';
 
 class ChillScreen extends StatelessWidget {
   const ChillScreen({super.key});
@@ -97,7 +99,7 @@ class ChillScreen extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerRight,
             child: Text(
-              title.toUpperCase(),
+              tr(title).toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
@@ -116,82 +118,83 @@ class ChillScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final juegos = [
+    return AnimatedBuilder(
+      animation: AppSettings.instance,
+      builder: (context, _) {
+        final juegos = [
+          {
+            'title': 'Impostor',
+            'screen': const ImpostorScreen(),
+          },
+          {
+            'title': 'La Asamblea',
+            'screen': const AsambleaSetupScreen(),
+          },
+          {
+            'title': 'Escala mental',
+            'screen': const EscalaScreen(),
+          },
+          {
+            'title': 'Color Memory',
+            'screen': const ColorDuelScreen(),
+          },
+          {
+            'title': 'Describe la palabra',
+            'screen': const DescribeLaPalabraScreen(),
+          },
+          {
+            'title': '4 en raya',
+            'screen': const CuatroEnRayaScreen(),
+          },
+          {
+            'title': 'Animales Prof',
+            'screen': const AnimalesProfesionalesScreen(),
+          },
+        ];
 
-      {
-        'title': 'Impostor',
-        'screen': const ImpostorScreen(),
-      },
-      {
-        'title': 'La Asamblea',
-        'screen': const AsambleaSetupScreen(),
-      },
-      {
-        'title': 'Describe la palabra',
-        'screen': const DescribeLaPalabraScreen(),
-      },
-      {
-        'title': 'Escala mental',
-        'screen': const EscalaScreen(),
-      },
-      {
-        'title': 'Color Memory',
-        'screen': const ColorDuelScreen(),
-      },
-      {
-        'title': '4 en raya',
-        'screen': const CuatroEnRayaScreen(),
-      },
-      {
-        'title': 'Animales Prof',
-        'screen': const AnimalesProfesionalesScreen(),
-      },
-      // {
-      //   'title': 'BCN Medianoche',
-      //   'screen': const BarcelonaMedianocheScreen(),
-      // },
-    ];
+        return Scaffold(
+          backgroundColor: blue,
+          body: Stack(
+            children: [
+              buildTopIcons(context),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 180, 30, 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      buildTitle(),
+                      const SizedBox(height: 105),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: juegos.length,
+                          itemBuilder: (context, index) {
+                            final juego = juegos[index];
 
-    return Scaffold(
-      backgroundColor: blue,
-      body: Stack(
-        children: [
-          buildTopIcons(context),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(30, 180, 30, 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  buildTitle(),
-                  const SizedBox(height: 105),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: juegos.length,
-                      itemBuilder: (context, index) {
-                        final juego = juegos[index];
-
-                        return buildGameButton(
-                          title: juego['title'] as String,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => juego['screen'] as Widget,
-                              ),
+                            return buildGameButton(
+                              title: juego['title'] as String,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                    juego['screen'] as Widget,
+                                  ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

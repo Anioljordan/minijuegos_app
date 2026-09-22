@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'i18n_text.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class AppLogoButton extends StatelessWidget {

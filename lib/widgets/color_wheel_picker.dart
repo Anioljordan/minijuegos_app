@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'i18n_text.dart';
 
 class ColorWheelPicker extends StatefulWidget {
   final ValueChanged<Color> onColorChanged;

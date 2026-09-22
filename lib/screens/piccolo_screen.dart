@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -606,7 +607,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
                   double.infinity,
                   child:
                   _singleLineResponsiveText(
-                    title
+                    tr(title)
                         .toUpperCase(),
                     style:
                     const TextStyle(
@@ -888,7 +889,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   InputDecoration inputDecoration() {
     return InputDecoration(
       hintText:
-      'Ej: ¿Quién acabaría antes en la cárcel?',
+      tr('Ej: ¿Quién acabaría antes en la cárcel?'),
       hintStyle: TextStyle(
         color:
         appWhite.withOpacity(
@@ -1042,7 +1043,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
           IconButton(
             tooltip:
-            'Eliminar frase',
+            tr('Eliminar frase'),
             constraints:
             const BoxConstraints(
               minWidth: 38,
@@ -1290,7 +1291,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
                       decoration:
                       InputDecoration(
                         hintText:
-                        '¿Quién es más probable que...?\nSeñala a quien...\n¿Quién acabaría antes...?',
+                        tr('¿Quién es más probable que...?\nSeñala a quien...\n¿Quién acabaría antes...?'),
                         hintStyle:
                         TextStyle(
                           color: appWhite

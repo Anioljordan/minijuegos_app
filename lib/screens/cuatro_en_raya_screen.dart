@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:flutter/services.dart';
 import '../core/app_settings.dart';
 import '../widgets/app_logo_button.dart';
@@ -104,7 +105,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,
@@ -936,7 +937,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     showGeneralDialog(
       context: context,
       barrierDismissible: false,
-      barrierLabel: 'Resultado',
+      barrierLabel: tr('Resultado'),
       barrierColor: Colors.black.withOpacity(0.45),
       transitionDuration: const Duration(milliseconds: 320),
       pageBuilder: (context, animation, secondaryAnimation) {
@@ -1033,7 +1034,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                         const SizedBox(height: 14),
 
                         Text(
-                          subtitulo.toUpperCase(),
+                          tr(subtitulo).toUpperCase(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: appWhite,
@@ -1267,7 +1268,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
             const SizedBox(width: 5),
             Flexible(
               child: Text(
-                label.toUpperCase(),
+                tr(label).toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

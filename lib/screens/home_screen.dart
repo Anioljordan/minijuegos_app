@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'fiesta_screen.dart';
 import 'chill_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';

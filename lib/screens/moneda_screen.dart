@@ -1,5 +1,6 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -257,7 +258,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                 SizedBox(
                   width: double.infinity,
                   child: _singleLineResponsiveText(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     alignment: Alignment.centerLeft,
                     style: const TextStyle(
                       color: appWhite,
@@ -522,7 +523,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
       children: [
         Flexible(
           child: _singleLineResponsiveText(
-            'CARA ${_caraPercent.round()}%  ·  CRUZ ${_cruzPercent.round()}%',
+            '',
             alignment: Alignment.center,
             style: TextStyle(
               color:

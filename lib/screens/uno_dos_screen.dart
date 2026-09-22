@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -603,7 +604,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                   double.infinity,
                   child:
                   _singleLineResponsiveText(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     style:
                     const TextStyle(
                       color:
@@ -885,7 +886,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   InputDecoration inputDecoration() {
     return InputDecoration(
       hintText:
-      'Ej: Jugador 1 elige un reto para Jugador 2',
+      tr('Ej: Jugador 1 elige un reto para Jugador 2'),
       hintStyle: TextStyle(
         color:
         appWhite.withOpacity(
@@ -1041,7 +1042,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
 
           IconButton(
             tooltip:
-            'Eliminar acción',
+            tr('Eliminar acción'),
             constraints:
             const BoxConstraints(
               minWidth: 38,
@@ -1291,7 +1292,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                       decoration:
                       InputDecoration(
                         hintText:
-                        'Jugador 1...\nJugador 2...\nLos dos jugadores...',
+                        tr('Jugador 1...\nJugador 2...\nLos dos jugadores...'),
                         hintStyle:
                         TextStyle(
                           color: appWhite

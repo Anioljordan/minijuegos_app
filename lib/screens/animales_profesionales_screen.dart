@@ -1,7 +1,10 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import '../data/animales_profesionales_data.dart';
 import '../widgets/app_logo_button.dart';
+import '../core/app_settings.dart';
+import '../core/animal_profession_i18n.dart';
 
 class AnimalesProfesionalesScreen extends StatefulWidget {
   const AnimalesProfesionalesScreen({super.key});
@@ -214,7 +217,7 @@ class _AnimalesProfesionalesScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,
@@ -580,7 +583,10 @@ class _AnimalesProfesionalesScreenState
         const SizedBox(height: 24),
 
         Text(
-          _itemActual!.animal.toLowerCase(),
+          localizedAnimalName(
+            _itemActual!.animal,
+            AppSettings.instance.language,
+          ).toLowerCase(),
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: appWhite,
@@ -606,7 +612,10 @@ class _AnimalesProfesionalesScreenState
         const SizedBox(height: 8),
 
         Text(
-          _itemActual!.profesion.toLowerCase(),
+          localizedProfessionName(
+            _itemActual!.profesion,
+            AppSettings.instance.language,
+          ).toLowerCase(),
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: appWhite,

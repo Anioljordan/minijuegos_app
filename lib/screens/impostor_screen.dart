@@ -1,6 +1,9 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import '../data/impostor_data.dart';
+import '../core/app_settings.dart';
+import '../core/impostor_i18n.dart';
 import '../widgets/app_logo_button.dart';
 enum ImpostorMode {
   classic,
@@ -51,6 +54,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   bool secretCardOpen = false;
   double secretCardDragOffset = 0;
 
+  final GlobalKey _secretCardKey = GlobalKey();
+  bool _draggingRaisedSecretCard = false;
+
   double get secretRevealProgress {
     return (-secretCardDragOffset / 260).clamp(0.0, 1.0);
   }
@@ -58,6 +64,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   List<String> playerSecrets = [];
   List<int> impostorIndexes = [];
   List<String> playerNames = [];
+
   int get playersCount => playerNames.length;
 
   String selectedWord = '';
@@ -70,7 +77,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
     });
   }
 
@@ -290,7 +296,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
 
-
   void setupClassicMode() {
     final categoryData =
     classicWordsData[_random.nextInt(classicWordsData.length)];
@@ -316,12 +321,18 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final scenario =
     rolesScenariosData[_random.nextInt(rolesScenariosData.length)];
 
-    final place = scenario['place'] as String;
-    final roles = List<String>.from(scenario['roles'])..shuffle(_random);
+    final language = AppSettings.instance.language;
+    final placeSource = scenario['place'] as String;
+    final place = localizeImpostorRoleValue(placeSource, language);
+    final roles = List<String>.from(scenario['roles'])
+        .map((role) => localizeImpostorRoleValue(role, language, isRole: true))
+        .toList()
+      ..shuffle(_random);
 
     selectedCategory = 'Lugar';
     selectedWord = place;
-    selectedHint = scenario['hint'] as String;
+    selectedHint =
+        localizeImpostorRoleValue(scenario['hint'] as String, language);
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
@@ -371,7 +382,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
 
     selectedWord =
-    'Impostor(es): ${impostorIndexes.map((index) => playerNames[index]).join(', ')}';
+    'Impostor(es): ${impostorIndexes.map((index) => playerNames[index]).join(
+        ', ')}';
   }
 
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
@@ -403,9 +415,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   void _updateSecretCardDrag(DragUpdateDetails details) {
     setState(() {
       secretCardDragOffset =
-          (secretCardDragOffset + details.delta.dy).clamp(-260.0, 0.0);
+          (secretCardDragOffset + details.delta.dy)
+              .clamp(-260.0, 0.0);
 
-      secretCardOpen = secretCardDragOffset <= -235;
+
     });
   }
 
@@ -413,18 +426,78 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final velocity = details.primaryVelocity ?? 0;
 
     setState(() {
-      if (velocity < -700) {
+      // Swipe fuerte hacia arriba
+      if (velocity < -500) {
         secretCardDragOffset = -260;
-      } else if (velocity > 700) {
-        secretCardDragOffset = 0;
-      } else if (secretCardDragOffset <= -235) {
-        secretCardDragOffset = -260;
-      } else if (secretCardDragOffset >= -25) {
-        secretCardDragOffset = 0;
+        secretCardOpen = true;
       }
 
-      secretCardOpen = secretCardDragOffset <= -235;
+      // Swipe fuerte hacia abajo
+      else if (velocity > 500) {
+        secretCardDragOffset = 0;
+        secretCardOpen = false;
+      }
+
+      // Sin velocidad fuerte:
+      // usamos la mitad del recorrido para decidir.
+      else if (secretCardDragOffset <= -130) {
+        secretCardDragOffset = -260;
+        secretCardOpen = true;
+      } else {
+        secretCardDragOffset = 0;
+        secretCardOpen = false;
+      }
     });
+  }
+
+  bool _isPointInsideSecretCard(Offset globalPosition) {
+    final context = _secretCardKey.currentContext;
+
+    if (context == null) return false;
+
+    final renderBox = context.findRenderObject();
+
+    if (renderBox is! RenderBox) return false;
+
+    final topLeft = renderBox.localToGlobal(Offset.zero);
+
+    final bottomRight = renderBox.localToGlobal(
+      Offset(
+        renderBox.size.width,
+        renderBox.size.height,
+      ),
+    );
+
+    final rect = Rect.fromPoints(
+      topLeft,
+      bottomRight,
+    );
+
+    return rect.contains(globalPosition);
+  }
+
+  void _globalSecretDragStart(DragStartDetails details) {
+    if (!secretCardOpen) {
+      _draggingRaisedSecretCard = false;
+      return;
+    }
+
+    _draggingRaisedSecretCard =
+        _isPointInsideSecretCard(details.globalPosition);
+  }
+
+  void _globalSecretDragUpdate(DragUpdateDetails details) {
+    if (!_draggingRaisedSecretCard) return;
+
+    _updateSecretCardDrag(details);
+  }
+
+  void _globalSecretDragEnd(DragEndDetails details) {
+    if (!_draggingRaisedSecretCard) return;
+
+    _finishSecretCardDrag(details);
+
+    _draggingRaisedSecretCard = false;
   }
 
   void nextPlayer() {
@@ -563,7 +636,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       case ImpostorStep.modeSelection:
         return 'juego del impostor';
       case ImpostorStep.setup:
-        return getModeTitle(selectedMode!).toLowerCase();
+        return tr(getModeTitle(selectedMode!)).toLowerCase();
       case ImpostorStep.passPhone:
         return 'pasa el móvil';
       case ImpostorStep.reveal:
@@ -788,7 +861,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   InputDecoration inputDecoration(String hint) {
     return InputDecoration(
-      hintText: hint,
+      hintText: tr(hint),
       hintStyle: TextStyle(
         color: appWhite.withOpacity(0.45),
         fontWeight: FontWeight.w600,
@@ -833,7 +906,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,
@@ -997,102 +1070,108 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withOpacity(0.45),
-      builder: (_) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(color: appWhite.withOpacity(0.75), width: 2.2),
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.78,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
+      builder: (_) =>
+          Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+              decoration: BoxDecoration(
+                color: appBlue,
+                border: Border.all(
+                    color: appWhite.withOpacity(0.75), width: 2.2),
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery
+                      .of(context)
+                      .size
+                      .height * 0.78,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
+                      Row(
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: appWhite.withOpacity(0.85),
+                                width: 2.1,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.question_mark_rounded,
+                              color: appWhite,
+                              size: 28,
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
+                          const SizedBox(width: 14),
+                          const Expanded(
+                            child: Text(
+                              'normas',
+                              style: TextStyle(
+                                color: appWhite,
+                                fontSize: 38,
+                                height: 0.9,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.8,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(height: 3, color: appWhite.withOpacity(0.58)),
+                      const SizedBox(height: 18),
+                      Text(
+                        tr(title).toUpperCase(),
+                        style: const TextStyle(
                           color: appWhite,
-                          size: 28,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
                         ),
                       ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
+                      const SizedBox(height: 14),
+                      ...rules.map(
+                            (rule) =>
+                            rulesItem(
+                              icon: rule['icon'] as IconData,
+                              title: rule['title'] as String,
+                              text: rule['text'] as String,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: mainButtonStyle(),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            child: Text(
+                              'ENTENDIDO',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Container(height: 3, color: appWhite.withOpacity(0.58)),
-                  const SizedBox(height: 18),
-                  Text(
-                    title.toUpperCase(),
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  ...rules.map(
-                        (rule) => rulesItem(
-                      icon: rule['icon'] as IconData,
-                      title: rule['title'] as String,
-                      text: rule['text'] as String,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: mainButtonStyle(),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                        child: Text(
-                          'ENTENDIDO',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -1141,7 +1220,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               ),
               SizedBox(height: compact ? 8 : 11),
               Text(
-                title.toUpperCase(),
+                tr(title).toUpperCase(),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -1228,11 +1307,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _singleLineResponsiveText(
-      String text, {
-        required TextStyle style,
-        Alignment alignment = Alignment.centerLeft,
-      }) {
+  Widget _singleLineResponsiveText(String text, {
+    required TextStyle style,
+    Alignment alignment = Alignment.centerLeft,
+  }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
@@ -1250,7 +1328,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     required VoidCallback? onTap,
     required bool compact,
   }) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenWidth = MediaQuery
+        .sizeOf(context)
+        .width;
     final veryNarrow = screenWidth < 350;
 
     final size = veryNarrow
@@ -1362,7 +1442,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
               Expanded(
                 child: _singleLineResponsiveText(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: TextStyle(
                     color: appWhite,
                     fontSize: veryNarrow
@@ -1546,21 +1626,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
                 const SizedBox(height: 4),
 
-                Text(
-                  'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.44),
-                    fontSize: compact ? 10.5 : 11.5,
-                    height: 1.3,
-                  ),
-                ),
               ],
             ),
           )
         else
           Column(
-            children: playerNames.asMap().entries.map((entry) {
+            children: playerNames
+                .asMap()
+                .entries
+                .map((entry) {
               final index = entry.key;
               final name = entry.value;
 
@@ -1631,7 +1705,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ),
 
                     IconButton(
-                      tooltip: 'Eliminar jugador',
+                      tooltip: tr('Eliminar jugador'),
                       onPressed: () => _removePlayer(index),
                       icon: Icon(
                         Icons.delete_outline_rounded,
@@ -1788,7 +1862,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             SizedBox(height: compact ? 14 : 20),
 
             Text(
-              isImpostor ? 'TU PAPEL' : selectedCategory.toUpperCase(),
+              isImpostor ? 'TU PAPEL' : tr(selectedCategory).toUpperCase(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: appWhite.withOpacity(0.62),
@@ -1860,15 +1934,21 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }) {
     final progress = secretRevealProgress;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onVerticalDragUpdate: _updateSecretCardDrag,
-      onVerticalDragEnd: _finishSecretCardDrag,
-      child: AnimatedSlide(
-        duration: const Duration(milliseconds: 90),
-        curve: Curves.easeOutCubic,
-        offset: Offset(0, -0.92 * progress),
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 90),
+      curve: Curves.easeOutCubic,
+
+      // Deja una pequeña parte de la tarjeta visible arriba
+      // para poder agarrarla y volver a bajarla.
+      offset: Offset(0, -0.88 * progress),
+
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragUpdate: _updateSecretCardDrag,
+        onVerticalDragEnd: _finishSecretCardDrag,
+
         child: Container(
+          key: _secretCardKey,
           width: double.infinity,
           height: double.infinity,
           padding: EdgeInsets.symmetric(
@@ -2092,7 +2172,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ),
                     SizedBox(height: compact ? 16 : 22),
                     Text(
-                      isImpostor ? 'TU PAPEL' : selectedCategory.toUpperCase(),
+                      isImpostor ? 'TU PAPEL' : tr(selectedCategory)
+                          .toUpperCase(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: appWhite.withOpacity(0.62),
@@ -2314,66 +2395,84 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appBlue,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final narrow =
-                constraints.maxWidth < 380;
 
-            final veryNarrow =
-                constraints.maxWidth < 340;
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
 
-            final compact =
-                constraints.maxHeight < 740 ||
-                    narrow;
+        // Cuando la tarjeta está abierta, capturamos también
+        // el arrastre de la parte que queda fuera del panel.
+        onVerticalDragStart:
+        currentStep == ImpostorStep.passPhone && secretCardOpen
+            ? _globalSecretDragStart
+            : null,
 
-            final horizontalPadding =
-            veryNarrow
-                ? 8.0
-                : compact
-                ? 12.0
-                : 18.0;
+        onVerticalDragUpdate:
+        currentStep == ImpostorStep.passPhone && secretCardOpen
+            ? _globalSecretDragUpdate
+            : null,
 
-            final verticalPadding =
-            compact ? 10.0 : 18.0;
+        onVerticalDragEnd:
+        currentStep == ImpostorStep.passPhone && secretCardOpen
+            ? _globalSecretDragEnd
+            : null,
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 11 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(
-                    compact: compact,
-                  ),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
 
-                  SizedBox(
-                    height: compact ? 10 : 14,
-                  ),
+              final veryNarrow = constraints.maxWidth < 340;
 
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration:
-                      const Duration(
-                        milliseconds: 220,
-                      ),
-                      child: KeyedSubtree(
-                        key:
-                        ValueKey(currentStep),
-                        child:
-                        buildCurrentStep(
-                          compact: compact,
+              final compact =
+                  constraints.maxHeight < 740 || narrow;
+
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
+
+              final verticalPadding =
+              compact ? 10.0 : 18.0;
+
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 11 : 16,
+                ),
+
+                child: Column(
+                  children: [
+                    buildTopBar(
+                      compact: compact,
+                    ),
+
+                    SizedBox(
+                      height: compact ? 10 : 14,
+                    ),
+
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(
+                          milliseconds: 220,
+                        ),
+
+                        child: KeyedSubtree(
+                          key: ValueKey(currentStep),
+
+                          child: buildCurrentStep(
+                            compact: compact,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

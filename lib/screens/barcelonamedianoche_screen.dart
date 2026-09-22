@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import '../data/barcelonamedianoche_data.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -176,7 +177,7 @@ class _BarcelonaMedianocheScreenState
 
     // Convierte los títulos de dos líneas en una sola línea,
     // igual que en Impostor.
-    final visualTitle = title.replaceAll('\n', ' ').toLowerCase();
+    final visualTitle = tr(title).replaceAll('\n', ' ').toLowerCase();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -325,7 +326,7 @@ class _BarcelonaMedianocheScreenState
 
   Widget _sectionTitle(String text) {
     return Text(
-      text.toLowerCase(),
+      tr(text).toLowerCase(),
       style: const TextStyle(
         color: appWhite,
         fontSize: 28,
@@ -365,7 +366,7 @@ class _BarcelonaMedianocheScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title.toUpperCase(),
+                  tr(title).toUpperCase(),
                   style: const TextStyle(
                     color: appWhite,
                     fontSize: 13.5,
@@ -969,7 +970,7 @@ class _BarcelonaMedianocheScreenState
           ),
 
           IconButton(
-            tooltip: 'Eliminar jugador',
+            tooltip: tr('Eliminar jugador'),
             onPressed: () => _removeSetupPlayer(index),
             icon: Icon(
               Icons.delete_outline_rounded,
@@ -1640,7 +1641,7 @@ class _BarcelonaMedianocheScreenState
                   ),
                   SizedBox(height: compact ? 14 : 18),
                   Text(
-                    player.role.label.toLowerCase(),
+                    tr(player.role.label).toLowerCase(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: appWhite,
@@ -1964,7 +1965,7 @@ class _BarcelonaMedianocheScreenState
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    lot.name.toLowerCase(),
+                    tr(lot.name).toLowerCase(),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: appWhite,
@@ -2026,7 +2027,7 @@ class _BarcelonaMedianocheScreenState
                     ),
                     cursorColor: appWhite,
                     decoration: InputDecoration(
-                      hintText: '0 = no pujar',
+                      hintText: tr('0 = no pujar'),
                       hintStyle: TextStyle(
                         color: appWhite.withOpacity(0.40),
                       ),
@@ -2481,7 +2482,7 @@ class _BarcelonaMedianocheScreenState
         ),
       ),
       child: Text(
-        text.toUpperCase(),
+        tr(text).toUpperCase(),
         style: const TextStyle(
           color: appWhite,
           fontSize: 10.5,
@@ -2550,7 +2551,7 @@ class _BarcelonaMedianocheScreenState
                 SizedBox(
                   width: double.infinity,
                   child: _singleLineResponsiveText(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     alignment: Alignment.center,
                     style: TextStyle(
                       color: foreground,
@@ -2636,7 +2637,7 @@ class _BarcelonaMedianocheScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
+            tr(label).toUpperCase(),
             style: TextStyle(
               color: appWhite.withOpacity(0.62),
               fontSize: 10.5,
@@ -2693,7 +2694,7 @@ class _BarcelonaMedianocheScreenState
 
   InputDecoration _setupInputDecoration(String hint) {
     return InputDecoration(
-      hintText: hint,
+      hintText: tr(hint),
       hintStyle: TextStyle(
         color: appWhite.withOpacity(0.38),
       ),
@@ -3170,7 +3171,7 @@ class _BarcelonaMedianocheScreenState
     bool transferGood = false;
     String? selectedLotId;
     final amountController = TextEditingController();
-    final reasonController = TextEditingController(text: 'Trato privado');
+    final reasonController = TextEditingController(text: tr('Trato privado'));
 
     await showDialog(
       context: context,
@@ -3542,7 +3543,7 @@ class _BarcelonaMedianocheScreenState
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-            title.toLowerCase(),
+            tr(title).toLowerCase(),
             style: const TextStyle(
               color: appWhite,
               fontSize: 32,
@@ -3629,7 +3630,7 @@ class _BarcelonaMedianocheScreenState
 
   InputDecoration _dialogInputDecoration(String hint) {
     return InputDecoration(
-      hintText: hint,
+      hintText: tr(hint),
       hintStyle: TextStyle(
         color: appWhite.withOpacity(0.42),
       ),

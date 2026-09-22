@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_setup_screen.dart';
 import 'asamblea_roles_screen.dart';
@@ -432,7 +433,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                   border: Border.all(color: appWhite, width: 2),
                 ),
                 child: Text(
-                  _textoLey(ley).toUpperCase(),
+                  tr(_textoLey(ley)).toUpperCase(),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: appWhite,
@@ -494,7 +495,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       case AsambleaRole.derecha:
         return 'Derecha';
       case AsambleaRole.liderOculto:
-        return 'Líder Oculto';
+        return 'Dictador';
       default:
         return '';
     }
@@ -688,7 +689,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       await _guardarPartida();
       await _mostrarGanador(
         '¡Gana la Derecha!',
-        'El Líder Oculto ha llegado al poder.',
+        'El Dictador ha llegado al poder.',
       );
     }
   }
@@ -770,9 +771,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: cartasVisibles
+                    tooltip: tr(cartasVisibles
                         ? 'Ocultar cartas'
-                        : 'Mostrar cartas',
+                        : 'Mostrar cartas'),
                   ),
                 ],
               ),
@@ -995,7 +996,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
+                    tooltip: tr(cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas'),
                   ),
                 ],
               ),
@@ -1218,7 +1219,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
+                    tooltip: tr(cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas'),
                   ),
                 ],
               ),
@@ -1353,7 +1354,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       await _guardarPartida();
       await _mostrarGanador(
         '¡Gana la Izquierda!',
-        'El Líder Oculto ha sido eliminado.',
+        'El Dictador ha sido eliminado.',
       );
     }
   }
@@ -2269,7 +2270,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
   Widget sectionTitle(String text) {
     return Text(
-      text.toLowerCase(),
+      tr(text).toLowerCase(),
       style: const TextStyle(
         color: appWhite,
         fontSize: 28,
@@ -2326,7 +2327,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               SizedBox(width: compact ? 10 : 13),
               Expanded(
                 child: Text(
-                  title.toLowerCase(),
+                  tr(title).toLowerCase(),
                   style: TextStyle(
                     color: appWhite,
                     fontSize: compact ? 29 : 34,
@@ -2463,7 +2464,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
             Icon(icon, color: appWhite, size: 28),
             const SizedBox(height: 8),
             Text(
-              title.toUpperCase(),
+              tr(title).toUpperCase(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: appWhite.withOpacity(0.62),

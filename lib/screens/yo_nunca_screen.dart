@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 
@@ -476,7 +477,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                       decoration:
                       InputDecoration(
                         hintText:
-                        'Yo nunca he...\nYo nunca he...\nYo nunca he...',
+                        tr('Yo nunca he...\nYo nunca he...\nYo nunca he...'),
                         hintStyle:
                         TextStyle(
                           color: appWhite
@@ -904,7 +905,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                   width: double.infinity,
                   child:
                   _singleLineResponsiveText(
-                    title.toUpperCase(),
+                    tr(title).toUpperCase(),
                     style:
                     const TextStyle(
                       color: appWhite,
@@ -1217,7 +1218,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   InputDecoration inputDecoration() {
     return InputDecoration(
       hintText:
-      'Ej: he mentido para no salir de fiesta',
+      tr('Ej: he mentido para no salir de fiesta'),
       hintStyle: TextStyle(
         color: appWhite.withOpacity(0.42),
         fontSize: 13,
@@ -1335,7 +1336,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
           ),
 
           IconButton(
-            tooltip: 'Eliminar frase',
+            tooltip: tr('Eliminar frase'),
             onPressed: () =>
                 eliminarFrase(index),
             icon: Icon(

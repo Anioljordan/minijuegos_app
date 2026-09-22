@@ -93,7 +93,7 @@ class AppSettings extends ChangeNotifier {
         'resetData': 'Reiniciar dades guardades',
         'about': 'Sobre l’app',
         'close': 'Tancar',
-        'spanish': 'Español',
+        'spanish': 'Espanyol',
         'catalan': 'Català',
         'english': 'English',
         'dataReset': 'Dades guardades reiniciades',
