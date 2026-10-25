@@ -1,24 +1,16 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart' hide Text;
+
 import '../widgets/i18n_text.dart';
 import '../data/impostor_data.dart';
 import '../core/app_settings.dart';
 import '../core/impostor_i18n.dart';
 import '../widgets/app_logo_button.dart';
-enum ImpostorMode {
-  classic,
-  roles,
-  question,
-  fakeFact,
-}
 
-enum ImpostorStep {
-  modeSelection,
-  setup,
-  passPhone,
-  reveal,
-  finished,
-}
+enum ImpostorMode { classic, roles, question, football }
+
+enum ImpostorStep { modeSelection, setup, passPhone, reveal, finished }
 
 class ImpostorScreen extends StatefulWidget {
   const ImpostorScreen({super.key});
@@ -41,12 +33,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   ImpostorMode? selectedMode;
   ImpostorStep currentStep = ImpostorStep.modeSelection;
 
-  final TextEditingController playerNameController =
-  TextEditingController();
+  final TextEditingController playerNameController = TextEditingController();
 
   static const int maxPlayers = 12;
 
   int impostorsCount = 1;
+
+  final Set<FootballCategory> selectedFootballCategories = FootballCategory
+      .values
+      .toSet();
 
   int currentPlayerIndex = 0;
   bool showHints = true;
@@ -154,11 +149,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   String _nextAutomaticPlayerName() {
     int number = 1;
 
-    while (
-    playerNames.any(
-          (name) => name.toLowerCase() == 'jugador $number',
-    )
-    ) {
+    while (playerNames.any((name) => name.toLowerCase() == 'jugador $number')) {
       number++;
     }
 
@@ -167,17 +158,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void _addPlayer() {
     if (playerNames.length >= maxPlayers) {
-      showCustomSnackBar(
-        'El máximo es de $maxPlayers jugadores',
-      );
+      showCustomSnackBar('El máximo es de $maxPlayers jugadores');
       return;
     }
 
     final typedName = playerNameController.text.trim();
 
-    final newName = typedName.isEmpty
-        ? _nextAutomaticPlayerName()
-        : typedName;
+    final newName = typedName.isEmpty ? _nextAutomaticPlayerName() : typedName;
 
     final duplicated = playerNames.any(
           (name) => name.toLowerCase() == newName.toLowerCase(),
@@ -193,10 +180,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       playerNameController.clear();
 
       if (impostorsCount >= playerNames.length) {
-        impostorsCount = math.max(
-          1,
-          playerNames.length - 1,
-        );
+        impostorsCount = math.max(1, playerNames.length - 1);
       }
     });
   }
@@ -207,14 +191,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     setState(() {
       playerNames.removeAt(index);
 
-      final maxImpostors = math.max(
-        1,
-        playerNames.length - 1,
-      );
+      final maxImpostors = math.max(1, playerNames.length - 1);
 
-      impostorsCount = impostorsCount
-          .clamp(1, maxImpostors)
-          .toInt();
+      impostorsCount = impostorsCount.clamp(1, maxImpostors).toInt();
     });
   }
 
@@ -232,39 +211,41 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void _changeImpostors(int change) {
     if (playerNames.length < 2) {
-      showCustomSnackBar(
-        'Añade jugadores antes de cambiar los impostores',
-      );
+      showCustomSnackBar('Añade jugadores antes de cambiar los impostores');
       return;
     }
 
     final maxImpostors = playerNames.length - 1;
 
     setState(() {
-      impostorsCount = (impostorsCount + change)
-          .clamp(1, maxImpostors)
-          .toInt();
+      impostorsCount = (impostorsCount + change).clamp(1, maxImpostors).toInt();
     });
   }
 
   void startGame() {
     if (playersCount < 3) {
-      showCustomSnackBar(
-        'Tiene que haber al menos 3 jugadores',
-      );
+      showCustomSnackBar('Tiene que haber al menos 3 jugadores');
       return;
     }
 
     if (impostorsCount < 1) {
-      showCustomSnackBar(
-        'Tiene que haber al menos 1 impostor',
-      );
+      showCustomSnackBar('Tiene que haber al menos 1 impostor');
       return;
     }
 
     if (impostorsCount >= playersCount) {
+      showCustomSnackBar('No puede haber tantos impostores como jugadores');
+      return;
+    }
+
+    if (selectedMode == ImpostorMode.football &&
+        selectedFootballCategories.isEmpty) {
       showCustomSnackBar(
-        'No puede haber tantos impostores como jugadores',
+        _footballText(
+          'Marca al menos una categoría de fútbol',
+          'Marca com a mínim una categoria de futbol',
+          'Select at least one football category',
+        ),
       );
       return;
     }
@@ -282,8 +263,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         setupQuestionMode();
         break;
 
-      case ImpostorMode.fakeFact:
-        setupFakeFactMode();
+      case ImpostorMode.football:
+        setupFootballMode();
         break;
     }
 
@@ -294,7 +275,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       currentStep = ImpostorStep.passPhone;
     });
   }
-
 
   void setupClassicMode() {
     final categoryData =
@@ -324,15 +304,20 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final language = AppSettings.instance.language;
     final placeSource = scenario['place'] as String;
     final place = localizeImpostorRoleValue(placeSource, language);
-    final roles = List<String>.from(scenario['roles'])
-        .map((role) => localizeImpostorRoleValue(role, language, isRole: true))
+    final roles =
+    List<String>.from(scenario['roles'])
+        .map(
+          (role) => localizeImpostorRoleValue(role, language, isRole: true),
+    )
         .toList()
       ..shuffle(_random);
 
     selectedCategory = 'Lugar';
     selectedWord = place;
-    selectedHint =
-        localizeImpostorRoleValue(scenario['hint'] as String, language);
+    selectedHint = localizeImpostorRoleValue(
+      scenario['hint'] as String,
+      language,
+    );
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
@@ -362,28 +347,62 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
   }
 
-  void setupFakeFactMode() {
-    final facts = List<Map<String, String>>.from(curiousFactsData)
-      ..shuffle(_random);
+  void setupFootballMode() {
+    final pool = buildFootballPool(selectedFootballCategories);
+    final selected = pool[_random.nextInt(pool.length)];
+
+    selectedCategory = _footballCategoryLabel(selected.category);
+    selectedWord = selected.word.name;
+    selectedHint = _footballText(
+      selected.word.hintEs,
+      selected.word.hintCa,
+      selected.word.hintEn,
+    );
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
-    selectedCategory = 'Datos curiosos';
-    selectedHint = '';
-
-    int factCursor = 0;
     playerSecrets = List.generate(playersCount, (index) {
-      if (impostorIndexes.contains(index)) {
-        return 'ERES EL IMPOSTOR\n\nInvéntate un dato curioso falso, pero que parezca real.';
-      }
-
-      final fact = facts[factCursor % facts.length];
-      factCursor++;
-      return fact['fact']!;
+      return impostorIndexes.contains(index) ? 'IMPOSTOR' : selectedWord;
     });
+  }
 
-    selectedWord =
-    'Impostor(es): ${impostorIndexes.map((index) => playerNames[index]).join(
-        ', ')}';
+  // Los textos nuevos siguen el idioma elegido en los ajustes de Cubo.
+  String _footballText(String es, String ca, String en) {
+    final language = AppSettings.instance.language
+        .toString()
+        .split('.')
+        .last
+        .toLowerCase()
+        .split(RegExp('[-_]'))
+        .first;
+    switch (language) {
+      case 'ca':
+        return ca;
+      case 'en':
+        return en;
+      default:
+        return es;
+    }
+  }
+
+  String _footballCategoryLabel(FootballCategory category) {
+    switch (category) {
+      case FootballCategory.currentPlayers:
+        return _footballText(
+          'Jugadores actuales',
+          'Jugadors actuals',
+          'Current players',
+        );
+      case FootballCategory.historicPlayers:
+        return _footballText(
+          'Jugadores históricos',
+          'Jugadors històrics',
+          'Historic players',
+        );
+      case FootballCategory.coaches:
+        return _footballText('Entrenadores', 'Entrenadors', 'Coaches');
+      case FootballCategory.clubs:
+        return _footballText('Clubes', 'Clubs', 'Clubs');
+    }
   }
 
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
@@ -414,11 +433,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void _updateSecretCardDrag(DragUpdateDetails details) {
     setState(() {
-      secretCardDragOffset =
-          (secretCardDragOffset + details.delta.dy)
-              .clamp(-260.0, 0.0);
-
-
+      secretCardDragOffset = (secretCardDragOffset + details.delta.dy).clamp(
+        -260.0,
+        0.0,
+      );
     });
   }
 
@@ -431,13 +449,11 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         secretCardDragOffset = -260;
         secretCardOpen = true;
       }
-
       // Swipe fuerte hacia abajo
       else if (velocity > 500) {
         secretCardDragOffset = 0;
         secretCardOpen = false;
       }
-
       // Sin velocidad fuerte:
       // usamos la mitad del recorrido para decidir.
       else if (secretCardDragOffset <= -130) {
@@ -462,16 +478,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final topLeft = renderBox.localToGlobal(Offset.zero);
 
     final bottomRight = renderBox.localToGlobal(
-      Offset(
-        renderBox.size.width,
-        renderBox.size.height,
-      ),
+      Offset(renderBox.size.width, renderBox.size.height),
     );
 
-    final rect = Rect.fromPoints(
-      topLeft,
-      bottomRight,
-    );
+    final rect = Rect.fromPoints(topLeft, bottomRight);
 
     return rect.contains(globalPosition);
   }
@@ -482,8 +492,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       return;
     }
 
-    _draggingRaisedSecretCard =
-        _isPointInsideSecretCard(details.globalPosition);
+    _draggingRaisedSecretCard = _isPointInsideSecretCard(
+      details.globalPosition,
+    );
   }
 
   void _globalSecretDragUpdate(DragUpdateDetails details) {
@@ -537,15 +548,20 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         return 'Impostor con roles';
       case ImpostorMode.question:
         return 'Pregunta distinta';
-      case ImpostorMode.fakeFact:
-        return 'Dato falso';
+      case ImpostorMode.football:
+        return _footballText(
+          'Impostor fútbol',
+          'Impostor futbol',
+          'Football impostor',
+        );
     }
   }
 
   String getPlayerSecretDisplay() {
     final secret = playerSecrets[currentPlayerIndex];
 
-    if (selectedMode == ImpostorMode.classic) {
+    if (selectedMode == ImpostorMode.classic ||
+        selectedMode == ImpostorMode.football) {
       return secret == 'IMPOSTOR' ? 'Eres el impostor' : secret;
     }
 
@@ -569,7 +585,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         return accentOrange;
       case ImpostorMode.question:
         return accentGreen;
-      case ImpostorMode.fakeFact:
+      case ImpostorMode.football:
         return accentYellow;
       case null:
         return accentPink;
@@ -584,8 +600,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         return Icons.theater_comedy_rounded;
       case ImpostorMode.question:
         return Icons.quiz_rounded;
-      case ImpostorMode.fakeFact:
-        return Icons.fact_check_rounded;
+      case ImpostorMode.football:
+        return Icons.sports_soccer_rounded;
       case null:
         return Icons.person_search_rounded;
     }
@@ -664,10 +680,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             ),
             Row(
               children: [
-                if (showReset) ...[
-
-                  SizedBox(width: compact ? 9 : 12),
-                ],
+                if (showReset) ...[SizedBox(width: compact ? 9 : 12)],
                 circleButton(
                   compact: compact,
                   onTap: showRulesDialog,
@@ -683,9 +696,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         ),
         SizedBox(height: compact ? 14 : 24),
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
+          padding: EdgeInsets.only(right: compact ? 18 : 28),
           child: SizedBox(
             width: double.infinity,
             height: titleHeight,
@@ -942,7 +953,11 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         {
           'icon': Icons.videogame_asset_rounded,
           'title': 'Elige modo',
-          'text': 'Escoge entre clásico, roles, pregunta distinta o dato falso.',
+          'text': _footballText(
+            'Escoge entre clásico, roles, pregunta distinta o fútbol.',
+            'Tria entre clàssic, rols, pregunta diferent o futbol.',
+            'Choose classic, roles, different question or football.',
+          ),
         },
         {
           'icon': Icons.groups_rounded,
@@ -1039,27 +1054,55 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             },
           ]);
           break;
-        case ImpostorMode.fakeFact:
+        case ImpostorMode.football:
           rules.addAll([
             {
-              'icon': Icons.fact_check_rounded,
-              'title': 'Dato real',
-              'text': 'Los jugadores normales reciben un dato curioso real.',
+              'icon': Icons.check_box_rounded,
+              'title': _footballText(
+                'Elige categorías',
+                'Tria categories',
+                'Choose categories',
+              ),
+              'text': _footballText(
+                'Marca jugadores actuales, históricos, entrenadores o clubes. Puedes combinarlos todos.',
+                'Marca jugadors actuals, històrics, entrenadors o clubs. Els pots combinar tots.',
+                'Select current players, historic players, coaches or clubs. Combine any or all of them.',
+              ),
             },
             {
-              'icon': Icons.psychology_rounded,
-              'title': 'Dato falso',
-              'text': 'El impostor inventa uno que parezca verdadero.',
+              'icon': Icons.sports_soccer_rounded,
+              'title': _footballText(
+                'Nombre secreto',
+                'Nom secret',
+                'Secret name',
+              ),
+              'text': _footballText(
+                'Todos reciben el mismo nombre salvo los impostores.',
+                'Tothom rep el mateix nom excepte els impostors.',
+                'Everyone receives the same name except the impostors.',
+              ),
             },
             {
-              'icon': Icons.record_voice_over_rounded,
-              'title': 'Decidlo',
-              'text': 'Cada jugador dice su dato en voz alta.',
+              'icon': Icons.lightbulb_rounded,
+              'title': _footballText(
+                'Pista opcional',
+                'Pista opcional',
+                'Optional hint',
+              ),
+              'text': _footballText(
+                'Si activas las pistas, los impostores reciben una palabra de ayuda.',
+                'Si actives les pistes, els impostors reben una paraula d’ajuda.',
+                'When hints are enabled, impostors receive a one-word clue.',
+              ),
             },
             {
               'icon': Icons.how_to_vote_rounded,
               'title': 'Votad',
-              'text': 'Después votáis quién creéis que se lo ha inventado.',
+              'text': _footballText(
+                'Dad pistas sin decir el nombre y votad quién está disimulando.',
+                'Doneu pistes sense dir el nom i voteu qui està dissimulant.',
+                'Give clues without saying the name, then vote for whoever is bluffing.',
+              ),
             },
           ]);
           break;
@@ -1070,108 +1113,102 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withOpacity(0.45),
-      builder: (_) =>
-          Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 22),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-              decoration: BoxDecoration(
-                color: appBlue,
-                border: Border.all(
-                    color: appWhite.withOpacity(0.75), width: 2.2),
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.78,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: BoxDecoration(
+            color: appBlue,
+            border: Border.all(color: appWhite.withOpacity(0.75), width: 2.2),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: appWhite.withOpacity(0.85),
-                                width: 2.1,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.question_mark_rounded,
-                              color: appWhite,
-                              size: 28,
-                            ),
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: appWhite.withOpacity(0.85),
+                            width: 2.1,
                           ),
-                          const SizedBox(width: 14),
-                          const Expanded(
-                            child: Text(
-                              'normas',
-                              style: TextStyle(
-                                color: appWhite,
-                                fontSize: 38,
-                                height: 0.9,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.8,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Container(height: 3, color: appWhite.withOpacity(0.58)),
-                      const SizedBox(height: 18),
-                      Text(
-                        tr(title).toUpperCase(),
-                        style: const TextStyle(
+                        ),
+                        child: const Icon(
+                          Icons.question_mark_rounded,
                           color: appWhite,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
+                          size: 28,
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      ...rules.map(
-                            (rule) =>
-                            rulesItem(
-                              icon: rule['icon'] as IconData,
-                              title: rule['title'] as String,
-                              text: rule['text'] as String,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: mainButtonStyle(),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            child: Text(
-                              'ENTENDIDO',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Text(
+                          'normas',
+                          style: TextStyle(
+                            color: appWhite,
+                            fontSize: 38,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.8,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  Container(height: 3, color: appWhite.withOpacity(0.58)),
+                  const SizedBox(height: 18),
+                  Text(
+                    tr(title).toUpperCase(),
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  ...rules.map(
+                        (rule) => rulesItem(
+                      icon: rule['icon'] as IconData,
+                      title: rule['title'] as String,
+                      text: rule['text'] as String,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+        ),
+      ),
     );
   }
 
@@ -1212,11 +1249,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: color.withOpacity(0.75), width: 2),
                 ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: compact ? 30 : 38,
-                ),
+                child: Icon(icon, color: color, size: compact ? 30 : 38),
               ),
               SizedBox(height: compact ? 8 : 11),
               Text(
@@ -1276,11 +1309,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       mode: ImpostorMode.question,
       ),
       (
-      title: 'Dato falso',
-      subtitle: 'Todos tienen un dato real menos el impostor.',
-      icon: Icons.fact_check_rounded,
+      title: _footballText('Fútbol', 'Futbol', 'Football'),
+      subtitle: _footballText(
+        'Jugadores, leyendas, entrenadores y clubes.',
+        'Jugadors, llegendes, entrenadors i clubs.',
+        'Players, legends, coaches and clubs.',
+      ),
+      icon: Icons.sports_soccer_rounded,
       color: accentYellow,
-      mode: ImpostorMode.fakeFact,
+      mode: ImpostorMode.football,
       ),
     ];
 
@@ -1307,19 +1344,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _singleLineResponsiveText(String text, {
-    required TextStyle style,
-    Alignment alignment = Alignment.centerLeft,
-  }) {
+  Widget _singleLineResponsiveText(
+      String text, {
+        required TextStyle style,
+        Alignment alignment = Alignment.centerLeft,
+      }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
-      child: Text(
-        text,
-        maxLines: 1,
-        softWrap: false,
-        style: style,
-      ),
+      child: Text(text, maxLines: 1, softWrap: false, style: style),
     );
   }
 
@@ -1328,9 +1361,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     required VoidCallback? onTap,
     required bool compact,
   }) {
-    final screenWidth = MediaQuery
-        .sizeOf(context)
-        .width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final veryNarrow = screenWidth < 350;
 
     final size = veryNarrow
@@ -1351,17 +1382,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             border: Border.all(
-              color: appWhite.withOpacity(
-                onTap == null ? 0.12 : 0.35,
-              ),
+              color: appWhite.withOpacity(onTap == null ? 0.12 : 0.35),
               width: 1.5,
             ),
           ),
           child: Icon(
             icon,
-            color: appWhite.withOpacity(
-              onTap == null ? 0.28 : 1,
-            ),
+            color: appWhite.withOpacity(onTap == null ? 0.28 : 1),
             size: veryNarrow
                 ? 19
                 : compact
@@ -1409,10 +1436,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           ),
           decoration: BoxDecoration(
             color: appWhite.withOpacity(0.07),
-            border: Border.all(
-              color: appWhite.withOpacity(0.24),
-              width: 1.4,
-            ),
+            border: Border.all(color: appWhite.withOpacity(0.24), width: 1.4),
           ),
           child: Row(
             children: [
@@ -1494,9 +1518,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _buildPlayersEditor({
-    required bool compact,
-  }) {
+  Widget _buildPlayersEditor({required bool compact}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1504,9 +1526,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           title: 'Jugadores',
           icon: Icons.groups_rounded,
           value: playersCount,
-          onMinus: playerNames.isEmpty
-              ? null
-              : () => _changePlayers(-1),
+          onMinus: playerNames.isEmpty ? null : () => _changePlayers(-1),
           onPlus: playerNames.length >= maxPlayers
               ? null
               : () => _changePlayers(1),
@@ -1543,9 +1563,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   fontWeight: FontWeight.w700,
                 ),
                 cursorColor: appWhite,
-                decoration: inputDecoration(
-                  'Nombre opcional',
-                ),
+                decoration: inputDecoration('Nombre opcional'),
               ),
             ),
 
@@ -1555,12 +1573,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               width: compact ? 50 : 54,
               height: compact ? 50 : 54,
               child: ElevatedButton(
-                onPressed: playerNames.length >= maxPlayers
-                    ? null
-                    : _addPlayer,
+                onPressed: playerNames.length >= maxPlayers ? null : _addPlayer,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: modeColor,
-                  foregroundColor: selectedMode == ImpostorMode.fakeFact
+                  foregroundColor: selectedMode == ImpostorMode.football
                       ? appBlue
                       : appWhite,
                   disabledBackgroundColor: appWhite.withOpacity(0.18),
@@ -1577,12 +1593,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     borderRadius: BorderRadius.zero,
                   ),
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.add_rounded,
-                    size: 29,
-                  ),
-                ),
+                child: const Center(child: Icon(Icons.add_rounded, size: 29)),
               ),
             ),
           ],
@@ -1599,10 +1610,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             ),
             decoration: BoxDecoration(
               color: appWhite.withOpacity(0.05),
-              border: Border.all(
-                color: appWhite.withOpacity(0.18),
-                width: 1.3,
-              ),
+              border: Border.all(color: appWhite.withOpacity(0.18), width: 1.3),
             ),
             child: Column(
               children: [
@@ -1625,16 +1633,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
 
                 const SizedBox(height: 4),
-
               ],
             ),
           )
         else
           Column(
-            children: playerNames
-                .asMap()
-                .entries
-                .map((entry) {
+            children: playerNames.asMap().entries.map((entry) {
               final index = entry.key;
               final name = entry.value;
 
@@ -1650,20 +1654,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 decoration: BoxDecoration(
                   color: appWhite.withOpacity(0.07),
                   border: Border(
-                    left: BorderSide(
-                      color: modeColor,
-                      width: 6,
-                    ),
+                    left: BorderSide(color: modeColor, width: 6),
                     bottom: BorderSide(
                       color: appWhite.withOpacity(0.25),
                       width: 2,
                     ),
-                    top: BorderSide(
-                      color: appWhite.withOpacity(0.15),
-                    ),
-                    right: BorderSide(
-                      color: appWhite.withOpacity(0.15),
-                    ),
+                    top: BorderSide(color: appWhite.withOpacity(0.15)),
+                    right: BorderSide(color: appWhite.withOpacity(0.15)),
                   ),
                 ),
                 child: Row(
@@ -1721,10 +1718,141 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
+  Widget _buildFootballCategories({required bool compact}) {
+    final allSelected =
+        selectedFootballCategories.length == FootballCategory.values.length;
+    final noneSelected = selectedFootballCategories.isEmpty;
+    final availableNames = buildFootballPool(selectedFootballCategories).length;
+
+    Widget categoryCheckbox({
+      required String keyName,
+      required String title,
+      required bool? value,
+      required ValueChanged<bool?> onChanged,
+      bool tristate = false,
+    }) {
+      return Container(
+        margin: const EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
+          color: appWhite.withOpacity(value == false ? 0.04 : 0.08),
+          border: Border.all(
+            color: value == false
+                ? appWhite.withOpacity(0.22)
+                : modeColor.withOpacity(0.65),
+            width: 1.3,
+          ),
+        ),
+        child: CheckboxListTile(
+          key: ValueKey(keyName),
+          value: value,
+          tristate: tristate,
+          onChanged: onChanged,
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.symmetric(horizontal: compact ? 4 : 8),
+          activeColor: modeColor,
+          checkColor: appBlue,
+          side: BorderSide(color: appWhite.withOpacity(0.65), width: 1.7),
+          checkboxShape: const RoundedRectangleBorder(),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: appWhite,
+              fontSize: compact ? 13 : 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          _footballText(
+            'CONTENIDO DE FÚTBOL',
+            'CONTINGUT DE FUTBOL',
+            'FOOTBALL CONTENT',
+          ),
+          style: TextStyle(
+            color: appWhite.withOpacity(0.70),
+            fontSize: compact ? 10.5 : 12,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.7,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          _footballText(
+            'Combina las categorías que quieras.',
+            'Combina les categories que vulguis.',
+            'Combine any categories you like.',
+          ),
+          style: TextStyle(
+            color: appWhite.withOpacity(0.68),
+            fontSize: compact ? 12 : 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        categoryCheckbox(
+          keyName: 'football-all',
+          title: _footballText(
+            'Marcar todas',
+            'Marcar-les totes',
+            'Select all',
+          ),
+          value: allSelected ? true : (noneSelected ? false : null),
+          tristate: true,
+          onChanged: (_) => setState(() {
+            if (allSelected) {
+              selectedFootballCategories.clear();
+            } else {
+              selectedFootballCategories.addAll(FootballCategory.values);
+            }
+          }),
+        ),
+        for (final category in FootballCategory.values)
+          categoryCheckbox(
+            keyName: 'football-${category.name}',
+            title: _footballCategoryLabel(category),
+            value: selectedFootballCategories.contains(category),
+            onChanged: (checked) => setState(() {
+              if (checked == true) {
+                selectedFootballCategories.add(category);
+              } else {
+                selectedFootballCategories.remove(category);
+              }
+            }),
+          ),
+        const SizedBox(height: 10),
+        Text(
+          noneSelected
+              ? _footballText(
+            'Marca al menos una categoría para empezar.',
+            'Marca com a mínim una categoria per començar.',
+            'Select at least one category to start.',
+          )
+              : _footballText(
+            '$availableNames nombres disponibles',
+            '$availableNames noms disponibles',
+            '$availableNames names available',
+          ),
+          style: TextStyle(
+            color: noneSelected ? accentPink : appWhite.withOpacity(0.68),
+            fontSize: compact ? 12 : 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildSetup({required bool compact}) {
     final mode = selectedMode!;
     final showHintSwitch =
-        mode == ImpostorMode.classic || mode == ImpostorMode.roles;
+        mode == ImpostorMode.classic ||
+            mode == ImpostorMode.roles ||
+            mode == ImpostorMode.football;
 
     return SingleChildScrollView(
       child: buildPanel(
@@ -1764,10 +1892,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
               ],
             ),
+            if (mode == ImpostorMode.football) ...[
+              SizedBox(height: compact ? 16 : 20),
+              _buildFootballCategories(compact: compact),
+            ],
             SizedBox(height: compact ? 16 : 20),
-            _buildPlayersEditor(
-              compact: compact,
-            ),
+            _buildPlayersEditor(compact: compact),
 
             SizedBox(height: compact ? 14 : 17),
 
@@ -1775,11 +1905,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               title: 'Impostores',
               icon: Icons.visibility_off_rounded,
               value: impostorsCount,
-              onMinus: impostorsCount <= 1
-                  ? null
-                  : () => _changeImpostors(-1),
-              onPlus: playersCount < 2 ||
-                  impostorsCount >= playersCount - 1
+              onMinus: impostorsCount <= 1 ? null : () => _changeImpostors(-1),
+              onPlus: playersCount < 2 || impostorsCount >= playersCount - 1
                   ? null
                   : () => _changeImpostors(1),
               compact: compact,
@@ -1815,9 +1942,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               icon: Icons.play_arrow_rounded,
               label: 'EMPEZAR PARTIDA',
               backgroundColor: modeColor,
-              foregroundColor:
-              mode == ImpostorMode.fakeFact ? appBlue : appWhite,
-              onTap: startGame,
+              foregroundColor: mode == ImpostorMode.football
+                  ? appBlue
+                  : appWhite,
+              onTap:
+              mode == ImpostorMode.football &&
+                  selectedFootballCategories.isEmpty
+                  ? null
+                  : startGame,
               compact: compact,
             ),
           ],
@@ -1825,7 +1957,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       ),
     );
   }
-
 
   Widget buildSecretContent({required bool compact}) {
     final secret = getPlayerSecretDisplay();
@@ -1847,10 +1978,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               decoration: BoxDecoration(
                 color: secretColor.withOpacity(0.15),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: secretColor,
-                  width: 2.5,
-                ),
+                border: Border.all(color: secretColor, width: 2.5),
               ),
               child: Icon(
                 isImpostor ? Icons.visibility_off_rounded : modeIcon,
@@ -1894,18 +2022,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 decoration: BoxDecoration(
                   color: accentOrange.withOpacity(0.13),
                   border: const Border(
-                    left: BorderSide(
-                      color: accentOrange,
-                      width: 6,
-                    ),
+                    left: BorderSide(color: accentOrange, width: 6),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.lightbulb_rounded,
-                      color: accentOrange,
-                    ),
+                    const Icon(Icons.lightbulb_rounded, color: accentOrange),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -1928,10 +2050,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget buildSecretCover({
-    required bool compact,
-    required String playerName,
-  }) {
+  Widget buildSecretCover({required bool compact, required String playerName}) {
     final progress = secretRevealProgress;
 
     return AnimatedSlide(
@@ -1957,10 +2076,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           ),
           decoration: BoxDecoration(
             color: appBlue,
-            border: Border.all(
-              color: modeColor.withOpacity(0.85),
-              width: 2.4,
-            ),
+            border: Border.all(color: modeColor.withOpacity(0.85), width: 2.4),
             boxShadow: [
               BoxShadow(
                 color: modeColor.withOpacity(0.22),
@@ -1978,10 +2094,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 decoration: BoxDecoration(
                   color: modeColor.withOpacity(0.16),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: modeColor,
-                    width: 2.6,
-                  ),
+                  border: Border.all(color: modeColor, width: 2.6),
                 ),
                 child: Icon(
                   Icons.lock_rounded,
@@ -2126,8 +2239,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               ? 'FINALIZAR'
               : 'SIGUIENTE JUGADOR',
           backgroundColor: modeColor,
-          foregroundColor:
-          selectedMode == ImpostorMode.fakeFact ? appBlue : appWhite,
+          foregroundColor: selectedMode == ImpostorMode.football
+              ? appBlue
+              : appWhite,
           onTap: nextPlayer,
           compact: compact,
         ),
@@ -2172,8 +2286,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ),
                     SizedBox(height: compact ? 16 : 22),
                     Text(
-                      isImpostor ? 'TU PAPEL' : tr(selectedCategory)
-                          .toUpperCase(),
+                      isImpostor
+                          ? 'TU PAPEL'
+                          : tr(selectedCategory).toUpperCase(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: appWhite.withOpacity(0.62),
@@ -2198,9 +2313,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                         ),
                       ),
                     ),
-                    if (showHints &&
-                        selectedHint.isNotEmpty &&
-                        isImpostor) ...[
+                    if (showHints && selectedHint.isNotEmpty && isImpostor) ...[
                       SizedBox(height: compact ? 14 : 18),
                       Container(
                         width: double.infinity,
@@ -2262,8 +2375,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ? 'FINALIZAR'
                     : 'SIGUIENTE',
                 backgroundColor: modeColor,
-                foregroundColor:
-                selectedMode == ImpostorMode.fakeFact ? appBlue : appWhite,
+                foregroundColor: selectedMode == ImpostorMode.football
+                    ? appBlue
+                    : appWhite,
                 onTap: nextPlayer,
                 compact: compact,
               ),
@@ -2279,20 +2393,20 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     switch (selectedMode!) {
       case ImpostorMode.classic:
-        summaryText =
-        'Todos conocen su palabra. Haced preguntas sin decirla exactamente y votad quién es el impostor.';
+        summaryText = 'Todos conocen su palabra. Haced preguntas sin decirla exactamente y votad quién es el impostor.';
         break;
       case ImpostorMode.roles:
-        summaryText =
-        'Todos conocen su lugar y su rol. El impostor debe disimular y descubrir el lugar.';
+        summaryText = 'Todos conocen su lugar y su rol. El impostor debe disimular y descubrir el lugar.';
         break;
       case ImpostorMode.question:
-        summaryText =
-        'Las preguntas ya están repartidas. Responded y descubrid quién recibió la pregunta distinta.';
+        summaryText = 'Las preguntas ya están repartidas. Responded y descubrid quién recibió la pregunta distinta.';
         break;
-      case ImpostorMode.fakeFact:
-        summaryText =
-        'Cada jugador debe decir su dato. Después debatid quién se lo ha inventado.\n\n$selectedWord';
+      case ImpostorMode.football:
+        summaryText = _footballText(
+          'Todos tienen su papel. Dad pistas sobre el nombre secreto sin decirlo y votad quién es el impostor.',
+          'Tothom té el seu paper. Doneu pistes sobre el nom secret sense dir-lo i voteu qui és l’impostor.',
+          'Everyone has their role. Give clues about the secret name without saying it, then vote for the impostor.',
+        );
         break;
     }
 
@@ -2423,8 +2537,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
               final veryNarrow = constraints.maxWidth < 340;
 
-              final compact =
-                  constraints.maxHeight < 740 || narrow;
+              final compact = constraints.maxHeight < 740 || narrow;
 
               final horizontalPadding = veryNarrow
                   ? 8.0
@@ -2432,8 +2545,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   ? 12.0
                   : 18.0;
 
-              final verticalPadding =
-              compact ? 10.0 : 18.0;
+              final verticalPadding = compact ? 10.0 : 18.0;
 
               return Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -2445,26 +2557,18 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
                 child: Column(
                   children: [
-                    buildTopBar(
-                      compact: compact,
-                    ),
+                    buildTopBar(compact: compact),
 
-                    SizedBox(
-                      height: compact ? 10 : 14,
-                    ),
+                    SizedBox(height: compact ? 10 : 14),
 
                     Expanded(
                       child: AnimatedSwitcher(
-                        duration: const Duration(
-                          milliseconds: 220,
-                        ),
+                        duration: const Duration(milliseconds: 220),
 
                         child: KeyedSubtree(
                           key: ValueKey(currentStep),
 
-                          child: buildCurrentStep(
-                            compact: compact,
-                          ),
+                          child: buildCurrentStep(compact: compact),
                         ),
                       ),
                     ),

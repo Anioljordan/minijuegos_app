@@ -1328,465 +1328,340 @@ const List<Map<String, String>> questionPairsData = [
 ];
 
 /// ===============================
-/// MODO 4 — DATOS FALSOS
-/// Cada dato tiene su propia pista de una sola palabra.
+/// MODO 4 — FÚTBOL
+/// Categorías combinables. Las pistas no dependen del club actual.
 /// ===============================
 
-const List<Map<String, String>> curiousFactsData = [
-  {
-    'fact': 'Los pulpos tienen tres corazones.',
-    'hint': 'Bombeo',
-  },
-  {
-    'fact': 'La miel puede conservarse durante miles de años en buenas condiciones.',
-    'hint': 'Conserva',
-  },
-  {
-    'fact': 'Los flamencos nacen grises y adquieren su color con la alimentación.',
-    'hint': 'Pigmento',
-  },
-  {
-    'fact': 'Un día en Venus dura más que un año en Venus.',
-    'hint': 'Reloj',
-  },
-  {
-    'fact': 'Los koalas tienen huellas dactilares muy parecidas a las humanas.',
-    'hint': 'Forense',
-  },
-  {
-    'fact': 'Los tiburones existen desde antes que los árboles.',
-    'hint': 'Antigüedad',
-  },
-  {
-    'fact': 'Los plátanos son ligeramente radiactivos.',
-    'hint': 'Potasio',
-  },
-  {
-    'fact': 'El corazón de una ballena azul puede pesar más de cien kilos.',
-    'hint': 'Gigante',
-  },
-  {
-    'fact': 'Las nutrias marinas a veces se agarran de las patas mientras flotan.',
-    'hint': 'Deriva',
-  },
-  {
-    'fact': 'En microgravedad no se puede eructar de la misma forma que en la Tierra.',
-    'hint': 'Flotar',
-  },
-  {
-    'fact': 'Algunos caracoles pueden permanecer inactivos durante años.',
-    'hint': 'Pausa',
-  },
-  {
-    'fact': 'La Torre Eiffel puede crecer varios centímetros durante los días calurosos.',
-    'hint': 'Dilatación',
-  },
-  {
-    'fact': 'Los gatos no perciben el sabor dulce como los humanos.',
-    'hint': 'Sabor',
-  },
-  {
-    'fact': 'Las jirafas y los humanos tienen siete vértebras cervicales.',
-    'hint': 'Cuello',
-  },
-  {
-    'fact': 'El Monte Everest sigue aumentando lentamente de altura.',
-    'hint': 'Crecimiento',
-  },
-  {
-    'fact': 'Los cuervos pueden recordar caras humanas durante años.',
-    'hint': 'Memoria',
-  },
-  {
-    'fact': 'Hay más estrellas en el universo observable que granos de arena en las playas terrestres.',
-    'hint': 'Cantidad',
-  },
-  {
-    'fact': 'Los caballitos de mar macho son los que llevan los embriones.',
-    'hint': 'Gestación',
-  },
-  {
-    'fact': 'Las zanahorias no siempre fueron principalmente naranjas.',
-    'hint': 'Color',
-  },
-  {
-    'fact': 'Existen formas de hielo que permanecen sólidas bajo presiones extremas.',
-    'hint': 'Presión',
-  },
-  {
-    'fact': 'Los wombats producen excrementos con forma casi cúbica.',
-    'hint': 'Cubo',
-  },
-  {
-    'fact': 'Los tardígrados pueden sobrevivir temporalmente al vacío del espacio.',
-    'hint': 'Resistencia',
-  },
-  {
-    'fact': 'Botánicamente, el plátano es una baya y la fresa no.',
-    'hint': 'Botánica',
-  },
-  {
-    'fact': 'La guerra anglo-zanzibariana duró menos de una hora.',
-    'hint': 'Brevedad',
-  },
-  {
-    'fact': 'Un rayo puede calentar el aire a una temperatura mayor que la superficie del Sol.',
-    'hint': 'Calor',
-  },
-  {
-    'fact': 'La Antártida es el desierto más grande del planeta.',
-    'hint': 'Sequedad',
-  },
-  {
-    'fact': 'Una nube puede pesar cientos de toneladas.',
-    'hint': 'Peso',
-  },
-  {
-    'fact': 'La densidad media de Saturno es menor que la del agua.',
-    'hint': 'Flotación',
-  },
-  {
-    'fact': 'Los delfines pueden dormir con una mitad del cerebro despierta.',
-    'hint': 'Mitad',
-  },
-  {
-    'fact': 'La piel de los tigres también tiene rayas.',
-    'hint': 'Piel',
-  },
-  {
-    'fact': 'Los osos polares tienen la piel negra debajo del pelo.',
-    'hint': 'Contraste',
-  },
-  {
-    'fact': 'Las mariposas pueden saborear usando receptores de sus patas.',
-    'hint': 'Patas',
-  },
-  {
-    'fact': 'Algunas aves pueden imitar sonidos humanos con gran precisión.',
-    'hint': 'Imitación',
-  },
-  {
-    'fact': 'Los cacahuetes pertenecen a la familia de las legumbres.',
-    'hint': 'Familia',
-  },
-  {
-    'fact': 'Los anacardos crecen unidos al exterior de un fruto.',
-    'hint': 'Exterior',
-  },
-  {
-    'fact': 'Una piña puede tardar alrededor de dos años en crecer.',
-    'hint': 'Paciencia',
-  },
-  {
-    'fact': 'El sonido viaja más rápido por el agua que por el aire.',
-    'hint': 'Velocidad',
-  },
-  {
-    'fact': 'El galio es un metal que puede derretirse con el calor de una mano.',
-    'hint': 'Fusión',
-  },
-  {
-    'fact': 'El agua puede hervir y congelarse al mismo tiempo en condiciones concretas.',
-    'hint': 'Equilibrio',
-  },
-  {
-    'fact': 'Cleopatra vivió más cerca del viaje a la Luna que de la construcción de las grandes pirámides.',
-    'hint': 'Cronología',
-  },
-  {
-    'fact': 'La Universidad de Oxford es más antigua que el Imperio azteca.',
-    'hint': 'Historia',
-  },
-  {
-    'fact': 'El animal nacional de Escocia es el unicornio.',
-    'hint': 'Símbolo',
-  },
-  {
-    'fact': 'En Mercurio, un día solar dura más que su año.',
-    'hint': 'Calendario',
-  },
-  {
-    'fact': 'En la Luna se producen terremotos conocidos como lunamotos.',
-    'hint': 'Temblor',
-  },
-  {
-    'fact': 'Las abejas pueden aprender a distinguir patrones parecidos a rostros.',
-    'hint': 'Patrones',
-  },
-  {
-    'fact': 'Los cocodrilos no pueden sacar la lengua.',
-    'hint': 'Lengua',
-  },
-  {
-    'fact': 'Los elefantes no pueden saltar.',
-    'hint': 'Salto',
-  },
-  {
-    'fact': 'Los pulpos tienen sangre azul.',
-    'hint': 'Cobre',
-  },
-  {
-    'fact': 'Algunas tortugas pueden absorber oxígeno parcialmente por la cloaca.',
-    'hint': 'Respiración',
-  },
-  {
-    'fact': 'Los pingüinos emperador macho incuban el huevo durante semanas.',
-    'hint': 'Incubación',
-  },
-  {
-    'fact': 'Los cuervos pueden compartir información sobre personas peligrosas.',
-    'hint': 'Aviso',
-  },
-  {
-    'fact': 'Los pulpos pueden cambiar el aspecto de la textura de su piel.',
-    'hint': 'Camuflaje',
-  },
-  {
-    'fact': 'Las vacas pueden formar vínculos sociales preferentes con otras vacas.',
-    'hint': 'Amistad',
-  },
-  {
-    'fact': 'Algunos loros usan llamadas distintas para individuos concretos.',
-    'hint': 'Nombre',
-  },
-  {
-    'fact': 'Algunas ranas pueden congelarse parcialmente y sobrevivir.',
-    'hint': 'Hielo',
-  },
-  {
-    'fact': 'Los peces payaso pueden cambiar de sexo.',
-    'hint': 'Cambio',
-  },
-  {
-    'fact': 'Las hormigas no tienen pulmones.',
-    'hint': 'Oxígeno',
-  },
-  {
-    'fact': 'Las medusas no tienen cerebro, corazón ni huesos.',
-    'hint': 'Ausencia',
-  },
-  {
-    'fact': 'Los búhos no pueden mover los ojos dentro de las cuencas.',
-    'hint': 'Mirada',
-  },
-  {
-    'fact': 'Las estrellas de mar no tienen un cerebro centralizado.',
-    'hint': 'Control',
-  },
-  {
-    'fact': 'El ojo de un avestruz es más grande que su cerebro.',
-    'hint': 'Ojo',
-  },
-  {
-    'fact': 'Los canguros no pueden caminar hacia atrás con facilidad.',
-    'hint': 'Retroceso',
-  },
-  {
-    'fact': 'Las cabras tienen pupilas rectangulares.',
-    'hint': 'Pupila',
-  },
-  {
-    'fact': 'Los camellos tienen tres párpados.',
-    'hint': 'Párpados',
-  },
-  {
-    'fact': 'Los delfines desarrollan silbidos característicos parecidos a nombres.',
-    'hint': 'Silbido',
-  },
-  {
-    'fact': 'Las ratas pueden reír en frecuencias que los humanos no oyen.',
-    'hint': 'Risa',
-  },
-  {
-    'fact': 'Los axolotes pueden regenerar partes de sus extremidades.',
-    'hint': 'Regeneración',
-  },
-  {
-    'fact': 'Los tiburones no tienen huesos; su esqueleto es de cartílago.',
-    'hint': 'Cartílago',
-  },
-  {
-    'fact': 'Los caracoles tienen miles de dientes microscópicos.',
-    'hint': 'Dientes',
-  },
-  {
-    'fact': 'Algunas serpientes pueden detectar calor con órganos especializados.',
-    'hint': 'Calor',
-  },
-  {
-    'fact': 'Las orcas tienen dialectos diferentes según su grupo.',
-    'hint': 'Dialecto',
-  },
-  {
-    'fact': 'Los perezosos bajan de los árboles muy pocas veces por semana.',
-    'hint': 'Lentitud',
-  },
-  {
-    'fact': 'Los pingüinos pueden beber agua salada gracias a glándulas especiales.',
-    'hint': 'Sal',
-  },
-  {
-    'fact': 'El cerebro humano consume una parte importante de la energía del cuerpo.',
-    'hint': 'Energía',
-  },
-  {
-    'fact': 'Los huesos son tejidos vivos que se renuevan continuamente.',
-    'hint': 'Renovación',
-  },
-  {
-    'fact': 'El cuerpo humano produce suficiente saliva en una vida para llenar varias piscinas.',
-    'hint': 'Saliva',
-  },
-  {
-    'fact': 'Los bebés tienen más huesos que los adultos.',
-    'hint': 'Crecimiento',
-  },
-  {
-    'fact': 'La córnea es una de las pocas partes del cuerpo sin vasos sanguíneos.',
-    'hint': 'Transparencia',
-  },
-  {
-    'fact': 'El hígado humano puede regenerar parte de su masa.',
-    'hint': 'Regeneración',
-  },
-  {
-    'fact': 'Los astronautas pueden crecer unos centímetros durante una estancia larga en el espacio.',
-    'hint': 'Altura',
-  },
-  {
-    'fact': 'La Estación Espacial Internacional completa varias vueltas a la Tierra cada día.',
-    'hint': 'Órbita',
-  },
-  {
-    'fact': 'En Marte los atardeceres pueden verse azulados cerca del Sol.',
-    'hint': 'Atardecer',
-  },
-  {
-    'fact': 'Júpiter tiene una tormenta gigantesca observada desde hace siglos.',
-    'hint': 'Tormenta',
-  },
-  {
-    'fact': 'La Luna se aleja lentamente de la Tierra cada año.',
-    'hint': 'Distancia',
-  },
-  {
-    'fact': 'La luz del Sol tarda unos ocho minutos en llegar a la Tierra.',
-    'hint': 'Retraso',
-  },
-  {
-    'fact': 'Una cucharadita de materia de una estrella de neutrones pesaría enormemente en la Tierra.',
-    'hint': 'Densidad',
-  },
-  {
-    'fact': 'Hay volcanes bajo el océano que nunca vemos desde la superficie.',
-    'hint': 'Profundidad',
-  },
-  {
-    'fact': 'El núcleo interno de la Tierra es sólido pese a su enorme temperatura.',
-    'hint': 'Núcleo',
-  },
-  {
-    'fact': 'El Sáhara ha alternado entre periodos desérticos y periodos mucho más verdes.',
-    'hint': 'Ciclos',
-  },
-  {
-    'fact': 'Algunas semillas pueden germinar después de permanecer dormidas durante siglos.',
-    'hint': 'Semilla',
-  },
-  {
-    'fact': 'Los bambúes de ciertas especies pueden crecer muy rápido en un solo día.',
-    'hint': 'Velocidad',
-  },
-  {
-    'fact': 'Los árboles pueden comunicarse químicamente a través de redes de hongos del suelo.',
-    'hint': 'Redes',
-  },
-  {
-    'fact': 'La mayor parte del oxígeno atmosférico se renueva gracias a organismos fotosintéticos, muchos de ellos marinos.',
-    'hint': 'Oxígeno',
-  },
-  {
-    'fact': 'El vidrio común no es un líquido que fluya lentamente a temperatura ambiente.',
-    'hint': 'Mito',
-  },
-  {
-    'fact': 'El olor de la lluvia sobre suelo seco tiene un nombre: petricor.',
-    'hint': 'Aroma',
-  },
-  {
-    'fact': 'El agua caliente puede congelarse antes que la fría bajo ciertas condiciones.',
-    'hint': 'Mpemba',
-  },
-  {
-    'fact': 'Un imán pierde fuerza si se calienta lo suficiente.',
-    'hint': 'Magnetismo',
-  },
-  {
-    'fact': 'El diamante y el grafito están formados principalmente por carbono.',
-    'hint': 'Carbono',
-  },
-  {
-    'fact': 'Las burbujas de una bebida gaseosa crecen alrededor de pequeñas imperfecciones del vaso.',
-    'hint': 'Burbujas',
-  },
-  {
-    'fact': 'La miel no la producen todas las especies de abejas.',
-    'hint': 'Especies',
-  },
-  {
-    'fact': 'El tomate es botánicamente una fruta.',
-    'hint': 'Botánica',
-  },
-  {
-    'fact': 'Las manzanas flotan porque una parte importante de su volumen es aire.',
-    'hint': 'Flotar',
-  },
-  {
-    'fact': 'El chocolate blanco no contiene sólidos de cacao como el chocolate negro.',
-    'hint': 'Cacao',
-  },
-  {
-    'fact': 'La vainilla procede del fruto de una orquídea.',
-    'hint': 'Orquídea',
-  },
-  {
-    'fact': 'El café tostado tiene cientos de compuestos aromáticos.',
-    'hint': 'Aroma',
-  },
-  {
-    'fact': 'El queso puede tener agujeros producidos por gases de bacterias.',
-    'hint': 'Burbujas',
-  },
-  {
-    'fact': 'El picante no es un sabor, sino una sensación de calor y dolor.',
-    'hint': 'Picante',
-  },
-  {
-    'fact': 'La sal fue usada como forma de pago en distintas épocas y lugares.',
-    'hint': 'Pago',
-  },
-  {
-    'fact': 'Los primeros despertadores mecánicos no siempre podían ajustarse a cualquier hora.',
-    'hint': 'Alarma',
-  },
-  {
-    'fact': 'El código de barras fue inspirado en ideas parecidas a líneas alargadas y patrones legibles.',
-    'hint': 'Líneas',
-  },
-  {
-    'fact': 'La primera webcam famosa vigilaba una cafetera.',
-    'hint': 'Café',
-  },
-  {
-    'fact': 'El teclado QWERTY fue diseñado en la era de las máquinas de escribir.',
-    'hint': 'Teclas',
-  },
-  {
-    'fact': 'El símbolo arroba existía mucho antes del correo electrónico.',
-    'hint': 'Arroba',
-  },
-  {
-    'fact': 'Los primeros discos duros ocupaban muebles enteros y almacenaban muy poco comparados con los actuales.',
-    'hint': 'Memoria',
-  },
-];
+enum FootballCategory { currentPlayers, historicPlayers, coaches, clubs }
+
+class FootballWord {
+  const FootballWord(this.name, this.hintEs, this.hintCa, this.hintEn);
+
+  final String name;
+  final String hintEs;
+  final String hintCa;
+  final String hintEn;
+}
+
+// Jugadores actuales e históricos son listas editoriales, no plantillas en vivo.
+const Map<FootballCategory, List<FootballWord>> footballWordsData = {
+  FootballCategory.currentPlayers: [
+    FootballWord('Lionel Messi', 'Zurda', 'Esquerra', 'Left'),
+    FootballWord('Cristiano Ronaldo', 'Salto', 'Salt', 'Jump'),
+    FootballWord('Kylian Mbappé', 'Velocidad', 'Velocitat', 'Speed'),
+    FootballWord('Vinícius Júnior', 'Regate', 'Driblatge', 'Dribbling'),
+    FootballWord('Jude Bellingham', 'Llegada', 'Arribada', 'Runs'),
+    FootballWord('Erling Haaland', 'Potencia', 'Potència', 'Power'),
+    FootballWord('Lamine Yamal', 'Desborde', 'Desbordament', 'Dribbling'),
+    FootballWord('Pedri', 'Pausa', 'Pausa', 'Composure'),
+    FootballWord('Gavi', 'Intensidad', 'Intensitat', 'Intensity'),
+    FootballWord('Raphinha', 'Brasil', 'Brasil', 'Brazil'),
+    FootballWord('Frenkie de Jong', 'Conducción', 'Conducció', 'Carrying'),
+    FootballWord('Dani Olmo', 'Espacios', 'Espais', 'Spaces'),
+    FootballWord('Fermín López', 'Llegada', 'Arribada', 'Runs'),
+    FootballWord('Pau Cubarsí', 'Anticipación', 'Anticipació', 'Anticipation'),
+    FootballWord('Alejandro Balde', 'Banda', 'Banda', 'Wing'),
+    FootballWord('Jules Koundé', 'Francia', 'França', 'France'),
+    FootballWord('Joan García', 'Portería', 'Porteria', 'Goalkeeping'),
+    FootballWord('Nico Williams', 'Velocidad', 'Velocitat', 'Speed'),
+    FootballWord('Rodri', 'Equilibrio', 'Equilibri', 'Balance'),
+    FootballWord('Rodrygo', 'Remontada', 'Remuntada', 'Comeback'),
+    FootballWord('Federico Valverde', 'Potencia', 'Potència', 'Power'),
+    FootballWord(
+      'Eduardo Camavinga',
+      'Versatilidad',
+      'Versatilitat',
+      'Versatility',
+    ),
+    FootballWord('Aurélien Tchouaméni', 'Equilibrio', 'Equilibri', 'Balance'),
+    FootballWord('Arda Güler', 'Técnica', 'Tècnica', 'Technique'),
+    FootballWord('Endrick', 'Brasil', 'Brasil', 'Brazil'),
+    FootballWord('Thibaut Courtois', 'Reflejos', 'Reflexos', 'Reflexes'),
+    FootballWord('Antonio Rüdiger', 'Carácter', 'Caràcter', 'Character'),
+    FootballWord('Éder Militão', 'Anticipación', 'Anticipació', 'Anticipation'),
+    FootballWord('Trent Alexander-Arnold', 'Centros', 'Centrades', 'Crosses'),
+    FootballWord('Bukayo Saka', 'Banda', 'Banda', 'Wing'),
+    FootballWord('Martin Ødegaard', 'Visión', 'Visió', 'Vision'),
+    FootballWord('Declan Rice', 'Recuperación', 'Recuperació', 'Recovery'),
+    FootballWord('William Saliba', 'Francia', 'França', 'France'),
+    FootballWord('David Raya', 'Reflejos', 'Reflexos', 'Reflexes'),
+    FootballWord('Kai Havertz', 'Alemania', 'Alemanya', 'Germany'),
+    FootballWord('Phil Foden', 'Técnica', 'Tècnica', 'Technique'),
+    FootballWord('Jérémy Doku', 'Regate', 'Driblatge', 'Dribbling'),
+    FootballWord('Rayan Cherki', 'Creatividad', 'Creativitat', 'Creativity'),
+    FootballWord('Rúben Dias', 'Mando', 'Comandament', 'Leadership'),
+    FootballWord('Bernardo Silva', 'Control', 'Control', 'Control'),
+    FootballWord('Harry Kane', 'Remate', 'Rematada', 'Finishing'),
+    FootballWord('Jamal Musiala', 'Regate', 'Driblatge', 'Dribbling'),
+    FootballWord('Michael Olise', 'Zurda', 'Esquerra', 'Left'),
+    FootballWord('Alphonso Davies', 'Velocidad', 'Velocitat', 'Speed'),
+    FootballWord(
+      'Joshua Kimmich',
+      'Organización',
+      'Organització',
+      'Organisation',
+    ),
+    FootballWord('Florian Wirtz', 'Creatividad', 'Creativitat', 'Creativity'),
+    FootballWord('Mohamed Salah', 'Egipto', 'Egipte', 'Egypt'),
+    FootballWord('Virgil van Dijk', 'Jerarquía', 'Jerarquia', 'Authority'),
+    FootballWord('Alisson Becker', 'Parada', 'Aturada', 'Save'),
+    FootballWord('Luis Díaz', 'Colombia', 'Colòmbia', 'Colombia'),
+    FootballWord('Alexander Isak', 'Suecia', 'Suècia', 'Sweden'),
+    FootballWord('Cole Palmer', 'Calma', 'Calma', 'Calm'),
+    FootballWord('Moisés Caicedo', 'Recuperación', 'Recuperació', 'Recovery'),
+    FootballWord('Enzo Fernández', 'Argentina', 'Argentina', 'Argentina'),
+    FootballWord('Lautaro Martínez', 'Argentina', 'Argentina', 'Argentina'),
+    FootballWord('Julián Álvarez', 'Presión', 'Pressió', 'Pressing'),
+    FootballWord('Antoine Griezmann', 'Asociación', 'Associació', 'Linkup'),
+    FootballWord('Federico Dimarco', 'Carril', 'Carril', 'Flank'),
+    FootballWord('Rafael Leão', 'Zancada', 'Gambada', 'Stride'),
+    FootballWord('Christian Pulisic', 'América', 'Amèrica', 'America'),
+    FootballWord('Victor Osimhen', 'Máscara', 'Màscara', 'Mask'),
+    FootballWord('Khvicha Kvaratskhelia', 'Regate', 'Driblatge', 'Dribbling'),
+    FootballWord(
+      'Ousmane Dembélé',
+      'Ambidiestro',
+      'Ambidextre',
+      'Ambidextrous',
+    ),
+    FootballWord('Vitinha', 'Control', 'Control', 'Control'),
+    FootballWord('João Neves', 'Presión', 'Pressió', 'Pressing'),
+    FootballWord('Achraf Hakimi', 'Carril', 'Carril', 'Flank'),
+    FootballWord('Nuno Mendes', 'Velocidad', 'Velocitat', 'Speed'),
+    FootballWord('Désiré Doué', 'Creatividad', 'Creativitat', 'Creativity'),
+    FootballWord('Warren Zaïre-Emery', 'Francia', 'França', 'France'),
+    FootballWord('Bradley Barcola', 'Banda', 'Banda', 'Wing'),
+    FootballWord('Bruno Fernandes', 'Visión', 'Visió', 'Vision'),
+    FootballWord('Diogo Costa', 'Parada', 'Aturada', 'Save'),
+    FootballWord('Viktor Gyökeres', 'Suecia', 'Suècia', 'Sweden'),
+    FootballWord('Neymar', 'Filigrana', 'Filigrana', 'Flair'),
+    FootballWord('Takefusa Kubo', 'Japón', 'Japó', 'Japan'),
+  ],
+  FootballCategory.historicPlayers: [
+    FootballWord('Pelé', 'Brasil', 'Brasil', 'Brazil'),
+    FootballWord('Diego Maradona', 'Gambeta', 'Gambeta', 'Dribbling'),
+    FootballWord('Johan Cruyff', 'Filosofía', 'Filosofia', 'Philosophy'),
+    FootballWord('Alfredo Di Stéfano', 'Leyenda', 'Llegenda', 'Legend'),
+    FootballWord('Ferenc Puskás', 'Hungría', 'Hongria', 'Hungary'),
+    FootballWord('Eusébio', 'Pantera', 'Pantera', 'Panther'),
+    FootballWord('Garrincha', 'Regate', 'Driblatge', 'Dribbling'),
+    FootballWord('George Best', 'Talento', 'Talent', 'Talent'),
+    FootballWord('Bobby Charlton', 'Inglaterra', 'Anglaterra', 'England'),
+    FootballWord('Franz Beckenbauer', 'Líbero', 'Líbero', 'Libero'),
+    FootballWord('Gerd Müller', 'Área', 'Àrea', 'Box'),
+    FootballWord('Marco van Basten', 'Volea', 'Volea', 'Volley'),
+    FootballWord('Ruud Gullit', 'Trenzas', 'Trenes', 'Braids'),
+    FootballWord('Frank Rijkaard', 'Equilibrio', 'Equilibri', 'Balance'),
+    FootballWord('Paolo Maldini', 'Elegancia', 'Elegància', 'Elegance'),
+    FootballWord('Franco Baresi', 'Defensa', 'Defensa', 'Defence'),
+    FootballWord('Roberto Baggio', 'Coleta', 'Cua', 'Ponytail'),
+    FootballWord('Romário', 'Área', 'Àrea', 'Box'),
+    FootballWord('Rivaldo', 'Zurda', 'Esquerra', 'Left'),
+    FootballWord('Ronaldo Nazário', 'Potencia', 'Potència', 'Power'),
+    FootballWord('Ronaldinho', 'Sonrisa', 'Somriure', 'Smile'),
+    FootballWord('Kaká', 'Conducción', 'Conducció', 'Carrying'),
+    FootballWord('Zinédine Zidane', 'Elegancia', 'Elegància', 'Elegance'),
+    FootballWord('Luís Figo', 'Banda', 'Banda', 'Wing'),
+    FootballWord('David Beckham', 'Rosca', 'Rosca', 'Curl'),
+    FootballWord('Paul Scholes', 'Pase', 'Passada', 'Passing'),
+    FootballWord('Ryan Giggs', 'Banda', 'Banda', 'Wing'),
+    FootballWord('Steven Gerrard', 'Capitán', 'Capità', 'Captain'),
+    FootballWord('Frank Lampard', 'Llegada', 'Arribada', 'Runs'),
+    FootballWord('Wayne Rooney', 'Potencia', 'Potència', 'Power'),
+    FootballWord('Thierry Henry', 'Zancada', 'Gambada', 'Stride'),
+    FootballWord('Dennis Bergkamp', 'Control', 'Control', 'Control'),
+    FootballWord('Patrick Vieira', 'Presencia', 'Presència', 'Presence'),
+    FootballWord('Didier Drogba', 'Potencia', 'Potència', 'Power'),
+    FootballWord('Samuel Eto\'o', 'Velocidad', 'Velocitat', 'Speed'),
+    FootballWord('George Weah', 'Liberia', 'Libèria', 'Liberia'),
+    FootballWord('Andriy Shevchenko', 'Ucrania', 'Ucraïna', 'Ukraine'),
+    FootballWord('Pavel Nedvěd', 'Melena', 'Cabellera', 'Mane'),
+    FootballWord('Petr Čech', 'Casco', 'Casc', 'Helmet'),
+    FootballWord('Gianluigi Buffon', 'Longevidad', 'Longevitat', 'Longevity'),
+    FootballWord('Iker Casillas', 'Reflejos', 'Reflexos', 'Reflexes'),
+    FootballWord('Carles Puyol', 'Garra', 'Urpa', 'Grit'),
+    FootballWord('Gerard Piqué', 'Central', 'Central', 'Centreback'),
+    FootballWord('Xavi Hernández', 'Posesión', 'Possessió', 'Possession'),
+    FootballWord('Andrés Iniesta', 'Calma', 'Calma', 'Calm'),
+    FootballWord(
+      'Xabi Alonso',
+      'Desplazamiento',
+      'Desplaçament',
+      'Distribution',
+    ),
+    FootballWord('David Villa', 'Remate', 'Rematada', 'Finishing'),
+    FootballWord('Fernando Torres', 'Desmarque', 'Desmarcatge', 'Movement'),
+    FootballWord('Raúl González', 'Olfato', 'Olfacte', 'Instinct'),
+    FootballWord('Fernando Hierro', 'Carácter', 'Caràcter', 'Character'),
+    FootballWord('Roberto Carlos', 'Potencia', 'Potència', 'Power'),
+    FootballWord('Cafú', 'Banda', 'Banda', 'Wing'),
+    FootballWord(
+      'Roberto Ayala',
+      'Anticipación',
+      'Anticipació',
+      'Anticipation',
+    ),
+    FootballWord('Juan Román Riquelme', 'Pausa', 'Pausa', 'Composure'),
+    FootballWord('Gabriel Batistuta', 'Remate', 'Rematada', 'Finishing'),
+    FootballWord('Hernán Crespo', 'Área', 'Àrea', 'Box'),
+    FootballWord('Francesco Totti', 'Lealtad', 'Lleialtat', 'Loyalty'),
+    FootballWord('Alessandro Del Piero', 'Clase', 'Classe', 'Class'),
+    FootballWord('Andrea Pirlo', 'Visión', 'Visió', 'Vision'),
+    FootballWord('Gennaro Gattuso', 'Carácter', 'Caràcter', 'Character'),
+    FootballWord('Clarence Seedorf', 'Potencia', 'Potència', 'Power'),
+    FootballWord('Wesley Sneijder', 'Visión', 'Visió', 'Vision'),
+    FootballWord('Arjen Robben', 'Recorte', 'Retall', 'Cut'),
+    FootballWord('Franck Ribéry', 'Regate', 'Driblatge', 'Dribbling'),
+    FootballWord('Miroslav Klose', 'Cabeza', 'Cap', 'Heading'),
+    FootballWord('Philipp Lahm', 'Versatilidad', 'Versatilitat', 'Versatility'),
+    FootballWord('Mesut Özil', 'Asistencia', 'Assistència', 'Assist'),
+    FootballWord('Toni Kroos', 'Precisión', 'Precisió', 'Precision'),
+    FootballWord('Gareth Bale', 'Velocidad', 'Velocitat', 'Speed'),
+    FootballWord('Zlatan Ibrahimović', 'Acrobacia', 'Acrobàcia', 'Acrobatics'),
+  ],
+  FootballCategory.coaches: [
+    FootballWord('Pep Guardiola', 'Posesión', 'Possessió', 'Possession'),
+    FootballWord('José Mourinho', 'Carácter', 'Caràcter', 'Character'),
+    FootballWord('Carlo Ancelotti', 'Calma', 'Calma', 'Calm'),
+    FootballWord('Jürgen Klopp', 'Presión', 'Pressió', 'Pressing'),
+    FootballWord('Diego Simeone', 'Intensidad', 'Intensitat', 'Intensity'),
+    FootballWord('Luis Enrique', 'Verticalidad', 'Verticalitat', 'Verticality'),
+    FootballWord('Hansi Flick', 'Presión', 'Pressió', 'Pressing'),
+    FootballWord('Mikel Arteta', 'Estructura', 'Estructura', 'Structure'),
+    FootballWord('Xabi Alonso', 'Pizarra', 'Pissarra', 'Tactics'),
+    FootballWord('Zinédine Zidane', 'Gestión', 'Gestió', 'Management'),
+    FootballWord('Xavi Hernández', 'Posesión', 'Possessió', 'Possession'),
+    FootballWord('Alex Ferguson', 'Longevidad', 'Longevitat', 'Longevity'),
+    FootballWord('Arsène Wenger', 'Filosofía', 'Filosofia', 'Philosophy'),
+    FootballWord('Vicente del Bosque', 'Calma', 'Calma', 'Calm'),
+    FootballWord('Luis Aragonés', 'Carácter', 'Caràcter', 'Character'),
+    FootballWord('Johan Cruyff', 'Filosofía', 'Filosofia', 'Philosophy'),
+    FootballWord('Arrigo Sacchi', 'Presión', 'Pressió', 'Pressing'),
+    FootballWord('Fabio Capello', 'Disciplina', 'Disciplina', 'Discipline'),
+    FootballWord('Marcelo Bielsa', 'Intensidad', 'Intensitat', 'Intensity'),
+    FootballWord('Mauricio Pochettino', 'Argentina', 'Argentina', 'Argentina'),
+    FootballWord('Unai Emery', 'Análisis', 'Anàlisi', 'Analysis'),
+    FootballWord('Rafa Benítez', 'Táctica', 'Tàctica', 'Tactics'),
+    FootballWord('Manuel Pellegrini', 'Equilibrio', 'Equilibri', 'Balance'),
+    FootballWord('Joaquín Caparrós', 'Cantera', 'Pedrera', 'Academy'),
+    FootballWord('Ernesto Valverde', 'Prudencia', 'Prudència', 'Prudence'),
+    FootballWord('José Bordalás', 'Intensidad', 'Intensitat', 'Intensity'),
+    FootballWord('Julian Nagelsmann', 'Pizarra', 'Pissarra', 'Tactics'),
+    FootballWord(
+      'Thomas Tuchel',
+      'Flexibilidad',
+      'Flexibilitat',
+      'Flexibility',
+    ),
+    FootballWord('Antonio Conte', 'Carácter', 'Caràcter', 'Character'),
+    FootballWord(
+      'Massimiliano Allegri',
+      'Pragmatismo',
+      'Pragmatisme',
+      'Pragmatism',
+    ),
+    FootballWord('Roberto De Zerbi', 'Salida', 'Sortida', 'Buildup'),
+    FootballWord('Gian Piero Gasperini', 'Presión', 'Pressió', 'Pressing'),
+    FootballWord('Didier Deschamps', 'Equilibrio', 'Equilibri', 'Balance'),
+    FootballWord('Lionel Scaloni', 'Argentina', 'Argentina', 'Argentina'),
+    FootballWord('Luis de la Fuente', 'Selección', 'Selecció', 'National'),
+    FootballWord('Fernando Santos', 'Portugal', 'Portugal', 'Portugal'),
+    FootballWord('Roberto Martínez', 'Bélgica', 'Bèlgica', 'Belgium'),
+    FootballWord('Claudio Ranieri', 'Sorpresa', 'Sorpresa', 'Surprise'),
+    FootballWord('Luciano Spalletti', 'Italia', 'Itàlia', 'Italy'),
+    FootballWord('Rúben Amorim', 'Portugal', 'Portugal', 'Portugal'),
+  ],
+  FootballCategory.clubs: [
+    FootballWord('FC Barcelona', 'Culé', 'Culer', 'Blaugrana'),
+    FootballWord('Real Madrid', 'Blanco', 'Blanc', 'White'),
+    FootballWord('Atlético de Madrid', 'Colchonero', 'Matalasser', 'Mattress'),
+    FootballWord('Athletic Club', 'Leones', 'Lleons', 'Lions'),
+    FootballWord('Real Sociedad', 'Donostia', 'Donostia', 'Donostia'),
+    FootballWord('Real Betis', 'Heliópolis', 'Heliópolis', 'Heliópolis'),
+    FootballWord('Sevilla FC', 'Nervión', 'Nervión', 'Nervión'),
+    FootballWord('Valencia CF', 'Murciélago', 'Ratpenat', 'Bat'),
+    FootballWord('Villarreal CF', 'Submarino', 'Submarí', 'Submarine'),
+    FootballWord('RCD Espanyol', 'Periquito', 'Periquito', 'Parakeet'),
+    FootballWord('Girona FC', 'Montilivi', 'Montilivi', 'Montilivi'),
+    FootballWord('RC Celta', 'Olívico', 'Olívic', 'Olive'),
+    FootballWord('CA Osasuna', 'Navarra', 'Navarra', 'Navarre'),
+    FootballWord('Getafe CF', 'Azulón', 'Blau', 'Blue'),
+    FootballWord('Rayo Vallecano', 'Franja', 'Franja', 'Stripe'),
+    FootballWord('RCD Mallorca', 'Bermellón', 'Vermell', 'Vermilion'),
+    FootballWord('Deportivo de La Coruña', 'Riazor', 'Riazor', 'Riazor'),
+    FootballWord('Real Zaragoza', 'Ebro', 'Ebre', 'Ebro'),
+    FootballWord('Real Sporting de Gijón', 'Asturias', 'Astúries', 'Asturias'),
+    FootballWord('Real Oviedo', 'Carbayón', 'Carbayó', 'Oak'),
+    FootballWord('UD Las Palmas', 'Canarias', 'Canàries', 'Canaries'),
+    FootballWord('CD Tenerife', 'Isla', 'Illa', 'Island'),
+    FootballWord('Málaga CF', 'Costa', 'Costa', 'Coast'),
+    FootballWord('Granada CF', 'Alhambra', 'Alhambra', 'Alhambra'),
+    FootballWord('Manchester City', 'Celeste', 'Celeste', 'Skyblue'),
+    FootballWord('Manchester United', 'Diablos', 'Diables', 'Devils'),
+    FootballWord('Liverpool FC', 'Anfield', 'Anfield', 'Anfield'),
+    FootballWord('Arsenal FC', 'Cañón', 'Canó', 'Cannon'),
+    FootballWord('Chelsea FC', 'Londres', 'Londres', 'London'),
+    FootballWord('Tottenham Hotspur', 'Gallo', 'Gall', 'Cockerel'),
+    FootballWord('Newcastle United', 'Urracas', 'Garses', 'Magpies'),
+    FootballWord('Aston Villa', 'Birmingham', 'Birmingham', 'Birmingham'),
+    FootballWord('West Ham United', 'Martillos', 'Martells', 'Hammers'),
+    FootballWord('Nottingham Forest', 'Bosque', 'Bosc', 'Forest'),
+    FootballWord('Leeds United', 'Yorkshire', 'Yorkshire', 'Yorkshire'),
+    FootballWord('Juventus', 'Cebra', 'Zebra', 'Zebra'),
+    FootballWord('AC Milan', 'Rossonero', 'Rossonero', 'Rossonero'),
+    FootballWord('Inter de Milán', 'Nerazzurro', 'Nerazzurro', 'Nerazzurro'),
+    FootballWord('SSC Napoli', 'Vesubio', 'Vesuvi', 'Vesuvius'),
+    FootballWord('AS Roma', 'Loba', 'Lloba', 'Shewolf'),
+    FootballWord('SS Lazio', 'Águila', 'Àguila', 'Eagle'),
+    FootballWord('Atalanta BC', 'Bérgamo', 'Bèrgam', 'Bergamo'),
+    FootballWord('Fiorentina', 'Violeta', 'Violeta', 'Violet'),
+    FootballWord('Bologna FC', 'Bolonia', 'Bolonya', 'Bologna'),
+    FootballWord('Bayern de Múnich', 'Baviera', 'Baviera', 'Bavaria'),
+    FootballWord('Borussia Dortmund', 'Muro', 'Mur', 'Wall'),
+    FootballWord('Bayer Leverkusen', 'Farmacia', 'Farmàcia', 'Pharmacy'),
+    FootballWord('RB Leipzig', 'Toros', 'Toros', 'Bulls'),
+    FootballWord('Eintracht Frankfurt', 'Águila', 'Àguila', 'Eagle'),
+    FootballWord('VfB Stuttgart', 'Suabia', 'Suàbia', 'Swabia'),
+    FootballWord('Paris Saint-Germain', 'Torre', 'Torre', 'Tower'),
+    FootballWord('Olympique de Marsella', 'Puerto', 'Port', 'Harbour'),
+    FootballWord('Olympique de Lyon', 'León', 'Lleó', 'Lion'),
+    FootballWord('AS Monaco', 'Principado', 'Principat', 'Principality'),
+    FootballWord('LOSC Lille', 'Perros', 'Gossos', 'Dogs'),
+    FootballWord('Benfica', 'Águila', 'Àguila', 'Eagle'),
+    FootballWord('FC Porto', 'Dragón', 'Drac', 'Dragon'),
+    FootballWord('Sporting CP', 'León', 'Lleó', 'Lion'),
+    FootballWord('Ajax', 'Ámsterdam', 'Amsterdam', 'Amsterdam'),
+    FootballWord('PSV Eindhoven', 'Bombilla', 'Bombeta', 'Lightbulb'),
+    FootballWord('Feyenoord', 'Róterdam', 'Rotterdam', 'Rotterdam'),
+    FootballWord('Celtic FC', 'Trébol', 'Trèvol', 'Clover'),
+    FootballWord('Rangers FC', 'Glasgow', 'Glasgow', 'Glasgow'),
+    FootballWord('Galatasaray', 'León', 'Lleó', 'Lion'),
+    FootballWord('Fenerbahçe', 'Canario', 'Canari', 'Canary'),
+    FootballWord('Beşiktaş', 'Águila', 'Àguila', 'Eagle'),
+    FootballWord('Boca Juniors', 'Bombonera', 'Bombonera', 'Bombonera'),
+    FootballWord('River Plate', 'Millonarios', 'Milionaris', 'Millionaires'),
+    FootballWord('Flamengo', 'Rojinegro', 'Roginegre', 'Redblack'),
+    FootballWord('Palmeiras', 'Verde', 'Verd', 'Green'),
+    FootballWord('Santos FC', 'Puerto', 'Port', 'Port'),
+    FootballWord('São Paulo FC', 'Tricolor', 'Tricolor', 'Tricolour'),
+    FootballWord('Corinthians', 'Pueblo', 'Poble', 'People'),
+    FootballWord('Inter Miami', 'Rosa', 'Rosa', 'Pink'),
+    FootballWord('Al Nassr', 'Amarillo', 'Groc', 'Yellow'),
+    FootballWord('Al Hilal', 'Azul', 'Blau', 'Blue'),
+  ],
+};
+
+/// Mezcla las categorías marcadas sin dar más peso a nombres que aparecen
+/// tanto como jugador histórico como entrenador. Una selección vacía no juega.
+List<({FootballCategory category, FootballWord word})> buildFootballPool(
+    Set<FootballCategory> categories,
+    ) {
+  final names = <String>{};
+  return [
+    for (final category in FootballCategory.values)
+      if (categories.contains(category))
+        for (final word in footballWordsData[category]!)
+          if (names.add(word.name.toLowerCase()))
+            (category: category, word: word),
+  ];
+}
