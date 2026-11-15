@@ -53,13 +53,9 @@ workflows:
 
       - name: Compilar IPA
         script: |
-          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
-          BUILD_NUMBER=$((LATEST + 1))
-
-          echo "Usando build number: $BUILD_NUMBER"
-
           flutter build ipa --release \
-            --build-number=$BUILD_NUMBER \
+            --build-name=1.0.0 \
+            --build-number=2 \
             --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
