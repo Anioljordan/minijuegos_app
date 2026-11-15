@@ -1,0 +1,94 @@
+# codemagic.yaml — Cubo (Flutter) → App Store Connect / TestFlight
+# Colócalo en la RAÍZ del repo (al mismo nivel que pubspec.yaml).
+#
+# Antes de usarlo, cambia los 3 valores marcados con  <-- CAMBIAR
+
+workflows:
+  ios-release:
+    name: Cubo iOS → App Store
+    instance_type: mac_mini_m2        # Incluido en los 500 min gratis/mes
+    max_build_duration: 60
+
+    integrations:
+      # Nombre EXACTO que le pongas a la API key en Codemagic
+      # (Team settings → Integrations → Developer Portal)
+      app_store_connect: Cubo API Key              # <-- CAMBIAR si usas otro nombre
+
+    environment:
+      flutter: stable                 # o una versión fija, p. ej. 3.27.1
+      xcode: latest
+      cocoapods: default
+
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.tuempresa.cubo      # <-- CAMBIAR por tu Bundle ID
+
+      vars:
+        # "Apple ID" numérico de la app: App Store Connect → tu app →
+        # Información de la app → Apple ID (p. ej. 6501234567)
+        APP_STORE_APPLE_ID: 1234567890             # <-- CAMBIAR
+
+      # --- Solo si usas Firebase ---------------------------------------
+      # Crea en Codemagic un grupo de variables llamado "firebase" con la
+      # variable IOS_FIREBASE_CONFIG = contenido de GoogleService-Info.plist
+      # codificado en base64 (marcar como "Secure"), y descomenta:
+      # groups:
+      #   - firebase
+
+    # Lanzar build automáticamente al hacer push a main (opcional).
+    # Si prefieres lanzarlo a mano desde la web, borra este bloque.
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+
+    scripts:
+      # --- Solo si usas Firebase (descomenta junto con "groups") ---------
+      # - name: Añadir GoogleService-Info.plist
+      #   script: |
+      #     echo "$IOS_FIREBASE_CONFIG" | base64 --decode > ios/Runner/GoogleService-Info.plist
+
+      - name: Dependencias de Flutter
+        script: flutter pub get
+
+      - name: Instalar Pods
+        script: |
+          cd ios
+          pod install --repo-update
+
+      - name: Aplicar perfiles de firma al proyecto Xcode
+        script: xcode-project use-profiles
+
+      - name: Compilar IPA (build number automático)
+        script: |
+          # Coge el último build subido a TestFlight y suma 1.
+          # Si no hay ninguno todavía, empieza en 1.
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
+          BUILD_NUMBER=$((LATEST + 1))
+          echo "Usando build number: $BUILD_NUMBER"
+
+          # La versión visible (1.2.3) se toma de pubspec.yaml
+          flutter build ipa --release \
+            --build-number=$BUILD_NUMBER \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+    publishing:
+      email:
+        recipients:
+          - tu-email@ejemplo.com                   # <-- opcional: tu correo
+        notify:
+          success: true
+          failure: true
+
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true    # Sube a TestFlight para probar en tu iPhone
+        submit_to_app_store: false    # Pon true para enviarlo directamente a revisión
