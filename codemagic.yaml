@@ -12,7 +12,7 @@ workflows:
     integrations:
       # Nombre EXACTO que le pongas a la API key en Codemagic
       # (Team settings → Integrations → Developer Portal)
-      app_store_connect: Cubo API Key              # <-- CAMBIAR si usas otro nombre
+      app_store_connect: RF59ZS83K3              # <-- CAMBIAR si usas otro nombre
 
     environment:
       flutter: stable                 # o una versión fija, p. ej. 3.27.1
@@ -21,12 +21,12 @@ workflows:
 
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.tuempresa.cubo      # <-- CAMBIAR por tu Bundle ID
+        bundle_identifier: com.anioldev.cubo      # <-- CAMBIAR por tu Bundle ID
 
       vars:
         # "Apple ID" numérico de la app: App Store Connect → tu app →
         # Información de la app → Apple ID (p. ej. 6501234567)
-        APP_STORE_APPLE_ID: 1234567890             # <-- CAMBIAR
+        APP_STORE_APPLE_ID: 6793448087             # <-- CAMBIAR
 
       # --- Solo si usas Firebase ---------------------------------------
       # Crea en Codemagic un grupo de variables llamado "firebase" con la
@@ -83,7 +83,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - tu-email@ejemplo.com                   # <-- opcional: tu correo
+          - anioljolo@gmail.com                   # <-- opcional: tu correo
         notify:
           success: true
           failure: true
