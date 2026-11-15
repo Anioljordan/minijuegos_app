@@ -12,7 +12,7 @@ workflows:
     integrations:
       # Nombre EXACTO que le pongas a la API key en Codemagic
       # (Team settings → Integrations → Developer Portal)
-      app_store_connect: RF59ZS83K3              # <-- CAMBIAR si usas otro nombre
+      app_store_connect: cubo              # <-- CAMBIAR si usas otro nombre
 
     environment:
       flutter: stable                 # o una versión fija, p. ej. 3.27.1
