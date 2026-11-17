@@ -220,7 +220,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                   const CuboDialogHeader(),
                   const SizedBox(height: 18),
                   const Text(
-                    'DRINK & DARE',
+                    'RULETA DE RETOS',
                     style: TextStyle(
                       color: appWhite,
                       fontSize: 15,
@@ -240,7 +240,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     icon: Icons.water_drop_rounded,
                     title: 'Cascada',
                     text:
-                    'Quien saque CASCADA empieza el reto. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
+                    'Quien saque CASCADA dice una palabra. La persona de su derecha dice otra que empiece por la última letra, y así sucesivamente. Quien se quede en blanco o repita una palabra recibe un reto.',
                   ),
 
                   rulesItem(
@@ -500,7 +500,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
           ),
         ),
         child: Icon(
-          Icons.local_bar_rounded,
+          Icons.casino_rounded,
           color: CuboColors.white,
           size: size * 0.44,
         ),

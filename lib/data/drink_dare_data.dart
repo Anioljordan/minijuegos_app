@@ -10,6 +10,6 @@ const List<String> drinkDareOpciones = [
   "PONER UNA NORMA",
   "PROHIBIR PALABRA",
   "ZAS",
-  "PONER BEBIDA EN UN VASO COMÚN",
-  "TE BEBES EL VASO COMÚN",
+  "TODOS HACEN UN RETO",
+  "ELIGES QUIÉN HACE UN RETO",
 ];

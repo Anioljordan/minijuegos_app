@@ -119,7 +119,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     'Doctor',
     'Netflix',
     'Montaña',
-    'Cerveza',
     'Discoteca',
     'Helado',
     'Guitarra',

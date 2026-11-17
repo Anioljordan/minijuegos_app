@@ -4,13 +4,9 @@ const String unoDosAviso =
 const List<String> unoDosAcciones = [
 
 
-  'El 2 prepara un trago divertido para el 1.',
-  'El 1 y el 2 cruzan los brazos y hacen un brindis sin derramar nada.',
   'El 1 y el 2 hacen piedra, papel o tijera. El perdedor pierde un punto.',
   'El 1 inventa una norma para el 2 durante una ronda.',
   'El 2 inventa una norma para el 1 durante una ronda.',
-  'El 1 le sirve una bebida al 2 sin usar su mano dominante.',
-  'El 2 le sirve una bebida al 1 sin usar su mano dominante.',
   'El 1 elige una palabra prohibida para el 2 durante una ronda.',
   'El 2 elige una palabra prohibida para el 1 durante una ronda.',
   'El 1 cuenta una anécdota incómoda y el 2 la escucha.',
@@ -32,8 +28,6 @@ const List<String> unoDosAcciones = [
   'El 1 deja que el 2 le dibuje algo en la mano.',
   'El 2 deja que el 1 le dibuje algo en la mano.',
   'El 1 mantiene una servilleta sobre la cabeza durante una ronda y el 2 decide cómo debe colocarla.',
-  'El 1 huele y prueba la bebida del 2, y el 2 le da una pista para que adivine cuál es.',
-  'El 2 huele y prueba la bebida del 1, y el 1 le da una pista para que adivine cuál es.',
 
 
 
@@ -140,24 +134,6 @@ const List<String> unoDosAcciones = [
   'El 1 elige una palabra para describir la química entre él y el 2, y el 2 dice si está de acuerdo.',
   'El 2 elige una palabra para describir la química entre él y el 1, y el 1 dice si está de acuerdo.',
 
-  'El 1 coloca unas gotas de bebida en el ombligo del 2 y se las bebe, si ambos aceptan.',
-  'El 2 coloca unas gotas de bebida en el ombligo del 1 y se las bebe, si ambos aceptan.',
-  'El 1 da de beber un sorbo al 2 mientras mantiene contacto visual.',
-  'El 2 da de beber un sorbo al 1 mientras mantiene contacto visual.',
-  'El 1 sostiene el vaso del 2 mientras este da un sorbo.',
-  'El 2 sostiene el vaso del 1 mientras este da un sorbo.',
-  'El 1 bebe un sorbo del vaso del 2, si el 2 acepta.',
-  'El 2 bebe un sorbo del vaso del 1, si el 1 acepta.',
-  'El 1 elige entre darle un beso al 2 o compartir un sorbo de su bebida.',
-  'El 2 elige entre darle un beso al 1 o compartir un sorbo de su bebida.',
-  'El 1 y el 2 cruzan los brazos y dan un sorbo al mismo tiempo.',
-  'El 1 y el 2 comparten una bebida usando dos pajitas.',
-  'El 1 acerca el vaso a los labios del 2 y el 2 decide si da un sorbo.',
-  'El 2 acerca el vaso a los labios del 1 y el 1 decide si da un sorbo.',
-  'El 1 prepara una mezcla sin alcohol para el 2 y le pone un nombre atrevido.',
-  'El 2 prepara una mezcla sin alcohol para el 1 y le pone un nombre atrevido.',
-  'El 1 da un sorbo mientras el 2 le susurra algo al oído.',
-  'El 2 da un sorbo mientras el 1 le susurra algo al oído.',
   'El 1 y el 2 brindan por la persona más atractiva del grupo.',
   'El 1 y el 2 brindan por algo que nunca contarían en una primera cita.',
   'El 1 pasa un hielo por el brazo del 2, si el 2 acepta.',
@@ -209,10 +185,7 @@ const List<String> unoDosAcciones = [
 
   'El 2 debe puntuar el estilo del calcetín del 1 del 1 al 10.',
   'El 1 intenta recoger una servilleta del suelo sin usar las manos mientras el 2 le da instrucciones.',
-  'El 2 intenta mover un vaso vacío sin usar las manos hasta el 1.',
-  'El 2 lleva un vaso vacío como sombrero durante diez segundos y el 1 decide la pose que debe hacer.',
   'El 2 debe aplaudir cada vez que el 1 diga su nombre.',
-  'El 1 y el 2 deben brindar y actuar como millonarios.',
   'El 1 y el 2 deben intercambiar sus asientos sin levantarse a la vez.',
 
 ];

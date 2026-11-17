@@ -1,15 +1,12 @@
 const String pruebaVerdadAviso =
-    'Todos los retos son opcionales. Cualquier bebida puede ser sin alcohol. Si alguien no quiere responder o hacer una prueba, puede pasar sin dar explicaciones.';
+    'Todos los retos son opcionales. Si alguien no quiere responder o hacer una prueba, puede pasar sin dar explicaciones.';
 
 const List<String> preguntasVerdad = [
 
-  // FIESTA Y BEBIDAS
+  // FIESTA
 
   '¿Cuál es la cosa más vergonzosa que has hecho en una fiesta?',
-  '¿Cuál ha sido tu peor resaca?',
-  '¿Cuál es la peor mezcla de bebidas que has probado?',
   '¿Alguna vez has fingido estar mejor de lo que realmente estabas en una fiesta?',
-  '¿Has enviado un mensaje después de beber y te has arrepentido?',
   '¿Has llamado alguna vez a un ex después de una fiesta?',
   '¿Cuál es la peor decisión que has tomado durante una noche de fiesta?',
   '¿Alguna vez has perdido algo importante mientras salías?',
@@ -18,10 +15,7 @@ const List<String> preguntasVerdad = [
   '¿Has roto algo en una fiesta y has fingido que no fuiste tú?',
   '¿Alguna vez te han pedido que bajaras el volumen o te marcharas de algún sitio?',
   '¿Qué canción te transforma completamente cuando sales?',
-  '¿Cuál es tu bebida favorita para una noche especial?',
-  '¿Qué bebida no volverías a probar nunca?',
   '¿Alguna vez has dicho «solo una» y has acabado quedándote hasta el final?',
-  '¿Cuál ha sido tu brindis más absurdo?',
   '¿Alguna vez has acabado hablando con alguien que no conocías como si fuera tu mejor amigo?',
   '¿Cuál es la excusa más grande que has usado para salir de fiesta?',
   '¿Alguna vez has fingido recordar algo de una noche que realmente no recordabas?',
@@ -147,53 +141,8 @@ const List<String> preguntasVerdad = [
 
 const List<String> pruebas = [
 
-  // BEBIDAS Y FIESTA
+  // FIESTA
 
-  'Da un sorbo de tu bebida mientras mantienes contacto visual con alguien del grupo.',
-  'Elige a alguien para brindar y dad un sorbo juntos.',
-  'Cruza los brazos con alguien y dad un sorbo al mismo tiempo.',
-  'Deja que alguien sostenga tu vaso mientras das un sorbo.',
-  'Sostén el vaso de alguien mientras esa persona da un sorbo.',
-  'Prepara una bebida sencilla para alguien y ponle un nombre absurdo.',
-  'Deja que alguien prepare una bebida sencilla para ti.',
-  'Da un sorbo usando tu mano no dominante.',
-  'Haz un brindis improvisado sobre la persona de tu izquierda.',
-  'Haz un brindis dramático como si estuvieras en una película.',
-  'Haz un brindis por tu peor decisión de fiesta.',
-  'Brinda con la persona que creas que saldría contigo hasta más tarde.',
-  'Elige a alguien y compartid una bebida con dos pajitas, si ambos queréis.',
-  'Deja que alguien acerque el vaso a tus labios y decide si das un sorbo.',
-  'Acerca el vaso a los labios de alguien y deja que decida si da un sorbo.',
-  'Da un sorbo mientras alguien te susurra un cumplido.',
-  'Susurra un cumplido a alguien mientras da un sorbo.',
-  'Pon unas gotas de bebida en el ombligo de alguien que acepte y bébelas, si ambos queréis.',
-  'Deja que alguien ponga unas gotas de bebida en tu ombligo y las beba, si ambos queréis.',
-  'Elige entre dar un sorbo o contar una confesión incómoda.',
-  'Elige a alguien: uno da un sorbo y el otro cuenta una verdad.',
-  'Reparte dos sorbos opcionales entre dos personas del grupo.',
-  'Da un sorbo cada vez que alguien diga tu nombre hasta tu siguiente turno, con un máximo de dos.',
-  'Pon una norma divertida para beber durante una ronda, siempre con sorbos pequeños y opcionales.',
-  'Haz piedra, papel o tijera con alguien. El perdedor da un sorbo opcional.',
-  'Juega una pelea de miradas con alguien. Quien se ría primero da un sorbo opcional.',
-  'Elige a alguien para que invente cómo debes brindar.',
-  'Inventa cómo debe brindar otra persona.',
-  'Da un sorbo y describe su sabor como si fueras un crítico gastronómico.',
-  'Intercambia tu bebida con alguien durante un solo sorbo, si ambos aceptáis.',
-  'Elige una bebida de la mesa y adivina sus ingredientes.',
-  'Prueba un sorbo de la bebida de alguien que acepte y puntúala.',
-  'Deja que alguien pruebe un sorbo de tu bebida y la puntúe.',
-  'Haz una declaración de amor exagerada a tu bebida.',
-  'Presenta tu bebida como si fuera una celebridad.',
-  'Haz un anuncio publicitario de veinte segundos para la bebida de otra persona.',
-  'Elige a alguien y brindad por la persona más atractiva del grupo.',
-  'Elige a alguien y brindad por algo que nunca contaríais en una primera cita.',
-  'Da un sorbo con los ojos abiertos mientras alguien intenta hacerte reír.',
-  'Mantén el vaso en alto durante diez segundos mientras das un discurso absurdo.',
-  'Da un sorbo y di una palabra que describa tu vida amorosa.',
-  'Deja que el grupo elija entre dos bebidas cuál probarás en un solo sorbo.',
-  'Haz una mini cata de dos bebidas y di cuál prefieres.',
-  'Elige a alguien para hacer un brindis secreto de tres palabras.',
-  'Da un sorbo de cualquier bebida, incluida una sin alcohol, y elige quién continúa.',
 
   // RETOS DIVERTIDOS
 
@@ -201,7 +150,6 @@ const List<String> pruebas = [
   'Baila sin música durante veinte segundos.',
   'Haz una pasarela de moda con lo que llevas puesto.',
   'Habla como un presentador de televisión durante una ronda.',
-  'Haz una escena dramática porque alguien ha terminado tu bebida.',
   'Imita tu forma de ligar cuando estás nervioso.',
   'Vende tu personalidad como si fuera un producto de lujo.',
   'Haz un discurso político para conseguir el último aperitivo.',
@@ -280,7 +228,6 @@ const List<String> pruebas = [
   'Pasa un hielo envuelto por el brazo de alguien que acepte.',
   'Deja que alguien te dibuje algo en la mano con un dedo.',
   'Toca un cubito de hielo con la punta de un dedo durante cinco segundos.',
-  'Olfatea dos bebidas y adivina cuál es cuál.',
   'Describe tus pies usando tres palabras elegantes.',
   'Haz un anuncio publicitario para el calcetín de alguien.',
   'Acerca la nariz a un zapato durante un segundo y di la primera palabra que pienses.',
@@ -357,10 +304,6 @@ const List<String> pruebas = [
   'Elige a alguien y decidid quién daría el primer paso en una cita.',
   'Dile a alguien qué parte de su estilo te llama más la atención.',
   'Elige a alguien y decidid si tendríais química en una cita.',
-  'Da un sorbo mientras mantienes la mirada con la persona que más te atraiga del grupo.',
-  'Comparte un sorbo de tu bebida con alguien que acepte.',
-  'Pon unas gotas de bebida en el ombligo de alguien que acepte y bébelas, si ambos queréis.',
-  'Deja que alguien ponga unas gotas de bebida en tu ombligo y las beba, si ambos queréis.',
   'Pasa un hielo envuelto lentamente por el cuello de alguien que acepte.',
   'Deja que alguien pase un hielo envuelto por tu cuello, si aceptas.',
   'Elige a alguien y susúrrale una confesión que nunca dirías en una primera cita.',
