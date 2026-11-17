@@ -3,6 +3,7 @@ import 'i18n_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/app_settings.dart';
 import '../widgets/app_logo_button.dart';
+import 'cubo_game_widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class AppSettingsButton extends StatelessWidget {
@@ -28,8 +29,9 @@ class AppSettingsButton extends StatelessWidget {
         height: 54,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: white.withValues(alpha: 0.08),
           border: Border.all(
-            color: white.withOpacity(0.85),
+            color: white.withValues(alpha: 0.85),
             width: 2.2,
           ),
         ),
@@ -80,20 +82,10 @@ class AppSettingsSheet {
                 narrow ? 18 : 24,
                 20,
               ),
-              decoration: BoxDecoration(
-                color: blue,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: white.withOpacity(0.55),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.35),
-                    blurRadius: 30,
-                    offset: const Offset(0, 14),
-                  ),
-                ],
+              decoration: _panelDecoration(
+                blue: blue,
+                white: white,
+                borderRadius: CuboRadii.xlAll,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -175,13 +167,9 @@ class AppSettingsSheet {
                     ),
                   ),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
 
-                  Container(
-                    height: 2,
-                    width: double.infinity,
-                    color: white.withOpacity(0.28),
-                  ),
+                  const CuboPillBar(),
 
                   const SizedBox(height: 18),
 
@@ -255,13 +243,8 @@ class AppSettingsSheet {
                     child: ElevatedButton(
                       onPressed: () =>
                           Navigator.pop(dialogContext),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: white,
-                        foregroundColor: blue,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                      style: CuboButtons.primary(foreground: blue).copyWith(
+                        backgroundColor: WidgetStatePropertyAll(white),
                       ),
                       child: const Text(
                         'VOLVER A CUBO',
@@ -298,262 +281,315 @@ class AppSettingsSheet {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: CuboRadii.sheetTop),
       builder: (_) {
         return AnimatedBuilder(
           animation: settings,
           builder: (context, _) {
+            final maxHeight = MediaQuery.sizeOf(context).height * 0.92;
             return Container(
-              margin: const EdgeInsets.all(14),
-              padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
-              decoration: BoxDecoration(
-                color: blue,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: white.withOpacity(0.45),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.35),
-                    blurRadius: 30,
-                    offset: const Offset(0, 14),
-                  ),
-                ],
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              decoration: _panelDecoration(
+                blue: blue,
+                white: white,
+                borderRadius: CuboRadii.sheetTop,
               ),
               child: SafeArea(
                 top: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.settings_rounded,
-                          color: white,
-                          size: 30,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              settings.t('settings'),
-                              maxLines: 1,
-                              softWrap: false,
-                              style: TextStyle(
-                                color: white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 44,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: white.withValues(alpha: 0.40),
+                            borderRadius: BorderRadius.circular(3),
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: Icon(
-                            Icons.close_rounded,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Row(
+                        children: [
+                          CuboIconCircle(
+                            icon: Icons.settings_rounded,
+                            size: 46,
                             color: white,
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    Text(
-                      settings.t('language'),
-                      style: TextStyle(
-                        color: white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _languageButton(
-                            settings: settings,
-                            blue: blue,
-                            white: white,
-                            label: settings.t('spanish'),
-                            value: 'es',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _languageButton(
-                            settings: settings,
-                            blue: blue,
-                            white: white,
-                            label: settings.t('catalan'),
-                            value: 'ca',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _languageButton(
-                            settings: settings,
-                            blue: blue,
-                            white: white,
-                            label: settings.t('english'),
-                            value: 'en',
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _settingsSwitch(
-                      settings: settings,
-                      white: white,
-                      icon: Icons.volume_up_rounded,
-                      title: settings.t('sound'),
-                      value: settings.soundEnabled,
-                      onChanged: settings.setSoundEnabled,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.graphic_eq_rounded,
-                          color: white,
-                          size: 26,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              settings.t('volume'),
-                              maxLines: 1,
-                              softWrap: false,
-                              style: TextStyle(
-                                color: white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                settings.t('settings'),
+                                maxLines: 1,
+                                softWrap: false,
+                                style: CuboText.title(size: 34, color: white),
                               ),
                             ),
                           ),
-                        ),
-                        Text(
-                          '${(settings.volume * 100).round()}%',
-                          style: TextStyle(
-                            color: white.withOpacity(0.75),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    Slider(
-                      value: settings.volume,
-                      min: 0,
-                      max: 1,
-                      divisions: 10,
-                      activeColor: white,
-                      inactiveColor: white.withOpacity(0.25),
-                      onChanged: settings.soundEnabled
-                          ? settings.setVolume
-                          : null,
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    _settingsSwitch(
-                      settings: settings,
-                      white: white,
-                      icon: Icons.vibration_rounded,
-                      title: settings.t('vibration'),
-                      value: settings.vibrationEnabled,
-                      onChanged: settings.setVibrationEnabled,
-                    ),
-
-
-                    const SizedBox(height: 10),
-
-                    _settingsAction(
-                      white: white,
-                      icon: Icons.info_outline_rounded,
-                      title: settings.t('about'),
-                      onTap: () {
-                        _showCuboAboutDialog(
-                          context,
-                          blue: blue,
-                          white: white,
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    _settingsAction(
-                      white: white,
-                      icon: Icons.language_rounded,
-                      title: 'Web de Cubo',
-                      onTap: () {
-                        _openAniolDev(context);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            'Cubo está creado por',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: white.withOpacity(0.52),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-
-                          const SizedBox(height: 3),
-
-                          Text(
-                            'ANIOL DEV',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: white.withOpacity(0.88),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.1,
-                            ),
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          Text(
-                            'anioldev.com',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: white.withOpacity(0.42),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          const SizedBox(width: 8),
+                          CuboCircleButton(
+                            icon: Icons.close_rounded,
+                            size: 40,
+                            onTap: () => Navigator.pop(context),
                           ),
                         ],
                       ),
-                    ),
 
-                    const SizedBox(height: 18),
-                  ],
+                      const SizedBox(height: 10),
+
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: CuboPillBar(),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      _sectionLabel(settings.t('language'), white),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: white.withValues(alpha: 0.22),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            for (final lang in const [
+                              ('spanish', 'es'),
+                              ('catalan', 'ca'),
+                              ('english', 'en'),
+                            ])
+                              Expanded(
+                                child: _languageButton(
+                                  settings: settings,
+                                  blue: blue,
+                                  white: white,
+                                  label: settings.t(lang.$1),
+                                  value: lang.$2,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(14, 10, 8, 4),
+                        decoration: CuboDecorations.glass(radius: CuboRadii.lg),
+                        child: Column(
+                          children: [
+                            _settingsSwitch(
+                              settings: settings,
+                              white: white,
+                              icon: Icons.volume_up_rounded,
+                              title: settings.t('sound'),
+                              value: settings.soundEnabled,
+                              onChanged: settings.setSoundEnabled,
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                CuboIconCircle(
+                                  icon: Icons.graphic_eq_rounded,
+                                  size: 38,
+                                  color: white,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      settings.t('volume'),
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      style: CuboText.label(
+                                        size: 17,
+                                        color: white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.only(right: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: white.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    '${(settings.volume * 100).round()}%',
+                                    style: TextStyle(
+                                      color: white.withValues(alpha: 0.85),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 6,
+                                overlayShape: SliderComponentShape.noOverlay,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 12,
+                                ),
+                                child: Slider(
+                                  value: settings.volume,
+                                  min: 0,
+                                  max: 1,
+                                  divisions: 10,
+                                  activeColor: white,
+                                  inactiveColor: white.withValues(alpha: 0.25),
+                                  onChanged: settings.soundEnabled
+                                      ? settings.setVolume
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+                        decoration: CuboDecorations.glass(radius: CuboRadii.lg),
+                        child: _settingsSwitch(
+                          settings: settings,
+                          white: white,
+                          icon: Icons.vibration_rounded,
+                          title: settings.t('vibration'),
+                          value: settings.vibrationEnabled,
+                          onChanged: settings.setVibrationEnabled,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      _settingsAction(
+                        white: white,
+                        icon: Icons.info_outline_rounded,
+                        title: settings.t('about'),
+                        onTap: () {
+                          _showCuboAboutDialog(
+                            context,
+                            blue: blue,
+                            white: white,
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      _settingsAction(
+                        white: white,
+                        icon: Icons.language_rounded,
+                        title: 'Web de Cubo',
+                        onTap: () {
+                          _openAniolDev(context);
+                        },
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Cubo está creado por',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: white.withValues(alpha: 0.52),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+
+                            const SizedBox(height: 3),
+
+                            Text(
+                              'ANIOL DEV',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: white.withValues(alpha: 0.88),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Text(
+                              'anioldev.com',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: white.withValues(alpha: 0.42),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                 ),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  /// Panel azul con degradado suave, borde blanco translúcido y sombra.
+  static BoxDecoration _panelDecoration({
+    required Color blue,
+    required Color white,
+    required BorderRadius borderRadius,
+  }) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color.lerp(blue, Colors.white, 0.08)!, blue],
+      ),
+      borderRadius: borderRadius,
+      border: Border.all(color: white.withValues(alpha: 0.30), width: 1.2),
+      boxShadow: CuboShadows.soft,
+    );
+  }
+
+  static Widget _sectionLabel(String text, Color white) {
+    return Text(
+      text.toUpperCase(),
+      style: CuboText.chip(color: white.withValues(alpha: 0.72), size: 12),
     );
   }
 
@@ -572,25 +608,16 @@ class AppSettingsSheet {
       label: label,
       child: Material(
         color: selected ? white : Colors.transparent,
-        borderRadius: BorderRadius.circular(999),
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: BorderRadius.circular(999),
           onTap: () async {
             if (selected) return;
             await settings.setLanguage(value);
           },
           child: Container(
-            height: 44,
+            height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: selected
-                    ? white
-                    : white.withOpacity(0.65),
-                width: 1.5,
-              ),
-            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -635,34 +662,26 @@ class AppSettingsSheet {
   }) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: white,
-          size: 26,
-        ),
+        CuboIconCircle(icon: icon, size: 38, color: white),
         const SizedBox(width: 12),
         Expanded(
           child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                title,
-                maxLines: 1,
-                softWrap: false,
-                style: TextStyle(
-                  color: white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              maxLines: 1,
+              softWrap: false,
+              style: CuboText.label(size: 17, color: white),
             ),
+          ),
         ),
         Switch(
           value: value,
-          activeColor: white,
-          activeTrackColor: white.withOpacity(0.35),
-          inactiveThumbColor: white.withOpacity(0.75),
-          inactiveTrackColor: white.withOpacity(0.18),
+          activeThumbColor: white,
+          activeTrackColor: white.withValues(alpha: 0.35),
+          inactiveThumbColor: white.withValues(alpha: 0.75),
+          inactiveTrackColor: white.withValues(alpha: 0.18),
           onChanged: onChanged,
         ),
       ],
@@ -675,40 +694,26 @@ class AppSettingsSheet {
     required String title,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return CuboPressable(
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
-        decoration: BoxDecoration(
-          color: white.withOpacity(0.10),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: white.withOpacity(0.18),
-          ),
-        ),
+        padding: const EdgeInsets.fromLTRB(14, 11, 12, 11),
+        decoration: CuboDecorations.glass(radius: CuboRadii.md),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: white,
-              size: 24,
-            ),
+            CuboIconCircle(icon: icon, size: 38, color: white),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  color: white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: CuboText.label(size: 16, color: white),
               ),
             ),
             Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: white.withOpacity(0.65),
-              size: 16,
+              Icons.chevron_right_rounded,
+              color: white.withValues(alpha: 0.70),
+              size: 24,
             ),
           ],
         ),

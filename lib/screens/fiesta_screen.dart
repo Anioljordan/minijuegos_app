@@ -1,198 +1,69 @@
-import 'package:cubo/screens/moneda_screen.dart';
 import 'package:flutter/material.dart' hide Text;
-import '../widgets/i18n_text.dart';
-import 'yo_nunca_modes_screen.dart';
-import 'piccolo_screen.dart';
-import 'uno_dos_screen.dart';
-import 'prueba_verdad_screen.dart';
+
+import '../widgets/cubo_menu_layout.dart';
 import 'drink_dare_screen.dart';
+import 'moneda_screen.dart';
+import 'piccolo_screen.dart';
 import 'ping_pong_screen.dart';
-import '../widgets/app_settings_button.dart';
-import '../widgets/app_logo_button.dart';
-import '../core/app_settings.dart';
+import 'prueba_verdad_screen.dart';
+import 'uno_dos_screen.dart';
+import 'yo_nunca_modes_screen.dart';
 
 class FiestaScreen extends StatelessWidget {
   const FiestaScreen({super.key});
 
-  static const Color blue = Color(0xFF2F4F9C);
-  static const Color white = Color(0xFFF7F7F7);
-
-  Widget buildTopIcons(BuildContext context) {
-    final compact = MediaQuery.of(context).size.height < 740;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 35, 20, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AppLogoButton(
-            compact: compact,
-            onTap: () => Navigator.pop(context),
-          ),
-
-          const AppSettingsButton(
-            blue: blue,
-            white: white,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildTitle() {
-    const double parentPadding = 30;
-    const double sideInset = 28;
-
-    return Padding(
-      padding: const EdgeInsets.only(left: sideInset),
-      child: SizedBox(
-        width: double.infinity,
-        height: 82,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            const Positioned(
-              top: 0,
-              left: 0,
-              child: Text(
-                'fiesta',
-                style: TextStyle(
-                  color: white,
-                  fontSize: 66,
-                  height: 0.9,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-
-            Positioned(
-              top: 68,
-              left: 0,
-              right: -parentPadding,
-              child: Container(
-                height: 3,
-                color: white.withOpacity(0.58),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildGameButton({
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          height: 70,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          decoration: const BoxDecoration(
-            color: white,
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              tr(title).toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: blue,
-                fontSize: 21,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.3,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  static final List<CuboMenuGame> _games = [
+    CuboMenuGame(
+      title: 'Yo Nunca',
+      illustration: 'yo_nunca',
+      fallbackIcon: Icons.local_bar_rounded,
+      builder: (_) => const YoNuncaModesScreen(),
+    ),
+    CuboMenuGame(
+      title: 'Señala al mas...',
+      illustration: 'senala',
+      fallbackIcon: Icons.back_hand_rounded,
+      builder: (_) => const PiccoloScreen(),
+    ),
+    CuboMenuGame(
+      title: '1 & 2',
+      illustration: 'uno_dos',
+      fallbackIcon: Icons.looks_two_rounded,
+      builder: (_) => const UnoDosScreen(),
+    ),
+    CuboMenuGame(
+      title: 'Prueba o verdad',
+      illustration: 'prueba_verdad',
+      fallbackIcon: Icons.style_rounded,
+      builder: (_) => const PruebaVerdadScreen(),
+    ),
+    CuboMenuGame(
+      title: 'La Ruleta',
+      illustration: 'ruleta',
+      fallbackIcon: Icons.casino_rounded,
+      builder: (_) => const DrinkDareScreen(),
+    ),
+    CuboMenuGame(
+      title: 'Moneda',
+      illustration: 'moneda',
+      fallbackIcon: Icons.monetization_on_rounded,
+      builder: (_) => const MonedaScreen(),
+    ),
+    CuboMenuGame(
+      title: 'Ping Pong',
+      illustration: 'ping_pong',
+      fallbackIcon: Icons.sports_tennis_rounded,
+      builder: (_) => const PingPongScreen(),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: AppSettings.instance,
-      builder: (context, _) {
-        final juegos = [
-          {
-            'title': 'Yo Nunca',
-            'screen': const YoNuncaModesScreen(),
-          },
-          {
-            'title': 'Señala al mas...',
-            'screen': const PiccoloScreen(),
-          },
-          {
-            'title': '1 & 2',
-            'screen': const UnoDosScreen(),
-          },
-          {
-            'title': 'Prueba o verdad',
-            'screen': const PruebaVerdadScreen(),
-          },
-          {
-            'title': 'La Ruleta',
-            'screen': const DrinkDareScreen(),
-          },
-          {
-            'title': 'Moneda',
-            'screen': const MonedaScreen(),
-          },
-          {
-            'title': 'Ping Pong',
-            'screen': const PingPongScreen(),
-          },
-        ];
-
-        return Scaffold(
-          backgroundColor: blue,
-          body: Stack(
-            children: [
-              buildTopIcons(context),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(30, 180, 30, 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildTitle(),
-                      const SizedBox(height: 105),
-                      Expanded(
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: juegos.length,
-                          itemBuilder: (context, index) {
-                            final juego = juegos[index];
-
-                            return buildGameButton(
-                              title: juego['title'] as String,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                    juego['screen'] as Widget,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    return CuboMenuLayout(
+      title: 'fiesta',
+      heroIllustration: 'fiesta_hero',
+      mirrored: false,
+      games: _games,
     );
   }
 }

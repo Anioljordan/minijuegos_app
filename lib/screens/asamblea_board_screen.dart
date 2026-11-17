@@ -7,6 +7,7 @@ import 'asamblea_setup_screen.dart';
 import 'asamblea_roles_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 enum LeyType {
   izquierda,
@@ -44,6 +45,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   static const Color accentPurple = Color(0xFF8B5CF6);
   static const Color accentGreen = Color(0xFF22C55E);
 
+  static final ShapeBorder _alertShape = RoundedRectangleBorder(
+    borderRadius: CuboRadii.xlAll,
+    side: BorderSide(color: CuboColors.whiteA(0.30), width: 1.2),
+  );
+
   late List<AsambleaPlayer> players;
 
   List<LeyType> mazo = [];
@@ -61,58 +67,21 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.85),
-                        width: 2.1,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_rounded,
-                      color: appWhite,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Text(
-                      'salir',
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: 38,
-                        height: 0.9,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                  ),
-                ],
+              const CuboDialogHeader(
+                title: 'salir',
+                icon: Icons.account_balance_rounded,
               ),
-              const SizedBox(height: 10),
-              Container(height: 3, color: appWhite.withOpacity(0.58)),
               const SizedBox(height: 18),
               Text(
                 'La partida está guardada automáticamente. ¿Qué quieres hacer?',
@@ -249,50 +218,15 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.78),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: rightRed.withOpacity(0.18),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: rightRed, width: 2.2),
-                    ),
-                    child: const Icon(
-                      Icons.casino_rounded,
-                      color: appWhite,
-                      size: 30,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Text(
-                      'sacar ley',
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: 34,
-                        height: 0.95,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                  ),
-                ],
+              const CuboDialogHeader(
+                title: 'sacar ley',
+                icon: Icons.casino_rounded,
               ),
-              const SizedBox(height: 11),
-              Container(height: 3, color: appWhite.withOpacity(0.58)),
               const SizedBox(height: 18),
               Text(
                 '¿Seguro que quieres sacar una ley aleatoria? Una vez confirmada se añadirá directamente al tablero.',
@@ -330,9 +264,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         backgroundColor: rightRed,
                         foregroundColor: appWhite,
                         elevation: 0,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
+                        shape: const StadiumBorder(),
                       ),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 14),
@@ -381,13 +313,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.78),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -420,7 +346,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              Container(height: 3, color: appWhite.withOpacity(0.58)),
+              const CuboPillBar(),
               const SizedBox(height: 18),
               Container(
                 width: double.infinity,
@@ -430,6 +356,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: _colorLey(ley),
+                  borderRadius: CuboRadii.lgAll,
                   border: Border.all(color: appWhite, width: 2),
                 ),
                 child: Text(
@@ -642,7 +569,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       context: context,
       builder: (_) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF15112B),
+          backgroundColor: CuboColors.blue,
+        shape: _alertShape,
           title: const Text(
             'Elegir jugador',
             style: TextStyle(color: Colors.white),
@@ -743,7 +671,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF15112B),
+              backgroundColor: CuboColors.blue,
+        shape: _alertShape,
 
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
 
@@ -786,7 +715,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: CuboRadii.smAll,
                       border: Border.all(
                         color: Colors.white12,
                       ),
@@ -817,9 +747,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: cartasVisibles
                               ? _colorLey(ley)
-                              : const Color(0xFF2A2540),
+                              : CuboColors.blueDeep,
                           disabledBackgroundColor:
-                          const Color(0xFF2A2540),
+                          CuboColors.blueDeep,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 16,
@@ -827,11 +757,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           side: BorderSide(
                             color: seleccionada
                                 ? Colors.white
-                                : Colors.white.withOpacity(0.18),
-                            width: seleccionada ? 4 : 1.4,
+                                : Colors.white.withValues(alpha: 0.18),
+                            width: seleccionada ? 3 : 1.4,
                           ),
                           shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,
+                            borderRadius: CuboRadii.mdAll,
                           ),
                         ),
 
@@ -928,18 +858,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         );
                       }
                           : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appWhite,
-                        foregroundColor: appBlue,
-                        disabledBackgroundColor:
-                        appWhite.withOpacity(0.18),
-                        disabledForegroundColor:
-                        appWhite.withOpacity(0.40),
-                        elevation: 0,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
+                      style: CuboButtons.primary(padding: null),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(
                           vertical: 14,
@@ -974,7 +893,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF15112B),
+              backgroundColor: CuboColors.blue,
+        shape: _alertShape,
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
               title: Row(
                 children: [
@@ -1033,9 +953,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: visible
                               ? _colorLey(ley)
-                              : const Color(0xFF2A2540),
+                              : CuboColors.blueDeep,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          disabledBackgroundColor: const Color(0xFF2A2540),
+                          disabledBackgroundColor: CuboColors.blueDeep,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: CuboRadii.mdAll,
+                          ),
                         ),
                         onPressed: visible
                             ? () {
@@ -1135,7 +1058,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     final elegido = await showDialog<int>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
+        backgroundColor: CuboColors.blue,
+        shape: _alertShape,
         title: const Text(
           'Investigar jugador',
           style: TextStyle(color: Colors.white),
@@ -1165,7 +1089,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
+        backgroundColor: CuboColors.blue,
+        shape: _alertShape,
         title: const Text(
           'Resultado',
           style: TextStyle(color: Colors.white),
@@ -1197,7 +1122,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF15112B),
+              backgroundColor: CuboColors.blue,
+        shape: _alertShape,
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
               title: Row(
                 children: [
@@ -1259,7 +1185,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       decoration: BoxDecoration(
                         color: visible
                             ? _colorLey(ley)
-                            : const Color(0xFF2A2540),
+                            : CuboColors.blueDeep,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: visible ? Colors.white24 : Colors.white10,
@@ -1316,7 +1242,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     final elegido = await showDialog<int>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
+        backgroundColor: CuboColors.blue,
+        shape: _alertShape,
         title: const Text(
           'Eliminar jugador',
           style: TextStyle(color: Colors.white),
@@ -1369,7 +1296,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     final elegido = await showDialog<int>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
+        backgroundColor: CuboColors.blue,
+        shape: _alertShape,
         title: const Text(
           'Elegir jugador',
           style: TextStyle(color: Colors.white),
@@ -1483,7 +1411,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.70),
+      barrierColor: Colors.black.withValues(alpha: 0.70),
       builder: (dialogContext) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -1493,70 +1421,37 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           ),
           child: Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite,
-                width: 2.5,
-              ),
-            ),
+            clipBehavior: Clip.antiAlias,
+            decoration: CuboDecorations.dialog(),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // CABECERA GANADORA
 
-                  Container(
-                    width: double.infinity,
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(
                       20,
-                      24,
-                      20,
                       22,
-                    ),
-                    decoration: BoxDecoration(
-                      color: winnerColor,
-                      border: const Border(
-                        bottom: BorderSide(
-                          color: appWhite,
-                          width: 3,
-                        ),
-                      ),
+                      20,
+                      4,
                     ),
                     child: Column(
                       children: [
-                        Container(
-                          width: 82,
-                          height: 82,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: appWhite,
-                            border: Border.all(
-                              color: appWhite,
-                              width: 3,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.emoji_events_rounded,
-                            color: winnerColor,
-                            size: 50,
-                          ),
+                        const CuboIllustration(
+                          'asamblea',
+                          size: 104,
+                          popIn: true,
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
 
-                        const Text(
+                        const CuboStatusChip(
                           'FIN DE LA PARTIDA',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2,
-                          ),
+                          icon: Icons.emoji_events_rounded,
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
 
                         const Text(
                           '¡GANA!',
@@ -1583,6 +1478,17 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                             letterSpacing: -1.3,
                           ),
                         ),
+
+                        const SizedBox(height: 12),
+
+                        Container(
+                          width: 56,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: winnerColor,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1605,35 +1511,19 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: appWhite.withOpacity(0.08),
-                            border: Border(
-                              left: BorderSide(
-                                color: winnerColor,
-                                width: 6,
-                              ),
-                              bottom: BorderSide(
-                                color: appWhite.withOpacity(0.30),
-                                width: 2,
-                              ),
-                              top: BorderSide(
-                                color: appWhite.withOpacity(0.20),
-                                width: 1,
-                              ),
-                              right: BorderSide(
-                                color: appWhite.withOpacity(0.20),
-                                width: 1,
-                              ),
-                            ),
+                          decoration: CuboDecorations.glass(
+                            selected: true,
+                            radius: CuboRadii.md,
+                            accent: winnerColor,
                           ),
                           child: Row(
                             crossAxisAlignment:
                             CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                winnerIcon,
-                                color: appWhite,
-                                size: 27,
+                              CuboIconCircle(
+                                icon: winnerIcon,
+                                size: 36,
+                                color: winnerColor,
                               ),
 
                               const SizedBox(width: 12),
@@ -1702,7 +1592,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color:
-                                  leftBlue.withOpacity(0.22),
+                                  leftBlue.withValues(alpha: 0.22),
+                                  borderRadius: CuboRadii.mdAll,
                                   border: Border.all(
                                     color: leftBlue,
                                     width: 2,
@@ -1756,7 +1647,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color:
-                                  rightRed.withOpacity(0.22),
+                                  rightRed.withValues(alpha: 0.22),
+                                  borderRadius: CuboRadii.mdAll,
                                   border: Border.all(
                                     color: rightRed,
                                     width: 2,
@@ -1828,15 +1720,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                 ),
                               );
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: appWhite,
-                              foregroundColor: appBlue,
-                              elevation: 0,
-                              shape:
-                              const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
-                            ),
+                            style: CuboButtons.primary(padding: null),
                             child: const Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -1940,17 +1824,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                               );
                             },
                             style: OutlinedButton.styleFrom(
-                              foregroundColor:
-                              appWhite.withOpacity(0.78),
+                              foregroundColor: CuboColors.whiteA(0.78),
                               side: BorderSide(
-                                color:
-                                appWhite.withOpacity(0.38),
+                                color: CuboColors.whiteA(0.38),
                                 width: 1.4,
                               ),
-                              shape:
-                              const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
+                              shape: const StadiumBorder(),
                             ),
                             child: const Padding(
                               padding: EdgeInsets.symmetric(
@@ -1995,7 +1874,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF15112B),
+        backgroundColor: CuboColors.blue,
+        shape: _alertShape,
         title: const Text(
           'Reiniciar partida',
           style: TextStyle(color: Colors.white),
@@ -2105,27 +1985,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
 
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: null);
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.secondary(padding: null);
   }
 
   Widget circleButton({
@@ -2142,8 +2006,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: CuboColors.whiteA(0.08),
           border: Border.all(
-            color: appWhite.withOpacity(0.85),
+            color: CuboColors.whiteA(0.85),
             width: 2.2,
           ),
         ),
@@ -2154,8 +2019,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
   Widget buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2196,52 +2059,17 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           ],
         ),
 
-        SizedBox(height: compact ? 14 : 24),
+        SizedBox(height: compact ? 12 : 20),
 
         Padding(
           padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
+            right: compact ? 4 : 8,
           ),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'tablero asamblea',
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: titleSize,
-                          height: 1.9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  top: lineTop,
-                  left: compact ? -13 : -18,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
-            ),
+          child: CuboSectionTitle(
+            'tablero asamblea',
+            alignEnd: true,
+            size: titleSize,
+            gap: compact ? 8 : 10,
           ),
         ),
       ],
@@ -2257,13 +2085,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(),
       child: child,
     );
   }
@@ -2343,7 +2165,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                   vertical: compact ? 7 : 9,
                 ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.22),
+                  color: color.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(999),
                   border: Border.all(
                     color: color,
                     width: 1.8,
@@ -2381,7 +2204,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     vertical: compact ? 6 : 8,
                   ),
                   decoration: BoxDecoration(
-                    color: filled ? color : appWhite.withOpacity(0.07),
+                    color: filled ? color : CuboColors.whiteA(0.07),
+                    borderRadius: CuboRadii.smAll,
                     border: Border.all(
                       color: filled ? appWhite : appWhite.withOpacity(0.28),
                       width: filled ? 2.2 : 1.4,
@@ -2506,23 +2330,16 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 9),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: player.isAlive
-                    ? appWhite.withOpacity(0.07)
-                    : appWhite.withOpacity(0.035),
-                border: Border(
-                  left: BorderSide(
-                    color: player.isAlive
-                        ? appWhite.withOpacity(0.55)
-                        : rightRed.withOpacity(0.65),
-                    width: 5,
-                  ),
-                  bottom: BorderSide(
-                    color: appWhite.withOpacity(0.24),
-                    width: 2,
-                  ),
-                ),
-              ),
+              decoration: player.isAlive
+                  ? CuboDecorations.glass(radius: CuboRadii.md)
+                  : BoxDecoration(
+                      color: CuboColors.whiteA(0.035),
+                      borderRadius: CuboRadii.mdAll,
+                      border: Border.all(
+                        color: rightRed.withValues(alpha: 0.55),
+                        width: 1.2,
+                      ),
+                    ),
               child: Row(
                 children: [
                   Container(
@@ -2585,7 +2402,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         child: Material(
           color: enabled
               ? backgroundColor
-              : backgroundColor.withOpacity(0.30),
+              : backgroundColor.withValues(alpha: 0.30),
+          shape: const StadiumBorder(),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
             child: Container(
@@ -2594,6 +2413,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 vertical: compact ? 7 : 9,
               ),
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
                 border: Border.all(
                   color: appWhite.withOpacity(enabled ? 0.30 : 0.12),
                   width: 2,
@@ -2646,9 +2466,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Widget build(BuildContext context) {
     if (!mounted || (players.isEmpty && mazo.isEmpty && descarte.isEmpty)) {
       return const Scaffold(
-        backgroundColor: appBlue,
-        body: Center(
-          child: CircularProgressIndicator(color: appWhite),
+        backgroundColor: CuboColors.blue,
+        body: CuboBackground(
+          halo: CuboHalo.topLeft,
+          child: Center(
+            child: CircularProgressIndicator(color: appWhite),
+          ),
         ),
       );
     }
@@ -2661,8 +2484,10 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         await _mostrarDialogoSalirTablero();
       },
       child: Scaffold(
-        backgroundColor: appBlue,
-        body: SafeArea(
+        backgroundColor: CuboColors.blue,
+        body: CuboBackground(
+          halo: CuboHalo.topLeft,
+          child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxHeight < 740;
@@ -2735,6 +2560,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               );
             },
           ),
+        ),
         ),
       ),
     );

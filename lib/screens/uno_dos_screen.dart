@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class UnoDosScreen extends StatefulWidget {
   const UnoDosScreen({super.key});
@@ -417,44 +418,8 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     ).clamp(0.0, 1.0);
   }
 
-  ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape:
-      const RoundedRectangleBorder(
-        borderRadius:
-        BorderRadius.zero,
-      ),
-    );
-  }
-
-  Widget circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color:
-            appWhite.withOpacity(
-              0.85,
-            ),
-            width: 2.2,
-          ),
-        ),
-        child: Center(
-          child: child,
-        ),
-      ),
-    );
-  }
+  ButtonStyle mainButtonStyle() =>
+      CuboButtons.primary(padding: EdgeInsets.zero);
 
   Widget buildTopBar() {
     final compact =
@@ -479,74 +444,56 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                     context,
                   ),
             ),
-            circleButton(
+            CuboCircleButton(
+              icon: Icons.question_mark_rounded,
+              size: compact ? 44 : 50,
               onTap: mostrarNormas,
-              child: const Icon(
-                Icons
-                    .question_mark_rounded,
-                color: appWhite,
-                size: 27,
-              ),
             ),
           ],
         ),
 
-        const SizedBox(height: 24),
+        SizedBox(height: compact ? 10 : 16),
 
         Padding(
           padding:
           const EdgeInsets.only(
             left: 28,
           ),
-          child: SizedBox(
-            height: 94,
-            child: Stack(
-              clipBehavior:
-              Clip.none,
-              children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: FittedBox(
-                    fit:
-                    BoxFit.scaleDown,
-                    alignment:
-                    Alignment
-                        .centerLeft,
-                    child: Text(
-                      '1 y 2',
-                      maxLines: 1,
-                      style:
-                      TextStyle(
-                        color:
-                        appWhite,
-                        fontSize: 48,
-                        height: 1.90,
-                        fontWeight:
-                        FontWeight
-                            .w900,
-                        letterSpacing:
-                        -1,
+          child: Column(
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment:
+                CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit:
+                      BoxFit.scaleDown,
+                      alignment:
+                      Alignment
+                          .bottomLeft,
+                      child: Text(
+                        '1 y 2',
+                        maxLines: 1,
+                        style:
+                        CuboText.title(
+                          size: compact ? 44 : 54,
+                        ),
                       ),
                     ),
                   ),
-                ),
-
-                Positioned(
-                  top: 82,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite
-                        .withOpacity(
-                      0.58,
-                    ),
+                  const SizedBox(width: 8),
+                  CuboIllustration(
+                    'uno_dos',
+                    size: compact ? 60 : 78,
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+              SizedBox(height: compact ? 8 : 12),
+              const CuboPillBar(),
+            ],
           ),
         ),
       ],
@@ -558,93 +505,10 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     required String title,
     required String text,
   }) {
-    return Container(
-      margin:
-      const EdgeInsets.only(
-        bottom: 10,
-      ),
-      padding:
-      const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color:
-        appWhite.withOpacity(
-          0.08,
-        ),
-        border: Border.all(
-          color:
-          appWhite.withOpacity(
-            0.26,
-          ),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-
-          const SizedBox(width: 11),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
-              children: [
-                SizedBox(
-                  width:
-                  double.infinity,
-                  child:
-                  _singleLineResponsiveText(
-                    tr(title).toUpperCase(),
-                    style:
-                    const TextStyle(
-                      color:
-                      appWhite,
-                      fontSize:
-                      13.5,
-                      fontWeight:
-                      FontWeight
-                          .w900,
-                      letterSpacing:
-                      0.3,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 3,
-                ),
-
-                Text(
-                  text,
-                  style:
-                  TextStyle(
-                    color: appWhite
-                        .withOpacity(
-                      0.72,
-                    ),
-                    fontSize:
-                    12.5,
-                    height: 1.25,
-                    fontWeight:
-                    FontWeight
-                        .w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return CuboRulesItem(
+      icon: icon,
+      title: title,
+      text: text,
     );
   }
 
@@ -673,16 +537,8 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
             20,
             18,
           ),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite
-                  .withOpacity(
-                0.75,
-              ),
-              width: 2.2,
-            ),
-          ),
+          decoration:
+          CuboDecorations.dialog(),
           child:
           ConstrainedBox(
             constraints:
@@ -702,72 +558,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                 CrossAxisAlignment
                     .stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration:
-                        BoxDecoration(
-                          shape:
-                          BoxShape
-                              .circle,
-                          border:
-                          Border.all(
-                            color: appWhite
-                                .withOpacity(
-                              0.85,
-                            ),
-                            width: 2.1,
-                          ),
-                        ),
-                        child:
-                        const Icon(
-                          Icons
-                              .question_mark_rounded,
-                          color:
-                          appWhite,
-                          size: 28,
-                        ),
-                      ),
-
-                      const SizedBox(
-                        width: 14,
-                      ),
-
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style:
-                          TextStyle(
-                            color:
-                            appWhite,
-                            fontSize:
-                            38,
-                            height:
-                            0.9,
-                            fontWeight:
-                            FontWeight
-                                .w900,
-                            letterSpacing:
-                            -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(
-                    height: 10,
-                  ),
-
-                  Container(
-                    height: 3,
-                    color: appWhite
-                        .withOpacity(
-                      0.58,
-                    ),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(
                     height: 18,
@@ -905,22 +696,18 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
         vertical: 14,
       ),
       enabledBorder:
-      OutlineInputBorder(
-        borderRadius:
-        BorderRadius.zero,
-        borderSide: BorderSide(
+      CuboInputs.rounded(
+        BorderSide(
           color:
-          appWhite.withOpacity(
-            0.28,
+          appWhite.withValues(
+            alpha: 0.28,
           ),
           width: 1.4,
         ),
       ),
       focusedBorder:
-      const OutlineInputBorder(
-        borderRadius:
-        BorderRadius.zero,
-        borderSide: BorderSide(
+      CuboInputs.rounded(
+        const BorderSide(
           color:
           accentTurquoise,
           width: 2,
@@ -947,37 +734,8 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
         4,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color:
-        appWhite.withOpacity(
-          0.07,
-        ),
-        border: Border(
-          left: const BorderSide(
-            color:
-            accentTurquoise,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite
-                .withOpacity(
-              0.25,
-            ),
-            width: 2,
-          ),
-          top: BorderSide(
-            color: appWhite
-                .withOpacity(
-              0.15,
-            ),
-          ),
-          right: BorderSide(
-            color: appWhite
-                .withOpacity(
-              0.15,
-            ),
-          ),
-        ),
+      decoration: CuboDecorations.glass(
+        radius: CuboRadii.md,
       ),
       child: Row(
         children: [
@@ -992,11 +750,10 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
             BoxDecoration(
               shape:
               BoxShape.circle,
+              color: accentTurquoise
+                  .withValues(alpha: 0.18),
               border: Border.all(
-                color: appWhite
-                    .withOpacity(
-                  0.68,
-                ),
+                color: accentTurquoise,
                 width: 1.6,
               ),
             ),
@@ -1110,16 +867,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
               16,
             ),
             decoration:
-            BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite
-                    .withOpacity(
-                  0.75,
-                ),
-                width: 2.2,
-              ),
-            ),
+            CuboDecorations.dialog(),
             child:
             SingleChildScrollView(
               child: Column(
@@ -1204,12 +952,10 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                     height: 10,
                   ),
 
-                  Container(
-                    height: 3,
-                    color: appWhite
-                        .withOpacity(
-                      0.58,
-                    ),
+                  const Align(
+                    alignment:
+                    Alignment.centerLeft,
+                    child: CuboPillBar(),
                   ),
 
                   const SizedBox(
@@ -1312,26 +1058,18 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                         const EdgeInsets
                             .all(14),
                         enabledBorder:
-                        OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius
-                              .zero,
-                          borderSide:
+                        CuboInputs.rounded(
                           BorderSide(
                             color: appWhite
-                                .withOpacity(
-                              0.25,
+                                .withValues(
+                              alpha: 0.25,
                             ),
                             width: 1.4,
                           ),
                         ),
                         focusedBorder:
-                        const OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius
-                              .zero,
-                          borderSide:
-                          BorderSide(
+                        CuboInputs.rounded(
+                          const BorderSide(
                             color:
                             accentTurquoise,
                             width: 2,
@@ -1512,13 +1250,15 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
               decoration:
               BoxDecoration(
                 color: appWhite
-                    .withOpacity(
-                  0.09,
+                    .withValues(
+                  alpha: 0.09,
                 ),
+                borderRadius:
+                BorderRadius.circular(999),
                 border: Border.all(
                   color: appWhite
-                      .withOpacity(
-                    0.22,
+                      .withValues(
+                    alpha: 0.22,
                   ),
                 ),
               ),
@@ -1615,8 +1355,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                   shape:
                   const RoundedRectangleBorder(
                     borderRadius:
-                    BorderRadius
-                        .zero,
+                    CuboRadii.mdAll,
                   ),
                 ),
                 child:
@@ -1642,26 +1381,11 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
             onPressed:
             mostrarImportarAcciones,
             style:
-            OutlinedButton
-                .styleFrom(
-              foregroundColor:
-              appWhite,
+            CuboButtons.secondary(
               padding:
               const EdgeInsets
                   .symmetric(
                 horizontal: 12,
-              ),
-              side: BorderSide(
-                color: appWhite
-                    .withOpacity(
-                  0.45,
-                ),
-                width: 1.5,
-              ),
-              shape:
-              const RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.zero,
               ),
             ),
             child: Row(
@@ -1943,134 +1667,110 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   }
 
   Widget buildActionCard() {
-    return Container(
+    final compact = _isCompactScreen;
+
+    return SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: Center(
         child:
         SingleChildScrollView(
-          padding:
-          const EdgeInsets
-              .symmetric(
-            horizontal: 24,
-            vertical: 28,
+          padding: EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: compact ? 8 : 16,
           ),
-          child: Column(
-            mainAxisSize:
-            MainAxisSize.min,
-            children: [
-              Container(
-                width: 94,
-                height: 94,
-                decoration:
-                BoxDecoration(
-                  shape:
-                  BoxShape.circle,
-                  color: appWhite
-                      .withOpacity(
-                    0.16,
-                  ),
-                  border: Border.all(
-                    color: appWhite,
-                    width: 3,
-                  ),
-                ),
-                child:
-                const Icon(
-                  Icons
-                      .visibility_rounded,
-                  color: appWhite,
-                  size: 50,
-                ),
+          child: CuboCardSwitcher(
+            child: CuboHeroCard(
+              key: ValueKey(
+                accionActual.isEmpty
+                    ? 'sin_acciones'
+                    : accionActual,
               ),
-
-              const SizedBox(
-                height: 28,
+              chip: '1 y 2',
+              chipIcon:
+              Icons.compare_arrows_rounded,
+              padding: EdgeInsets.fromLTRB(
+                22,
+                compact ? 16 : 20,
+                22,
+                compact ? 22 : 30,
               ),
-
-              AnimatedSwitcher(
-                duration:
-                const Duration(
-                  milliseconds: 280,
-                ),
-                transitionBuilder:
-                    (
-                    child,
-                    animation,
-                    ) {
-                  final slide =
-                  Tween<Offset>(
-                    begin:
-                    const Offset(
-                      0,
-                      0.08,
+              child: Column(
+                mainAxisSize:
+                MainAxisSize.min,
+                children: [
+                  Container(
+                    width: compact ? 62 : 76,
+                    height: compact ? 62 : 76,
+                    decoration:
+                    BoxDecoration(
+                      shape:
+                      BoxShape.circle,
+                      color: accentTurquoise
+                          .withValues(alpha: 0.16),
+                      border: Border.all(
+                        color: accentTurquoise,
+                        width: 2.4,
+                      ),
                     ),
-                    end:
-                    Offset.zero,
-                  ).animate(
-                    animation,
-                  );
-
-                  return SlideTransition(
-                    position: slide,
-                    child:
-                    FadeTransition(
-                      opacity:
-                      animation,
-                      child: child,
+                    child: Icon(
+                      Icons
+                          .visibility_rounded,
+                      color: accentTurquoise,
+                      size: compact ? 32 : 40,
                     ),
-                  );
-                },
-                child: Text(
-                  accionActual.isEmpty
-                      ? 'Añade tus acciones para empezar'
-                      : accionActual,
-                  key: ValueKey(
+                  ),
+
+                  SizedBox(
+                    height: compact ? 14 : 20,
+                  ),
+
+                  Text(
                     accionActual.isEmpty
-                        ? 'sin_acciones'
+                        ? 'Añade tus acciones para empezar'
                         : accionActual,
-                  ),
-                  textAlign:
-                  TextAlign.center,
-                  style:
-                  const TextStyle(
-                    color:
-                    appWhite,
-                    fontSize: 32,
-                    height: 1.14,
-                    fontWeight:
-                    FontWeight
-                        .w900,
-                    letterSpacing:
-                    -0.7,
-                  ),
-                ),
-              ),
-
-              if (accionActual
-                  .isEmpty) ...[
-                const SizedBox(
-                  height: 12,
-                ),
-
-                Text(
-                  'Pulsa el lápiz para crear o importar tu lista',
-                  textAlign:
-                  TextAlign.center,
-                  style:
-                  TextStyle(
-                    color: appWhite
-                        .withOpacity(
-                      0.52,
+                    textAlign:
+                    TextAlign.center,
+                    style:
+                    TextStyle(
+                      color:
+                      CuboColors.blueInk,
+                      fontSize: compact ? 25 : 30,
+                      height: 1.14,
+                      fontWeight:
+                      FontWeight
+                          .w900,
+                      letterSpacing:
+                      -0.6,
                     ),
-                    fontSize: 13,
-                    fontWeight:
-                    FontWeight
-                        .w700,
                   ),
-                ),
-              ],
-            ],
+
+                  if (accionActual
+                      .isEmpty) ...[
+                    const SizedBox(
+                      height: 12,
+                    ),
+
+                    Text(
+                      'Pulsa el lápiz para crear o importar tu lista',
+                      textAlign:
+                      TextAlign.center,
+                      style:
+                      TextStyle(
+                        color: CuboColors.blueInk
+                            .withValues(
+                          alpha: 0.6,
+                        ),
+                        fontSize: 13,
+                        fontWeight:
+                        FontWeight
+                            .w700,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -2197,51 +1897,24 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     return Expanded(
       child: AspectRatio(
         aspectRatio: 1.35,
-        child: Material(
-          color:
-          backgroundColor,
-          borderRadius:
-          BorderRadius.circular(
-            16,
-          ),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius:
-            BorderRadius.circular(
-              16,
-            ),
-            child: Container(
+        child: CuboPressable(
+          onTap: onTap,
+          child: Container(
               decoration:
               BoxDecoration(
+                color: backgroundColor,
                 borderRadius:
-                BorderRadius
-                    .circular(
-                  16,
-                ),
+                CuboRadii.lgAll,
                 border:
                 Border.all(
                   color: appWhite
-                      .withOpacity(
-                    0.28,
+                      .withValues(
+                    alpha: 0.55,
                   ),
-                  width: 2.4,
+                  width: 1.6,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                    backgroundColor
-                        .withOpacity(
-                      0.28,
-                    ),
-                    blurRadius:
-                    16,
-                    offset:
-                    const Offset(
-                      0,
-                      7,
-                    ),
-                  ),
-                ],
+                boxShadow:
+                CuboShadows.soft,
               ),
               child:
               Center(
@@ -2252,7 +1925,6 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                   size: 54,
                 ),
               ),
-            ),
           ),
         ),
       ),
@@ -2289,7 +1961,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
               icon:
               Icons.edit_rounded,
               backgroundColor:
-              appBlue,
+              CuboColors.whiteA(0.12),
               foregroundColor:
               appWhite,
               onTap:
@@ -2323,11 +1995,14 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     if (cargando) {
       return const Scaffold(
         backgroundColor:
-        appBlue,
-        body: Center(
-          child:
-          CircularProgressIndicator(
-            color: appWhite,
+        CuboColors.blue,
+        body: CuboBackground(
+          halo: CuboHalo.topRight,
+          child: Center(
+            child:
+            CircularProgressIndicator(
+              color: appWhite,
+            ),
           ),
         ),
       );
@@ -2335,8 +2010,10 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
 
     return Scaffold(
       backgroundColor:
-      appBlue,
-      body: SafeArea(
+      CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topRight,
+        child: SafeArea(
         child: LayoutBuilder(
           builder:
               (
@@ -2419,6 +2096,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
               ),
             );
           },
+        ),
         ),
       ),
     );

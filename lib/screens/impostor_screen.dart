@@ -7,6 +7,7 @@ import '../data/impostor_data.dart';
 import '../core/app_settings.dart';
 import '../core/impostor_i18n.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 enum ImpostorMode { classic, roles, question, football }
 
@@ -608,22 +609,24 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   ButtonStyle mainButtonStyle({Color? background, Color? foreground}) {
+    if (background == null) {
+      return CuboButtons.primary(
+        foreground: foreground ?? appBlue,
+        padding: EdgeInsets.zero,
+      );
+    }
     return ElevatedButton.styleFrom(
-      backgroundColor: background ?? appWhite,
+      backgroundColor: background,
       foregroundColor: foreground ?? appBlue,
-      disabledBackgroundColor: appWhite.withOpacity(0.18),
-      disabledForegroundColor: appWhite.withOpacity(0.42),
+      disabledBackgroundColor: CuboColors.whiteA(0.18),
+      disabledForegroundColor: CuboColors.whiteA(0.42),
       elevation: 0,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      shape: const StadiumBorder(),
     );
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(color: appWhite.withOpacity(0.70), width: 2),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-    );
+    return CuboButtons.secondary(padding: EdgeInsets.zero);
   }
 
   Widget circleButton({
@@ -694,7 +697,18 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             ),
           ],
         ),
-        SizedBox(height: compact ? 14 : 24),
+        if (currentStep == ImpostorStep.modeSelection) ...[
+          SizedBox(height: compact ? 6 : 12),
+          Padding(
+            padding: EdgeInsets.only(right: compact ? 18 : 28),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: CuboIllustration('impostor', size: compact ? 72 : 104),
+            ),
+          ),
+          SizedBox(height: compact ? 2 : 6),
+        ] else
+          SizedBox(height: compact ? 14 : 24),
         Padding(
           padding: EdgeInsets.only(right: compact ? 18 : 28),
           child: SizedBox(
@@ -727,19 +741,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
                 Positioned(
                   top: lineTop,
-
-                  // Cancela el padding horizontal general de la pantalla
-                  // para que la línea empiece en el borde izquierdo.
-                  left: compact ? -13 : -18,
-
-                  // Termina antes del borde derecho,
-                  // igual que en la pantalla Chill.
                   right: 0,
-
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  child: const CuboPillBar(),
                 ),
               ],
             ),
@@ -758,7 +761,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
+        color: CuboColors.whiteA(0.08),
+        borderRadius: CuboRadii.lgAll,
         border: Border.all(
           color: borderColor ?? appWhite.withOpacity(0.28),
           width: 1.4,
@@ -799,10 +803,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         ),
         const SizedBox(height: 8),
         Container(
-          height: compact ? 11 : 14,
+          height: compact ? 8 : 10,
           decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.14),
-            border: Border.all(color: appWhite.withOpacity(0.30), width: 1.2),
+            color: CuboColors.whiteA(0.14),
+            borderRadius: BorderRadius.circular(99),
           ),
           clipBehavior: Clip.antiAlias,
           child: LinearProgressIndicator(
@@ -823,40 +827,39 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     required VoidCallback? onTap,
     required bool compact,
   }) {
+    final disabled = onTap == null;
+    final outlined = backgroundColor == appBlue;
+    final fg = outlined ? appWhite : CuboColors.blueInk;
+    final fgColor = fg.withValues(alpha: disabled ? 0.45 : 1);
+
     return SizedBox(
       height: compact ? 54 : 62,
       child: Material(
-        color: onTap == null
-            ? backgroundColor.withOpacity(0.30)
-            : backgroundColor,
+        color: outlined
+            ? CuboColors.whiteA(0.08)
+            : (disabled ? CuboColors.whiteA(0.35) : appWhite),
+        shape: StadiumBorder(
+          side: outlined
+              ? BorderSide(color: CuboColors.whiteA(0.55), width: 1.4)
+              : BorderSide.none,
+        ),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 14),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: appWhite.withOpacity(onTap == null ? 0.12 : 0.28),
-                width: 2.1,
-              ),
-            ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  color: foregroundColor.withOpacity(onTap == null ? 0.40 : 1),
-                  size: compact ? 24 : 28,
-                ),
+                Icon(icon, color: fgColor, size: compact ? 24 : 28),
                 const SizedBox(width: 8),
-                Expanded(
+                Flexible(
                   child: _singleLineResponsiveText(
                     label,
                     alignment: Alignment.center,
                     style: TextStyle(
-                      color: foregroundColor.withOpacity(
-                        onTap == null ? 0.40 : 1,
-                      ),
-                      fontSize: compact ? 11.5 : 13,
+                      color: fgColor,
+                      fontSize: compact ? 12.5 : 14,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.35,
                     ),
@@ -871,28 +874,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   InputDecoration inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: tr(hint),
-      hintStyle: TextStyle(
-        color: appWhite.withOpacity(0.45),
-        fontWeight: FontWeight.w600,
-      ),
-      filled: true,
-      fillColor: appWhite.withOpacity(0.07),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(color: appWhite.withOpacity(0.28), width: 1.4),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(color: appWhite.withOpacity(0.28), width: 1.4),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(color: appWhite, width: 2),
-      ),
-    );
+    return CuboInputs.decoration(hintText: tr(hint));
   }
 
   Widget rulesItem({
@@ -900,47 +882,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(color: appWhite.withOpacity(0.26), width: 1.4),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: appWhite, size: 22),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void showRulesDialog() {
@@ -1112,16 +1054,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(color: appWhite.withOpacity(0.75), width: 2.2),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -1131,41 +1070,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(height: 3, color: appWhite.withOpacity(0.58)),
+                  const CuboDialogHeader(),
                   const SizedBox(height: 18),
                   Text(
                     tr(title).toUpperCase(),
@@ -1224,20 +1129,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        borderRadius: CuboRadii.lgAll,
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: compact ? 10 : 13,
             vertical: compact ? 11 : 15,
           ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.08),
-            border: Border(
-              left: BorderSide(color: color, width: compact ? 5 : 7),
-              bottom: BorderSide(color: appWhite.withOpacity(0.30), width: 2),
-              top: BorderSide(color: appWhite.withOpacity(0.18), width: 1),
-              right: BorderSide(color: appWhite.withOpacity(0.18), width: 1),
-            ),
-          ),
+          decoration: CuboDecorations.glass(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1332,13 +1230,16 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       itemCount: cards.length,
       itemBuilder: (context, index) {
         final card = cards[index];
-        return buildModeCard(
+        return CuboEntrance(
+          index: index,
+          child: buildModeCard(
           title: card.title,
           subtitle: card.subtitle,
           icon: card.icon,
           color: card.color,
           compact: compact,
           onTap: () => goToSetup(card.mode),
+          ),
         );
       },
     );
@@ -1371,21 +1272,21 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         : 44.0;
 
     return Material(
-      color: onTap == null
-          ? appWhite.withOpacity(0.04)
-          : appWhite.withOpacity(0.10),
+      color: CuboColors.whiteA(onTap == null ? 0.04 : 0.10),
+      shape: RoundedRectangleBorder(
+        borderRadius: CuboRadii.smAll,
+        side: BorderSide(
+          color: CuboColors.whiteA(onTap == null ? 0.12 : 0.35),
+          width: 1.5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
           width: size,
           height: size,
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: appWhite.withOpacity(onTap == null ? 0.12 : 0.35),
-              width: 1.5,
-            ),
-          ),
           child: Icon(
             icon,
             color: appWhite.withOpacity(onTap == null ? 0.28 : 1),
@@ -1434,10 +1335,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ? 10
                 : 12,
           ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.07),
-            border: Border.all(color: appWhite.withOpacity(0.24), width: 1.4),
-          ),
+          decoration: CuboDecorations.glass(radius: CuboRadii.md),
           child: Row(
             children: [
               Container(
@@ -1590,7 +1488,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   alignment: Alignment.center,
 
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+                    borderRadius: CuboRadii.inputAll,
                   ),
                 ),
                 child: const Center(child: Icon(Icons.add_rounded, size: 29)),
@@ -1609,8 +1507,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               vertical: compact ? 16 : 20,
             ),
             decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.05),
-              border: Border.all(color: appWhite.withOpacity(0.18), width: 1.3),
+              color: CuboColors.whiteA(0.05),
+              borderRadius: CuboRadii.mdAll,
+              border: Border.all(color: CuboColors.whiteA(0.18), width: 1.3),
             ),
             child: Column(
               children: [
@@ -1651,18 +1550,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   5,
                   compact ? 7 : 8,
                 ),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.07),
-                  border: Border(
-                    left: BorderSide(color: modeColor, width: 6),
-                    bottom: BorderSide(
-                      color: appWhite.withOpacity(0.25),
-                      width: 2,
-                    ),
-                    top: BorderSide(color: appWhite.withOpacity(0.15)),
-                    right: BorderSide(color: appWhite.withOpacity(0.15)),
-                  ),
-                ),
+                decoration: CuboDecorations.glass(radius: CuboRadii.md),
                 child: Row(
                   children: [
                     Container(
@@ -1671,10 +1559,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: appWhite.withOpacity(0.68),
-                          width: 1.6,
-                        ),
+                        color: modeColor.withValues(alpha: 0.16),
+                        border: Border.all(color: modeColor, width: 1.6),
                       ),
                       child: Text(
                         '${index + 1}',
@@ -1734,7 +1620,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       return Container(
         margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
-          color: appWhite.withOpacity(value == false ? 0.04 : 0.08),
+          color: CuboColors.whiteA(value == false ? 0.04 : 0.08),
+          borderRadius: CuboRadii.mdAll,
           border: Border.all(
             color: value == false
                 ? appWhite.withOpacity(0.22)
@@ -1742,17 +1629,22 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             width: 1.3,
           ),
         ),
-        child: CheckboxListTile(
+        child: Material(
+          type: MaterialType.transparency,
+          child: CheckboxListTile(
           key: ValueKey(keyName),
           value: value,
           tristate: tristate,
           onChanged: onChanged,
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.symmetric(horizontal: compact ? 4 : 8),
+          shape: const RoundedRectangleBorder(borderRadius: CuboRadii.mdAll),
           activeColor: modeColor,
           checkColor: appBlue,
           side: BorderSide(color: appWhite.withOpacity(0.65), width: 1.7),
-          checkboxShape: const RoundedRectangleBorder(),
+          checkboxShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
           title: Text(
             title,
             style: TextStyle(
@@ -1761,6 +1653,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               fontWeight: FontWeight.w800,
             ),
           ),
+        ),
         ),
       );
     }
@@ -1915,14 +1808,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               SizedBox(height: compact ? 13 : 16),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.07),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.22),
-                    width: 1.3,
-                  ),
-                ),
-                child: SwitchListTile(
+                decoration: CuboDecorations.glass(radius: CuboRadii.md),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: SwitchListTile(
                   value: showHints,
                   onChanged: (value) => setState(() => showHints = value),
                   contentPadding: EdgeInsets.zero,
@@ -1934,6 +1823,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
+                ),
                 ),
               ),
             ],
@@ -1969,83 +1859,100 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       opacity: 0.08 + (progress * 0.92),
       child: Transform.scale(
         scale: 0.96 + (progress * 0.04),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+        child: Center(
+          child: CuboCardSwitcher(
+            child: KeyedSubtree(
+              key: ValueKey('secret-$currentPlayerIndex'),
+              child: buildSecretHeroCard(
+                compact: compact,
+                secret: secret,
+                isImpostor: isImpostor,
+                secretColor: secretColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Tarjeta blanca con la palabra/rol secreto del jugador actual.
+  Widget buildSecretHeroCard({
+    required bool compact,
+    required String secret,
+    required bool isImpostor,
+    required Color secretColor,
+  }) {
+    return CuboHeroCard(
+      chip: isImpostor ? 'TU PAPEL' : selectedCategory,
+      padding: EdgeInsets.fromLTRB(
+        compact ? 16 : 22,
+        compact ? 16 : 20,
+        compact ? 16 : 22,
+        compact ? 20 : 26,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: compact ? 64 : 78,
+            height: compact ? 64 : 78,
+            decoration: BoxDecoration(
+              color: secretColor.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
+              border: Border.all(color: secretColor, width: 2.5),
+            ),
+            child: Icon(
+              isImpostor ? Icons.visibility_off_rounded : modeIcon,
+              color: CuboColors.blueInk,
+              size: compact ? 32 : 40,
+            ),
+          ),
+          SizedBox(height: compact ? 14 : 18),
+          Text(
+            secret,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: CuboColors.blueInk,
+              fontSize: compact ? 24 : 30,
+              height: 1.15,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+          if (showHints && selectedHint.isNotEmpty && isImpostor) ...[
+            SizedBox(height: compact ? 14 : 18),
             Container(
-              width: compact ? 72 : 88,
-              height: compact ? 72 : 88,
+              width: double.infinity,
+              padding: EdgeInsets.all(compact ? 11 : 14),
               decoration: BoxDecoration(
-                color: secretColor.withOpacity(0.15),
-                shape: BoxShape.circle,
-                border: Border.all(color: secretColor, width: 2.5),
-              ),
-              child: Icon(
-                isImpostor ? Icons.visibility_off_rounded : modeIcon,
-                color: secretColor,
-                size: compact ? 37 : 45,
-              ),
-            ),
-
-            SizedBox(height: compact ? 14 : 20),
-
-            Text(
-              isImpostor ? 'TU PAPEL' : tr(selectedCategory).toUpperCase(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: appWhite.withOpacity(0.62),
-                fontSize: compact ? 10.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.9,
-              ),
-            ),
-
-            const SizedBox(height: 9),
-
-            Text(
-              secret,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: appWhite,
-                fontSize: compact ? 24 : 30,
-                height: 1.15,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-              ),
-            ),
-
-            if (showHints && selectedHint.isNotEmpty && isImpostor) ...[
-              SizedBox(height: compact ? 14 : 18),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(compact ? 11 : 14),
-                decoration: BoxDecoration(
-                  color: accentOrange.withOpacity(0.13),
-                  border: const Border(
-                    left: BorderSide(color: accentOrange, width: 6),
-                  ),
+                color: accentOrange.withValues(alpha: 0.16),
+                borderRadius: CuboRadii.mdAll,
+                border: Border.all(
+                  color: accentOrange.withValues(alpha: 0.70),
+                  width: 1.4,
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.lightbulb_rounded, color: accentOrange),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Pista: $selectedHint',
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: compact ? 13 : 15,
-                          height: 1.3,
-                          fontWeight: FontWeight.w800,
-                        ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lightbulb_rounded, color: accentOrange),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Pista: $selectedHint',
+                      style: TextStyle(
+                        color: CuboColors.blueInk,
+                        fontSize: compact ? 13 : 15,
+                        height: 1.3,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -2076,6 +1983,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           ),
           decoration: BoxDecoration(
             color: appBlue,
+            borderRadius: CuboRadii.xlAll,
             border: Border.all(color: modeColor.withOpacity(0.85), width: 2.4),
             boxShadow: [
               BoxShadow(
@@ -2140,13 +2048,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   horizontal: compact ? 12 : 15,
                   vertical: compact ? 12 : 14,
                 ),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.26),
-                    width: 1.4,
-                  ),
-                ),
+                decoration: CuboDecorations.glass(radius: CuboRadii.md),
                 child: Column(
                   children: [
                     Icon(
@@ -2259,94 +2161,17 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         buildProgress(compact: compact),
         SizedBox(height: compact ? 10 : 14),
         Expanded(
-          child: buildPanel(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 16 : 22,
-              vertical: compact ? 16 : 24,
-            ),
-            borderColor: secretColor.withOpacity(0.75),
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: compact ? 74 : 90,
-                      height: compact ? 74 : 90,
-                      decoration: BoxDecoration(
-                        color: secretColor.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: secretColor, width: 2.5),
-                      ),
-                      child: Icon(
-                        isImpostor ? Icons.visibility_off_rounded : modeIcon,
-                        color: secretColor,
-                        size: compact ? 38 : 46,
-                      ),
-                    ),
-                    SizedBox(height: compact ? 16 : 22),
-                    Text(
-                      isImpostor
-                          ? 'TU PAPEL'
-                          : tr(selectedCategory).toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: appWhite.withOpacity(0.62),
-                        fontSize: compact ? 10.5 : 12,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.9,
-                      ),
-                    ),
-                    const SizedBox(height: 9),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 260),
-                      child: Text(
-                        secret,
-                        key: ValueKey(secret),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: compact ? 24 : 30,
-                          height: 1.15,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ),
-                    if (showHints && selectedHint.isNotEmpty && isImpostor) ...[
-                      SizedBox(height: compact ? 14 : 18),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(compact ? 11 : 14),
-                        decoration: BoxDecoration(
-                          color: accentOrange.withOpacity(0.13),
-                          border: const Border(
-                            left: BorderSide(color: accentOrange, width: 6),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.lightbulb_rounded,
-                              color: accentOrange,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Pista: $selectedHint',
-                                style: TextStyle(
-                                  color: appWhite,
-                                  fontSize: compact ? 13 : 15,
-                                  height: 1.3,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
+          child: Center(
+            child: SingleChildScrollView(
+              child: CuboCardSwitcher(
+                child: KeyedSubtree(
+                  key: ValueKey('reveal-$currentPlayerIndex-$secret'),
+                  child: buildSecretHeroCard(
+                    compact: compact,
+                    secret: secret,
+                    isImpostor: isImpostor,
+                    secretColor: secretColor,
+                  ),
                 ),
               ),
             ),
@@ -2423,19 +2248,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Container(
-                      width: compact ? 82 : 100,
-                      height: compact ? 82 : 100,
-                      decoration: BoxDecoration(
-                        color: accentGreen.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: accentGreen, width: 2.6),
-                      ),
-                      child: Icon(
-                        Icons.celebration_rounded,
-                        color: accentGreen,
-                        size: compact ? 42 : 52,
-                      ),
+                    CuboIllustration(
+                      'impostor',
+                      size: compact ? 92 : 120,
+                      popIn: true,
                     ),
                     SizedBox(height: compact ? 18 : 24),
                     Text(
@@ -2453,12 +2269,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(compact ? 13 : 16),
-                      decoration: BoxDecoration(
-                        color: appWhite.withOpacity(0.07),
-                        border: Border.all(
-                          color: appWhite.withOpacity(0.25),
-                          width: 1.4,
-                        ),
+                      decoration: CuboDecorations.glass(
+                        radius: CuboRadii.md,
                       ),
                       child: Text(
                         summaryText,
@@ -2530,7 +2342,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             ? _globalSecretDragEnd
             : null,
 
-        child: SafeArea(
+        child: CuboBackground(
+          halo: CuboHalo.topLeft,
+          child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
               final narrow = constraints.maxWidth < 380;
@@ -2576,6 +2390,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 ),
               );
             },
+          ),
           ),
         ),
       ),

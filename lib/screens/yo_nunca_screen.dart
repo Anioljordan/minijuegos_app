@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class YoNuncaScreen extends StatefulWidget {
   final String modo;
@@ -308,14 +309,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                   : 18,
               16,
             ),
-            decoration: BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite
-                    .withOpacity(0.75),
-                width: 2.2,
-              ),
-            ),
+            decoration: CuboDecorations.dialog(),
             child: ConstrainedBox(
               constraints:
               BoxConstraints(
@@ -402,11 +396,9 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                     height: 10,
                   ),
 
-                  Container(
-                    height: 3,
-                    color: appWhite
-                        .withOpacity(
-                        0.58),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: CuboPillBar(),
                   ),
 
                   const SizedBox(
@@ -494,24 +486,14 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                         const EdgeInsets
                             .all(14),
                         enabledBorder:
-                        OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius
-                              .zero,
-                          borderSide:
+                        CuboInputs.rounded(
                           BorderSide(
-                            color: appWhite
-                                .withOpacity(
-                                0.25),
+                            color: CuboColors.whiteA(0.28),
                             width: 1.4,
                           ),
                         ),
                         focusedBorder:
-                        OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius
-                              .zero,
-                          borderSide:
+                        CuboInputs.rounded(
                           BorderSide(
                             color:
                             accentColor,
@@ -749,37 +731,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   }
 
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  Widget circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
-          ),
-        ),
-        child: Center(
-          child: child,
-        ),
-      ),
-    );
+    return CuboButtons.primary(padding: null);
   }
 
   Widget buildTopBar() {
@@ -801,13 +753,9 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                   Navigator.pop(context),
             ),
 
-            circleButton(
+            CuboCircleButton(
+              icon: Icons.question_mark_rounded,
               onTap: mostrarNormas,
-              child: const Icon(
-                Icons.question_mark_rounded,
-                color: appWhite,
-                size: 27,
-              ),
             ),
           ],
         ),
@@ -817,48 +765,28 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
         Padding(
           padding:
           const EdgeInsets.only(left: 28),
-          child: SizedBox(
-            height: 94,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment:
-                    Alignment.centerLeft,
-                    child: Text(
-                      tituloModo(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                        color: appWhite,
-                        fontSize: 42,
-                        height: 2.20,
-                        fontWeight:
-                        FontWeight.w900,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (configurando) ...[
+                CuboIllustration(
+                  'yo_nunca',
+                  size: compact ? 72 : 100,
                 ),
-
-                Positioned(
-                  top: 82,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color:
-                    appWhite.withOpacity(
-                      0.58,
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 8),
               ],
-            ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  tituloModo(),
+                  maxLines: 1,
+                  style: CuboText.title(size: 42),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const CuboPillBar(),
+            ],
           ),
         ),
       ],
@@ -870,82 +798,14 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
     required String title,
     required String text,
   }) {
-    return Container(
-      margin:
-      const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-
-          const SizedBox(width: 11),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child:
-                  _singleLineResponsiveText(
-                    tr(title).toUpperCase(),
-                    style:
-                    const TextStyle(
-                      color: appWhite,
-                      fontSize: 13.5,
-                      fontWeight:
-                      FontWeight.w900,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                Text(
-                  text,
-                  style: TextStyle(
-                    color:
-                    appWhite.withOpacity(
-                      0.72,
-                    ),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight:
-                    FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void mostrarNormas() {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor:
-      Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor:
         Colors.transparent,
@@ -961,14 +821,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
             20,
             18,
           ),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color:
-              appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight:
@@ -985,64 +838,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                 CrossAxisAlignment
                     .stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration:
-                        BoxDecoration(
-                          shape:
-                          BoxShape.circle,
-                          border:
-                          Border.all(
-                            color: appWhite
-                                .withOpacity(
-                                0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons
-                              .question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-
-                      const SizedBox(
-                        width: 14,
-                      ),
-
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight:
-                            FontWeight
-                                .w900,
-                            letterSpacing:
-                            -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(
-                    height: 10,
-                  ),
-
-                  Container(
-                    height: 3,
-                    color:
-                    appWhite.withOpacity(
-                      0.58,
-                    ),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(
                     height: 18,
@@ -1231,19 +1027,14 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
         horizontal: 14,
         vertical: 14,
       ),
-      enabledBorder:
-      OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color:
-          appWhite.withOpacity(0.28),
+      enabledBorder: CuboInputs.rounded(
+        BorderSide(
+          color: CuboColors.whiteA(0.28),
           width: 1.4,
         ),
       ),
-      focusedBorder:
-      OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
+      focusedBorder: CuboInputs.rounded(
+        BorderSide(
           color: accentColor,
           width: 2,
         ),
@@ -1266,28 +1057,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
         4,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: BorderSide(
-            color: accentColor,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color:
-            appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-          top: BorderSide(
-            color:
-            appWhite.withOpacity(0.15),
-          ),
-          right: BorderSide(
-            color:
-            appWhite.withOpacity(0.15),
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           Container(
@@ -1296,11 +1066,9 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: accentColor.withValues(alpha: 0.14),
               border: Border.all(
-                color:
-                appWhite.withOpacity(
-                  0.68,
-                ),
+                color: accentColor.withValues(alpha: 0.70),
                 width: 1.6,
               ),
             ),
@@ -1410,13 +1178,10 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color:
-                appWhite.withOpacity(0.09),
+                color: CuboColors.whiteA(0.12),
+                borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color:
-                  appWhite.withOpacity(
-                    0.22,
-                  ),
+                  color: CuboColors.whiteA(0.28),
                 ),
               ),
               child: Text(
@@ -1491,8 +1256,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
                       .shrinkWrap,
                   shape:
                   const RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.zero,
+                    borderRadius: CuboRadii.inputAll,
                   ),
                 ),
                 child: const Icon(
@@ -1510,21 +1274,9 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
           height: compact ? 42 : 46,
           child: OutlinedButton(
             onPressed: mostrarImportarFrases,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: appWhite,
-              padding:
-              const EdgeInsets.symmetric(
+            style: CuboButtons.secondary(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 12,
-              ),
-              side: BorderSide(
-                color:
-                appWhite.withOpacity(0.45),
-                width: 1.5,
-              ),
-              shape:
-              const RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.zero,
               ),
             ),
             child: Row(
@@ -1747,95 +1499,34 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   }
 
   Widget buildQuestionCard() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      child: Center(
-        child: SingleChildScrollView(
-          padding:
-          const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 28,
-          ),
-          child: Column(
-            mainAxisSize:
-            MainAxisSize.min,
-            children: [
-              Container(
-                width: 94,
-                height: 94,
-                decoration:
-                BoxDecoration(
-                  shape:
-                  BoxShape.circle,
-                  color: accentColor
-                      .withOpacity(0.15),
-                  border: Border.all(
-                    color: accentColor,
-                    width: 3,
-                  ),
-                ),
-                child: Icon(
-                  modeIcon,
-                  color: accentColor,
-                  size: 50,
-                ),
+    final cardKey =
+        preguntaActual.isEmpty ? 'sin_frases' : preguntaActual;
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 4,
+          vertical: 16,
+        ),
+        child: CuboCardSwitcher(
+          child: CuboHeroCard(
+            key: ValueKey(cardKey),
+            chip: nombreModo(),
+            chipIcon: modeIcon,
+            padding: const EdgeInsets.fromLTRB(22, 18, 22, 30),
+            child: Text(
+              preguntaActual.isEmpty
+                  ? 'Añade tus frases para empezar'
+                  : preguntaActual,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: CuboColors.blueInk,
+                fontSize: 30,
+                height: 1.14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.7,
               ),
-
-              const SizedBox(
-                height: 28,
-              ),
-
-              AnimatedSwitcher(
-                duration:
-                const Duration(
-                  milliseconds: 280,
-                ),
-                transitionBuilder:
-                    (child, animation) {
-                  final slide =
-                  Tween<Offset>(
-                    begin:
-                    const Offset(
-                      0,
-                      0.08,
-                    ),
-                    end: Offset.zero,
-                  ).animate(
-                    animation,
-                  );
-
-                  return SlideTransition(
-                    position: slide,
-                    child:
-                    FadeTransition(
-                      opacity:
-                      animation,
-                      child: child,
-                    ),
-                  );
-                },
-                child: Text(
-                  preguntaActual.isEmpty
-                      ? 'Añade tus frases para empezar'
-                      : preguntaActual,
-                  key: ValueKey(
-                    preguntaActual.isEmpty
-                        ? 'sin_frases'
-                        : preguntaActual,
-                  ),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 32,
-                    height: 1.14,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.7,
-                  ),
-                ),
-
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1896,28 +1587,17 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
           builder:
               (context, value, _) {
             return Container(
-              height: 14,
-              decoration:
-              BoxDecoration(
-                color: appWhite
-                    .withOpacity(
-                    0.15),
-                borderRadius:
-                BorderRadius
-                    .circular(7),
-                border: Border.all(
-                  color: appWhite
-                      .withOpacity(
-                      0.34),
-                  width: 1.2,
-                ),
+              height: 10,
+              decoration: BoxDecoration(
+                color: CuboColors.whiteA(0.15),
+                borderRadius: BorderRadius.circular(99),
               ),
               clipBehavior:
               Clip.antiAlias,
               child:
               LinearProgressIndicator(
                 value: value,
-                minHeight: 14,
+                minHeight: 10,
                 backgroundColor:
                 Colors.transparent,
                 valueColor:
@@ -1942,44 +1622,26 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
     return Expanded(
       child: AspectRatio(
         aspectRatio: 1.35,
-        child: Material(
-          color: backgroundColor,
-          borderRadius:
-          BorderRadius.circular(
-            16,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: CuboRadii.mdAll,
+            boxShadow: backgroundColor == appWhite
+                ? CuboShadows.soft
+                : null,
           ),
+          child: Material(
+          color: backgroundColor,
+          borderRadius: CuboRadii.mdAll,
           child: InkWell(
             onTap: onTap,
-            borderRadius:
-            BorderRadius.circular(
-              16,
-            ),
+            borderRadius: CuboRadii.mdAll,
             child: Container(
-              decoration:
-              BoxDecoration(
-                borderRadius:
-                BorderRadius
-                    .circular(16),
+              decoration: BoxDecoration(
+                borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: appWhite
-                      .withOpacity(
-                      0.28),
-                  width: 2.4,
+                  color: CuboColors.whiteA(0.55),
+                  width: 1.4,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                    backgroundColor
-                        .withOpacity(
-                        0.28),
-                    blurRadius: 16,
-                    offset:
-                    const Offset(
-                      0,
-                      7,
-                    ),
-                  ),
-                ],
               ),
               child: Center(
                 child: Icon(
@@ -1991,6 +1653,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );
@@ -2025,8 +1688,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
             buildActionButton(
               icon:
               Icons.edit_rounded,
-              backgroundColor:
-              appBlue,
+              backgroundColor: CuboColors.whiteA(0.10),
               foregroundColor:
               appWhite,
               onTap:
@@ -2071,7 +1733,9 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
 
     return Scaffold(
       backgroundColor: appBlue,
-      body: SafeArea(
+      body: CuboBackground(
+        halo: CuboHalo.topRight,
+        child: SafeArea(
         child: LayoutBuilder(
           builder:
               (context, constraints) {
@@ -2151,6 +1815,7 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
             );
           },
         ),
+      ),
       ),
     );
   }

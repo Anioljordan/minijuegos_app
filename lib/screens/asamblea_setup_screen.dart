@@ -7,6 +7,7 @@ import 'asamblea_roles_screen.dart';
 import 'asamblea_board_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 enum AsambleaRole {
   izquierda,
@@ -87,67 +88,27 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.symmetric(horizontal: 22),
           child: Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-            decoration: BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite.withOpacity(0.75),
-                width: 2.2,
-              ),
-            ),
+            decoration: CuboDecorations.dialog(),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: appWhite.withOpacity(0.85),
-                          width: 2.1,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_rounded,
-                        color: appWhite,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Text(
-                        'la asamblea',
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: 34,
-                          height: 0.9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.8,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  height: 3,
-                  color: appWhite.withOpacity(0.58),
+                const CuboDialogHeader(
+                  title: 'la asamblea',
+                  icon: Icons.account_balance_rounded,
                 ),
                 const SizedBox(height: 18),
                 Text(
                   'Tienes datos guardados. ¿Qué quieres hacer?',
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.76),
+                    color: appWhite.withValues(alpha: 0.76),
                     fontSize: 14,
                     height: 1.35,
                     fontWeight: FontWeight.w700,
@@ -482,27 +443,11 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   }
 
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: null);
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.secondary(padding: null);
   }
 
   Widget circleButton({
@@ -519,8 +464,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: CuboColors.whiteA(0.08),
           border: Border.all(
-            color: appWhite.withOpacity(0.85),
+            color: CuboColors.whiteA(0.85),
             width: 2.2,
           ),
         ),
@@ -531,8 +477,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
   Widget buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
+    final illustrationSize = compact ? 72.0 : 104.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -556,52 +501,24 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
           ],
         ),
 
-        SizedBox(height: compact ? 14 : 24),
+        SizedBox(height: compact ? 8 : 14),
 
         Padding(
           padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
+            right: compact ? 4 : 8,
           ),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'la asamblea',
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: titleSize,
-                          height: 1.4,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  top: lineTop,
-                  left: compact ? -13 : -18,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              CuboIllustration('asamblea', size: illustrationSize),
+              SizedBox(height: compact ? 6 : 10),
+              CuboSectionTitle(
+                'la asamblea',
+                alignEnd: true,
+                size: titleSize,
+                gap: compact ? 8 : 10,
+              ),
+            ],
           ),
         ),
       ],
@@ -617,13 +534,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(),
       child: child,
     );
   }
@@ -638,26 +549,14 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
       filled: true,
       fillColor: appWhite.withOpacity(0.07),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
+      border: CuboInputs.rounded(
+        BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
+      enabledBorder: CuboInputs.rounded(
+        BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
       ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite,
-          width: 2,
-        ),
+      focusedBorder: CuboInputs.rounded(
+        const BorderSide(color: appWhite, width: 2),
       ),
     );
   }
@@ -683,19 +582,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.07),
-          border: Border(
-            left: BorderSide(
-              color: color,
-              width: 5,
-            ),
-            bottom: BorderSide(
-              color: appWhite.withOpacity(0.25),
-              width: 2,
-            ),
-          ),
-        ),
+        decoration: CuboDecorations.glass(radius: CuboRadii.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -737,25 +624,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         5,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: const BorderSide(
-            color: accentGreen,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-          top: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-          right: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           Container(
@@ -764,8 +633,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: accentGreen.withValues(alpha: 0.16),
               border: Border.all(
-                color: appWhite.withOpacity(0.68),
+                color: accentGreen.withValues(alpha: 0.80),
                 width: 1.6,
               ),
             ),
@@ -840,8 +710,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
     return Material(
       color: onTap == null
-          ? appWhite.withOpacity(0.04)
-          : appWhite.withOpacity(0.10),
+          ? appWhite.withValues(alpha: 0.04)
+          : appWhite.withValues(alpha: 0.10),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
@@ -895,13 +767,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                 ? 10
                 : 12,
           ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.07),
-            border: Border.all(
-              color: appWhite.withOpacity(0.24),
-              width: 1.4,
-            ),
-          ),
+          decoration: CuboDecorations.glass(radius: CuboRadii.md),
           child: Row(
             children: [
               Container(
@@ -1071,7 +937,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     alignment: Alignment.center,
 
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: CuboRadii.inputAll,
                     ),
                   ),
                   child: const Center(
@@ -1095,9 +961,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                 vertical: compact ? 16 : 20,
               ),
               decoration: BoxDecoration(
-                color: appWhite.withOpacity(0.05),
+                color: CuboColors.whiteA(0.05),
+                borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: appWhite.withOpacity(0.18),
+                  color: CuboColors.whiteA(0.18),
                   width: 1.3,
                 ),
               ),
@@ -1168,11 +1035,14 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             const SizedBox(height: 9),
 
             ..._players.asMap().entries.map(
-                  (entry) => _playerTile(
-                entry.value,
-                entry.key,
-                compact: compact,
-              ),
+                  (entry) => CuboEntrance(
+                    key: ObjectKey(entry.value),
+                    child: _playerTile(
+                      entry.value,
+                      entry.key,
+                      compact: compact,
+                    ),
+                  ),
             ),
           ],
         ],
@@ -1183,8 +1053,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final narrow = constraints.maxWidth < 380;
@@ -1242,18 +1114,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     height: compact ? 62 : 72,
                     child: ElevatedButton.icon(
                       onPressed: _startGame,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appWhite,
-                        foregroundColor: appBlue,
-                        disabledBackgroundColor:
-                        appWhite.withOpacity(0.18),
-                        disabledForegroundColor:
-                        appWhite.withOpacity(0.42),
-                        elevation: 0,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
+                      style: CuboButtons.primary(padding: null),
                       icon: Icon(
                         Icons.play_arrow_rounded,
                         size: compact ? 30 : 36,
@@ -1277,6 +1138,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               ),
             );
           },
+        ),
         ),
       ),
     );

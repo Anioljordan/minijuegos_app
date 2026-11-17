@@ -1,22 +1,11 @@
 import 'package:flutter/material.dart' hide Text;
+import 'cubo_game_widgets.dart';
 import 'i18n_text.dart';
 
-const Color _appBlue = Color(0xFF2F4F9C);
-const Color _appWhite = Color(0xFFF7F7F7);
+const Color _appWhite = CuboColors.white;
 const Color _leftBlue = Color(0xFF60A5FA);
 const Color _rightRed = Color(0xFFE63946);
 const Color _leaderGold = Color(0xFFFFD166);
-
-ButtonStyle _mainButtonStyle() {
-  return ElevatedButton.styleFrom(
-    backgroundColor: _appWhite,
-    foregroundColor: _appBlue,
-    elevation: 0,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.zero,
-    ),
-  );
-}
 
 Widget _rulesItem({
   required IconData icon,
@@ -24,53 +13,11 @@ Widget _rulesItem({
   required String text,
   required Color color,
 }) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 10),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-    decoration: BoxDecoration(
-      color: _appWhite.withOpacity(0.08),
-      border: Border.all(
-        color: _appWhite.withOpacity(0.26),
-        width: 1.4,
-      ),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          color: _appWhite,
-          size: 22,
-        ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                tr(title).toUpperCase(),
-                style: const TextStyle(
-                  color: _appWhite,
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                text,
-                style: TextStyle(
-                  color: _appWhite.withOpacity(0.72),
-                  fontSize: 12.5,
-                  height: 1.25,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
+  return CuboRulesItem(
+    icon: icon,
+    title: title,
+    text: text,
+    color: color,
   );
 }
 
@@ -78,19 +25,13 @@ Future<void> showAsambleaRulesDialog(BuildContext context) {
   return showDialog(
     context: context,
     barrierDismissible: true,
-    barrierColor: Colors.black.withOpacity(0.45),
+    barrierColor: Colors.black.withValues(alpha: 0.45),
     builder: (_) => Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 22),
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-        decoration: BoxDecoration(
-          color: _appBlue,
-          border: Border.all(
-            color: _appWhite.withOpacity(0.75),
-            width: 2.2,
-          ),
-        ),
+        decoration: CuboDecorations.dialog(),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -100,60 +41,16 @@ Future<void> showAsambleaRulesDialog(BuildContext context) {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: _appWhite.withOpacity(0.85),
-                          width: 2.1,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.question_mark_rounded,
-                        color: _appWhite,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Text(
-                        'normas',
-                        style: TextStyle(
-                          color: _appWhite,
-                          fontSize: 38,
-                          height: 0.9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.8,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                Container(
-                  height: 3,
-                  color: _appWhite.withOpacity(0.58),
-                ),
+                const CuboDialogHeader(),
 
                 const SizedBox(height: 18),
 
-                const Text(
+                Text(
                   'LA ASAMBLEA',
-                  style: TextStyle(
-                    color: _appWhite,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                  ),
+                  style: CuboText.chip(size: 13),
                 ),
 
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
 
                 _rulesItem(
                   icon: Icons.groups_rounded,
@@ -225,16 +122,13 @@ Future<void> showAsambleaRulesDialog(BuildContext context) {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    style: _mainButtonStyle(),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      child: Text(
-                        'ENTENDIDO',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.4,
-                        ),
+                    style: CuboButtons.primary(),
+                    child: const Text(
+                      'ENTENDIDO',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
                       ),
                     ),
                   ),
