@@ -53,13 +53,18 @@ workflows:
 
       - name: Compilar IPA
         script: |
-          # Apple no acepta números de build repetidos: se usa el último
-          # subido a TestFlight + 1 (o el número de build de Codemagic si falla).
-          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "")
-          if [ -n "$LATEST" ]; then
+          # Apple no acepta números de build repetidos: se usa el mayor entre
+          # TestFlight y App Store + 1. Si la API falla, se usa la fecha/hora
+          # (siempre creciente y nunca repetida).
+          TF=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null | tail -1 | tr -dc '0-9')
+          AS=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null | tail -1 | tr -dc '0-9')
+          echo "Último build TestFlight: ${TF:-?} · App Store: ${AS:-?}"
+          TF=${TF:-0}; AS=${AS:-0}
+          LATEST=$(( TF > AS ? TF : AS ))
+          if [ "$LATEST" -gt 0 ]; then
             NEXT_BUILD=$((LATEST + 1))
           else
-            NEXT_BUILD=$((BUILD_NUMBER + 10))
+            NEXT_BUILD=$(date -u +%y%j%H%M)
           fi
           echo "Build number: $NEXT_BUILD"
           flutter build ipa --release \
