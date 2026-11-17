@@ -5,6 +5,7 @@ import '../widgets/i18n_text.dart';
 import 'package:flutter/services.dart';
 import '../core/app_settings.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 enum CuatroEnRayaMode {
   twoPlayers,
@@ -81,54 +82,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     required String text,
     required Color color,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text, color: color);
   }
 
   @override
@@ -714,27 +668,11 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   ButtonStyle mainButtonStyle(Color color) {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: null);
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.secondary(padding: null);
   }
 
 
@@ -742,13 +680,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.30),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(),
       child: child,
     );
   }
@@ -757,19 +689,13 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -779,46 +705,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(height: 18),
 
@@ -938,43 +825,36 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       context: context,
       barrierDismissible: false,
       barrierLabel: tr('Resultado'),
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       transitionDuration: const Duration(milliseconds: 320),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Center(
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 22),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-            decoration: BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite.withOpacity(0.75),
-                width: 2.2,
-              ),
-            ),
+            decoration: CuboDecorations.dialog(),
             child: Material(
               color: Colors.transparent,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Center(
+                    child: CuboIllustration(
+                      'cuatro_raya',
+                      size: MediaQuery.sizeOf(context).height < 740 ? 72 : 100,
+                      popIn: true,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
                   Row(
                     children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.2,
-                          ),
-                        ),
-                        child: Icon(
-                          icon,
-                          color: accentColor,
-                          size: 31,
-                        ),
+                      CuboIconCircle(
+                        icon: icon,
+                        size: 52,
+                        color: accentColor,
                       ),
 
                       const SizedBox(width: 14),
@@ -982,26 +862,17 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                       Expanded(
                         child: Text(
                           titulo,
-                          style: const TextStyle(
-                            color: appWhite,
-                            fontSize: 40,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
+                          style: CuboText.title(size: 40),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  const CuboPillBar(),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 18),
 
                   Container(
                     width: double.infinity,
@@ -1009,13 +880,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                       horizontal: 14,
                       vertical: 16,
                     ),
-                    decoration: BoxDecoration(
-                      color: appWhite.withOpacity(0.08),
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.26),
-                        width: 1.4,
-                      ),
-                    ),
+                    decoration: CuboDecorations.glass(),
                     child: Column(
                       children: [
                         Container(
@@ -1025,7 +890,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                             shape: BoxShape.circle,
                             color: accentColor,
                             border: Border.all(
-                              color: appWhite.withOpacity(0.75),
+                              color: CuboColors.whiteA(0.75),
                               width: 2,
                             ),
                           ),
@@ -1147,9 +1012,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          color: CuboColors.whiteA(0.12),
           border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
+            color: CuboColors.whiteA(0.55),
+            width: 1.6,
           ),
         ),
         child: Center(child: child),
@@ -1158,8 +1024,6 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
   Widget buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1184,53 +1048,37 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
           ],
         ),
 
-        SizedBox(height: compact ? 14 : 24),
+        SizedBox(height: compact ? 8 : 16),
 
-        Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        '4 en raya',
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: titleSize,
-                          height: 1.9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            CuboIllustration(
+              'cuatro_raya',
+              size: compact ? 64 : 96,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '4 en raya',
+                      maxLines: 1,
+                      textAlign: TextAlign.right,
+                      style: CuboText.title(size: titleSize),
                     ),
                   ),
-                ),
-
-                Positioned(
-                  top: lineTop,
-                  left: compact ? -13 : -18,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
+                  SizedBox(height: compact ? 9 : 12),
+                  const CuboPillBar(),
+                  const SizedBox(height: 4),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );
@@ -1245,13 +1093,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     return Expanded(
       child: Container(
         height: 48,
-        decoration: BoxDecoration(
-          color: appWhite,
-          border: Border.all(
-            color: appWhite.withOpacity(0.75),
-            width: 1.5,
-          ),
-        ),
+        decoration: CuboDecorations.whiteCard(radius: CuboRadii.md),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1260,7 +1102,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
             Text(
               value,
               style: const TextStyle(
-                color: appBlue,
+                color: CuboColors.blueInk,
                 fontSize: 21,
                 fontWeight: FontWeight.w900,
               ),
@@ -1272,7 +1114,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: appBlue.withOpacity(0.70),
+                  color: CuboColors.blueInk.withValues(alpha: 0.70),
                   fontSize: 9.5,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.3,
@@ -1297,20 +1139,19 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       child: Material(
         color: selected
             ? appWhite
-            : appWhite.withOpacity(0.07),
+            : CuboColors.whiteA(0.08),
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: selected ? appWhite : CuboColors.whiteA(0.45),
+            width: 1.4,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => _cambiarModo(mode),
           child: Container(
             height: compact ? 40 : 44,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: selected
-                    ? appWhite
-                    : appWhite.withOpacity(0.26),
-                width: selected ? 2 : 1.3,
-              ),
-            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1397,19 +1238,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: BorderSide(
-            color: colorTurno,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.40),
-            width: 2,
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           AnimatedContainer(
@@ -1599,13 +1428,19 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   Widget buildBoardCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(7),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: boardBlue,
-        border: Border.all(
-          color: appWhite.withOpacity(0.75),
-          width: 2.5,
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [boardBlue, boardBlueDark],
         ),
+        borderRadius: CuboRadii.lgAll,
+        border: Border.all(
+          color: CuboColors.whiteA(0.35),
+          width: 1.4,
+        ),
+        boxShadow: CuboShadows.soft,
       ),
       child: AspectRatio(
         aspectRatio: columnas / filas,
@@ -1658,8 +1493,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       animation: AppSettings.instance,
       builder: (context, _) {
         return Scaffold(
-          backgroundColor: appBlue,
-          body: SafeArea(
+          backgroundColor: CuboColors.blue,
+          body: CuboBackground(
+            halo: CuboHalo.topLeft,
+            child: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final compact = constraints.maxHeight < 740;
@@ -1761,6 +1598,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                 );
               },
             ),
+          ),
           ),
         );
       },

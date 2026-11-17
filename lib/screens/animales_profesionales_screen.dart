@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../data/animales_profesionales_data.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 import '../core/app_settings.dart';
 import '../core/animal_profession_i18n.dart';
 
@@ -61,27 +62,11 @@ class _AnimalesProfesionalesScreenState
   }
 
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: EdgeInsets.zero);
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.secondary(padding: EdgeInsets.zero);
   }
 
   Widget _circleButton({
@@ -173,12 +158,8 @@ class _AnimalesProfesionalesScreenState
 
                 Positioned(
                   top: lineTop,
-                  left: compact ? -13 : -18,
                   right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  child: const CuboPillBar(),
                 ),
               ],
             ),
@@ -193,73 +174,20 @@ class _AnimalesProfesionalesScreenState
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void mostrarNormas() {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -269,46 +197,7 @@ class _AnimalesProfesionalesScreenState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(height: 18),
 
@@ -382,24 +271,22 @@ class _AnimalesProfesionalesScreenState
   }
 
   Widget buildMainCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.30),
-          width: 1.4,
-        ),
-      ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
+    final contentKey = _itemActual == null
+        ? 'empty'
+        : _oculto
+        ? 'hidden'
+        : '${_itemActual!.animal}-${_itemActual!.profesion}';
+
+    return CuboCardSwitcher(
+      child: CuboHeroCard(
+        key: ValueKey(contentKey),
+        chip: 'animales profesionales',
+        chipIcon: Icons.pets_rounded,
+        padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
         child: _buildContenido(),
       ),
     );
   }
-
-
 
   Widget buildButtons() {
     return Column(
@@ -451,7 +338,9 @@ class _AnimalesProfesionalesScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appBlue,
-      body: SafeArea(
+      body: CuboBackground(
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxHeight < 740;
@@ -485,9 +374,11 @@ class _AnimalesProfesionalesScreenState
             );
           },
         ),
+        ),
       ),
     );
   }
+
   Widget _buildContenido() {
     if (_itemActual == null) {
       return const Column(
@@ -495,10 +386,7 @@ class _AnimalesProfesionalesScreenState
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            '🐾',
-            style: TextStyle(fontSize: 82),
-          ),
+          CuboIllustration('animales', onBlue: false, size: 104),
           SizedBox(height: 18),
           Text(
             'pulsa generar\npara empezar',
@@ -506,7 +394,7 @@ class _AnimalesProfesionalesScreenState
             style: TextStyle(
               fontSize: 31,
               height: 0.95,
-              color: appWhite,
+              color: CuboColors.blueInk,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.7,
             ),
@@ -524,17 +412,14 @@ class _AnimalesProfesionalesScreenState
           Container(
             width: 76,
             height: 76,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: appWhite.withOpacity(0.85),
-                width: 2.2,
-              ),
+              color: CuboColors.blueTint,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.visibility_off_rounded,
               size: 39,
-              color: appWhite.withOpacity(0.9),
+              color: CuboColors.blueInk,
             ),
           ),
 
@@ -546,7 +431,7 @@ class _AnimalesProfesionalesScreenState
             style: TextStyle(
               fontSize: 34,
               height: 0.92,
-              color: appWhite,
+              color: CuboColors.blueInk,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.8,
             ),
@@ -559,7 +444,7 @@ class _AnimalesProfesionalesScreenState
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: appWhite.withOpacity(0.68),
+              color: CuboColors.blueInk.withValues(alpha: 0.68),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -589,7 +474,7 @@ class _AnimalesProfesionalesScreenState
           ).toLowerCase(),
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: appWhite,
+            color: CuboColors.blueInk,
             fontSize: 41,
             height: 0.95,
             fontWeight: FontWeight.w900,
@@ -602,7 +487,7 @@ class _AnimalesProfesionalesScreenState
         Text(
           'haciendo de',
           style: TextStyle(
-            color: appWhite.withOpacity(0.66),
+            color: CuboColors.blueInk.withValues(alpha: 0.66),
             fontSize: 14,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.4,
@@ -618,7 +503,7 @@ class _AnimalesProfesionalesScreenState
           ).toLowerCase(),
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: appWhite,
+            color: CuboColors.blueInk,
             fontSize: 41,
             height: 0.95,
             fontWeight: FontWeight.w900,

@@ -38,7 +38,6 @@ const List<String> preguntasPingPong = [
   'Di 5 comidas rápidas.',
   'Di 5 platos italianos.',
   'Di 5 comidas que lleven queso.',
-  'Di 5 bebidas alcohólicas.',
   'Di 5 cócteles.',
   'Di 5 comidas picantes.',
   'Di 5 postres.',
@@ -101,7 +100,6 @@ const List<String> preguntasPingPong = [
   /// COSAS GRACIOSAS
 
   'Di 5 excusas para llegar tarde.',
-  'Di 5 cosas que harías borracho.',
   'Di 5 cosas que dan vergüenza.',
   'Di 5 cosas que gritarías en una fiesta.',
   'Di 5 cosas que harías si fueras rico.',
@@ -113,15 +111,10 @@ const List<String> preguntasPingPong = [
 
   /// FIESTA
 
-  'Di 5 bebidas alcohólicas.',
   'Di 5 juegos de fiesta.',
-  'Di 5 razones para beber.',
   'Di 5 cosas que pasan en una discoteca.',
   'Di 5 cócteles famosos.',
-  'Di 5 motivos para brindar.',
   'Di 5 cosas que haces en una fiesta.',
-  'Di 5 tipos de chupitos.',
-  'Di 5 bebidas con alcohol.',
   'Di 5 cosas que haces cuando sales de fiesta.',
 
   /// CASA

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../data/ping_pong_data.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class PingPongScreen extends StatefulWidget {
   const PingPongScreen({super.key});
@@ -47,7 +48,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
     setState(() {
       juegoIniciado = true;
       preguntaActual =
-      preguntasPingPong[random.nextInt(preguntasPingPong.length)];
+          preguntasPingPong[random.nextInt(preguntasPingPong.length)];
       tiempoRestante = 10;
     });
 
@@ -80,16 +81,8 @@ class _PingPongScreenState extends State<PingPongScreen> {
     });
   }
 
-
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: EdgeInsets.zero);
   }
 
   Widget circleButton({
@@ -106,10 +99,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
-          ),
+          border: Border.all(color: appWhite.withOpacity(0.85), width: 2.2),
         ),
         child: Center(child: child),
       ),
@@ -171,15 +161,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: lineTop,
-                  left: 0,
-                  right: -18,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
+                Positioned(top: lineTop, left: 0, child: const CuboPillBar()),
               ],
             ),
           ),
@@ -193,69 +175,20 @@ class _PingPongScreenState extends State<PingPongScreen> {
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: appWhite, size: 22),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void mostrarNormas() {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -265,41 +198,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(height: 3, color: appWhite.withOpacity(0.58)),
+                  const CuboDialogHeader(),
                   const SizedBox(height: 18),
                   const Text(
                     'PING PONG',
@@ -319,17 +218,20 @@ class _PingPongScreenState extends State<PingPongScreen> {
                   rulesItem(
                     icon: Icons.timer_rounded,
                     title: 'Responde rápido',
-                    text: 'Tienes 10 segundos para responder antes de llegar a cero.',
+                    text:
+                        'Tienes 10 segundos para responder antes de llegar a cero.',
                   ),
                   rulesItem(
                     icon: Icons.warning_rounded,
                     title: 'Si falla o duda',
-                    text: 'Si duda, falla o tarda demasiado PIERDE y tiene que hacer un reto.',
+                    text:
+                        'Si duda, falla o tarda demasiado PIERDE y tiene que hacer un reto.',
                   ),
                   rulesItem(
                     icon: Icons.arrow_forward_rounded,
                     title: 'Siguiente',
-                    text: 'Pulsa SIGUIENTE para sacar otra pregunta y reiniciar el tiempo.',
+                    text:
+                        'Pulsa SIGUIENTE para sacar otra pregunta y reiniciar el tiempo.',
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
@@ -395,69 +297,47 @@ class _PingPongScreenState extends State<PingPongScreen> {
   }
 
   Widget buildGameCard({required bool compact}) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 16 : 24,
-              vertical: compact ? 16 : 24,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(vertical: compact ? 6 : 12),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: max(0.0, constraints.maxHeight - (compact ? 12 : 24)),
             ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: max(0.0, constraints.maxHeight - (compact ? 32 : 48)),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: compact ? 68 : 88,
-                    height: compact ? 68 : 88,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: accentYellow.withOpacity(0.15),
-                      border: Border.all(color: accentYellow, width: 3),
-                    ),
-                    child: Icon(
-                      Icons.sports_tennis_rounded,
-                      color: accentYellow,
-                      size: compact ? 36 : 48,
-                    ),
-                  ),
-                  SizedBox(height: compact ? 14 : 20),
-                  buildTimer(compact: compact),
-                  SizedBox(height: compact ? 16 : 24),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    transitionBuilder: (child, animation) {
-                      final slide = Tween<Offset>(
-                        begin: const Offset(0, 0.08),
-                        end: Offset.zero,
-                      ).animate(animation);
-
-                      return SlideTransition(
-                        position: slide,
-                        child: FadeTransition(
-                          opacity: animation,
-                          child: child,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  child: juegoIniciado
+                      ? KeyedSubtree(
+                          key: const ValueKey('timer'),
+                          child: buildTimer(compact: compact),
+                        )
+                      : CuboIllustration(
+                          'ping_pong',
+                          key: const ValueKey('illustration'),
+                          size: compact ? 92 : 120,
                         ),
-                      );
-                    },
+                ),
+                SizedBox(height: compact ? 16 : 24),
+                CuboCardSwitcher(
+                  child: CuboHeroCard(
+                    key: ValueKey(preguntaActual),
+                    chip: 'ping pong',
+                    chipIcon: Icons.sports_tennis_rounded,
+                    padding: EdgeInsets.fromLTRB(
+                      compact ? 18 : 24,
+                      compact ? 16 : 20,
+                      compact ? 18 : 24,
+                      compact ? 22 : 30,
+                    ),
                     child: Text(
                       preguntaActual,
-                      key: ValueKey(preguntaActual),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: appWhite,
+                        color: CuboColors.blueInk,
                         fontSize: compact ? 24 : 30,
                         height: 1.14,
                         fontWeight: FontWeight.w900,
@@ -465,12 +345,12 @@ class _PingPongScreenState extends State<PingPongScreen> {
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -488,9 +368,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
       child: AspectRatio(
         aspectRatio: compact ? 1.55 : 1.4,
         child: Material(
-          color: disabled
-              ? backgroundColor.withOpacity(0.35)
-              : backgroundColor,
+          color: disabled ? backgroundColor.withOpacity(0.35) : backgroundColor,
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
             onTap: onTap,
@@ -505,12 +383,12 @@ class _PingPongScreenState extends State<PingPongScreen> {
                 boxShadow: disabled
                     ? null
                     : [
-                  BoxShadow(
-                    color: backgroundColor.withOpacity(0.28),
-                    blurRadius: 16,
-                    offset: const Offset(0, 7),
-                  ),
-                ],
+                        BoxShadow(
+                          color: backgroundColor.withOpacity(0.28),
+                          blurRadius: 16,
+                          offset: const Offset(0, 7),
+                        ),
+                      ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -543,52 +421,57 @@ class _PingPongScreenState extends State<PingPongScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appBlue,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 14.0 : 18.0;
-            final verticalPadding = compact ? 12.0 : 18.0;
+      body: CuboBackground(
+        halo: CuboHalo.topRight,
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 740;
+              final horizontalPadding = compact ? 14.0 : 18.0;
+              final verticalPadding = compact ? 12.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 10 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(compact: compact),
-                  SizedBox(height: compact ? 8 : 14),
-                  Expanded(child: buildGameCard(compact: compact)),
-                  SizedBox(height: compact ? 9 : 14),
-                  SizedBox(
-                    width: double.infinity,
-                    height: compact ? 72 : 82,
-                    child: ElevatedButton.icon(
-                      onPressed: juegoIniciado ? siguientePregunta : empezarRonda,
-                      style: mainButtonStyle(),
-                      icon: Icon(
-                        juegoIniciado
-                            ? Icons.arrow_forward_rounded
-                            : Icons.play_arrow_rounded,
-                        size: compact ? 24 : 28,
-                      ),
-                      label: Text(
-                        juegoIniciado ? 'SIGUIENTE PREGUNTA' : 'EMPEZAR',
-                        style: TextStyle(
-                          fontSize: compact ? 15 : 17,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 10 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
+                    SizedBox(height: compact ? 8 : 14),
+                    Expanded(child: buildGameCard(compact: compact)),
+                    SizedBox(height: compact ? 9 : 14),
+                    SizedBox(
+                      width: double.infinity,
+                      height: compact ? 72 : 82,
+                      child: ElevatedButton.icon(
+                        onPressed: juegoIniciado
+                            ? siguientePregunta
+                            : empezarRonda,
+                        style: mainButtonStyle(),
+                        icon: Icon(
+                          juegoIniciado
+                              ? Icons.arrow_forward_rounded
+                              : Icons.play_arrow_rounded,
+                          size: compact ? 24 : 28,
+                        ),
+                        label: Text(
+                          juegoIniciado ? 'SIGUIENTE PREGUNTA' : 'EMPEZAR',
+                          style: TextStyle(
+                            fontSize: compact ? 15 : 17,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../data/barcelonamedianoche_data.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class BarcelonaMedianocheScreen extends StatefulWidget {
   const BarcelonaMedianocheScreen({super.key});
@@ -98,39 +99,33 @@ class _BarcelonaMedianocheScreenState
     super.dispose();
   }
 
+  static const EdgeInsets _pillPadding = EdgeInsets.symmetric(horizontal: 16);
+
   ButtonStyle _mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: _pillPadding);
   }
 
   ButtonStyle _dangerButtonStyle() {
     return ElevatedButton.styleFrom(
       backgroundColor: accentRed,
       foregroundColor: appWhite,
+      disabledBackgroundColor: CuboColors.whiteA(0.16),
+      disabledForegroundColor: CuboColors.whiteA(0.45),
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shadowColor: Colors.transparent,
+      padding: _pillPadding,
+      shape: const StadiumBorder(),
     );
   }
 
+  /// Para [OutlinedButton].
   ButtonStyle _secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.secondary(padding: _pillPadding);
+  }
+
+  /// Mismo aspecto que [_secondaryButtonStyle] pero para [ElevatedButton].
+  ButtonStyle _secondaryElevatedStyle() {
+    return CuboButtons.secondaryElevated(padding: _pillPadding);
   }
 
   Widget _circleButton({
@@ -151,8 +146,9 @@ class _BarcelonaMedianocheScreenState
           height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            color: CuboColors.whiteA(0.08),
             border: Border.all(
-              color: appWhite.withOpacity(0.85),
+              color: CuboColors.whiteA(0.85),
               width: 2.2,
             ),
           ),
@@ -168,12 +164,13 @@ class _BarcelonaMedianocheScreenState
     VoidCallback? extraAction,
     IconData? extraIcon,
     VoidCallback? onBack,
+    bool showIllustration = false,
+    bool illustrationPopIn = false,
   }) {
     final compact = _isCompactScreen;
 
     final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
+    final shortScreen = MediaQuery.sizeOf(context).height < 740;
 
     // Convierte los títulos de dos líneas en una sola línea,
     // igual que en Impostor.
@@ -215,56 +212,44 @@ class _BarcelonaMedianocheScreenState
           ],
         ),
 
-        SizedBox(height: compact ? 14 : 24),
+        SizedBox(height: compact ? 14 : 22),
+
+        if (showIllustration) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: CuboIllustration(
+              'bcn_medianoche',
+              size: shortScreen ? 88 : 116,
+              popIn: illustrationPopIn,
+            ),
+          ),
+          SizedBox(height: compact ? 8 : 12),
+        ],
 
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        visualTitle,
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: titleSize,
-                          height: 1.4,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
+          padding: const EdgeInsets.only(right: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  visualTitle,
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.right,
+                  style: CuboText.title(size: titleSize),
                 ),
-                Positioned(
-                  top: lineTop,
-                  left: compact ? -13 : -18,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              SizedBox(height: compact ? 10 : 12),
+              const CuboPillBar(),
+            ],
           ),
         ),
 
         if (subtitle != null) ...[
-          SizedBox(height: compact ? 8 : 10),
+          SizedBox(height: compact ? 12 : 14),
           _infoBar(
             text: subtitle,
             color: accentRed,
@@ -280,29 +265,36 @@ class _BarcelonaMedianocheScreenState
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: BorderSide(
-            color: color,
-            width: 6,
+      padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _accentDot(color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: CuboColors.whiteA(0.80),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+              ),
+            ),
           ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
+        ],
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
+    );
+  }
+
+  /// Punto de color que sustituye a la antigua barra lateral de acento.
+  Widget _accentDot(Color color) {
+    return Container(
+      width: 9,
+      height: 9,
+      margin: const EdgeInsets.only(top: 4),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 
@@ -313,27 +305,23 @@ class _BarcelonaMedianocheScreenState
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(),
       child: child,
     );
   }
 
   Widget _sectionTitle(String text) {
-    return Text(
-      tr(text).toLowerCase(),
-      style: const TextStyle(
-        color: appWhite,
-        fontSize: 28,
-        height: 0.95,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -0.7,
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          tr(text).toLowerCase(),
+          style: CuboText.title(size: 28),
+        ),
+        const SizedBox(height: 8),
+        const CuboPillBar(width: 36, height: 5),
+      ],
     );
   }
 
@@ -342,54 +330,7 @@ class _BarcelonaMedianocheScreenState
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   Future<void> _showRulesDialog() {
@@ -401,14 +342,8 @@ class _BarcelonaMedianocheScreenState
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.78),
-              width: 2.2,
-            ),
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.82,
@@ -418,54 +353,11 @@ class _BarcelonaMedianocheScreenState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  const CuboDialogHeader(),
                   const SizedBox(height: 18),
-                  const Text(
+                  Text(
                     'BARCELONA, MEDIANOCHE',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-
-                    ),
+                    style: CuboText.chip(size: 13),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -503,19 +395,19 @@ class _BarcelonaMedianocheScreenState
                     'No se puede asesinar si hay otro jugador vivo presente. Cuando una misión se cumple, el asesino recibe una nueva.',
                   ),
                   _rulesItem(
-                    icon: Icons.payments_outlined,
+                    icon: Icons.payments_rounded,
                     title: 'Cuando alguien muere',
                     text:
                     'La víctima entrega todo su dinero al atacante. Queda eliminada: puede hablar y negociar, pero ya no actúa, puja ni puede ganar.',
                   ),
                   _rulesItem(
-                    icon: Icons.local_police_outlined,
+                    icon: Icons.local_police_rounded,
                     title: 'Agentes',
                     text:
                     'Un agente puede declarar una detención si ha presenciado el crimen o tiene una prueba clara.',
                   ),
                   _rulesItem(
-                    icon: Icons.timer_outlined,
+                    icon: Icons.timer_rounded,
                     title: 'Detención correcta',
                     text:
                     'El asesino paga hasta 40€ al agente y no puede cometer asesinatos durante 10 minutos. Sí puede hablar, negociar y pujar.',
@@ -527,19 +419,19 @@ class _BarcelonaMedianocheScreenState
                     'Si no había prueba clara o el acusado era inocente, el agente paga hasta 40€ al acusado.',
                   ),
                   _rulesItem(
-                    icon: Icons.handshake_outlined,
+                    icon: Icons.handshake_rounded,
                     title: 'Tratos y robos',
                     text:
                     'Se permiten alianzas, intercambios y robos acordados por la mesa. Registra en la app cualquier cambio de dinero o bienes.',
                   ),
                   _rulesItem(
-                    icon: Icons.diamond_outlined,
+                    icon: Icons.diamond_rounded,
                     title: 'Subasta final',
                     text:
                     'Al terminar la noche se subastan 5 lotes. Las pujas son secretas y solo participan los jugadores vivos.',
                   ),
                   _rulesItem(
-                    icon: Icons.emoji_events_outlined,
+                    icon: Icons.emoji_events_rounded,
                     title: 'Quién gana',
                     text:
                     'Gana el superviviente con mayor fortuna total: dinero restante + valor de los bienes adquiridos.',
@@ -549,9 +441,9 @@ class _BarcelonaMedianocheScreenState
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      style: _mainButtonStyle(),
+                      style: CuboButtons.primary(),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 2),
                         child: Text(
                           'ENTENDIDO',
                           style: TextStyle(
@@ -583,54 +475,14 @@ class _BarcelonaMedianocheScreenState
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.82),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.88),
-                        width: 2.1,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.mail_outline_rounded,
-                      color: appWhite,
-                      size: 29,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Text(
-                      'la invitación',
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: 36,
-                        height: 0.92,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Container(
-                height: 3,
-                color: appWhite.withOpacity(0.58),
+              _dialogTitle(
+                icon: Icons.mail_outline_rounded,
+                title: 'la invitación',
               ),
               const SizedBox(height: 18),
               Text(
@@ -690,13 +542,7 @@ class _BarcelonaMedianocheScreenState
         insetPadding: const EdgeInsets.symmetric(horizontal: 20),
         child: Container(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.80),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -704,7 +550,7 @@ class _BarcelonaMedianocheScreenState
               children: [
                 _dialogTitle(
                   icon: editingRooms
-                      ? Icons.place_outlined
+                      ? Icons.place_rounded
                       : Icons.hardware_rounded,
                   title: title,
                 ),
@@ -912,25 +758,7 @@ class _BarcelonaMedianocheScreenState
         5,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: const BorderSide(
-            color: accentGold,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-          top: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-          right: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           Container(
@@ -939,8 +767,9 @@ class _BarcelonaMedianocheScreenState
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: accentGold.withValues(alpha: 0.16),
               border: Border.all(
-                color: appWhite.withOpacity(0.68),
+                color: accentGold.withValues(alpha: 0.80),
                 width: 1.6,
               ),
             ),
@@ -997,8 +826,12 @@ class _BarcelonaMedianocheScreenState
 
     return Material(
       color: onTap == null
-          ? appWhite.withOpacity(0.04)
-          : appWhite.withOpacity(0.10),
+          ? CuboColors.whiteA(0.04)
+          : CuboColors.whiteA(0.12),
+      shape: CircleBorder(
+        side: BorderSide(color: CuboColors.whiteA(onTap == null ? 0.12 : 0.30)),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
@@ -1106,7 +939,7 @@ class _BarcelonaMedianocheScreenState
                     MaterialTapTargetSize.shrinkWrap,
                     alignment: Alignment.center,
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: CuboRadii.mdAll,
                     ),
                   ),
                   child: const Center(
@@ -1130,9 +963,10 @@ class _BarcelonaMedianocheScreenState
                 vertical: compact ? 16 : 20,
               ),
               decoration: BoxDecoration(
-                color: appWhite.withOpacity(0.05),
+                color: CuboColors.whiteA(0.05),
+                borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: appWhite.withOpacity(0.18),
+                  color: CuboColors.whiteA(0.18),
                   width: 1.3,
                 ),
               ),
@@ -1263,11 +1097,14 @@ class _BarcelonaMedianocheScreenState
         children: [
           _screenHeader(
             title: 'barcelona\nmedianoche',
+            showIllustration: true,
           ),
 
-          SizedBox(height: compact ? 12 : 18),
+          SizedBox(height: compact ? 14 : 20),
 
-          _panel(
+          CuboEntrance(
+            index: 0,
+            child: _panel(
             padding: EdgeInsets.all(compact ? 13 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1300,7 +1137,7 @@ class _BarcelonaMedianocheScreenState
                             ),
                         style: _secondaryButtonStyle(),
                         icon: const Icon(
-                          Icons.place_outlined,
+                          Icons.place_rounded,
                         ),
                         label: Padding(
                           padding: EdgeInsets.symmetric(
@@ -1352,18 +1189,22 @@ class _BarcelonaMedianocheScreenState
               ],
             ),
           ),
+          ),
 
           SizedBox(height: compact ? 10 : 14),
 
-          _buildSetupPlayersEditor(
-            compact: compact,
+          CuboEntrance(
+            index: 1,
+            child: _buildSetupPlayersEditor(
+              compact: compact,
+            ),
           ),
 
           SizedBox(height: compact ? 12 : 16),
 
           SizedBox(
             width: double.infinity,
-            height: compact ? 58 : 66,
+            height: compact ? 58 : 64,
             child: ElevatedButton(
               onPressed: game.canStart
                   ? _startGame
@@ -1371,17 +1212,14 @@ class _BarcelonaMedianocheScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: appWhite,
                 foregroundColor: appBlue,
-                disabledBackgroundColor:
-                appWhite.withOpacity(0.18),
-                disabledForegroundColor:
-                appWhite.withOpacity(0.42),
+                disabledBackgroundColor: CuboColors.whiteA(0.16),
+                disabledForegroundColor: CuboColors.whiteA(0.45),
                 elevation: 0,
+                shadowColor: Colors.transparent,
                 padding: EdgeInsets.symmetric(
-                  horizontal: veryNarrow ? 10 : 16,
+                  horizontal: veryNarrow ? 14 : 20,
                 ),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                ),
+                shape: const StadiumBorder(),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1449,13 +1287,7 @@ class _BarcelonaMedianocheScreenState
                 ? 10
                 : 12,
           ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.07),
-            border: Border.all(
-              color: appWhite.withOpacity(0.24),
-              width: 1.4,
-            ),
-          ),
+          decoration: CuboDecorations.glass(radius: CuboRadii.md),
           child: Row(
             children: [
               Container(
@@ -1547,11 +1379,9 @@ class _BarcelonaMedianocheScreenState
     final target = game.findPlayerById(player.currentTargetId);
     final compact = _isCompactScreen;
     final roleColor = _roleColor(player.role);
-    final progress =
-    game.players.isEmpty ? 0.0 : (game.revealIndex + 1) / game.players.length;
 
     return SingleChildScrollView(
-      key: ValueKey('reveal_${player.id}_${game.revealRoleVisible}'),
+      key: const ValueKey('reveal'),
       padding: EdgeInsets.fromLTRB(
         compact ? 13 : 18,
         compact ? 11 : 18,
@@ -1587,36 +1417,27 @@ class _BarcelonaMedianocheScreenState
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: compact ? 8 : 10,
-              backgroundColor: appWhite.withOpacity(0.12),
-              valueColor: const AlwaysStoppedAnimation<Color>(accentGold),
+          const SizedBox(height: 10),
+          Center(
+            child: CuboProgressDots(
+              total: game.players.length,
+              current: game.revealIndex,
             ),
           ),
-          SizedBox(height: compact ? 12 : 18),
-          Container(
-            width: double.infinity,
-            constraints: BoxConstraints(
-              minHeight: compact ? 360 : 450,
-            ),
-            padding: EdgeInsets.all(compact ? 16 : 20),
-            decoration: BoxDecoration(
-              color: game.revealRoleVisible
-                  ? roleColor.withOpacity(0.16)
-                  : appWhite.withOpacity(0.08),
-              border: Border.all(
-                color: game.revealRoleVisible
-                    ? roleColor
-                    : appWhite.withOpacity(0.28),
-                width: game.revealRoleVisible ? 2.5 : 1.4,
+          SizedBox(height: compact ? 14 : 20),
+          CuboCardSwitcher(
+            child: CuboHeroCard(
+              key: ValueKey('reveal_${player.id}_${game.revealRoleVisible}'),
+              chip: game.revealRoleVisible
+                  ? player.name
+                  : '${game.revealIndex + 1}/${game.players.length}',
+              chipIcon: Icons.person_rounded,
+              padding: EdgeInsets.fromLTRB(
+                compact ? 18 : 22,
+                compact ? 16 : 20,
+                compact ? 18 : 22,
+                compact ? 22 : 30,
               ),
-            ),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 260),
               child: game.revealRoleVisible
                   ? Column(
                 key: const ValueKey('visible'),
@@ -1628,10 +1449,7 @@ class _BarcelonaMedianocheScreenState
                     decoration: BoxDecoration(
                       color: roleColor,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: appWhite,
-                        width: 2.4,
-                      ),
+                      boxShadow: CuboShadows.soft,
                     ),
                     child: Icon(
                       _roleIcon(player.role),
@@ -1643,12 +1461,9 @@ class _BarcelonaMedianocheScreenState
                   Text(
                     tr(player.role.label).toLowerCase(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: compact ? 34 : 42,
-                      height: 0.92,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                    style: CuboText.title(
+                      size: compact ? 34 : 42,
+                      color: CuboColors.blueInk,
                     ),
                   ),
                   SizedBox(height: compact ? 12 : 16),
@@ -1656,7 +1471,7 @@ class _BarcelonaMedianocheScreenState
                     _roleDescription(player.role),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.80),
+                      color: CuboColors.blueInk.withValues(alpha: 0.78),
                       fontSize: compact ? 13 : 14.5,
                       height: 1.35,
                       fontWeight: FontWeight.w700,
@@ -1667,14 +1482,17 @@ class _BarcelonaMedianocheScreenState
                     _secretInfoTile(
                       'Objetivo',
                       target?.name ?? 'Sin objetivo',
+                      light: true,
                     ),
                     _secretInfoTile(
                       'Habitación',
                       player.currentRoom ?? '-',
+                      light: true,
                     ),
                     _secretInfoTile(
                       'Objeto',
                       player.currentWeapon ?? '-',
+                      light: true,
                     ),
                   ],
                 ],
@@ -1686,16 +1504,13 @@ class _BarcelonaMedianocheScreenState
                   Container(
                     width: compact ? 72 : 84,
                     height: compact ? 72 : 84,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.85),
-                        width: 2.2,
-                      ),
+                      color: CuboColors.blueTint,
                     ),
                     child: Icon(
                       Icons.phone_android_rounded,
-                      color: appWhite,
+                      color: CuboColors.blue,
                       size: compact ? 36 : 42,
                     ),
                   ),
@@ -1703,12 +1518,9 @@ class _BarcelonaMedianocheScreenState
                   Text(
                     player.name.toLowerCase(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: appWhite,
-                      fontSize: compact ? 36 : 44,
-                      height: 0.92,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
+                    style: CuboText.title(
+                      size: compact ? 36 : 44,
+                      color: CuboColors.blueInk,
                     ),
                   ),
                   SizedBox(height: compact ? 12 : 16),
@@ -1716,7 +1528,7 @@ class _BarcelonaMedianocheScreenState
                     'Coge el móvil y toca la tarjeta para descubrir tu identidad.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.72),
+                      color: CuboColors.blueInk.withValues(alpha: 0.72),
                       fontSize: compact ? 13 : 14,
                       height: 1.35,
                       fontWeight: FontWeight.w700,
@@ -1724,7 +1536,9 @@ class _BarcelonaMedianocheScreenState
                   ),
                   SizedBox(height: compact ? 18 : 24),
                   Material(
-                    color: appWhite,
+                    color: CuboColors.blue,
+                    shape: const StadiumBorder(),
+                    clipBehavior: Clip.antiAlias,
                     child: InkWell(
                       onTap: () {
                         setState(() {
@@ -1741,13 +1555,14 @@ class _BarcelonaMedianocheScreenState
                           children: [
                             Icon(
                               Icons.visibility_rounded,
-                              color: appBlue,
+                              color: appWhite,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'REVELAR IDENTIDAD',
                               style: TextStyle(
-                                color: appBlue,
+                                color: appWhite,
+
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.4,
                               ),
@@ -1825,7 +1640,7 @@ class _BarcelonaMedianocheScreenState
                 child: _actionButton(
                   title: 'Asesinato',
                   subtitle: 'Confirma una misión en secreto.',
-                  icon: Icons.local_fire_department_outlined,
+                  icon: Icons.local_fire_department_rounded,
                   color: accentRed,
                   onTap: _showKillDialog,
                 ),
@@ -1835,7 +1650,7 @@ class _BarcelonaMedianocheScreenState
                 child: _actionButton(
                   title: 'Detención',
                   subtitle: 'Un agente acusa con pruebas.',
-                  icon: Icons.local_police_outlined,
+                  icon: Icons.local_police_rounded,
                   color: accentBlue,
                   onTap: _showArrestDialog,
                 ),
@@ -1849,7 +1664,7 @@ class _BarcelonaMedianocheScreenState
                 child: _actionButton(
                   title: 'Trato o robo',
                   subtitle: 'Mueve dinero o bienes.',
-                  icon: Icons.handshake_outlined,
+                  icon: Icons.handshake_rounded,
                   color: accentPurple,
                   onTap: _showTransferDialog,
                 ),
@@ -1859,7 +1674,7 @@ class _BarcelonaMedianocheScreenState
                 child: _actionButton(
                   title: 'Subasta final',
                   subtitle: 'Comienza las pujas secretas.',
-                  icon: Icons.diamond_outlined,
+                  icon: Icons.diamond_rounded,
                   color: accentGold,
                   onTap: _confirmStartFinalAuction,
                   darkForeground: true,
@@ -1890,7 +1705,7 @@ class _BarcelonaMedianocheScreenState
                       const Padding(
                         padding: EdgeInsets.only(top: 4),
                         child: Icon(
-                          Icons.circle,
+                          Icons.circle_rounded,
                           size: 8,
                           color: accentRed,
                         ),
@@ -1944,47 +1759,47 @@ class _BarcelonaMedianocheScreenState
           ),
           const SizedBox(height: 18),
           if (lot != null)
-            _panel(
-              child: Column(
-                children: [
-                  Container(
-                    width: 76,
-                    height: 76,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.85),
-                        width: 2.2,
+            CuboCardSwitcher(
+              child: CuboHeroCard(
+                key: ValueKey('lot_${game.currentLotIndex}'),
+                chip:
+                    '${game.currentLotIndex + 1}/${game.finalAuctionLots.length}',
+                chipIcon: Icons.diamond_rounded,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accentGold.withValues(alpha: 0.22),
+                        border: Border.all(
+                          color: accentGold,
+                          width: 2.2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.diamond_rounded,
+                        color: CuboColors.blueInk,
+                        size: 38,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.diamond_outlined,
-                      color: appWhite,
-                      size: 38,
+                    const SizedBox(height: 16),
+                    Text(
+                      tr(lot.name).toLowerCase(),
+                      textAlign: TextAlign.center,
+                      style: CuboText.title(
+                        size: 32,
+                        color: CuboColors.blueInk,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    tr(lot.name).toLowerCase(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 32,
-                      height: 0.95,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.7,
+                    const SizedBox(height: 10),
+                    Text(
+                      'Valor real: ${lot.value}€',
+                      style: CuboText.label(size: 16),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Valor real: ${lot.value}€',
-                    style: const TextStyle(
-                      color: accentGold,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           const SizedBox(height: 14),
@@ -2026,32 +1841,8 @@ class _BarcelonaMedianocheScreenState
                       fontWeight: FontWeight.w900,
                     ),
                     cursorColor: appWhite,
-                    decoration: InputDecoration(
+                    decoration: CuboInputs.decoration(
                       hintText: tr('0 = no pujar'),
-                      hintStyle: TextStyle(
-                        color: appWhite.withOpacity(0.40),
-                      ),
-                      filled: true,
-                      fillColor: appWhite.withOpacity(0.07),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide: BorderSide(
-                          color: appWhite.withOpacity(0.28),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide: BorderSide(
-                          color: appWhite.withOpacity(0.28),
-                        ),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide: BorderSide(
-                          color: appWhite,
-                          width: 2,
-                        ),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -2080,7 +1871,7 @@ class _BarcelonaMedianocheScreenState
               child: Column(
                 children: [
                   const Icon(
-                    Icons.emoji_events_outlined,
+                    Icons.emoji_events_rounded,
                     color: accentGold,
                     size: 42,
                   ),
@@ -2145,6 +1936,8 @@ class _BarcelonaMedianocheScreenState
           _screenHeader(
             title: 'resultado\nfinal',
             subtitle: 'La noche ha terminado. La fortuna ya tiene dueño.',
+            showIllustration: true,
+            illustrationPopIn: true,
           ),
           const SizedBox(height: 18),
           if (winner != null)
@@ -2153,10 +1946,12 @@ class _BarcelonaMedianocheScreenState
               padding: const EdgeInsets.fromLTRB(18, 24, 18, 22),
               decoration: BoxDecoration(
                 color: accentGold,
+                borderRadius: CuboRadii.xlAll,
                 border: Border.all(
                   color: appWhite,
                   width: 2.5,
                 ),
+                boxShadow: CuboShadows.soft,
               ),
               child: Column(
                 children: [
@@ -2219,25 +2014,17 @@ class _BarcelonaMedianocheScreenState
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: appWhite.withOpacity(0.07),
-                    border: Border(
-                      left: BorderSide(
-                        color: index == 0 ? accentGold : appWhite,
-                        width: 5,
-                      ),
-                      bottom: BorderSide(
-                        color: appWhite.withOpacity(0.24),
-                        width: 2,
-                      ),
-                    ),
+                  decoration: CuboDecorations.glass(
+                    radius: CuboRadii.md,
+                    selected: index == 0,
+                    accent: accentGold,
                   ),
                   child: Row(
                     children: [
                       Text(
                         '${index + 1}',
-                        style: const TextStyle(
-                          color: appWhite,
+                        style: TextStyle(
+                          color: index == 0 ? accentGold : appWhite,
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                         ),
@@ -2382,28 +2169,26 @@ class _BarcelonaMedianocheScreenState
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border(
-          left: BorderSide(
-            color: !player.isAlive
-                ? appWhite.withOpacity(0.35)
-                : player.isDetained
-                ? accentBlue
-                : accentGreen,
-            width: 5,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.26),
-            width: 2,
-          ),
-        ),
-      ),
+      decoration: player.isAlive
+          ? CuboDecorations.glass(radius: CuboRadii.md)
+          : BoxDecoration(
+              color: CuboColors.whiteA(0.04),
+              borderRadius: CuboRadii.mdAll,
+              border: Border.all(color: CuboColors.whiteA(0.14), width: 1.2),
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              _accentDot(
+                !player.isAlive
+                    ? CuboColors.whiteA(0.35)
+                    : player.isDetained
+                    ? accentBlue
+                    : accentGreen,
+              ),
+              const SizedBox(width: 9),
               Expanded(
                 child: Text(
                   player.name,
@@ -2473,11 +2258,12 @@ class _BarcelonaMedianocheScreenState
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.16),
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: color.withOpacity(0.55),
+          color: color.withValues(alpha: 0.55),
           width: 1.3,
         ),
       ),
@@ -2508,22 +2294,19 @@ class _BarcelonaMedianocheScreenState
       aspectRatio: compact ? 1.28 : 1.18,
       child: Material(
         color: color,
+        shape: const RoundedRectangleBorder(borderRadius: CuboRadii.lgAll),
+        clipBehavior: Clip.antiAlias,
+        elevation: 0,
         child: InkWell(
           onTap: onTap,
           child: Container(
             padding: EdgeInsets.all(compact ? 10 : 13),
             decoration: BoxDecoration(
+              borderRadius: CuboRadii.lgAll,
               border: Border.all(
-                color: appWhite.withOpacity(0.32),
-                width: 2,
+                color: CuboColors.whiteA(0.32),
+                width: 1.6,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.30),
-                  blurRadius: 16,
-                  offset: const Offset(0, 7),
-                ),
-              ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -2585,11 +2368,12 @@ class _BarcelonaMedianocheScreenState
 
   Widget _chip(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
+        color: CuboColors.whiteA(0.08),
+        borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: appWhite.withOpacity(0.24),
+          color: CuboColors.whiteA(0.24),
         ),
       ),
       child: Text(
@@ -2604,11 +2388,12 @@ class _BarcelonaMedianocheScreenState
 
   Widget _miniPill(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
+        color: CuboColors.whiteA(0.08),
+        borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: appWhite.withOpacity(0.18),
+          color: CuboColors.whiteA(0.18),
         ),
       ),
       child: Text(
@@ -2622,24 +2407,26 @@ class _BarcelonaMedianocheScreenState
     );
   }
 
-  Widget _secretInfoTile(String label, String value) {
+  /// [light] es la variante para usar dentro de la tarjeta blanca.
+  Widget _secretInfoTile(String label, String value, {bool light = false}) {
+    final fg = light ? CuboColors.blueInk : appWhite;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.24),
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(14, 11, 14, 12),
+      decoration: light
+          ? const BoxDecoration(
+              color: CuboColors.blueTint,
+              borderRadius: CuboRadii.mdAll,
+            )
+          : CuboDecorations.glass(radius: CuboRadii.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             tr(label).toUpperCase(),
             style: TextStyle(
-              color: appWhite.withOpacity(0.62),
+              color: fg.withValues(alpha: 0.62),
               fontSize: 10.5,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.6,
@@ -2648,8 +2435,8 @@ class _BarcelonaMedianocheScreenState
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              color: appWhite,
+            style: TextStyle(
+              color: fg,
               fontSize: 16,
               fontWeight: FontWeight.w900,
             ),
@@ -2693,37 +2480,7 @@ class _BarcelonaMedianocheScreenState
   }
 
   InputDecoration _setupInputDecoration(String hint) {
-    return InputDecoration(
-      hintText: tr(hint),
-      hintStyle: TextStyle(
-        color: appWhite.withOpacity(0.38),
-      ),
-      filled: true,
-      fillColor: appWhite.withOpacity(0.07),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 14,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-        ),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite,
-          width: 2,
-        ),
-      ),
-    );
+    return CuboInputs.decoration(hintText: tr(hint));
   }
 
   bool _applyMissionConfiguration() {
@@ -2828,20 +2585,14 @@ class _BarcelonaMedianocheScreenState
               insetPadding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: appBlue,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.78),
-                    width: 2.2,
-                  ),
-                ),
+                decoration: CuboDecorations.dialog(),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _dialogTitle(
-                        icon: Icons.local_fire_department_outlined,
+                        icon: Icons.local_fire_department_rounded,
                         title: 'asesinato',
                       ),
                       const SizedBox(height: 14),
@@ -2879,8 +2630,8 @@ class _BarcelonaMedianocheScreenState
                           style: _secondaryButtonStyle(),
                           icon: Icon(
                             missionVisible
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
                           ),
                           label: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -3033,20 +2784,14 @@ class _BarcelonaMedianocheScreenState
               insetPadding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: appBlue,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.78),
-                    width: 2.2,
-                  ),
-                ),
+                decoration: CuboDecorations.dialog(),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _dialogTitle(
-                        icon: Icons.local_police_outlined,
+                        icon: Icons.local_police_rounded,
                         title: 'detención',
                       ),
                       const SizedBox(height: 14),
@@ -3201,20 +2946,14 @@ class _BarcelonaMedianocheScreenState
               insetPadding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: appBlue,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.78),
-                    width: 2.2,
-                  ),
-                ),
+                decoration: CuboDecorations.dialog(),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _dialogTitle(
-                        icon: Icons.handshake_outlined,
+                        icon: Icons.handshake_rounded,
                         title: 'trato',
                       ),
                       const SizedBox(height: 14),
@@ -3226,7 +2965,7 @@ class _BarcelonaMedianocheScreenState
                                 setModalState(() => transferGood = false);
                               },
                               style: transferGood
-                                  ? _secondaryButtonStyle()
+                                  ? _secondaryElevatedStyle()
                                   : _mainButtonStyle(),
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -3247,7 +2986,7 @@ class _BarcelonaMedianocheScreenState
                               },
                               style: transferGood
                                   ? _mainButtonStyle()
-                                  : _secondaryButtonStyle(),
+                                  : _secondaryElevatedStyle(),
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 12),
                                 child: Text(
@@ -3439,19 +3178,13 @@ class _BarcelonaMedianocheScreenState
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.78),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _dialogTitle(
-                icon: Icons.diamond_outlined,
+                icon: Icons.diamond_rounded,
                 title: 'subasta',
               ),
               const SizedBox(height: 14),
@@ -3522,37 +3255,30 @@ class _BarcelonaMedianocheScreenState
     required IconData icon,
     required String title,
   }) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: appWhite.withOpacity(0.82),
-              width: 2,
+        Row(
+          children: [
+            CuboIconCircle(icon: icon, size: 48),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  tr(title).toLowerCase(),
+                  maxLines: 1,
+                  softWrap: false,
+                  style: CuboText.title(size: 32),
+                ),
+              ),
             ),
-          ),
-          child: Icon(
-            icon,
-            color: appWhite,
-            size: 26,
-          ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            tr(title).toLowerCase(),
-            style: const TextStyle(
-              color: appWhite,
-              fontSize: 32,
-              height: 0.95,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.7,
-            ),
-          ),
-        ),
+        const SizedBox(height: 12),
+        const CuboPillBar(),
       ],
     );
   }
@@ -3560,28 +3286,25 @@ class _BarcelonaMedianocheScreenState
   Widget _dialogNotice(String text, Color color) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: BorderSide(
-            color: color,
-            width: 5,
+      padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _accentDot(color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: CuboColors.whiteA(0.80),
+                fontSize: 12.5,
+                height: 1.3,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.24),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.78),
-          fontSize: 12.5,
-          height: 1.3,
-          fontWeight: FontWeight.w700,
-        ),
+        ],
       ),
     );
   }
@@ -3593,15 +3316,18 @@ class _BarcelonaMedianocheScreenState
   }) {
     return InkWell(
       onTap: () => onChanged(!value),
+      borderRadius: CuboRadii.mdAll,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.06),
+          color: CuboColors.whiteA(value ? 0.14 : 0.06),
+          borderRadius: CuboRadii.mdAll,
           border: Border.all(
             color: value
-                ? appWhite.withOpacity(0.70)
-                : appWhite.withOpacity(0.20),
+                ? CuboColors.whiteA(0.80)
+                : CuboColors.whiteA(0.20),
+            width: value ? 1.6 : 1.2,
           ),
         ),
         child: Row(
@@ -3611,6 +3337,9 @@ class _BarcelonaMedianocheScreenState
               onChanged: (newValue) => onChanged(newValue ?? false),
               activeColor: appWhite,
               checkColor: appBlue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
             Expanded(
               child: Text(
@@ -3629,33 +3358,7 @@ class _BarcelonaMedianocheScreenState
   }
 
   InputDecoration _dialogInputDecoration(String hint) {
-    return InputDecoration(
-      hintText: tr(hint),
-      hintStyle: TextStyle(
-        color: appWhite.withOpacity(0.42),
-      ),
-      filled: true,
-      fillColor: appWhite.withOpacity(0.07),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-        ),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite,
-          width: 2,
-        ),
-      ),
-    );
+    return CuboInputs.decoration(hintText: tr(hint));
   }
 
   Widget _dialogDropdown<T>({
@@ -3678,17 +3381,21 @@ class _BarcelonaMedianocheScreenState
         ),
         const SizedBox(height: 7),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.07),
+            color: CuboColors.whiteA(0.07),
+            borderRadius: CuboRadii.inputAll,
             border: Border.all(
-              color: appWhite.withOpacity(0.28),
+              color: CuboColors.whiteA(0.28),
+              width: 1.2,
             ),
           ),
           child: DropdownButton<T>(
             value: value,
             isExpanded: true,
             dropdownColor: appBlue,
+            borderRadius: CuboRadii.mdAll,
+            icon: const Icon(Icons.expand_more_rounded),
             style: const TextStyle(
               color: appWhite,
               fontWeight: FontWeight.w700,
@@ -3718,15 +3425,19 @@ class _BarcelonaMedianocheScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          child: _buildCurrentPhase(),
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: _buildCurrentPhase(),
+          ),
         ),
       ),
     );
+
   }
 }

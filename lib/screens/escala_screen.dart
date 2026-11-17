@@ -5,6 +5,8 @@ import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/escala_data.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
+import '../widgets/escala_picker_sheet.dart';
 
 class EscalaScreen extends StatefulWidget {
   const EscalaScreen({super.key});
@@ -65,6 +67,9 @@ class _EscalaScreenState extends State<EscalaScreen> {
   String respuestaJugador1 = '';
 
   bool escalaActualEsPersonalizada = false;
+
+  /// Última categoría filtrada en el selector (null = todas).
+  String? categoriaSelector;
 
   int fase = 0;
 
@@ -184,6 +189,18 @@ class _EscalaScreenState extends State<EscalaScreen> {
     });
   }
 
+  void usarEscalaElegida(Map<String, String> escala) {
+    setState(() {
+      escalaActual = escala;
+      escalaActualEsPersonalizada = false;
+      valorReal = random.nextInt(101);
+      valorAdivinado = 50;
+      respuestaJugador1 = '';
+      respuestaController.clear();
+      fase = 1;
+    });
+  }
+
   void usarEscalaPersonalizada() {
     final izquierda = izquierdaController.text.trim();
     final derecha = derechaController.text.trim();
@@ -275,58 +292,52 @@ class _EscalaScreenState extends State<EscalaScreen> {
         ? appBlue
         : appWhite;
 
+    // Botón principal: píldora blanca del sistema Cubo.
+    if (color == appWhite) {
+      return CuboButtons.primary(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+      );
+    }
+
+    // Botones de acento de cada fase: misma píldora con su color.
     return ElevatedButton.styleFrom(
       backgroundColor: color,
       foregroundColor: foreground,
-      disabledBackgroundColor: color.withOpacity(0.28),
-      disabledForegroundColor: foreground.withOpacity(0.45),
+      disabledBackgroundColor: color.withValues(alpha: 0.28),
+      disabledForegroundColor: foreground.withValues(alpha: 0.45),
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shadowColor: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      shape: const StadiumBorder(),
     );
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+    return CuboButtons.secondary(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
 
-  Widget circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-    required bool compact,
-  }) {
-    final size = compact ? 44.0 : 50.0;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
-          ),
-        ),
-        child: Center(child: child),
-      ),
-    );
-  }
+  static const List<String> _pasosFase = [
+    'Jugador 1',
+    'Escribe pista',
+    'Jugador 2',
+    'Resultado',
+  ];
+
+  static const List<IconData> _iconosFase = [
+    Icons.visibility_rounded,
+    Icons.edit_rounded,
+    Icons.touch_app_rounded,
+    Icons.emoji_events_rounded,
+  ];
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 48.0 : 58.0;
+    final enJuego = fase > 0;
+    final titleSize = enJuego
+        ? (compact ? 28.0 : 34.0)
+        : (compact ? 34.0 : 42.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -338,68 +349,53 @@ class _EscalaScreenState extends State<EscalaScreen> {
               compact: compact,
               onTap: () => Navigator.pop(context),
             ),
-            circleButton(
-              compact: compact,
+            CuboCircleButton(
+              icon: Icons.question_mark_rounded,
+              size: compact ? 44 : 50,
               onTap: mostrarNormas,
-              child: Icon(
-                Icons.question_mark_rounded,
-                color: appWhite,
-                size: compact ? 23 : 27,
-              ),
             ),
           ],
         ),
-
-        SizedBox(height: compact ? 14 : 24),
-
-        Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.topRight,
-                    child: Text(
-                      'escala mental',
-                      maxLines: 1,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: titleSize,
-                        height: 1,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  bottom: 0,
-                  left: compact ? -13 : -18,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
+        if (!enJuego) ...[
+          SizedBox(height: compact ? 4 : 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: EdgeInsets.only(right: compact ? 12 : 20),
+              child: CuboIllustration('escala', size: compact ? 76 : 108),
             ),
           ),
+          SizedBox(height: compact ? 6 : 10),
+        ] else
+          SizedBox(height: compact ? 6 : 12),
+        Padding(
+          padding: EdgeInsets.only(right: compact ? 6 : 10),
+          child: CuboSectionTitle(
+            'escala mental',
+            alignEnd: true,
+            size: titleSize,
+            gap: compact ? 8 : 10,
+          ),
         ),
+        if (enJuego) ...[
+          SizedBox(height: compact ? 10 : 14),
+          Row(
+            children: [
+              CuboProgressDots(total: 4, current: fase - 1),
+              const Spacer(),
+              Flexible(
+                flex: 3,
+                child: CuboStatusChip(
+                  _pasosFase[fase - 1],
+                  icon: _iconosFase[fase - 1],
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
-
-
 
   Color _phaseColor() {
     switch (fase) {
@@ -423,37 +419,6 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
 
 
-  Widget buildInfoBar({
-    required String text,
-    Color color = accentPurple,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: BorderSide(
-            color: color,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
-          ),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.76),
-          fontSize: 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
-      ),
-    );
-  }
 
   Widget buildGlassCard({
     required Widget child,
@@ -472,13 +437,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 ? 13
                 : 17,
           ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(),
       child: child,
     );
   }
@@ -553,6 +512,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
     required TextEditingController controller,
     required String label,
     int maxLines = 1,
+    IconData? icon,
   }) {
     return TextField(
       controller: controller,
@@ -568,19 +528,20 @@ class _EscalaScreenState extends State<EscalaScreen> {
           color: appWhite.withOpacity(0.62),
           fontWeight: FontWeight.w700,
         ),
+        prefixIcon: icon == null
+            ? null
+            : Icon(icon, color: appWhite.withValues(alpha: 0.7), size: 20),
         filled: true,
-        fillColor: appWhite.withOpacity(0.07),
+        fillColor: appWhite.withValues(alpha: 0.07),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(
-            color: appWhite.withOpacity(0.28),
+        enabledBorder: CuboInputs.rounded(
+          BorderSide(
+            color: appWhite.withValues(alpha: 0.28),
             width: 1.4,
           ),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(
+        focusedBorder: CuboInputs.rounded(
+          const BorderSide(
             color: appWhite,
             width: 2,
           ),
@@ -589,96 +550,25 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
-  Widget sectionTitle(String text) {
-    final compact = _isCompactScreen;
-
-    return SizedBox(
-      width: double.infinity,
-      child: _singleLineResponsiveText(
-        tr(text).toLowerCase(),
-        alignment: Alignment.center,
-        style: TextStyle(
-          color: appWhite,
-          fontSize: compact ? 25 : 30,
-          height: 0.95,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.7,
-        ),
-      ),
-    );
-  }
   Widget rulesItem({
     required IconData icon,
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void mostrarNormas() {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -688,46 +578,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(height: 18),
 
@@ -784,7 +635,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      style: mainButtonStyle(),
+                      style: CuboButtons.primary(padding: EdgeInsets.zero),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 14),
                         child: Text(
@@ -811,86 +662,25 @@ class _EscalaScreenState extends State<EscalaScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: appWhite.withOpacity(0.85),
-                        width: 2.1,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.flag_rounded,
-                      color: appWhite,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Text(
-                      'ronda',
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: 38,
-                        height: 0.9,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-
-              Container(
-                height: 3,
-                color: appWhite.withOpacity(0.58),
+              const CuboDialogHeader(
+                title: 'ronda',
+                icon: Icons.flag_rounded,
               ),
 
               const SizedBox(height: 18),
 
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.26),
-                    width: 1.4,
-                  ),
-                ),
-                child: Text(
-                  '${escalaActual['izquierda']} ↔ ${escalaActual['derecha']}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.82),
-                    fontSize: 14,
-                    height: 1.3,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+              buildScaleEnds(),
 
               const SizedBox(height: 16),
 
@@ -990,6 +780,88 @@ class _EscalaScreenState extends State<EscalaScreen> {
     return value.clamp(0.0, 100.0);
   }
 
+  /// Los dos extremos de la escala como píldoras con flecha.
+  Widget buildScaleEnds() {
+    final compact = _isCompactScreen;
+
+    Widget extremo(String text, {required bool derecha}) {
+      final icon = Icon(
+        derecha ? Icons.east_rounded : Icons.west_rounded,
+        color: appWhite.withValues(alpha: 0.75),
+        size: compact ? 15 : 17,
+      );
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 10 : 12,
+            vertical: compact ? 8 : 10,
+          ),
+          decoration: BoxDecoration(
+            color: appWhite.withValues(alpha: 0.12),
+            borderRadius: CuboRadii.inputAll,
+            border: Border.all(color: appWhite.withValues(alpha: 0.22)),
+          ),
+          child: Row(
+            children: [
+              if (!derecha) ...[icon, const SizedBox(width: 6)],
+              Expanded(
+                child: Text(
+                  text,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: derecha ? TextAlign.right : TextAlign.left,
+                  style: TextStyle(
+                    color: appWhite,
+                    fontWeight: FontWeight.w800,
+                    fontSize: compact ? 11.5 : 13,
+                    height: 1.15,
+                  ),
+                ),
+              ),
+              if (derecha) ...[const SizedBox(width: 6), icon],
+            ],
+          ),
+        ),
+      );
+    }
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          extremo(escalaActual['izquierda']!, derecha: false),
+          SizedBox(width: compact ? 8 : 10),
+          extremo(escalaActual['derecha']!, derecha: true),
+        ],
+      ),
+    );
+  }
+
+  Widget buildPositionPill(int valor) {
+    final compact = _isCompactScreen;
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 16 : 20,
+        vertical: compact ? 7 : 9,
+      ),
+      decoration: BoxDecoration(
+        color: appWhite,
+        borderRadius: BorderRadius.circular(99),
+        boxShadow: CuboShadows.soft,
+      ),
+      child: Text(
+        'POSICIÓN $valor',
+        maxLines: 1,
+        style: TextStyle(
+          color: CuboColors.blueInk,
+          fontSize: compact ? 14 : 16,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
   Widget buildMedidorSemicircular({
     int? valor,
     required bool mostrarNumero,
@@ -997,417 +869,442 @@ class _EscalaScreenState extends State<EscalaScreen> {
     bool mostrarZonasPuntuacion = false,
     int? centroZonas,
     bool interactivo = false,
+    int? marcaReal,
   }) {
     final compact = _isCompactScreen;
     final veryNarrow = _isVeryNarrowScreen;
 
     final gaugeHeight = veryNarrow
-        ? 145.0
+        ? 140.0
         : compact
-        ? 168.0
-        : 225.0;
+        ? 165.0
+        : 215.0;
 
     return Column(
       children: [
-        Container(
+        SizedBox(
+          height: gaugeHeight,
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(
-            compact ? 5 : 8,
-            compact ? 8 : 12,
-            compact ? 5 : 8,
-            compact ? 4 : 6,
-          ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.075),
-            border: Border.all(
-              color: appWhite.withOpacity(0.32),
-              width: 1.6,
-            ),
-          ),
-          child: SizedBox(
-            height: gaugeHeight,
-            width: double.infinity,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final gaugeSize = Size(
-                  constraints.maxWidth,
-                  gaugeHeight,
-                );
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final gaugeSize = Size(constraints.maxWidth, gaugeHeight);
 
-                void actualizar(Offset position) {
-                  if (!interactivo) return;
+              void actualizar(Offset position) {
+                if (!interactivo) return;
+                final nuevoValor = _valorDesdePosicion(position, gaugeSize);
+                setState(() {
+                  valorAdivinado = nuevoValor;
+                });
+              }
 
-                  final nuevoValor =
-                  _valorDesdePosicion(
-                    position,
-                    gaugeSize,
-                  );
-
-                  setState(() {
-                    valorAdivinado =
-                        nuevoValor;
-                  });
-                }
-
-                return GestureDetector(
-                  behavior:
-                  HitTestBehavior.opaque,
-
-                  onTapDown: interactivo
-                      ? (details) {
-                    actualizar(
-                      details.localPosition,
-                    );
-                  }
-                      : null,
-
-                  onPanStart: interactivo
-                      ? (details) {
-                    actualizar(
-                      details.localPosition,
-                    );
-                  }
-                      : null,
-
-                  onPanUpdate: interactivo
-                      ? (details) {
-                    actualizar(
-                      details.localPosition,
-                    );
-                  }
-                      : null,
-
-                  child: CustomPaint(
-                    size: gaugeSize,
-                    painter:
-                    NeedleGaugePainter(
-                      valorPrincipal:
-                      valor?.toDouble(),
-                      valorSecundario:
-                      valorSecundario
-                          ?.toDouble(),
-                      mostrarZonasPuntuacion:
-                      mostrarZonasPuntuacion,
-                      centroZonas:
-                      (centroZonas ??
-                          valor ??
-                          valorSecundario ??
-                          50)
-                          .toDouble(),
-                    ),
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: interactivo
+                    ? (details) => actualizar(details.localPosition)
+                    : null,
+                onPanStart: interactivo
+                    ? (details) => actualizar(details.localPosition)
+                    : null,
+                onPanUpdate: interactivo
+                    ? (details) => actualizar(details.localPosition)
+                    : null,
+                child: CustomPaint(
+                  size: gaugeSize,
+                  painter: NeedleGaugePainter(
+                    valorPrincipal: valor?.toDouble(),
+                    valorSecundario: valorSecundario?.toDouble(),
+                    mostrarZonasPuntuacion: mostrarZonasPuntuacion,
+                    centroZonas:
+                        (centroZonas ?? valor ?? valorSecundario ?? 50)
+                            .toDouble(),
+                    marcaReal: marcaReal?.toDouble(),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
-        SizedBox(height: compact ? 8 : 11),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                escalaActual['izquierda']!,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w900,
-                  fontSize: compact ? 11.5 : 13.5,
-                  height: 1.1,
-                ),
-              ),
-            ),
-            SizedBox(width: compact ? 14 : 20),
-            Expanded(
-              child: Text(
-                escalaActual['derecha']!,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w900,
-                  fontSize: compact ? 11.5 : 13.5,
-                  height: 1.1,
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: compact ? 7 : 9),
-
+        SizedBox(height: compact ? 10 : 14),
+        buildScaleEnds(),
         if (interactivo) ...[
+          SizedBox(height: compact ? 10 : 12),
           Row(
-            mainAxisAlignment:
-            MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.touch_app_rounded,
-                color:
-                appWhite.withOpacity(0.48),
+                Icons.swipe_rounded,
+                color: appWhite.withValues(alpha: 0.55),
                 size: compact ? 15 : 17,
               ),
-
               const SizedBox(width: 6),
-
               Text(
                 'ARRASTRA LA AGUJA',
                 maxLines: 1,
                 softWrap: false,
-                style: TextStyle(
-                  color:
-                  appWhite.withOpacity(0.48),
-                  fontSize:
-                  compact ? 10 : 11,
-                  fontWeight:
-                  FontWeight.w900,
-                  letterSpacing: 0.7,
+                style: CuboText.chip(
+                  color: appWhite.withValues(alpha: 0.55),
+                  size: compact ? 10 : 11,
                 ),
               ),
             ],
           ),
-
-          SizedBox(
-            height: compact ? 7 : 9,
-          ),
         ],
-
-        if (mostrarNumero && valor != null)
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 12 : 16,
-              vertical: compact ? 7 : 9,
-            ),
-            decoration: BoxDecoration(
-              color: accentYellow,
-              border: Border.all(
-                color: appWhite.withOpacity(0.55),
-                width: 1.5,
-              ),
-            ),
-            child: _singleLineResponsiveText(
-              'POSICIÓN $valor',
-              alignment: Alignment.center,
-              style: TextStyle(
-                color: appBlue,
-                fontSize: compact ? 13 : 15,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
+        if (mostrarNumero && valor != null) ...[
+          SizedBox(height: compact ? 10 : 14),
+          buildPositionPill(valor),
+        ],
       ],
     );
   }
 
-  Widget buildInfoPill({
-    required IconData icon,
+
+  /// Abre el selector de escalas por categoría y empieza con la elegida.
+  Future<void> abrirSelectorEscalas() async {
+    final elegida = await mostrarSelectorEscalas(
+      context,
+      categoriaInicial: categoriaSelector,
+      onCategoriaCambiada: (c) => categoriaSelector = c,
+    );
+    if (!mounted || elegida == null) return;
+    usarEscalaElegida(elegida);
+  }
+
+  Widget buildRandomScaleCard() => buildOptionCard(
+        title: 'Escala aleatoria',
+        subtitle: 'Una escala sorpresa de la app',
+        icon: Icons.casino_rounded,
+        trailingIcon: Icons.play_arrow_rounded,
+        onTap: usarEscalaAleatoria,
+        light: true,
+      );
+
+  Widget buildPickScaleCard() => buildOptionCard(
+        title: 'Elegir escala',
+        subtitle: 'Filtra por categoría y escoge',
+        icon: Icons.format_list_bulleted_rounded,
+        trailingIcon: Icons.chevron_right_rounded,
+        onTap: abrirSelectorEscalas,
+        light: false,
+      );
+
+  /// Tarjeta de opción: blanca ([light]) o de cristal sobre el azul.
+  Widget buildOptionCard({
     required String title,
-    required String text,
+    required String subtitle,
+    required IconData icon,
+    required IconData trailingIcon,
+    required VoidCallback onTap,
+    required bool light,
   }) {
     final compact = _isCompactScreen;
+    final iconBox = compact ? 50.0 : 58.0;
+    final ink = light ? CuboColors.blueInk : appWhite;
 
-    return Expanded(
+    return CuboPressable(
+      onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 6 : 8,
-          vertical: compact ? 9 : 11,
-        ),
-        decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.08),
-          border: Border.all(
-            color: appWhite.withOpacity(0.26),
-            width: 1.4,
-          ),
-        ),
-        child: Column(
+        padding: EdgeInsets.all(compact ? 14 : 18),
+        decoration: light
+            ? CuboDecorations.whiteCard()
+            : CuboDecorations.glass(radius: CuboRadii.lg),
+        child: Row(
           children: [
-            Icon(
-              icon,
-              color: appWhite,
-              size: compact ? 21 : 23,
-            ),
-
-            const SizedBox(height: 7),
-
-            SizedBox(
-              width: double.infinity,
-              child: _singleLineResponsiveText(
-                tr(title).toUpperCase(),
-                alignment: Alignment.center,
-                style: const TextStyle(
-                  color: appWhite,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 11,
-                  letterSpacing: 0.4,
-                ),
+            Container(
+              width: iconBox,
+              height: iconBox,
+              decoration: BoxDecoration(
+                color: light
+                    ? CuboColors.blueTint
+                    : appWhite.withValues(alpha: 0.14),
+                borderRadius: CuboRadii.mdAll,
+              ),
+              child: Icon(
+                icon,
+                color: light ? CuboColors.blue : appWhite,
+                size: compact ? 28 : 32,
               ),
             ),
-
-            const SizedBox(height: 4),
-
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: appWhite.withOpacity(0.65),
-                fontSize: compact ? 9.5 : 10.5,
-                height: 1.2,
-                fontWeight: FontWeight.w600,
+            SizedBox(width: compact ? 12 : 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: CuboText.label(size: compact ? 18 : 20, color: ink),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink.withValues(alpha: 0.65),
+                      fontSize: compact ? 12 : 13,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: light ? CuboColors.blue : appWhite,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                trailingIcon,
+                color: light ? CuboColors.white : CuboColors.blue,
+                size: 24,
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildDividerText(String text) {
+    Widget linea() => Expanded(
+          child: Container(
+            height: 1.5,
+            decoration: BoxDecoration(
+              color: appWhite.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+        );
+
+    return Row(
+      children: [
+        linea(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            text,
+            style: TextStyle(
+              color: appWhite.withValues(alpha: 0.7),
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        linea(),
+      ],
+    );
+  }
+
+  Widget buildSavedScaleTile(Map<String, String> escala, int index) {
+    final compact = _isCompactScreen;
+    final style = TextStyle(
+      color: appWhite,
+      fontSize: compact ? 12 : 13,
+      height: 1.15,
+      fontWeight: FontWeight.w800,
+    );
+
+    return CuboEntrance(
+      index: index,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: CuboPressable(
+          onTap: () => usarEscalaGuardada(escala),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+            decoration: CuboDecorations.glass(radius: CuboRadii.md),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    escala['izquierda']!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: style,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Icon(
+                    Icons.swap_horiz_rounded,
+                    color: appWhite.withValues(alpha: 0.6),
+                    size: 20,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    escala['derecha']!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: style,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: CuboColors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow_rounded,
+                    color: CuboColors.blue,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget buildPantallaElegirEscala() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    final compact = _isCompactScreen;
 
-
-
-          const SizedBox(height: 14),
-
-          buildGlassCard(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: compact ? 8 : 14),
+        CuboEntrance(child: buildRandomScaleCard()),
+        SizedBox(height: compact ? 10 : 12),
+        CuboEntrance(index: 1, child: buildPickScaleCard()),
+        SizedBox(height: compact ? 14 : 20),
+        CuboEntrance(index: 1, child: buildDividerText('o crea la tuya')),
+        SizedBox(height: compact ? 14 : 20),
+        CuboEntrance(
+          index: 2,
+          child: buildGlassCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                sectionTitle('Escala personalizada'),
-
+                Row(
+                  children: [
+                    CuboIconCircle(
+                      icon: Icons.tune_rounded,
+                      size: compact ? 34 : 38,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Escala personalizada',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: CuboText.label(
+                          size: compact ? 17 : 19,
+                          color: appWhite,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 8),
-
                 Text(
                   'Ejemplo: “Comida buenísima” ↔ “Comida horrible”',
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.65),
-                    fontSize: 12.5,
+                    color: appWhite.withValues(alpha: 0.6),
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
                 buildCustomField(
                   controller: izquierdaController,
                   label: 'Extremo izquierdo',
+                  icon: Icons.west_rounded,
                 ),
-
-                const SizedBox(height: 12),
-
+                const SizedBox(height: 10),
                 buildCustomField(
                   controller: derechaController,
                   label: 'Extremo derecho',
+                  icon: Icons.east_rounded,
                 ),
-
-                const SizedBox(height: 16),
-
+                const SizedBox(height: 14),
                 buildFancyButton(
                   text: 'Usar esta escala',
-                  color: appBlue,
                   icon: Icons.play_arrow_rounded,
                   onPressed: usarEscalaPersonalizada,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
-
-          buildFancyButton(
-            text: 'Usar escala aleatoria',
-            color: appWhite,
-            icon: Icons.casino_rounded,
-            onPressed: usarEscalaAleatoria,
-          ),
-
-          if (escalasGuardadas.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            sectionTitle('Guardadas'),
-            const SizedBox(height: 10),
-            ...escalasGuardadas.map(
-                  (escala) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: OutlinedButton(
-                  onPressed: () => usarEscalaGuardada(escala),
-                  style: secondaryButtonStyle(),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    child: Text(
-                      '${escala['izquierda']} ↔ ${escala['derecha']}',
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: _isCompactScreen ? 11.5 : 13,
-                        height: 1.15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ),
-                ),
+        ),
+        if (escalasGuardadas.isNotEmpty) ...[
+          SizedBox(height: compact ? 16 : 22),
+          Row(
+            children: [
+              const Icon(
+                Icons.bookmark_rounded,
+                color: appWhite,
+                size: 18,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Text(
+                'Guardadas',
+                style: CuboText.label(size: 16, color: appWhite),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          for (var i = 0; i < escalasGuardadas.length; i++)
+            buildSavedScaleTile(escalasGuardadas[i], i + 3),
         ],
-      ),
+      ],
     );
   }
 
   Widget buildPantallaInicioJugador1() {
+    final compact = _isCompactScreen;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
           child: Column(
             children: [
-              sectionTitle('Jugador 1'),
-
-              const SizedBox(height: 8),
-
+              const CuboStatusChip(
+                'Que no mire el jugador 2',
+                icon: Icons.visibility_off_rounded,
+              ),
+              SizedBox(height: compact ? 10 : 14),
               Text(
                 'Mira la posición secreta y piensa una respuesta.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
+                  color: appWhite.withValues(alpha: 0.75),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
-              const SizedBox(height: 16),
-
+              SizedBox(height: compact ? 12 : 16),
               buildMedidorSemicircular(
                 valor: valorReal,
                 mostrarNumero: true,
               ),
-
-              const SizedBox(height: 14),
-
+              SizedBox(height: compact ? 10 : 14),
               Text(
                 'Tu posición está ${interpretarLado(valorReal)}.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: appWhite,
-                  fontSize: 18,
+                  fontSize: compact ? 16 : 18,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ],
           ),
         ),
-
-        const SizedBox(height: 18),
-
+        SizedBox(height: compact ? 14 : 18),
         buildFancyButton(
           text: 'Continuar',
-          color: accentYellow,
           icon: Icons.arrow_forward_rounded,
           onPressed: pasarAEscribirRespuesta,
         ),
@@ -1416,49 +1313,50 @@ class _EscalaScreenState extends State<EscalaScreen> {
   }
 
   Widget buildPantallaRespuesta() {
+    final compact = _isCompactScreen;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              sectionTitle('Escribe pista'),
-
-              const SizedBox(height: 8),
-
-              Text(
-                'Escribe una pista que encaje con la posición o déjala vacía.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
+              Row(
+                children: [
+                  CuboIconCircle(
+                    icon: Icons.lightbulb_rounded,
+                    size: compact ? 34 : 38,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Escribe una pista que encaje con la posición o déjala vacía.',
+                      style: TextStyle(
+                        color: appWhite.withValues(alpha: 0.82),
+                        fontSize: 13,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 16),
-
-              buildMedidorSemicircular(
-                valor: null,
-                mostrarNumero: false,
-              ),
-
-              const SizedBox(height: 16),
-
+              SizedBox(height: compact ? 14 : 18),
+              buildScaleEnds(),
+              SizedBox(height: compact ? 14 : 18),
               buildCustomField(
                 controller: respuestaController,
                 label: 'Tu respuesta',
                 maxLines: 2,
+                icon: Icons.edit_rounded,
               ),
             ],
           ),
         ),
-
-        const SizedBox(height: 18),
-
+        SizedBox(height: compact ? 14 : 18),
         buildFancyButton(
           text: 'Confirmar respuesta',
-          color: accentYellow,
           icon: Icons.check_rounded,
           onPressed: confirmarRespuesta,
         ),
@@ -1467,71 +1365,59 @@ class _EscalaScreenState extends State<EscalaScreen> {
   }
 
   Widget buildPantallaAdivinar() {
+    final compact = _isCompactScreen;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
           child: Column(
             children: [
-              sectionTitle('Jugador 2'),
-
-              const SizedBox(height: 8),
-
               Text(
                 '¿Dónde crees que estaba la respuesta?',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
+                  color: appWhite.withValues(alpha: 0.75),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
-              const SizedBox(height: 16),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.28),
-                    width: 1.4,
-                  ),
-                ),
-                child: Text(
-                  respuestaJugador1.isEmpty
-                      ? 'SIN PISTA'
-                      : '"$respuestaJugador1"',
-                  textAlign: TextAlign.center,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: appWhite,
-                    fontSize: _isCompactScreen ? 21 : 25,
-                    height: 1.08,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
+              SizedBox(height: compact ? 10 : 14),
+              CuboCardSwitcher(
+                child: CuboHeroCard(
+                  key: ValueKey('pista-$valorReal-$respuestaJugador1'),
+                  chip: 'Jugador 1',
+                  chipIcon: Icons.lightbulb_rounded,
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+                  child: Text(
+                    respuestaJugador1.isEmpty
+                        ? 'SIN PISTA'
+                        : '"$respuestaJugador1"',
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: compact ? 21 : 25,
+                      height: 1.08,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ),
               ),
-
-              const SizedBox(height: 16),
-
+              SizedBox(height: compact ? 12 : 16),
               buildMedidorSemicircular(
                 valor: valorAdivinado.round(),
                 mostrarNumero: true,
                 interactivo: true,
               ),
-
             ],
           ),
         ),
-
-        const SizedBox(height: 18),
-
+        SizedBox(height: compact ? 14 : 18),
         buildFancyButton(
           text: 'Confirmar',
-          color: accentGreen,
           icon: Icons.check_circle_rounded,
           onPressed: confirmarAdivinanza,
         ),
@@ -1539,7 +1425,50 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
+  Widget buildStatTile(String label, String value, IconData icon) {
+    final compact = _isCompactScreen;
+
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: compact ? 10 : 12,
+          horizontal: 6,
+        ),
+        decoration: CuboDecorations.glass(radius: CuboRadii.md),
+        child: Column(
+          children: [
+            Icon(icon, color: appWhite.withValues(alpha: 0.7), size: 18),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                color: appWhite,
+                fontSize: compact ? 20 : 24,
+                height: 1,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                tr(label).toUpperCase(),
+                maxLines: 1,
+                style: CuboText.chip(
+                  color: appWhite.withValues(alpha: 0.7),
+                  size: 10,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget buildPantallaResultado() {
+    final compact = _isCompactScreen;
     final diferencia = calcularDiferencia();
     final puntos = calcularPuntos();
     final Color resultColor;
@@ -1571,101 +1500,76 @@ class _EscalaScreenState extends State<EscalaScreen> {
         resultMessage = 'LEJOS';
     }
 
+    final resultInk = Color.lerp(resultColor, Colors.black, 0.35)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
           child: Column(
             children: [
-              sectionTitle('Resultado'),
-
-              const SizedBox(height: 16),
-
-              buildMedidorSemicircular(
-                valor: null,
-                mostrarNumero: false,
-                valorSecundario: valorAdivinado.round(),
-                mostrarZonasPuntuacion: true,
-                centroZonas: valorReal,
-              ),
-
-              const SizedBox(height: 16),
-
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 15,
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  compact ? 14 : 18,
+                  18,
+                  compact ? 14 : 18,
                 ),
-                decoration: BoxDecoration(
-                  color: resultColor,
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.72),
-                    width: 2,
-                  ),
-                ),
+                decoration: CuboDecorations.whiteCard(radius: CuboRadii.xl),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: appWhite.withOpacity(0.18),
-                        border: Border.all(
-                          color: appWhite.withOpacity(0.55),
-                          width: 1.6,
-                        ),
-                      ),
-                      child: Icon(
-                        resultIcon,
-                        color: puntos == 2 ? appBlue : appWhite,
-                        size: 27,
-                      ),
+                    CuboIllustration(
+                      'escala',
+                      onBlue: false,
+                      size: compact ? 64 : 80,
+                      popIn: true,
                     ),
-
-                    SizedBox(
-                      width: _isVeryNarrowScreen ? 42 : 48,
-                      height: _isVeryNarrowScreen ? 42 : 48,
-                    ),
-
+                    SizedBox(width: compact ? 12 : 16),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: _singleLineResponsiveText(
-                              resultMessage,
-                              alignment: Alignment.centerLeft,
-                              style: TextStyle(
-                                color: puntos == 2
-                                    ? appBlue
-                                    : appWhite,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1,
-                              ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: resultColor.withValues(alpha: 0.22),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(resultIcon, color: resultInk, size: 15),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    resultMessage,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: CuboText.chip(
+                                      color: resultInk,
+                                      size: 11,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-
-                          const SizedBox(height: 3),
-
+                          const SizedBox(height: 8),
                           SizedBox(
                             width: double.infinity,
                             child: _singleLineResponsiveText(
                               '$puntos ${puntos == 1 ? 'PUNTO' : 'PUNTOS'}',
                               alignment: Alignment.centerLeft,
                               style: TextStyle(
-                                color: puntos == 2
-                                    ? appBlue
-                                    : appWhite,
-                                fontSize: _isCompactScreen ? 23 : 27,
+                                color: CuboColors.blueInk,
+                                fontSize: compact ? 28 : 34,
                                 height: 1,
                                 fontWeight: FontWeight.w900,
-                                letterSpacing: 0.5,
+                                letterSpacing: -0.5,
                               ),
                             ),
                           ),
@@ -1675,49 +1579,39 @@ class _EscalaScreenState extends State<EscalaScreen> {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 14),
-
-              SizedBox(
-                width: double.infinity,
-                child: _singleLineResponsiveText(
-                  'REAL: $valorReal · ADIVINADA: ${valorAdivinado.round()}',
-                  alignment: Alignment.center,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.82),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+              SizedBox(height: compact ? 14 : 18),
+              buildMedidorSemicircular(
+                valor: null,
+                mostrarNumero: false,
+                valorSecundario: valorAdivinado.round(),
+                mostrarZonasPuntuacion: true,
+                centroZonas: valorReal,
+                marcaReal: valorReal,
               ),
-
-              const SizedBox(height: 4),
-
-              SizedBox(
-                width: double.infinity,
-                child: _singleLineResponsiveText(
-                  'DIFERENCIA: $diferencia',
-                  alignment: Alignment.center,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.82),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
+              SizedBox(height: compact ? 12 : 16),
+              Row(
+                children: [
+                  buildStatTile('Real', '$valorReal', Icons.flag_rounded),
+                  const SizedBox(width: 8),
+                  buildStatTile(
+                    'Adivinada',
+                    '${valorAdivinado.round()}',
+                    Icons.touch_app_rounded,
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  buildStatTile(
+                    'Diferencia',
+                    '$diferencia',
+                    Icons.straighten_rounded,
+                  ),
+                ],
               ),
-
-
             ],
           ),
         ),
-
-        const SizedBox(height: 18),
-
+        SizedBox(height: compact ? 14 : 18),
         buildFancyButton(
           text: 'Terminar ronda',
-          color: accentRed,
           icon: Icons.flag_rounded,
           onPressed: mostrarDialogoFinRonda,
         ),
@@ -1804,8 +1698,10 @@ class _EscalaScreenState extends State<EscalaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final narrow =
@@ -1852,6 +1748,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
             );
           },
         ),
+        ),
       ),
     );
   }
@@ -1863,15 +1760,20 @@ class NeedleGaugePainter extends CustomPainter {
   final bool mostrarZonasPuntuacion;
   final double centroZonas;
 
+  /// Marca blanca en el borde con la posición real (pantalla de resultado).
+  final double? marcaReal;
+
   NeedleGaugePainter({
     required this.valorPrincipal,
     this.valorSecundario,
     required this.mostrarZonasPuntuacion,
     required this.centroZonas,
+    this.marcaReal,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    // El centro debe coincidir con _valorDesdePosicion.
     final center = Offset(size.width / 2, size.height - 10);
     final outerRadius = math.min(size.width / 2 - 14, size.height - 14);
     final innerRadius = outerRadius * 0.42;
@@ -1879,146 +1781,111 @@ class NeedleGaugePainter extends CustomPainter {
     final outerRect = Rect.fromCircle(center: center, radius: outerRadius);
     final innerRect = Rect.fromCircle(center: center, radius: innerRadius);
 
-    drawFilledRingSegment(
-      canvas,
-      outerRect,
-      innerRect,
-      math.pi,
-      math.pi,
-      const Color(0xFFC8FFF8),
+    // Pista translúcida con un brillo arriba.
+    final track = _ringPath(outerRect, innerRect, math.pi, math.pi);
+    canvas.drawPath(
+      track,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withValues(alpha: 0.30),
+            Colors.white.withValues(alpha: 0.10),
+          ],
+        ).createShader(outerRect),
     );
 
     if (mostrarZonasPuntuacion) {
-      drawZonaRellenaConTexto(
-        canvas,
-        center,
-        outerRadius,
-        innerRadius,
-        centroZonas - 15,
-        centroZonas - 9,
-        const Color(0xFFFFE45E),
-        '1',
-      );
+      const zonas = [
+        (-15.0, -9.0, Color(0xFFFFE45E), '1'),
+        (-8.0, -4.0, Color(0xFFFFB84D), '2'),
+        (-3.0, 3.0, Color(0xFFFF7A3D), '4'),
+        (4.0, 8.0, Color(0xFFFFB84D), '2'),
+        (9.0, 15.0, Color(0xFFFFE45E), '1'),
+      ];
+      for (final zona in zonas) {
+        drawZonaRellenaConTexto(
+          canvas,
+          center,
+          outerRadius,
+          innerRadius,
+          centroZonas + zona.$1,
+          centroZonas + zona.$2,
+          zona.$3,
+          zona.$4,
+        );
+      }
+    }
 
-      drawZonaRellenaConTexto(
-        canvas,
-        center,
-        outerRadius,
-        innerRadius,
-        centroZonas - 8,
-        centroZonas - 4,
-        const Color(0xFFFFB84D),
-        '2',
-      );
-
-      drawZonaRellenaConTexto(
-        canvas,
-        center,
-        outerRadius,
-        innerRadius,
-        centroZonas - 3,
-        centroZonas + 3,
-        const Color(0xFFFF7A3D),
-        '4',
-      );
-
-      drawZonaRellenaConTexto(
-        canvas,
-        center,
-        outerRadius,
-        innerRadius,
-        centroZonas + 4,
-        centroZonas + 8,
-        const Color(0xFFFFB84D),
-        '2',
-      );
-
-      drawZonaRellenaConTexto(
-        canvas,
-        center,
-        outerRadius,
-        innerRadius,
-        centroZonas + 9,
-        centroZonas + 15,
-        const Color(0xFFFFE45E),
-        '1',
+    // Marcas cada 5, más largas cada 10.
+    for (var v = 0; v <= 100; v += 5) {
+      final major = v % 10 == 0;
+      final angle = valueToAngle(v.toDouble());
+      final dir = Offset(math.cos(angle), math.sin(angle));
+      canvas.drawLine(
+        center + dir * (outerRadius - (major ? 13 : 8)),
+        center + dir * (outerRadius - 4),
+        Paint()
+          ..color = Colors.white.withValues(alpha: major ? 0.75 : 0.4)
+          ..strokeWidth = major ? 2.2 : 1.4
+          ..strokeCap = StrokeCap.round,
       );
     }
 
-    final borderPaint = Paint()
+    // Contorno.
+    final borde = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..color = Colors.white.withOpacity(0.12);
+      ..strokeWidth = 1.5
+      ..color = Colors.white.withValues(alpha: 0.4);
+    canvas.drawArc(outerRect, math.pi, math.pi, false, borde);
+    canvas.drawArc(innerRect, math.pi, math.pi, false, borde);
 
-    canvas.drawArc(outerRect, math.pi, math.pi, false, borderPaint);
-    canvas.drawArc(innerRect, math.pi, math.pi, false, borderPaint);
+    if (marcaReal != null) {
+      _drawMarcaReal(canvas, center, outerRadius, marcaReal!);
+    }
 
     if (valorPrincipal != null) {
-      drawNeedle(
-        canvas,
-        center,
-        outerRadius,
-        valorPrincipal!,
-        const Color(0xFFE11D48),
-        5,
-      );
+      drawNeedle(canvas, center, outerRadius, valorPrincipal!);
     }
-
     if (valorSecundario != null) {
-      drawNeedle(
-        canvas,
-        center,
-        outerRadius,
-        valorSecundario!,
-        const Color(0xFFE11D48),
-        5,
-      );
+      drawNeedle(canvas, center, outerRadius, valorSecundario!);
     }
 
-    final centroPaint = Paint()
-      ..color = const Color(0xFFC21F3A)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(center, 22, centroPaint);
-
-    final bordeCentroPaint = Paint()
-      ..color = Colors.white.withOpacity(0.22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-
-    canvas.drawCircle(center, 22, bordeCentroPaint);
+    // Eje central.
+    canvas.drawCircle(
+      center + const Offset(0, 2),
+      19,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.2)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+    canvas.drawCircle(center, 18, Paint()..color = CuboColors.white);
+    canvas.drawCircle(center, 8, Paint()..color = CuboColors.blue);
   }
 
-  void drawFilledRingSegment(
-      Canvas canvas,
-      Rect outerRect,
-      Rect innerRect,
-      double startAngle,
-      double sweepAngle,
-      Color color,
-      ) {
-    final path = Path()
+  Path _ringPath(
+    Rect outerRect,
+    Rect innerRect,
+    double startAngle,
+    double sweepAngle,
+  ) {
+    return Path()
       ..arcTo(outerRect, startAngle, sweepAngle, false)
       ..arcTo(innerRect, startAngle + sweepAngle, -sweepAngle, false)
       ..close();
-
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = color;
-
-    canvas.drawPath(path, paint);
   }
 
   void drawZonaRellenaConTexto(
-      Canvas canvas,
-      Offset center,
-      double outerRadius,
-      double innerRadius,
-      double fromValue,
-      double toValue,
-      Color color,
-      String texto,
-      ) {
+    Canvas canvas,
+    Offset center,
+    double outerRadius,
+    double innerRadius,
+    double fromValue,
+    double toValue,
+    Color color,
+    String texto,
+  ) {
     final inicio = valueToAngle(fromValue.clamp(0, 100));
     final fin = valueToAngle(toValue.clamp(0, 100));
     final sweep = fin - inicio == 0 ? 0.02 : fin - inicio;
@@ -2026,31 +1893,22 @@ class NeedleGaugePainter extends CustomPainter {
     final outerRect = Rect.fromCircle(center: center, radius: outerRadius);
     final innerRect = Rect.fromCircle(center: center, radius: innerRadius);
 
-    final path = Path()
-      ..arcTo(outerRect, inicio, sweep, false)
-      ..arcTo(innerRect, inicio + sweep, -sweep, false)
-      ..close();
-
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = color;
-
-    canvas.drawPath(path, paint);
+    canvas.drawPath(
+      _ringPath(outerRect, innerRect, inicio, sweep),
+      Paint()..color = color,
+    );
 
     final angleMedio = inicio + sweep / 2;
     final textRadius = (outerRadius + innerRadius) / 2;
-
-    final textOffset = Offset(
-      center.dx + math.cos(angleMedio) * textRadius,
-      center.dy + math.sin(angleMedio) * textRadius,
-    );
+    final textOffset = center +
+        Offset(math.cos(angleMedio), math.sin(angleMedio)) * textRadius;
 
     final textPainter = TextPainter(
       text: TextSpan(
         text: tr(texto),
         style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 16,
+          color: CuboColors.blueInk,
+          fontSize: 14,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -2059,42 +1917,51 @@ class NeedleGaugePainter extends CustomPainter {
 
     textPainter.paint(
       canvas,
-      Offset(
-        textOffset.dx - textPainter.width / 2,
-        textOffset.dy - textPainter.height / 2,
-      ),
+      textOffset - Offset(textPainter.width / 2, textPainter.height / 2),
     );
   }
 
-  void drawNeedle(
-      Canvas canvas,
-      Offset center,
-      double outerRadius,
-      double valor,
-      Color color,
-      double strokeWidth,
-      ) {
+  void _drawMarcaReal(
+    Canvas canvas,
+    Offset center,
+    double outerRadius,
+    double valor,
+  ) {
     final angle = valueToAngle(valor);
-    final needleLength = outerRadius - 20;
+    final dir = Offset(math.cos(angle), math.sin(angle));
+    final normal = Offset(-dir.dy, dir.dx);
+    final punta = center + dir * (outerRadius + 1);
+    final base = center + dir * (outerRadius + 11);
+    final path = Path()
+      ..moveTo(punta.dx, punta.dy)
+      ..lineTo((base + normal * 7).dx, (base + normal * 7).dy)
+      ..lineTo((base - normal * 7).dx, (base - normal * 7).dy)
+      ..close();
+    canvas.drawPath(path, Paint()..color = CuboColors.white);
+  }
 
-    final end = Offset(
-      center.dx + math.cos(angle) * needleLength,
-      center.dy + math.sin(angle) * needleLength,
-    );
+  /// Aguja blanca afilada con sombra suave.
+  void drawNeedle(
+    Canvas canvas,
+    Offset center,
+    double outerRadius,
+    double valor,
+  ) {
+    final angle = valueToAngle(valor);
+    final dir = Offset(math.cos(angle), math.sin(angle));
+    final normal = Offset(-dir.dy, dir.dx);
+    final tip = center + dir * (outerRadius - 6);
+    final baseLeft = center + normal * 6;
+    final baseRight = center - normal * 6;
 
-    final glowPaint = Paint()
-      ..color = color.withOpacity(0.22)
-      ..strokeWidth = strokeWidth + 6
-      ..strokeCap = StrokeCap.round;
+    final path = Path()
+      ..moveTo(baseLeft.dx, baseLeft.dy)
+      ..lineTo(tip.dx, tip.dy)
+      ..lineTo(baseRight.dx, baseRight.dy)
+      ..close();
 
-    final needlePaint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(center, end, glowPaint);
-    canvas.drawLine(center, end, needlePaint);
-
+    canvas.drawShadow(path, Colors.black, 4, false);
+    canvas.drawPath(path, Paint()..color = CuboColors.white);
   }
 
   double valueToAngle(double value) {
@@ -2106,6 +1973,7 @@ class NeedleGaugePainter extends CustomPainter {
     return oldDelegate.valorPrincipal != valorPrincipal ||
         oldDelegate.valorSecundario != valorSecundario ||
         oldDelegate.mostrarZonasPuntuacion != mostrarZonasPuntuacion ||
-        oldDelegate.centroZonas != centroZonas;
+        oldDelegate.centroZonas != centroZonas ||
+        oldDelegate.marcaReal != marcaReal;
   }
 }

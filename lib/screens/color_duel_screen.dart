@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../widgets/color_wheel_picker.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 enum ColorDuelPhase {
   setup,
@@ -126,26 +127,12 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   }
 
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: EdgeInsets.zero);
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+    return CuboButtons.secondary(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
 
@@ -180,13 +167,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return Container(
       width: double.infinity,
       padding: padding,
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(),
       child: child,
     );
   }
@@ -256,23 +237,20 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       filled: true,
       fillColor: appWhite.withOpacity(0.07),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
+      border: CuboInputs.rounded(
+        BorderSide(
+          color: appWhite.withValues(alpha: 0.28),
           width: 1.4,
         ),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
+      enabledBorder: CuboInputs.rounded(
+        BorderSide(
+          color: appWhite.withValues(alpha: 0.28),
           width: 1.4,
         ),
       ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
+      focusedBorder: CuboInputs.rounded(
+        const BorderSide(
           color: appWhite,
           width: 2,
         ),
@@ -283,7 +261,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   Widget _buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
     final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
+    final lineTop = compact ? 52.0 : 62.0;
 
     final bool showRound = _phase != ColorDuelPhase.setup;
 
@@ -309,7 +287,21 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ],
         ),
 
-        SizedBox(height: compact ? 14 : 24),
+        if (!showRound) ...[
+          SizedBox(height: compact ? 4 : 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: EdgeInsets.only(right: compact ? 18 : 28),
+              child: CuboIllustration(
+                'color_memory',
+                size: compact ? 76 : 108,
+              ),
+            ),
+          ),
+          SizedBox(height: compact ? 2 : 4),
+        ] else
+          SizedBox(height: compact ? 14 : 24),
 
         Padding(
           padding: EdgeInsets.only(
@@ -346,12 +338,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
                 Positioned(
                   top: lineTop,
-                  left: compact ? -13 : -18,
                   right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  child: const CuboPillBar(),
                 ),
               ],
             ),
@@ -366,27 +354,32 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               horizontal: 14,
               vertical: compact ? 8 : 9,
             ),
-            decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.06),
-              border: Border(
-                left: const BorderSide(
-                  color: accentPurple,
-                  width: 6,
+            decoration: CuboDecorations.glass(radius: CuboRadii.md),
+            child: Row(
+              children: [
+                Flexible(
+                  child: _singleLineResponsiveText(
+                    'RONDA $_currentRound DE $_totalRounds',
+                    style: TextStyle(
+                      color: appWhite.withValues(alpha: 0.82),
+                      fontSize: compact ? 11.5 : 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
                 ),
-                bottom: BorderSide(
-                  color: appWhite.withOpacity(0.36),
-                  width: 2,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: CuboProgressDots(
+                      total: _totalRounds,
+                      current: _currentRound - 1,
+                      maxDots: 8,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            child: Text(
-              'RONDA $_currentRound DE $_totalRounds',
-              style: TextStyle(
-                color: appWhite.withOpacity(0.82),
-                fontSize: compact ? 11.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.1,
-              ),
+              ],
             ),
           ),
         ],
@@ -399,73 +392,20 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   Future<void> _showRulesDialog() {
     return showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -475,46 +415,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(height: 18),
 
@@ -966,30 +867,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         duration: const Duration(milliseconds: 220),
         width: double.infinity,
         padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(
-          color: selected ? appWhite.withOpacity(0.14) : appWhite.withOpacity(0.07),
-          border: Border(
-            left: BorderSide(
-              color: selected ? accentPurple : appWhite.withOpacity(0.26),
-              width: selected ? 7 : 2,
-            ),
-            bottom: BorderSide(
-              color: appWhite.withOpacity(0.30),
-              width: 2,
-            ),
-            top: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
-            ),
-            right: BorderSide(
-              color: appWhite.withOpacity(0.18),
-              width: 1,
-            ),
-          ),
-        ),
+        decoration: CuboDecorations.glass(selected: selected),
         child: Row(
           children: [
-            Icon(icon, color: appWhite, size: 28),
+            Icon(icon, color: selected ? appWhite : accentPurple, size: 28),
             const SizedBox(width: 13),
             Expanded(
               child: Column(
@@ -1017,11 +898,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 ],
               ),
             ),
-            if (selected)
-              const Icon(
-                Icons.check_rounded,
-                color: appWhite,
-              ),
+            CuboCheckBadge(selected: selected),
           ],
         ),
       ),
@@ -1059,8 +936,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return Material(
       color: onTap == null
-          ? appWhite.withOpacity(0.04)
-          : appWhite.withOpacity(0.10),
+          ? appWhite.withValues(alpha: 0.04)
+          : appWhite.withValues(alpha: 0.10),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
@@ -1114,13 +993,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 ? 10
                 : 12,
           ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.07),
-            border: Border.all(
-              color: appWhite.withOpacity(0.24),
-              width: 1.4,
-            ),
-          ),
+          decoration: CuboDecorations.glass(radius: CuboRadii.md),
           child: Row(
             children: [
               Container(
@@ -1222,25 +1095,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         5,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: const BorderSide(
-            color: accentPurple,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-          top: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-          right: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           Container(
@@ -1249,8 +1104,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: accentPurple.withValues(alpha: 0.18),
               border: Border.all(
-                color: appWhite.withOpacity(0.68),
+                color: accentPurple.withValues(alpha: 0.85),
                 width: 1.6,
               ),
             ),
@@ -1321,7 +1177,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             ),
           ),
 
-          SizedBox(width: veryNarrow ? 6 : 9),
+          SizedBox(height: veryNarrow ? 6 : 9),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1374,7 +1230,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     MaterialTapTargetSize.shrinkWrap,
                     alignment: Alignment.center,
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+                      borderRadius: CuboRadii.mdAll,
                     ),
                   ),
                   child: const Center(
@@ -1398,9 +1254,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 vertical: compact ? 16 : 20,
               ),
               decoration: BoxDecoration(
-                color: appWhite.withOpacity(0.05),
+                color: appWhite.withValues(alpha: 0.05),
+                borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: appWhite.withOpacity(0.18),
+                  color: appWhite.withValues(alpha: 0.18),
                   width: 1.3,
                 ),
               ),
@@ -1495,10 +1352,13 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return Material(
       color: selected
-          ? accentPurple.withOpacity(0.24)
-          : appWhite.withOpacity(0.06),
+          ? accentPurple.withValues(alpha: 0.24)
+          : appWhite.withValues(alpha: 0.06),
+      borderRadius: CuboRadii.mdAll,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        borderRadius: CuboRadii.mdAll,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           height: veryNarrow
@@ -1514,11 +1374,12 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 : 11,
           ),
           decoration: BoxDecoration(
+            borderRadius: CuboRadii.mdAll,
             border: Border.all(
               color: selected
-                  ? accentPurple
-                  : appWhite.withOpacity(0.22),
-              width: selected ? 2.2 : 1.3,
+                  ? appWhite.withValues(alpha: 0.85)
+                  : appWhite.withValues(alpha: 0.22),
+              width: selected ? 1.8 : 1.2,
             ),
           ),
           child: Column(
@@ -1541,9 +1402,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
                   if (selected) ...[
                     SizedBox(width: veryNarrow ? 3 : 5),
-                    Icon(
-                      Icons.check_circle_rounded,
-                      color: accentGreen,
+                    CuboCheckBadge(
+                      selected: true,
                       size: veryNarrow ? 15 : 18,
                     ),
                   ],
@@ -1617,7 +1477,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ),
 
           SizedBox(
-            width: veryNarrow
+            height: veryNarrow
                 ? 6
                 : compact
                 ? 8
@@ -1660,7 +1520,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ),
 
           SizedBox(
-            width: veryNarrow
+            height: veryNarrow
                 ? 6
                 : compact
                 ? 8
@@ -1733,7 +1593,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         : 35.0;
 
     return Material(
-      color: appWhite.withOpacity(0.10),
+      color: appWhite.withValues(alpha: 0.10),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
@@ -1776,13 +1638,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             ? 9
             : 11,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border.all(
-          color: appWhite.withOpacity(0.22),
-          width: 1.3,
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Column(
         children: [
           Row(
@@ -1914,6 +1770,16 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (!_isCompactScreen) ...[
+                CuboStatusChip(
+                  _gameMode == ColorDuelMode.sameColorForAll
+                      ? 'Mismo color'
+                      : 'Color distinto',
+                  icon: Icons.palette_rounded,
+                ),
+                const SizedBox(height: 12),
+              ],
+
               SizedBox(
                 width: double.infinity,
                 child: _singleLineResponsiveText(
@@ -1948,7 +1814,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               LayoutBuilder(
                 builder: (context, constraints) {
                   final size = min(
-                    _isVeryNarrowScreen ? 190.0 : 230.0,
+                    _isVeryNarrowScreen ||
+                            MediaQuery.sizeOf(context).height < 740
+                        ? 190.0
+                        : 230.0,
                     constraints.maxWidth,
                   );
 
@@ -1957,10 +1826,12 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     height: size,
                     decoration: BoxDecoration(
                       color: _targetColor,
+                      borderRadius: CuboRadii.lgAll,
                       border: Border.all(
-                        color: appWhite.withOpacity(0.75),
+                        color: appWhite.withValues(alpha: 0.75),
                         width: 3,
                       ),
+                      boxShadow: CuboShadows.soft,
                     ),
                   );
                 },
@@ -2098,6 +1969,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                         BoxDecoration(
                           color:
                           _currentSelectedColor,
+                          borderRadius:
+                          CuboRadii.mdAll,
                           border:
                           Border.all(
                             color: appWhite
@@ -2266,8 +2139,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             height: 74,
             decoration: BoxDecoration(
               color: color,
+              borderRadius: CuboRadii.mdAll,
               border: Border.all(
-                color: appWhite.withOpacity(0.50),
+                color: appWhite.withValues(alpha: 0.50),
                 width: 2,
               ),
             ),
@@ -2284,13 +2158,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: appWhite.withOpacity(0.07),
-          border: Border.all(
-            color: appWhite.withOpacity(0.22),
-            width: 1.3,
-          ),
-        ),
+        decoration: CuboDecorations.glass(radius: CuboRadii.md),
         child: Column(
           children: [
             SizedBox(
@@ -2381,16 +2249,17 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
                     const SizedBox(height: 12),
 
-                    Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: appWhite.withOpacity(0.12),
-                      ),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: accuracy / 100,
-                        child: Container(
-                          color: accentGreen,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(99),
+                      child: Container(
+                        height: 8,
+                        color: appWhite.withValues(alpha: 0.12),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: accuracy / 100,
+                          child: Container(
+                            color: accentGreen,
+                          ),
                         ),
                       ),
                     ),
@@ -2455,24 +2324,13 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           _glassCard(
             child: Column(
               children: [
-                Container(
-                  width: 78,
-                  height: 78,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: appWhite.withOpacity(0.85),
-                      width: 2.2,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.emoji_events_rounded,
-                    size: 39,
-                    color: appWhite,
-                  ),
+                CuboIllustration(
+                  'color_memory',
+                  size: _isCompactScreen ? 84 : 108,
+                  popIn: true,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 const Text(
                   'resultado\nfinal',
@@ -2485,6 +2343,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     letterSpacing: -0.9,
                   ),
                 ),
+
+                const SizedBox(height: 10),
+
+                const CuboPillBar(),
 
                 const SizedBox(height: 12),
 
@@ -2580,8 +2442,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final narrow =
@@ -2631,6 +2495,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               ),
             );
           },
+        ),
         ),
       ),
     );

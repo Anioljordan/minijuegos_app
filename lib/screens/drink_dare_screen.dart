@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../data/drink_dare_data.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class DrinkDareScreen extends StatefulWidget {
   const DrinkDareScreen({super.key});
@@ -131,45 +132,12 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     return (normalizedAngle / segmentAngle).floor() % total;
   }
 
-  ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  Widget circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-    required bool compact,
-  }) {
-    final size = compact ? 44.0 : 50.0;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: appWhite.withOpacity(0.85),
-            width: 2.2,
-          ),
-        ),
-        child: Center(child: child),
-      ),
-    );
-  }
+  ButtonStyle mainButtonStyle() =>
+      CuboButtons.primary(padding: EdgeInsets.zero);
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 35.0 : 42.0;
-    final titleHeight = compact ? 72.0 : 94.0;
-    final lineTop = compact ? 62.0 : 82.0;
+    final titleSize = compact ? 38.0 : 46.0;
+    final illustrationSize = compact ? 60.0 : 78.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -181,56 +149,40 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
               compact: compact,
               onTap: () => Navigator.pop(context),
             ),
-            circleButton(
-              compact: compact,
+            CuboCircleButton(
+              icon: Icons.question_mark_rounded,
+              size: compact ? 44 : 50,
               onTap: mostrarNormas,
-              child: Icon(
-                Icons.question_mark_rounded,
-                color: appWhite,
-                size: compact ? 23 : 27,
-              ),
             ),
           ],
         ),
-        SizedBox(height: compact ? 14 : 24),
+        SizedBox(height: compact ? 10 : 16),
         Padding(
           padding: EdgeInsets.only(left: compact ? 18 : 28),
-          child: SizedBox(
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.bottomLeft,
                       child: Text(
                         'la ruleta',
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: titleSize,
-                          height: 2.0,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
+                        maxLines: 1,
+                        style: CuboText.title(size: titleSize),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  top: lineTop,
-                  left: 0,
-                  right: -18,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 8),
+                  CuboIllustration('ruleta', size: illustrationSize),
+                ],
+              ),
+              SizedBox(height: compact ? 8 : 12),
+              const CuboPillBar(),
+            ],
           ),
         ),
       ],
@@ -242,50 +194,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: appWhite, size: 22),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void mostrarNormas() {
@@ -298,13 +207,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.78,
@@ -314,44 +217,10 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(height: 3, color: appWhite.withOpacity(0.58)),
+                  const CuboDialogHeader(),
                   const SizedBox(height: 18),
                   const Text(
-                    'DRINK & DARE',
+                    'RULETA DE RETOS',
                     style: TextStyle(
                       color: appWhite,
                       fontSize: 15,
@@ -371,7 +240,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     icon: Icons.water_drop_rounded,
                     title: 'Cascada',
                     text:
-                    'Quien saque CASCADA empieza el reto. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
+                    'Quien saque CASCADA dice una palabra. La persona de su derecha dice otra que empiece por la última letra, y así sucesivamente. Quien se quede en blanco o repita una palabra recibe un reto.',
                   ),
 
                   rulesItem(
@@ -447,31 +316,12 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: accentPink.withOpacity(0.18),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: accentPink, width: 2.4),
-                ),
-                child: const Icon(
-                  Icons.local_bar_rounded,
-                  color: accentPink,
-                  size: 34,
-                ),
-              ),
-              const SizedBox(height: 16),
+              const CuboIllustration('ruleta', size: 88, popIn: true),
+              const SizedBox(height: 14),
               Text(
                 'número $number',
                 textAlign: TextAlign.center,
@@ -495,23 +345,17 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                 ),
               ),
               const SizedBox(height: 12),
-              Container(height: 3, color: appWhite.withOpacity(0.58)),
+              const CuboPillBar(),
               const SizedBox(height: 18),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: appWhite.withOpacity(0.08),
-                  border: Border.all(
-                    color: appWhite.withOpacity(0.26),
-                    width: 1.4,
-                  ),
-                ),
+                padding: const EdgeInsets.all(18),
+                decoration: CuboDecorations.whiteCard(),
                 child: Text(
                   text,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: appWhite,
+                    color: CuboColors.blueInk,
                     fontSize: 23,
                     height: 1.18,
                     fontWeight: FontWeight.w900,
@@ -545,103 +389,198 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
+  /// Inclinación del puntero: da un "tic" cada vez que pasa una casilla.
+  double pointerTilt() {
+    if (!spinning || drinkDareOpciones.isEmpty) return 0;
+    final segment = 2 * pi / drinkDareOpciones.length;
+    final within = ((-angle) % segment + segment) % segment / segment;
+    return -0.42 * max(0.0, 1 - within * 3.5);
+  }
+
+  /// Las luces del aro parpadean más rápido cuanto más rápido gira.
+  bool lightsPhase() => spinning && (angle * 9).floor().isEven;
+
+  Widget buildWheel(double wheelSize) {
+    final hubSize = wheelSize * 0.2;
+    final pointerWidth = wheelSize * 0.13;
+    final wheelTop = pointerWidth * 0.55;
+
+    return SizedBox(
+      width: wheelSize,
+      height: wheelSize + wheelTop,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        clipBehavior: Clip.none,
+        children: [
+          // Halo de luz detrás de la ruleta.
+          Positioned(
+            top: wheelTop - wheelSize * 0.12,
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                width: wheelSize * 1.24,
+                height: wheelSize * 1.24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      CuboColors.whiteA(spinning ? 0.22 : 0.12),
+                      CuboColors.whiteA(0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: wheelTop,
+            width: wheelSize,
+            height: wheelSize,
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x40000000),
+                    blurRadius: 26,
+                    offset: Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: Transform.rotate(
+                angle: angle,
+                child: CustomPaint(
+                  painter: _DrinkWheelPainter(
+                    itemCount: drinkDareOpciones.length,
+                    colors: wheelColors,
+                    lightsPhase: lightsPhase(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: wheelTop + (wheelSize - hubSize) / 2,
+            child: buildHub(hubSize),
+          ),
+          Positioned(
+            top: 0,
+            child: Transform.rotate(
+              angle: pointerTilt(),
+              alignment: const Alignment(0, -0.4),
+              child: CustomPaint(
+                size: Size(pointerWidth, pointerWidth * 1.6),
+                painter: const _WheelPointerPainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildHub(double size) {
+    return Container(
+      width: size,
+      height: size,
+      padding: EdgeInsets.all(size * 0.07),
+      decoration: BoxDecoration(
+        color: CuboColors.blueDeep,
+        border: Border.all(color: CuboColors.whiteA(0.45), width: 1.5),
+        shape: BoxShape.circle,
+        boxShadow: CuboShadows.soft,
+      ),
+      child: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [CuboColors.blueLight, CuboColors.blueDeep],
+          ),
+        ),
+        child: Icon(
+          Icons.casino_rounded,
+          color: CuboColors.white,
+          size: size * 0.44,
+        ),
+      ),
+    );
+  }
+
+  Widget buildStatus(bool compact) {
+    final icon = spinning
+        ? (stopping ? Icons.slow_motion_video_rounded : Icons.autorenew_rounded)
+        : Icons.touch_app_rounded;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.9, end: 1.0).animate(animation),
+          child: child,
+        ),
+      ),
+      child: Container(
+        key: ValueKey(resultado),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 16 : 20,
+          vertical: compact ? 9 : 11,
+        ),
+        decoration: BoxDecoration(
+          color: CuboColors.whiteA(0.14),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: CuboColors.whiteA(0.28)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: appWhite, size: compact ? 18 : 20),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                resultado,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: CuboText.label(
+                  size: compact ? 15 : 17,
+                  color: appWhite,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget buildGameCard({required bool compact}) {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.xl),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final maxWheel = compact ? 250.0 : 330.0;
+          final statusSpace = compact ? 70.0 : 86.0;
           final availableWheel = min(
-            constraints.maxWidth - 28,
-            constraints.maxHeight * (compact ? 0.66 : 0.72),
+            constraints.maxWidth - (compact ? 32 : 40),
+            (constraints.maxHeight - statusSpace) / 1.07,
           );
-          final wheelSize = availableWheel.clamp(180.0, maxWheel).toDouble();
+          final wheelSize =
+              availableWheel.clamp(180.0, compact ? 300.0 : 360.0).toDouble();
 
           return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: compact ? 12 : 18,
-              vertical: compact ? 14 : 20,
-            ),
+            padding: EdgeInsets.symmetric(vertical: compact ? 12 : 18),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight - 28),
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - (compact ? 24 : 36),
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: wheelSize,
-                    height: wheelSize,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Positioned.fill(
-                          child: Transform.rotate(
-                            angle: angle,
-                            child: CustomPaint(
-                              painter: _DrinkWheelPainter(
-                                itemCount: drinkDareOpciones.length,
-                                colors: wheelColors,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: compact ? 48 : 58,
-                          height: compact ? 48 : 58,
-                          decoration: BoxDecoration(
-                            color: appBlue,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: appWhite.withOpacity(0.88),
-                              width: 2.2,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.local_bar_rounded,
-                            color: appWhite,
-                            size: compact ? 25 : 30,
-                          ),
-                        ),
-                        Positioned(
-                          top: -9,
-                          child: Icon(
-                            Icons.arrow_drop_down_rounded,
-                            size: compact ? 64 : 76,
-                            color: appWhite,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.55),
-                                blurRadius: 12,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: compact ? 12 : 18),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 260),
-                    child: Text(
-                      resultado,
-                      key: ValueKey(resultado),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: compact ? 18 : 22,
-                        height: 1.18,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                  ),
+                  buildWheel(wheelSize),
+                  SizedBox(height: compact ? 14 : 22),
+                  buildStatus(compact),
                 ],
               ),
             ),
@@ -662,45 +601,38 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     return Expanded(
       child: AspectRatio(
         aspectRatio: compact ? 1.55 : 1.45,
-        child: Material(
-          color: onTap == null
-              ? backgroundColor.withOpacity(0.35)
-              : backgroundColor,
-          child: InkWell(
-            onTap: onTap,
-            child: Container(
+        child: CuboPressable(
+          onTap: onTap,
+          child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
               padding: EdgeInsets.symmetric(
                 horizontal: compact ? 8 : 12,
                 vertical: compact ? 10 : 14,
               ),
               decoration: BoxDecoration(
+                color: onTap == null ? CuboColors.whiteA(0.08) : backgroundColor,
+                borderRadius: CuboRadii.lgAll,
                 border: Border.all(
-                  color: appWhite.withOpacity(onTap == null ? 0.12 : 0.28),
-                  width: 2.4,
-                ),
-                boxShadow: onTap == null
-                    ? null
-                    : [
-                  BoxShadow(
-                    color: backgroundColor.withOpacity(0.30),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
+                  color: appWhite.withValues(
+                    alpha: onTap == null ? 0.12 : 0.55,
                   ),
-                ],
+                  width: 1.6,
+                ),
+                boxShadow: onTap == null ? null : CuboShadows.soft,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     icon,
-                    color: foregroundColor.withOpacity(onTap == null ? 0.45 : 1),
+                    color: onTap == null ? CuboColors.whiteA(0.4) : foregroundColor,
                     size: compact ? 38 : 48,
                   ),
                   const SizedBox(height: 5),
                   Text(
                     label,
                     style: TextStyle(
-                      color: foregroundColor.withOpacity(onTap == null ? 0.45 : 1),
+                      color: onTap == null ? CuboColors.whiteA(0.4) : foregroundColor,
                       fontSize: compact ? 12.5 : 14,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.5,
@@ -708,7 +640,6 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                   ),
                 ],
               ),
-            ),
           ),
         ),
       ),
@@ -718,8 +649,10 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topRight,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxHeight < 740;
@@ -744,8 +677,8 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                       buildActionButton(
                         icon: Icons.rotate_right_rounded,
                         label: 'GIRAR',
-                        backgroundColor: appBlue,
-                        foregroundColor: appWhite,
+                        backgroundColor: appWhite,
+                        foregroundColor: appBlue,
                         onTap: spinning ? null : girarRuleta,
                         compact: compact,
                       ),
@@ -765,6 +698,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
             );
           },
         ),
+        ),
       ),
     );
   }
@@ -773,10 +707,12 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
 class _DrinkWheelPainter extends CustomPainter {
   final int itemCount;
   final List<Color> colors;
+  final bool lightsPhase;
 
   const _DrinkWheelPainter({
     required this.itemCount,
     required this.colors,
+    required this.lightsPhase,
   });
 
   @override
@@ -785,42 +721,105 @@ class _DrinkWheelPainter extends CustomPainter {
 
     final radius = size.width / 2;
     final center = Offset(radius, radius);
-    final rect = Rect.fromCircle(center: center, radius: radius);
-
+    final rimWidth = radius * 0.11;
+    final faceRadius = radius - rimWidth;
+    final faceRect = Rect.fromCircle(center: center, radius: faceRadius);
     final segmentAngle = 2 * pi / itemCount;
-    double startAngle = -pi / 2;
 
-    for (int i = 0; i < itemCount; i++) {
-      final paint = Paint()
-        ..color = colors[i % colors.length]
-        ..style = PaintingStyle.fill;
-
-      canvas.drawArc(rect, startAngle, segmentAngle, true, paint);
-
-      final borderPaint = Paint()
-        ..color = Colors.white.withOpacity(0.85)
+    // Aro exterior azul con un brillo suave arriba.
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [CuboColors.blueLight, CuboColors.blueDeep],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+    canvas.drawCircle(
+      center,
+      radius - 1,
+      Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2;
+        ..strokeWidth = 1.5
+        ..color = Colors.white.withValues(alpha: 0.35),
+    );
 
-      canvas.drawArc(rect, startAngle, segmentAngle, true, borderPaint);
+    // Casillas con un degradado suave hacia el centro.
+    for (int i = 0; i < itemCount; i++) {
+      final color = colors[i % colors.length];
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Color.lerp(color, Colors.white, 0.35)!,
+            color,
+            Color.lerp(color, Colors.black, 0.08)!,
+          ],
+          stops: const [0.0, 0.7, 1.0],
+        ).createShader(faceRect);
+      canvas.drawArc(
+        faceRect,
+        -pi / 2 + segmentAngle * i,
+        segmentAngle,
+        true,
+        paint,
+      );
+    }
 
+    // Separadores finos.
+    final divider = Paint()
+      ..color = Colors.white.withValues(alpha: 0.55)
+      ..strokeWidth = max(1.5, radius * 0.014)
+      ..strokeCap = StrokeCap.round;
+    for (int i = 0; i < itemCount; i++) {
+      final a = -pi / 2 + segmentAngle * i;
+      canvas.drawLine(
+        center,
+        center + Offset(cos(a), sin(a)) * faceRadius,
+        divider,
+      );
+    }
+
+    // Sombra interior junto al aro para dar profundidad.
+    canvas.drawCircle(
+      center,
+      faceRadius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = radius * 0.035
+        ..color = Colors.black.withValues(alpha: 0.10)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+
+    // Luces de feria en el aro; se alternan mientras gira.
+    final lights = max(16, itemCount * 2);
+    final lightRadius = rimWidth * 0.24;
+    for (int i = 0; i < lights; i++) {
+      final a = -pi / 2 + 2 * pi * i / lights + pi / lights;
+      final p = center + Offset(cos(a), sin(a)) * (radius - rimWidth / 2);
+      final on = i.isEven != lightsPhase;
+      canvas.drawCircle(
+        p,
+        lightRadius,
+        Paint()
+          ..color = on
+              ? CuboColors.white
+              : CuboColors.white.withValues(alpha: 0.28),
+      );
+    }
+
+    // Números en una chapa blanca.
+    for (int i = 0; i < itemCount; i++) {
       _drawNumber(
         canvas: canvas,
         center: center,
-        radius: radius,
-        angle: startAngle + segmentAngle / 2,
+        radius: faceRadius,
+        angle: -pi / 2 + segmentAngle * (i + 0.5),
         number: i + 1,
+        color: colors[i % colors.length],
       );
-
-      startAngle += segmentAngle;
     }
-
-    final outerPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5;
-
-    canvas.drawCircle(center, radius, outerPaint);
   }
 
   void _drawNumber({
@@ -829,35 +828,40 @@ class _DrinkWheelPainter extends CustomPainter {
     required double radius,
     required double angle,
     required int number,
+    required Color color,
   }) {
+    final badgeRadius = radius * 0.13;
     final textPainter = TextPainter(
       text: TextSpan(
         text: '$number',
         style: TextStyle(
           color: Colors.white,
-          fontSize: radius < 120 ? 18 : 24,
+          fontSize: badgeRadius * 1.15,
           fontWeight: FontWeight.w900,
-          shadows: const [
-            Shadow(
-              color: Colors.black54,
-              blurRadius: 5,
-            ),
-          ],
+          height: 1,
         ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     )..layout();
 
-    final textRadius = radius * 0.72;
-    final offset = Offset(
-      center.dx + cos(angle) * textRadius,
-      center.dy + sin(angle) * textRadius,
-    );
+    final offset = center + Offset(cos(angle), sin(angle)) * (radius * 0.74);
 
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
     canvas.rotate(angle + pi / 2);
+    canvas.drawCircle(
+      const Offset(0, 1.5),
+      badgeRadius,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.12)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+    canvas.drawCircle(
+      Offset.zero,
+      badgeRadius,
+      Paint()..color = Color.lerp(color, CuboColors.blueDeep, 0.45)!,
+    );
     textPainter.paint(
       canvas,
       Offset(-textPainter.width / 2, -textPainter.height / 2),
@@ -867,6 +871,46 @@ class _DrinkWheelPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DrinkWheelPainter oldDelegate) {
-    return oldDelegate.itemCount != itemCount || oldDelegate.colors != colors;
+    return oldDelegate.itemCount != itemCount ||
+        oldDelegate.colors != colors ||
+        oldDelegate.lightsPhase != lightsPhase;
   }
+}
+
+/// Puntero tipo chincheta: cabeza redonda blanca con punto azul y pico abajo.
+class _WheelPointerPainter extends CustomPainter {
+  const _WheelPointerPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final headRadius = w / 2;
+    final head = Offset(w / 2, headRadius);
+
+    final path = Path()
+      ..addOval(Rect.fromCircle(center: head, radius: headRadius))
+      ..moveTo(w / 2 - headRadius * 0.8, head.dy + headRadius * 0.5)
+      ..quadraticBezierTo(w / 2 - headRadius * 0.2, size.height * 0.85,
+          w / 2, size.height)
+      ..quadraticBezierTo(w / 2 + headRadius * 0.2, size.height * 0.85,
+          w / 2 + headRadius * 0.8, head.dy + headRadius * 0.5)
+      ..close();
+
+    canvas.drawShadow(
+      Path()..addOval(Rect.fromCircle(center: head, radius: headRadius)),
+      Colors.black,
+      5,
+      false,
+    );
+    canvas.drawPath(path, Paint()..color = CuboColors.white);
+    canvas.drawCircle(head, headRadius * 0.42, Paint()..color = CuboColors.blue);
+    canvas.drawCircle(
+      head + Offset(-headRadius * 0.13, -headRadius * 0.13),
+      headRadius * 0.12,
+      Paint()..color = CuboColors.blueLight,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _WheelPointerPainter oldDelegate) => false;
 }

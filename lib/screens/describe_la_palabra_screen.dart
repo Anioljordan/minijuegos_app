@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 enum DescribeStep {
   setup,
@@ -118,7 +119,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     'Doctor',
     'Netflix',
     'Montaña',
-    'Cerveza',
     'Discoteca',
     'Helado',
     'Guitarra',
@@ -671,26 +671,16 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     return ElevatedButton.styleFrom(
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
-      disabledBackgroundColor: backgroundColor.withOpacity(0.25),
-      disabledForegroundColor: foregroundColor.withOpacity(0.45),
+      disabledBackgroundColor: backgroundColor.withValues(alpha: 0.25),
+      disabledForegroundColor: foregroundColor.withValues(alpha: 0.45),
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
+      shadowColor: Colors.transparent,
+      shape: const StadiumBorder(),
     );
   }
 
   ButtonStyle secondaryButtonStyle() {
-    return OutlinedButton.styleFrom(
-      foregroundColor: appWhite,
-      side: BorderSide(
-        color: appWhite.withOpacity(0.70),
-        width: 2,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.secondary(padding: null);
   }
 
   Widget circleButton({
@@ -710,9 +700,10 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+            color: CuboColors.whiteA(0.12),
             border: Border.all(
-              color: appWhite.withOpacity(0.85),
-              width: 2.2,
+              color: CuboColors.whiteA(0.55),
+              width: 1.6,
             ),
           ),
           child: Center(child: child),
@@ -725,10 +716,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     required bool compact,
     String? subtitle,
     bool showReset = false,
+    bool showIllustration = false,
   }) {
     final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -768,53 +758,35 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           ],
         ),
 
-        SizedBox(height: compact ? 14 : 24),
-
-        Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'describe la palabra',
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: appWhite,
-                          fontSize: titleSize,
-                          height: 1.4,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  top: lineTop,
-                  left: compact ? -13 : -18,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color: appWhite.withOpacity(0.58),
-                  ),
-                ),
-              ],
+        if (showIllustration) ...[
+          SizedBox(height: compact ? 4 : 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: CuboIllustration(
+              'describe',
+              size: compact ? 72 : 108,
             ),
           ),
+          SizedBox(height: compact ? 6 : 12),
+        ] else
+          SizedBox(height: compact ? 14 : 24),
+
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                'describe la palabra',
+                maxLines: 1,
+                textAlign: TextAlign.right,
+                style: CuboText.title(size: titleSize),
+              ),
+            ),
+            SizedBox(height: compact ? 9 : 12),
+            const CuboPillBar(),
+          ],
         ),
 
         if (subtitle != null) ...[
@@ -842,24 +814,27 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         horizontal: 12,
         vertical: compact ? 8 : 10,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.06),
-        border: Border(
-          left: BorderSide(color: color, width: 6),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.36),
-            width: 2,
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
+      child: Row(
+        children: [
+          Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: appWhite.withOpacity(0.78),
-          fontSize: compact ? 11.5 : 12.5,
-          fontWeight: FontWeight.w700,
-          height: 1.25,
-        ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: CuboColors.whiteA(0.82),
+                fontSize: compact ? 11.5 : 12.5,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -873,24 +848,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border(
-          left: BorderSide(
-            color: accent ?? appWhite.withOpacity(0.28),
-            width: accent == null ? 1.4 : 6,
-          ),
-          top: BorderSide(
-            color: appWhite.withOpacity(0.22),
-            width: 1.2,
-          ),
-          right: BorderSide(
-            color: appWhite.withOpacity(0.22),
-            width: 1.2,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.32),
-            width: 2,
-          ),
+        color: CuboColors.whiteA(0.10),
+        borderRadius: CuboRadii.lgAll,
+        border: Border.all(
+          color: accent?.withValues(alpha: 0.55) ?? CuboColors.whiteA(0.22),
+          width: 1.4,
         ),
       ),
       child: child,
@@ -901,33 +863,24 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     return InputDecoration(
       hintText: tr(hint),
       hintStyle: TextStyle(
-        color: appWhite.withOpacity(0.43),
+        color: CuboColors.whiteA(0.50),
         fontWeight: FontWeight.w600,
       ),
       filled: true,
-      fillColor: appWhite.withOpacity(0.07),
+      fillColor: CuboColors.whiteA(0.07),
       isDense: dense,
       contentPadding: EdgeInsets.symmetric(
         horizontal: 13,
         vertical: dense ? 11 : 14,
       ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
+      border: CuboInputs.rounded(
+        BorderSide(color: CuboColors.whiteA(0.28), width: 1.2),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
-          color: appWhite.withOpacity(0.28),
-          width: 1.4,
-        ),
+      enabledBorder: CuboInputs.rounded(
+        BorderSide(color: CuboColors.whiteA(0.28), width: 1.2),
       ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(color: appWhite, width: 2),
+      focusedBorder: CuboInputs.rounded(
+        BorderSide(color: CuboColors.whiteA(0.75), width: 1.6),
       ),
     );
   }
@@ -986,13 +939,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             decoration: BoxDecoration(
               color: active || completed
                   ? color
-                  : appWhite.withOpacity(0.14),
-              border: Border.all(
-                color: active
-                    ? appWhite.withOpacity(0.80)
-                    : appWhite.withOpacity(0.16),
-                width: active ? 1.6 : 1,
-              ),
+                  : CuboColors.whiteA(0.16),
+              borderRadius: BorderRadius.circular(99),
+              border: active
+                  ? Border.all(color: CuboColors.whiteA(0.85), width: 1.4)
+                  : null,
             ),
           ),
         );
@@ -1031,25 +982,24 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         height: compact ? 52 : 60,
         child: Material(
           color: onTap == null
-              ? backgroundColor.withOpacity(0.28)
+              ? backgroundColor.withValues(alpha: 0.28)
               : backgroundColor,
+          shape: StadiumBorder(
+            side: BorderSide(
+              color: CuboColors.whiteA(onTap == null ? 0.12 : 0.40),
+              width: 1.4,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
             child: Container(
               padding: EdgeInsets.symmetric(
                 horizontal: veryNarrow
-                    ? 5
+                    ? 8
                     : compact
-                    ? 7
-                    : 10,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: appWhite.withOpacity(
-                    onTap == null ? 0.12 : 0.28,
-                  ),
-                  width: 2,
-                ),
+                    ? 10
+                    : 14,
               ),
               child: Row(
                 children: [
@@ -1109,21 +1059,16 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           child: Container(
             height: compact ? 58 : 66,
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: selected
-                  ? appBlue
-                  : appWhite.withOpacity(0.07),
-              border: Border.all(
-                color: selected
-                    ? appWhite
-                    : appWhite.withOpacity(0.24),
-                width: selected ? 2 : 1.3,
-              ),
+            decoration: CuboDecorations.glass(
+              selected: selected,
+              radius: CuboRadii.md,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: appWhite, size: compact ? 21 : 24),
+                selected
+                    ? CuboCheckBadge(selected: true, size: compact ? 20 : 22)
+                    : Icon(icon, color: appWhite, size: compact ? 21 : 24),
                 SizedBox(
                   width: _isVeryNarrowScreen ? 5 : 7,
                 ),
@@ -1170,16 +1115,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 9),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: BorderSide(color: color, width: 5),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           Container(
@@ -1187,7 +1123,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             height: 34,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: color.withOpacity(0.20),
+              color: color.withValues(alpha: 0.20),
               border: Border.all(color: color, width: 1.5),
             ),
             child: Center(
@@ -1250,30 +1186,36 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           final color = colors[index % colors.length];
           return Container(
             width: compact ? 105 : 118,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.08),
-              border: Border(
-                left: BorderSide(color: color, width: 5),
-                bottom: BorderSide(
-                  color: appWhite.withOpacity(0.26),
-                  width: 2,
-                ),
-              ),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: CuboDecorations.glass(radius: CuboRadii.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  tr(team.name).toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.70),
-                    fontSize: compact ? 9 : 10,
-                    fontWeight: FontWeight.w900,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        tr(team.name).toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: CuboColors.whiteA(0.72),
+                          fontSize: compact ? 9 : 10,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -1312,24 +1254,25 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
               horizontal: 12,
               vertical: compact ? 9 : 11,
             ),
-            decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.07),
-              border: Border(
-                left: BorderSide(color: color, width: 5),
-                bottom: BorderSide(
-                  color: appWhite.withOpacity(0.25),
-                  width: 2,
-                ),
-              ),
-            ),
+            decoration: CuboDecorations.glass(radius: CuboRadii.md),
             child: Row(
               children: [
-                Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.58),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
+                Container(
+                  width: 26,
+                  height: 26,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color.withValues(alpha: 0.22),
+                    border: Border.all(color: color, width: 1.4),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(
+                      color: appWhite,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -1362,69 +1305,20 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: appWhite, size: 22),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: appWhite,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void showRulesDialog() {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.50),
+      barrierColor: Colors.black.withValues(alpha: 0.50),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color: appWhite.withOpacity(0.78),
-              width: 2.2,
-            ),
-          ),
+          decoration: CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.80,
@@ -1434,41 +1328,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Container(height: 3, color: appWhite.withOpacity(0.58)),
+                  const CuboDialogHeader(),
                   const SizedBox(height: 18),
                   const Text(
                     'DESCRIBE LA PALABRA',
@@ -1521,7 +1381,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      style: mainButtonStyle(),
+                      style: CuboButtons.primary(padding: null),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 14),
                         child: Text(
@@ -1559,8 +1419,15 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
 
     return Material(
       color: onTap == null
-          ? appWhite.withOpacity(0.04)
-          : appWhite.withOpacity(0.10),
+          ? CuboColors.whiteA(0.04)
+          : CuboColors.whiteA(0.12),
+      shape: CircleBorder(
+        side: BorderSide(
+          color: CuboColors.whiteA(onTap == null ? 0.12 : 0.40),
+          width: 1.2,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
@@ -1614,13 +1481,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                 ? 10
                 : 12,
           ),
-          decoration: BoxDecoration(
-            color: appWhite.withOpacity(0.07),
-            border: Border.all(
-              color: appWhite.withOpacity(0.24),
-              width: 1.4,
-            ),
-          ),
+          decoration: CuboDecorations.glass(radius: CuboRadii.md),
           child: Row(
             children: [
               Container(
@@ -1721,25 +1582,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         5,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.07),
-        border: Border(
-          left: const BorderSide(
-            color: accentCyan,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color: appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-          top: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-          right: BorderSide(
-            color: appWhite.withOpacity(0.15),
-          ),
-        ),
-      ),
+      decoration: CuboDecorations.glass(radius: CuboRadii.md),
       child: Row(
         children: [
           Container(
@@ -1748,8 +1591,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: accentCyan.withValues(alpha: 0.18),
               border: Border.all(
-                color: appWhite.withOpacity(0.68),
+                color: accentCyan.withValues(alpha: 0.85),
                 width: 1.6,
               ),
             ),
@@ -1874,9 +1718,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     tapTargetSize:
                     MaterialTapTargetSize.shrinkWrap,
                     alignment: Alignment.center,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                    ),
+                    shape: const CircleBorder(),
                   ),
                   child: const Center(
                     child: Icon(
@@ -1899,10 +1741,11 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                 vertical: compact ? 16 : 20,
               ),
               decoration: BoxDecoration(
-                color: appWhite.withOpacity(0.05),
+                color: CuboColors.whiteA(0.05),
+                borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: appWhite.withOpacity(0.18),
-                  width: 1.3,
+                  color: CuboColors.whiteA(0.18),
+                  width: 1.2,
                 ),
               ),
               child: Column(
@@ -1989,7 +1832,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       children: [
         buildTopBar(
           compact: compact,
-
+          showIllustration: true,
         ),
         SizedBox(height: compact ? 10 : 14),
         Expanded(
@@ -2032,9 +1875,10 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                             height: compact ? 48 : 54,
                             child: ElevatedButton(
                               onPressed: createEmptyTeams,
-                              style: mainButtonStyle(
-                                backgroundColor: appWhite,
-                                foregroundColor: appBlue,
+                              style: CuboButtons.primary(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                               ),
                               child: const FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -2128,11 +1972,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                               horizontal: 11,
                               vertical: 5,
                             ),
-                            decoration: BoxDecoration(
-                              color: appWhite.withOpacity(0.06),
-                              border: Border.all(
-                                color: appWhite.withOpacity(0.20),
-                              ),
+                            decoration: CuboDecorations.glass(
+                              radius: CuboRadii.input,
                             ),
                             child: Row(
                               children: [
@@ -2152,6 +1993,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                                 DropdownButton<int>(
                                   value: assignedTeam,
                                   dropdownColor: appBlue,
+                                  borderRadius: CuboRadii.mdAll,
                                   hint: Text(
                                     'Equipo',
                                     style: TextStyle(
@@ -2254,11 +2096,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                           Expanded(
                             child: Container(
                               height: compact ? 67 : 74,
-                              decoration: BoxDecoration(
-                                color: appWhite.withOpacity(0.06),
-                                border: Border.all(
-                                  color: appWhite.withOpacity(0.20),
-                                ),
+                              decoration: CuboDecorations.glass(
+                                radius: CuboRadii.md,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2299,10 +2138,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
               FocusScope.of(context).unfocus();
               startGame();
             },
-            style: mainButtonStyle(
-              backgroundColor: appWhite,
-              foregroundColor: appBlue,
-            ),
+            style: CuboButtons.primary(padding: null),
             icon: const Icon(Icons.play_arrow_rounded),
             label: _singleLineResponsiveText(
               'EMPEZAR TURNO',
@@ -2434,11 +2270,8 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                           horizontal: 13,
                           vertical: compact ? 11 : 14,
                         ),
-                        decoration: BoxDecoration(
-                          color: appWhite.withOpacity(0.07),
-                          border: Border.all(
-                            color: appWhite.withOpacity(0.24),
-                          ),
+                        decoration: CuboDecorations.glass(
+                          radius: CuboRadii.md,
                         ),
                         child: Row(
                           children: [
@@ -2622,144 +2455,100 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         ),
 
         Expanded(
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(
-              compact ? 13 : 18,
-            ),
-            decoration: BoxDecoration(
-              color: appWhite.withOpacity(0.08),
-              border: Border.all(
-                color: accent.withOpacity(0.88),
-                width: 2.2,
+          child: Column(
+            children: [
+              // CABECERA DEL TURNO
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: CuboStatusChip(
+                        'Quedan ${currentRoundWords.length} palabras',
+                        icon: Icons.layers_rounded,
+                        uppercase: false,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(
+                    width: compact ? 10 : 14,
+                  ),
+
+                  // TEMPORIZADOR
+                  Container(
+                    width: compact ? 62 : 72,
+                    height: compact ? 62 : 72,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (
+                          danger
+                              ? const Color(0xFFFF4D6D)
+                              : accent
+                      ).withValues(alpha: 0.20),
+                      border: Border.all(
+                        color: danger
+                            ? const Color(0xFFFF4D6D)
+                            : accent,
+                        width: 2.6,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$remainingSeconds',
+                        style: TextStyle(
+                          color: danger
+                              ? const Color(0xFFFF8FA3)
+                              : appWhite,
+                          fontSize: compact ? 27 : 32,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            child: Column(
-              children: [
-                // CABECERA DEL TURNO
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Esta zona ahora tiene un ancho limitado.
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: compact ? 10 : 13,
-                            vertical: compact ? 7 : 9,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accent.withOpacity(0.18),
-                            border: Border.all(
-                              color: accent,
-                              width: 1.5,
+
+              SizedBox(
+                height: compact ? 8 : 12,
+              ),
+
+              // PALABRA
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: CuboCardSwitcher(
+                      child: CuboHeroCard(
+                        key: ValueKey('word-$currentWord'),
+                        chip: _roundShortName,
+                        chipIcon: getRoundIcon(currentRound),
+                        padding: EdgeInsets.fromLTRB(
+                          18,
+                          compact ? 16 : 20,
+                          18,
+                          compact ? 30 : 42,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.only(top: compact ? 10 : 18),
+                          child: Text(
+                            tr(currentWord).toLowerCase(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: CuboColors.blueInk,
+                              fontSize: compact ? 43 : 56,
+                              height: 0.92,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1.4,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                getRoundIcon(currentRound),
-                                color: appWhite,
-                                size: compact ? 18 : 21,
-                              ),
-
-                              const SizedBox(width: 6),
-
-                              // IMPORTANTE:
-                              // Ya no hay Flexible aquí.
-                              Text(
-                                _roundShortName,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: TextStyle(
-                                  color: appWhite,
-                                  fontSize: compact ? 10 : 11.5,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(
-                      width: compact ? 10 : 14,
-                    ),
-
-                    // TEMPORIZADOR
-                    Container(
-                      width: compact ? 62 : 72,
-                      height: compact ? 62 : 72,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (
-                            danger
-                                ? const Color(0xFFFF4D6D)
-                                : accent
-                        ).withOpacity(0.20),
-                        border: Border.all(
-                          color: danger
-                              ? const Color(0xFFFF4D6D)
-                              : accent,
-                          width: 2.6,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$remainingSeconds',
-                          style: TextStyle(
-                            color: danger
-                                ? const Color(0xFFFF8FA3)
-                                : appWhite,
-                            fontSize: compact ? 27 : 32,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // PALABRA
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                        ),
-                        child: Text(
-                          tr(currentWord).toLowerCase(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: compact ? 43 : 56,
-                            height: 0.92,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1.4,
-                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-
-                // PALABRAS RESTANTES
-                Text(
-                  'Quedan ${currentRoundWords.length} palabras',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.60),
-                    fontSize: compact ? 11 : 12.5,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
 
@@ -2773,7 +2562,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             _compactActionButton(
               icon: Icons.skip_next_rounded,
               label: 'PASAR',
-              backgroundColor: appWhite.withOpacity(0.10),
+              backgroundColor: CuboColors.whiteA(0.10),
               foregroundColor: appWhite,
               onTap: passWord,
               compact: compact,
@@ -2823,7 +2612,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                         height: compact ? 68 : 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: accent.withOpacity(0.20),
+                          color: accent.withValues(alpha: 0.20),
                           border: Border.all(color: accent, width: 2.2),
                         ),
                         child: Icon(
@@ -2920,6 +2709,12 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                CuboIllustration(
+                  'describe',
+                  size: compact ? 84 : 116,
+                  popIn: true,
+                ),
+                SizedBox(height: compact ? 8 : 12),
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.fromLTRB(
@@ -2928,30 +2723,29 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                     16,
                     compact ? 18 : 23,
                   ),
-                  decoration: BoxDecoration(
-                    color: accentYellow,
-                    border: Border.all(color: appWhite, width: 2.5),
+                  decoration: CuboDecorations.whiteCard(
+                    radius: CuboRadii.xl,
                   ),
                   child: Column(
                     children: [
                       Container(
-                        width: compact ? 72 : 86,
-                        height: compact ? 72 : 86,
+                        width: compact ? 60 : 72,
+                        height: compact ? 60 : 72,
                         decoration: const BoxDecoration(
-                          color: appWhite,
+                          color: accentYellow,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.emoji_events_rounded,
-                          color: appBlue,
-                          size: compact ? 43 : 52,
+                          color: CuboColors.blueInk,
+                          size: compact ? 34 : 42,
                         ),
                       ),
                       SizedBox(height: compact ? 11 : 15),
                       const Text(
                         'EQUIPO GANADOR',
                         style: TextStyle(
-                          color: appBlue,
+                          color: CuboColors.blueInk,
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.5,
@@ -2964,7 +2758,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                           winner.name.toLowerCase(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: appBlue,
+                            color: CuboColors.blueInk,
                             fontSize: compact ? 40 : 48,
                             height: 0.9,
                             fontWeight: FontWeight.w900,
@@ -2976,7 +2770,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
                       Text(
                         '${winner.points} PUNTOS',
                         style: TextStyle(
-                          color: appBlue,
+                          color: CuboColors.blueInk,
                           fontSize: compact ? 15 : 17,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
@@ -3000,7 +2794,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             _compactActionButton(
               icon: Icons.home_outlined,
               label: 'MENÚ',
-              backgroundColor: appWhite.withOpacity(0.10),
+              backgroundColor: CuboColors.whiteA(0.10),
               foregroundColor: appWhite,
               onTap: () => Navigator.pop(context),
               compact: compact,
@@ -3023,8 +2817,10 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final narrow = constraints.maxWidth < 380;
@@ -3086,6 +2882,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
               child: body,
             );
           },
+        ),
         ),
       ),
     );

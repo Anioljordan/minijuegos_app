@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class MonedaScreen extends StatefulWidget {
   const MonedaScreen({super.key});
@@ -111,18 +112,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   }
 
   ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      disabledBackgroundColor:
-      appWhite.withOpacity(0.25),
-      disabledForegroundColor:
-      appBlue.withOpacity(0.45),
-      elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
+    return CuboButtons.primary(padding: EdgeInsets.zero);
   }
 
   Widget circleButton({
@@ -182,11 +172,11 @@ class _CaraCruzScreenState extends State<MonedaScreen>
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Positioned(
+                Positioned(
                   top: 0,
                   left: 0,
-                  right: 0,
-                  child: FittedBox(
+                  right: compact ? 80 : 96,
+                  child: const FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -203,14 +193,18 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   ),
                 ),
 
-                Positioned(
+                const Positioned(
                   top: 82,
                   left: 0,
+                  child: CuboPillBar(),
+                ),
+
+                Positioned(
+                  top: 0,
                   right: 0,
-                  child: Container(
-                    height: 3,
-                    color:
-                    appWhite.withOpacity(0.58),
+                  child: CuboIllustration(
+                    'moneda',
+                    size: compact ? 72 : 88,
                   ),
                 ),
               ],
@@ -226,73 +220,14 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     required String title,
     required String text,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color: appWhite.withOpacity(0.08),
-        border: Border.all(
-          color: appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-
-          const SizedBox(width: 11),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: _singleLineResponsiveText(
-                    tr(title).toUpperCase(),
-                    alignment: Alignment.centerLeft,
-                    style: const TextStyle(
-                      color: appWhite,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite.withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    return CuboRulesItem(icon: icon, title: title, text: text);
   }
 
   void mostrarNormas() {
     showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) {
         final size = MediaQuery.sizeOf(context);
         final narrow = size.width < 380;
@@ -309,13 +244,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
               narrow ? 16 : 20,
               18,
             ),
-            decoration: BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite.withOpacity(0.75),
-                width: 2.2,
-              ),
-            ),
+            decoration: CuboDecorations.dialog(),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: size.height * 0.78,
@@ -326,53 +255,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   crossAxisAlignment:
                   CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: narrow ? 46 : 52,
-                          height: narrow ? 46 : 52,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color:
-                              appWhite.withOpacity(0.85),
-                              width: 2.1,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.question_mark_rounded,
-                            color: appWhite,
-                            size: narrow ? 25 : 28,
-                          ),
-                        ),
-
-                        const SizedBox(width: 14),
-
-                        Expanded(
-                          child: _singleLineResponsiveText(
-                            'normas',
-                            alignment:
-                            Alignment.centerLeft,
-                            style: TextStyle(
-                              color: appWhite,
-                              fontSize:
-                              narrow ? 32 : 38,
-                              height: 0.9,
-                              fontWeight:
-                              FontWeight.w900,
-                              letterSpacing: -0.8,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Container(
-                      height: 3,
-                      color: appWhite.withOpacity(0.58),
-                    ),
+                    const CuboDialogHeader(),
 
                     const SizedBox(height: 18),
 
@@ -612,16 +495,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   16,
                 ),
                 decoration:
-                BoxDecoration(
-                  color: appBlue,
-                  border: Border.all(
-                    color: appWhite
-                        .withOpacity(
-                      0.75,
-                    ),
-                    width: 2.2,
-                  ),
-                ),
+                CuboDecorations.dialog(),
                 child: Column(
                   mainAxisSize:
                   MainAxisSize.min,
@@ -705,12 +579,9 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                       height: 10,
                     ),
 
-                    Container(
-                      height: 3,
-                      color: appWhite
-                          .withOpacity(
-                        0.58,
-                      ),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: CuboPillBar(),
                     ),
 
                     const SizedBox(
@@ -728,18 +599,8 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                               horizontal: 8,
                             ),
                             decoration:
-                            BoxDecoration(
-                              color: appWhite
-                                  .withOpacity(
-                                0.07,
-                              ),
-                              border:
-                              Border.all(
-                                color: appWhite
-                                    .withOpacity(
-                                  0.20,
-                                ),
-                              ),
+                            CuboDecorations.glass(
+                              radius: CuboRadii.md,
                             ),
                             child: Column(
                               children: [
@@ -794,18 +655,8 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                               horizontal: 8,
                             ),
                             decoration:
-                            BoxDecoration(
-                              color: appWhite
-                                  .withOpacity(
-                                0.07,
-                              ),
-                              border:
-                              Border.all(
-                                color: appWhite
-                                    .withOpacity(
-                                  0.20,
-                                ),
-                              ),
+                            CuboDecorations.glass(
+                              radius: CuboRadii.md,
                             ),
                             child: Column(
                               children: [
@@ -961,7 +812,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                           );
                         },
                         style:
-                        mainButtonStyle(),
+                        CuboButtons.primary(),
                         child:
                         const FittedBox(
                           fit:
@@ -1393,7 +1244,9 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appBlue,
-      body: SafeArea(
+      body: CuboBackground(
+        halo: CuboHalo.topRight,
+        child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final narrow =
@@ -1447,6 +1300,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
             );
           },
         ),
+      ),
       ),
     );
   }

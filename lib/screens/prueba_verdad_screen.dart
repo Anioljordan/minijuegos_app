@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_game_widgets.dart';
 
 class PruebaVerdadScreen extends StatefulWidget {
   const PruebaVerdadScreen({super.key});
@@ -510,41 +511,8 @@ class _PruebaVerdadScreenState
     return Icons.compare_arrows_rounded;
   }
 
-  ButtonStyle mainButtonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appWhite,
-      foregroundColor: appBlue,
-      elevation: 0,
-      shape:
-      const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  Widget circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color:
-            appWhite.withOpacity(0.85),
-            width: 2.2,
-          ),
-        ),
-        child: Center(
-          child: child,
-        ),
-      ),
-    );
-  }
+  ButtonStyle mainButtonStyle() =>
+      CuboButtons.primary(padding: EdgeInsets.zero);
 
   Widget buildTopBar() {
     final compact =
@@ -566,63 +534,51 @@ class _PruebaVerdadScreenState
               onTap: () =>
                   Navigator.pop(context),
             ),
-            circleButton(
+            CuboCircleButton(
+              icon: Icons.question_mark_rounded,
+              size: compact ? 44 : 50,
               onTap: mostrarNormas,
-              child: const Icon(
-                Icons.question_mark_rounded,
-                color: appWhite,
-                size: 27,
-              ),
             ),
           ],
         ),
 
-        const SizedBox(height: 24),
+        SizedBox(height: compact ? 10 : 16),
 
         Padding(
           padding:
           const EdgeInsets.only(left: 28),
-          child: SizedBox(
-            height: 94,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment:
-                    Alignment.centerLeft,
-                    child: Text(
-                      'prueba o verdad',
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: appWhite,
-                        fontSize: 42,
-                        height: 2.60,
-                        fontWeight:
-                        FontWeight.w900,
-                        letterSpacing: -1,
+          child: Column(
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment:
+                CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment:
+                      Alignment.bottomLeft,
+                      child: Text(
+                        'prueba o verdad',
+                        maxLines: 1,
+                        style: CuboText.title(
+                          size: compact ? 38 : 44,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  top: 82,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 3,
-                    color:
-                    appWhite.withOpacity(
-                      0.58,
-                    ),
+                  const SizedBox(width: 8),
+                  CuboIllustration(
+                    'prueba_verdad',
+                    size: compact ? 60 : 78,
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+              SizedBox(height: compact ? 8 : 12),
+              const CuboPillBar(),
+            ],
           ),
         ),
       ],
@@ -634,70 +590,10 @@ class _PruebaVerdadScreenState
     required String title,
     required String text,
   }) {
-    return Container(
-      margin:
-      const EdgeInsets.only(bottom: 10),
-      padding:
-      const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color:
-        appWhite.withOpacity(0.08),
-        border: Border.all(
-          color:
-          appWhite.withOpacity(0.26),
-          width: 1.4,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: appWhite,
-            size: 22,
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child:
-                  _singleLineResponsiveText(
-                    tr(title).toUpperCase(),
-                    style:
-                    const TextStyle(
-                      color: appWhite,
-                      fontSize: 13.5,
-                      fontWeight:
-                      FontWeight.w900,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: appWhite
-                        .withOpacity(0.72),
-                    fontSize: 12.5,
-                    height: 1.25,
-                    fontWeight:
-                    FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return CuboRulesItem(
+      icon: icon,
+      title: title,
+      text: text,
     );
   }
 
@@ -722,14 +618,8 @@ class _PruebaVerdadScreenState
             20,
             18,
           ),
-          decoration: BoxDecoration(
-            color: appBlue,
-            border: Border.all(
-              color:
-              appWhite.withOpacity(0.75),
-              width: 2.2,
-            ),
-          ),
+          decoration:
+          CuboDecorations.dialog(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight:
@@ -745,56 +635,7 @@ class _PruebaVerdadScreenState
                 crossAxisAlignment:
                 CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration:
-                        BoxDecoration(
-                          shape:
-                          BoxShape.circle,
-                          border:
-                          Border.all(
-                            color: appWhite
-                                .withOpacity(
-                                0.85),
-                            width: 2.1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons
-                              .question_mark_rounded,
-                          color: appWhite,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text(
-                          'normas',
-                          style: TextStyle(
-                            color: appWhite,
-                            fontSize: 38,
-                            height: 0.9,
-                            fontWeight:
-                            FontWeight.w900,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  Container(
-                    height: 3,
-                    color:
-                    appWhite.withOpacity(
-                      0.58,
-                    ),
-                  ),
+                  const CuboDialogHeader(),
 
                   const SizedBox(height: 18),
 
@@ -897,18 +738,16 @@ class _PruebaVerdadScreenState
         vertical: 14,
       ),
       enabledBorder:
-      OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
+      CuboInputs.rounded(
+        BorderSide(
           color:
-          appWhite.withOpacity(0.28),
+          appWhite.withValues(alpha: 0.28),
           width: 1.4,
         ),
       ),
       focusedBorder:
-      OutlineInputBorder(
-        borderRadius: BorderRadius.zero,
-        borderSide: BorderSide(
+      CuboInputs.rounded(
+        BorderSide(
           color: editorAccent,
           width: 2,
         ),
@@ -963,13 +802,16 @@ class _PruebaVerdadScreenState
     return Material(
       color: selected
           ? color
-          : appWhite.withOpacity(0.07),
+          : appWhite.withValues(alpha: 0.07),
+      borderRadius: CuboRadii.mdAll,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
           height: 43,
           alignment: Alignment.center,
           decoration: BoxDecoration(
+            borderRadius: CuboRadii.mdAll,
             border: Border.all(
               color: selected
                   ? color
@@ -1017,28 +859,8 @@ class _PruebaVerdadScreenState
         4,
         compact ? 7 : 8,
       ),
-      decoration: BoxDecoration(
-        color:
-        appWhite.withOpacity(0.07),
-        border: Border(
-          left: BorderSide(
-            color: editorAccent,
-            width: 6,
-          ),
-          bottom: BorderSide(
-            color:
-            appWhite.withOpacity(0.25),
-            width: 2,
-          ),
-          top: BorderSide(
-            color:
-            appWhite.withOpacity(0.15),
-          ),
-          right: BorderSide(
-            color:
-            appWhite.withOpacity(0.15),
-          ),
-        ),
+      decoration: CuboDecorations.glass(
+        radius: CuboRadii.md,
       ),
       child: Row(
         children: [
@@ -1048,11 +870,10 @@ class _PruebaVerdadScreenState
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: editorAccent
+                  .withValues(alpha: 0.16),
               border: Border.all(
-                color:
-                appWhite.withOpacity(
-                  0.68,
-                ),
+                color: editorAccent,
                 width: 1.6,
               ),
             ),
@@ -1147,14 +968,8 @@ class _PruebaVerdadScreenState
                   : 18,
               16,
             ),
-            decoration: BoxDecoration(
-              color: appBlue,
-              border: Border.all(
-                color: appWhite
-                    .withOpacity(0.75),
-                width: 2.2,
-              ),
-            ),
+            decoration:
+            CuboDecorations.dialog(),
             child:
             SingleChildScrollView(
               child: Column(
@@ -1224,12 +1039,10 @@ class _PruebaVerdadScreenState
 
                   const SizedBox(height: 10),
 
-                  Container(
-                    height: 3,
-                    color:
-                    appWhite.withOpacity(
-                      0.58,
-                    ),
+                  const Align(
+                    alignment:
+                    Alignment.centerLeft,
+                    child: CuboPillBar(),
                   ),
 
                   const SizedBox(height: 14),
@@ -1308,22 +1121,16 @@ class _PruebaVerdadScreenState
                         const EdgeInsets
                             .all(14),
                         enabledBorder:
-                        OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.zero,
-                          borderSide:
+                        CuboInputs.rounded(
                           BorderSide(
                             color: appWhite
-                                .withOpacity(
-                                0.25),
+                                .withValues(
+                                alpha: 0.25),
                             width: 1.4,
                           ),
                         ),
                         focusedBorder:
-                        OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.zero,
-                          borderSide:
+                        CuboInputs.rounded(
                           BorderSide(
                             color:
                             editorAccent,
@@ -1517,7 +1324,7 @@ class _PruebaVerdadScreenState
                   shape:
                   const RoundedRectangleBorder(
                     borderRadius:
-                    BorderRadius.zero,
+                    CuboRadii.mdAll,
                   ),
                 ),
                 child:
@@ -1539,20 +1346,10 @@ class _PruebaVerdadScreenState
             onPressed:
             mostrarImportarLista,
             style:
-            OutlinedButton.styleFrom(
-              foregroundColor:
-              appWhite,
-              side: BorderSide(
-                color:
-                appWhite.withOpacity(
-                  0.45,
-                ),
-                width: 1.5,
-              ),
-              shape:
-              const RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.zero,
+            CuboButtons.secondary(
+              padding:
+              const EdgeInsets.symmetric(
+                horizontal: 16,
               ),
             ),
             child: Row(
@@ -1688,101 +1485,73 @@ class _PruebaVerdadScreenState
   }
 
   Widget buildCard() {
-    final foreground =
-    tipoActual == 'PRUEBA'
-        ? appBlue
-        : appWhite;
+    final compact = _isCompactScreen;
 
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
       child: Center(
         child: SingleChildScrollView(
-          padding:
-          const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 28,
+          padding: EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: compact ? 8 : 16,
           ),
-          child: Column(
-            mainAxisSize:
-            MainAxisSize.min,
-            children: [
-              Container(
-                width: 94,
-                height: 94,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: appWhite,
-                    width: 3,
-                  ),
-                ),
-                child: Icon(
-                  cardIcon,
-                  color: appWhite,
-                  size: 50,
-                ),
+          child: CuboCardSwitcher(
+            child: CuboHeroCard(
+              key: ValueKey(
+                '$tipoActual|$textoActual',
               ),
-
-              const SizedBox(height: 18),
-
-              Container(
-                padding:
-                const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: tipoActual.isEmpty
-                      ? appWhite.withOpacity(
-                      0.12)
-                      : cardAccent,
-                  border: Border.all(
-                    color: appWhite
-                        .withOpacity(0.26),
-                    width: 1.2,
-                  ),
-                ),
-                child: Text(
-                  tipoActual.isEmpty
-                      ? 'ELIGE'
-                      : tipoActual,
-                  style: TextStyle(
-                    color: foreground,
-                    fontSize: 13,
-                    letterSpacing: 1.2,
-                    fontWeight:
-                    FontWeight.w900,
-                  ),
-                ),
+              chip: tipoActual.isEmpty
+                  ? 'ELIGE'
+                  : tipoActual,
+              chipIcon: cardIcon,
+              padding: EdgeInsets.fromLTRB(
+                22,
+                compact ? 16 : 20,
+                22,
+                compact ? 22 : 30,
               ),
+              child: Column(
+                mainAxisSize:
+                MainAxisSize.min,
+                children: [
+                  Container(
+                    width: compact ? 62 : 76,
+                    height: compact ? 62 : 76,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: cardAccent
+                          .withValues(alpha: 0.16),
+                      border: Border.all(
+                        color: cardAccent,
+                        width: 2.4,
+                      ),
+                    ),
+                    child: Icon(
+                      cardIcon,
+                      color: cardAccent,
+                      size: compact ? 32 : 40,
+                    ),
+                  ),
 
-              const SizedBox(height: 22),
+                  SizedBox(height: compact ? 14 : 20),
 
-              AnimatedSwitcher(
-                duration:
-                const Duration(
-                  milliseconds: 280,
-                ),
-                child: Text(
-                  textoActual,
-                  key: ValueKey(
+                  Text(
                     textoActual,
+                    textAlign:
+                    TextAlign.center,
+                    style: TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: compact ? 25 : 29,
+                      height: 1.14,
+                      fontWeight:
+                      FontWeight.w900,
+                      letterSpacing: -0.6,
+                    ),
                   ),
-                  textAlign:
-                  TextAlign.center,
-                  style:
-                  const TextStyle(
-                    color: appWhite,
-                    fontSize: 31,
-                    height: 1.14,
-                    fontWeight:
-                    FontWeight.w900,
-                    letterSpacing: -0.7,
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1929,28 +1698,20 @@ class _PruebaVerdadScreenState
     return Expanded(
       child: AspectRatio(
         aspectRatio: 1.35,
-        child: Material(
-          color: backgroundColor,
-          borderRadius:
-          BorderRadius.circular(16),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius:
-            BorderRadius.circular(
-              16,
-            ),
-            child: Container(
+        child: CuboPressable(
+          onTap: onTap,
+          child: Container(
               decoration:
               BoxDecoration(
+                color: backgroundColor,
                 borderRadius:
-                BorderRadius.circular(
-                  16,
-                ),
+                CuboRadii.lgAll,
                 border: Border.all(
                   color: appWhite
-                      .withOpacity(0.28),
-                  width: 2.4,
+                      .withValues(alpha: 0.55),
+                  width: 1.6,
                 ),
+                boxShadow: CuboShadows.soft,
               ),
               child: Column(
                 mainAxisAlignment:
@@ -1983,7 +1744,6 @@ class _PruebaVerdadScreenState
                   ),
                 ],
               ),
-            ),
           ),
         ),
       ),
@@ -2020,7 +1780,7 @@ class _PruebaVerdadScreenState
               icon: Icons
                   .local_fire_department_rounded,
               backgroundColor:
-              appBlue,
+              CuboColors.whiteA(0.12),
               foregroundColor:
               appWhite,
               onTap: sacarPrueba,
@@ -2048,19 +1808,24 @@ class _PruebaVerdadScreenState
   Widget build(BuildContext context) {
     if (cargando) {
       return const Scaffold(
-        backgroundColor: appBlue,
-        body: Center(
-          child:
-          CircularProgressIndicator(
-            color: appWhite,
+        backgroundColor: CuboColors.blue,
+        body: CuboBackground(
+          halo: CuboHalo.topRight,
+          child: Center(
+            child:
+            CircularProgressIndicator(
+              color: appWhite,
+            ),
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: appBlue,
-      body: SafeArea(
+      backgroundColor: CuboColors.blue,
+      body: CuboBackground(
+        halo: CuboHalo.topRight,
+        child: SafeArea(
         child: LayoutBuilder(
           builder:
               (context, constraints) {
@@ -2132,6 +1897,7 @@ class _PruebaVerdadScreenState
               ),
             );
           },
+        ),
         ),
       ),
     );
