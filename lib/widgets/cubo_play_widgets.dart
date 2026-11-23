@@ -108,10 +108,14 @@ class CuboPlayCard extends StatelessWidget {
   /// Texto pequeño bajo la frase (p. ej. cómo añadir frases).
   final String? hint;
 
+  /// Elemento opcional encima de la frase (icono del juego, contador...).
+  final Widget? leading;
+
   const CuboPlayCard({
     super.key,
     required this.text,
     this.hint,
+    this.leading,
     this.chip,
     this.chipIcon,
     this.accent = CuboColors.fiesta,
@@ -151,6 +155,10 @@ class CuboPlayCard extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (leading != null) ...[
+                          leading!,
+                          const SizedBox(height: 18),
+                        ],
                         Text(
                           translated,
                           textAlign: TextAlign.center,
@@ -181,6 +189,34 @@ class CuboPlayCard extends StatelessWidget {
           CuboPillBar(width: 40, height: 5, color: accent),
         ],
       ),
+    );
+  }
+}
+
+/// Icono redondo con el color de acento, para [CuboPlayCard.leading].
+class CuboCardBadge extends StatelessWidget {
+  final IconData icon;
+  final Color accent;
+  final double size;
+
+  const CuboCardBadge({
+    super.key,
+    required this.icon,
+    this.accent = CuboColors.fiesta,
+    this.size = 72,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: accent.withValues(alpha: 0.22),
+        border: Border.all(color: accent, width: 2.4),
+      ),
+      child: Icon(icon, color: CuboColors.blueInk, size: size * 0.52),
     );
   }
 }
