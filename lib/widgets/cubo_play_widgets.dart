@@ -559,7 +559,9 @@ class CuboActionBar extends StatelessWidget {
 class CuboChoiceButton extends StatelessWidget {
   final String label;
   final IconData icon;
-  final VoidCallback onTap;
+
+  /// Nulo = desactivado (más tenue y sin pulsación).
+  final VoidCallback? onTap;
   final bool primary;
   final Color? accent;
   final double height;
@@ -576,22 +578,27 @@ class CuboChoiceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = primary ? CuboColors.blue : CuboColors.white;
+    final enabled = onTap != null;
+    final solid = primary && enabled;
+    final fg = solid ? CuboColors.blue : CuboColors.whiteA(enabled ? 1 : 0.4);
     return CuboPressable(
       onTap: onTap,
       child: Container(
         height: height,
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: primary
+        decoration: solid
             ? const BoxDecoration(
                 color: CuboColors.white,
                 borderRadius: CuboRadii.xlAll,
                 boxShadow: CuboShadows.float,
               )
             : BoxDecoration(
-                color: CuboColors.whiteA(0.10),
+                color: CuboColors.whiteA(enabled ? 0.10 : 0.06),
                 borderRadius: CuboRadii.xlAll,
-                border: Border.all(color: CuboColors.whiteA(0.45), width: 1.4),
+                border: Border.all(
+                  color: CuboColors.whiteA(enabled ? 0.45 : 0.14),
+                  width: 1.4,
+                ),
               ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -601,13 +608,13 @@ class CuboChoiceButton extends StatelessWidget {
               height: height * 0.44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color:
-                    accent ??
-                    (primary ? CuboColors.blueTint : CuboColors.whiteA(0.14)),
+                color: enabled && accent != null
+                    ? accent
+                    : (solid ? CuboColors.blueTint : CuboColors.whiteA(0.14)),
               ),
               child: Icon(
                 icon,
-                color: accent != null ? CuboColors.blueInk : fg,
+                color: enabled && accent != null ? CuboColors.blueInk : fg,
                 size: height * 0.26,
               ),
             ),

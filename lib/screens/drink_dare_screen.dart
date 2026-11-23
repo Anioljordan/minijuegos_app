@@ -16,13 +16,6 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     with SingleTickerProviderStateMixin {
   final Random random = Random();
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentPink = Color(0xFFFF4D6D);
-  static const Color accentOrange = Color(0xFFFFB86C);
-  static const Color accentYellow = Color(0xFFFFD166);
-  static const Color accentGreen = Color(0xFF22C55E);
-
   late final AnimationController controller;
 
   double angle = 0;
@@ -181,7 +174,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                 ],
               ),
               SizedBox(height: compact ? 8 : 12),
-              const CuboPillBar(),
+              const CuboPillBar(width: 44, color: CuboColors.fiesta),
             ],
           ),
         ),
@@ -198,10 +191,10 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
@@ -222,7 +215,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                   const Text(
                     'DRINK & DARE',
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -233,49 +226,49 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                     icon: Icons.rotate_right_rounded,
                     title: 'Cómo jugar',
                     text:
-                    'Por turnos, gira la ruleta y pulsa PARAR cuando quieras. Cuando se detenga, cumple lo que indique el número que haya salido.',
+                        'Por turnos, gira la ruleta y pulsa PARAR cuando quieras. Cuando se detenga, cumple lo que indique el número que haya salido.',
                   ),
 
                   rulesItem(
                     icon: Icons.water_drop_rounded,
                     title: 'Cascada',
                     text:
-                    'Quien saque CASCADA empieza el reto. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
+                        'Quien saque CASCADA empieza el reto. Después empieza la persona de su derecha y así sucesivamente. Cuando la persona de tu izquierda pare, tú también puedes parar, aunque puedes seguir para obligar a la persona de tu derecha a continuar.',
                   ),
 
                   rulesItem(
                     icon: Icons.visibility_rounded,
                     title: 'Medusa',
                     text:
-                    'Todos cierran los ojos. A la cuenta de 3, cada uno mira a un jugador cualquiera. Si dos personas cruzan la mirada, quedan eliminadas. Se repite hasta que quede un único ganador o solo dos jugadores en pie.',
+                        'Todos cierran los ojos. A la cuenta de 3, cada uno mira a un jugador cualquiera. Si dos personas cruzan la mirada, quedan eliminadas. Se repite hasta que quede un único ganador o solo dos jugadores en pie.',
                   ),
 
                   rulesItem(
                     icon: Icons.category_rounded,
                     title: 'Saco lleno de…',
                     text:
-                    'Elige una temática, por ejemplo marcas de ropa. Por turnos, cada jugador debe decir algo de esa categoría sin repetir. El primero que no sepa qué decir recibe un reto.',
+                        'Elige una temática, por ejemplo marcas de ropa. Por turnos, cada jugador debe decir algo de esa categoría sin repetir. El primero que no sepa qué decir recibe un reto.',
                   ),
 
                   rulesItem(
                     icon: Icons.rule_rounded,
                     title: 'Poner una norma',
                     text:
-                    'Crea una norma que todos deberán cumplir durante toda la noche. Por ejemplo: solo se puede utilizar la mano izquierda.',
+                        'Crea una norma que todos deberán cumplir durante toda la noche. Por ejemplo: solo se puede utilizar la mano izquierda.',
                   ),
 
                   rulesItem(
                     icon: Icons.comments_disabled_rounded,
                     title: 'Prohibir palabra',
                     text:
-                    'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un reto.',
+                        'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un reto.',
                   ),
 
                   rulesItem(
                     icon: Icons.flash_on_rounded,
                     title: 'ZAS',
                     text:
-                    'Si te toca ZAS consigues este poder y puedes usarlo cuando quieras y tantas veces como quieras. Grita “ZAS” y haz 🤙 poniéndote la mano en la frente. El último jugador en imitarte recibe un reto.',
+                        'Si te toca ZAS consigues este poder y puedes usarlo cuando quieras y tantas veces como quieras. Grita “ZAS” y haz 🤙 poniéndote la mano en la frente. El último jugador en imitarte recibe un reto.',
                   ),
 
                   const SizedBox(height: 8),
@@ -307,10 +300,10 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
   }
 
   void mostrarResultado(int number, String text) {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
@@ -326,7 +319,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                 'número $number',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: accentPink,
+                  color: CuboColors.fiesta,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.1,
@@ -337,7 +330,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                 'te ha tocado',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite,
+                  color: CuboColors.white,
                   fontSize: 34,
                   height: 0.95,
                   fontWeight: FontWeight.w900,
@@ -535,7 +528,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: appWhite, size: compact ? 18 : 20),
+            Icon(icon, color: CuboColors.white, size: compact ? 18 : 20),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -544,7 +537,7 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                 overflow: TextOverflow.ellipsis,
                 style: CuboText.label(
                   size: compact ? 15 : 17,
-                  color: appWhite,
+                  color: CuboColors.white,
                 ),
               ),
             ),
@@ -566,8 +559,9 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
             constraints.maxWidth - (compact ? 32 : 40),
             (constraints.maxHeight - statusSpace) / 1.07,
           );
-          final wheelSize =
-              availableWheel.clamp(180.0, compact ? 300.0 : 360.0).toDouble();
+          final wheelSize = availableWheel
+              .clamp(180.0, compact ? 300.0 : 360.0)
+              .toDouble();
 
           return SingleChildScrollView(
             padding: EdgeInsets.symmetric(vertical: compact ? 12 : 18),
@@ -590,114 +584,62 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
-  Widget buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color backgroundColor,
-    required Color foregroundColor,
-    required VoidCallback? onTap,
-    required bool compact,
-  }) {
-    return Expanded(
-      child: AspectRatio(
-        aspectRatio: compact ? 1.55 : 1.45,
-        child: CuboPressable(
-          onTap: onTap,
-          child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: EdgeInsets.symmetric(
-                horizontal: compact ? 8 : 12,
-                vertical: compact ? 10 : 14,
-              ),
-              decoration: BoxDecoration(
-                color: onTap == null ? CuboColors.whiteA(0.08) : backgroundColor,
-                borderRadius: CuboRadii.lgAll,
-                border: Border.all(
-                  color: appWhite.withValues(
-                    alpha: onTap == null ? 0.12 : 0.55,
-                  ),
-                  width: 1.6,
-                ),
-                boxShadow: onTap == null ? null : CuboShadows.soft,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    color: onTap == null ? CuboColors.whiteA(0.4) : foregroundColor,
-                    size: compact ? 38 : 48,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: onTap == null ? CuboColors.whiteA(0.4) : foregroundColor,
-                      fontSize: compact ? 12.5 : 14,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CuboColors.blue,
-      body: CuboBackground(
+      body: CuboGameBackground(
+        accent: CuboColors.fiesta,
         halo: CuboHalo.topRight,
         child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 14.0 : 18.0;
-            final verticalPadding = compact ? 12.0 : 18.0;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 740;
+              final horizontalPadding = compact ? 14.0 : 18.0;
+              final verticalPadding = compact ? 12.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 12 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(compact: compact),
-                  SizedBox(height: compact ? 10 : 14),
-                  Expanded(child: buildGameCard(compact: compact)),
-                  SizedBox(height: compact ? 10 : 14),
-                  Row(
-                    children: [
-                      buildActionButton(
-                        icon: Icons.rotate_right_rounded,
-                        label: 'GIRAR',
-                        backgroundColor: appWhite,
-                        foregroundColor: appBlue,
-                        onTap: spinning ? null : girarRuleta,
-                        compact: compact,
-                      ),
-                      const SizedBox(width: 12),
-                      buildActionButton(
-                        icon: Icons.pan_tool_alt_rounded,
-                        label: stopping ? 'FRENANDO' : 'PARAR',
-                        backgroundColor: appWhite,
-                        foregroundColor: appBlue,
-                        onTap: spinning && !stopping ? pararRuleta : null,
-                        compact: compact,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 12 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
+                    SizedBox(height: compact ? 10 : 14),
+                    Expanded(child: buildGameCard(compact: compact)),
+                    SizedBox(height: compact ? 10 : 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CuboChoiceButton(
+                            icon: Icons.rotate_right_rounded,
+                            label: 'GIRAR',
+                            primary: true,
+                            accent: CuboColors.fiesta,
+                            height: compact ? 84 : 100,
+                            onTap: spinning ? null : girarRuleta,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: CuboChoiceButton(
+                            icon: Icons.pan_tool_alt_rounded,
+                            label: stopping ? 'FRENANDO' : 'PARAR',
+                            primary: true,
+                            height: compact ? 84 : 100,
+                            onTap: spinning && !stopping ? pararRuleta : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -837,6 +779,7 @@ class _DrinkWheelPainter extends CustomPainter {
         style: TextStyle(
           color: Colors.white,
           fontSize: badgeRadius * 1.15,
+          fontFamily: CuboText.fontFamily,
           fontWeight: FontWeight.w900,
           height: 1,
         ),
@@ -890,10 +833,18 @@ class _WheelPointerPainter extends CustomPainter {
     final path = Path()
       ..addOval(Rect.fromCircle(center: head, radius: headRadius))
       ..moveTo(w / 2 - headRadius * 0.8, head.dy + headRadius * 0.5)
-      ..quadraticBezierTo(w / 2 - headRadius * 0.2, size.height * 0.85,
-          w / 2, size.height)
-      ..quadraticBezierTo(w / 2 + headRadius * 0.2, size.height * 0.85,
-          w / 2 + headRadius * 0.8, head.dy + headRadius * 0.5)
+      ..quadraticBezierTo(
+        w / 2 - headRadius * 0.2,
+        size.height * 0.85,
+        w / 2,
+        size.height,
+      )
+      ..quadraticBezierTo(
+        w / 2 + headRadius * 0.2,
+        size.height * 0.85,
+        w / 2 + headRadius * 0.8,
+        head.dy + headRadius * 0.5,
+      )
       ..close();
 
     canvas.drawShadow(
@@ -903,7 +854,11 @@ class _WheelPointerPainter extends CustomPainter {
       false,
     );
     canvas.drawPath(path, Paint()..color = CuboColors.white);
-    canvas.drawCircle(head, headRadius * 0.42, Paint()..color = CuboColors.blue);
+    canvas.drawCircle(
+      head,
+      headRadius * 0.42,
+      Paint()..color = CuboColors.blue,
+    );
     canvas.drawCircle(
       head + Offset(-headRadius * 0.13, -headRadius * 0.13),
       headRadius * 0.12,
