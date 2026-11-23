@@ -36,16 +36,16 @@ class CuboMenuLayout extends StatelessWidget {
     required this.games,
   });
 
+  /// Chill va en espejo; Fiesta no.
+  Color get _accent => mirrored ? CuboColors.chill : CuboColors.fiesta;
+
   Widget _topIcons(BuildContext context, bool compact) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 35, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          AppLogoButton(
-            compact: compact,
-            onTap: () => Navigator.pop(context),
-          ),
+          AppLogoButton(compact: compact, onTap: () => Navigator.pop(context)),
           const AppSettingsButton(
             blue: CuboColors.blue,
             white: CuboColors.white,
@@ -66,6 +66,7 @@ class CuboMenuLayout extends StatelessWidget {
       title,
       alignEnd: mirrored,
       size: compact ? 58 : 66,
+      barColor: _accent,
     );
 
     return SizedBox(
@@ -81,8 +82,7 @@ class CuboMenuLayout extends StatelessWidget {
             child: hero,
           ),
           Align(
-            alignment:
-                mirrored ? Alignment.bottomRight : Alignment.bottomLeft,
+            alignment: mirrored ? Alignment.bottomRight : Alignment.bottomLeft,
             child: Padding(
               padding: EdgeInsets.only(
                 left: mirrored ? 0 : 6,
@@ -109,18 +109,14 @@ class CuboMenuLayout extends StatelessWidget {
         final compact = MediaQuery.sizeOf(context).height < 740;
         return Scaffold(
           backgroundColor: CuboColors.blue,
-          body: CuboBackground(
+          body: CuboGameBackground(
+            accent: _accent,
             halo: mirrored ? CuboHalo.topLeft : CuboHalo.topRight,
             child: Stack(
               children: [
                 SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      24,
-                      compact ? 92 : 120,
-                      24,
-                      0,
-                    ),
+                    padding: EdgeInsets.fromLTRB(24, compact ? 92 : 120, 24, 0),
                     child: Column(
                       crossAxisAlignment: mirrored
                           ? CrossAxisAlignment.end
@@ -145,6 +141,7 @@ class CuboMenuLayout extends StatelessWidget {
                                   fallbackIcon: game.fallbackIcon,
                                   mirrored: mirrored,
                                   height: compact ? 64 : 70,
+                                  accent: _accent,
                                   onTap: () => _open(context, game),
                                 ),
                               );

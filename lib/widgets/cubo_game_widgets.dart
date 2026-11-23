@@ -27,16 +27,22 @@ class CuboGameTile extends StatelessWidget {
     this.fallbackIcon = Icons.casino_rounded,
     this.mirrored = false,
     this.height = 68,
+    this.accent,
   });
+
+  /// Acento del modo (Fiesta/Chill): tarjeta elevada y flecha de color.
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
     final iconBox = Container(
       width: 48,
       height: 48,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: CuboColors.blueTint,
-        borderRadius: CuboRadii.smAll,
+        borderRadius: accent == null
+            ? CuboRadii.smAll
+            : BorderRadius.circular(16),
       ),
       alignment: Alignment.center,
       child: illustration == null
@@ -47,13 +53,13 @@ class CuboGameTile extends StatelessWidget {
     final arrow = Container(
       width: 34,
       height: 34,
-      decoration: const BoxDecoration(
-        color: CuboColors.blue,
+      decoration: BoxDecoration(
+        color: accent ?? CuboColors.blue,
         shape: BoxShape.circle,
       ),
       child: Icon(
         mirrored ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded,
-        color: CuboColors.white,
+        color: accent == null ? CuboColors.white : CuboColors.blueInk,
         size: 20,
       ),
     );
@@ -85,7 +91,13 @@ class CuboGameTile extends StatelessWidget {
         child: Container(
           height: height,
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: CuboDecorations.whiteCard(),
+          decoration: accent == null
+              ? CuboDecorations.whiteCard()
+              : const BoxDecoration(
+                  color: CuboColors.paper,
+                  borderRadius: BorderRadius.all(Radius.circular(24)),
+                  boxShadow: CuboShadows.card,
+                ),
           child: Row(
             children: mirrored ? children.reversed.toList() : children,
           ),
