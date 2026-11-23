@@ -4,6 +4,7 @@ import 'app_logo_button.dart';
 import 'cubo_widgets.dart';
 import 'i18n_text.dart';
 
+export 'cubo_play_widgets.dart';
 export 'cubo_widgets.dart';
 
 /// Fila de juego de los menús Fiesta y Chill: tarjeta blanca con icono en un
@@ -101,12 +102,16 @@ class CuboStatusChip extends StatelessWidget {
   final bool light;
   final bool uppercase;
 
+  /// Punto de color delante del texto (acento del modo).
+  final Color? dot;
+
   const CuboStatusChip(
     this.text, {
     super.key,
     this.icon,
     this.light = false,
     this.uppercase = true,
+    this.dot,
   });
 
   @override
@@ -123,6 +128,14 @@ class CuboStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (dot != null) ...[
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 8),
+          ],
           if (icon != null) ...[
             Icon(icon, size: 15, color: fg),
             const SizedBox(width: 6),
