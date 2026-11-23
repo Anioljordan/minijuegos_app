@@ -34,6 +34,67 @@ class CuboGameScope extends StatelessWidget {
   }
 }
 
+/// Fondo de partida: [CuboBackground] con halo de acento e Inter para todo
+/// lo que cuelga de él. Sustituye a CuboBackground en las pantallas de juego.
+class CuboGameBackground extends StatelessWidget {
+  final Widget child;
+  final CuboHalo halo;
+  final Color accent;
+
+  const CuboGameBackground({
+    super.key,
+    required this.child,
+    this.halo = CuboHalo.topRight,
+    this.accent = CuboColors.fiesta,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CuboGameScope(
+      child: CuboBackground(halo: halo, accent: accent, child: child),
+    );
+  }
+}
+
+/// [showDialog] con Inter: los diálogos viven en otra ruta y no heredan el
+/// [CuboGameScope] de la pantalla.
+Future<T?> showCuboDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color? barrierColor,
+}) {
+  return showDialog<T>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    builder: (dialogContext) => CuboGameScope(child: builder(dialogContext)),
+  );
+}
+
+/// [showModalBottomSheet] con Inter.
+Future<T?> showCuboSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool isScrollControlled = false,
+  Color? backgroundColor,
+  bool isDismissible = true,
+  bool enableDrag = true,
+  bool useSafeArea = false,
+  ShapeBorder? shape,
+}) {
+  return showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: isScrollControlled,
+    backgroundColor: backgroundColor,
+    isDismissible: isDismissible,
+    enableDrag: enableDrag,
+    useSafeArea: useSafeArea,
+    shape: shape,
+    builder: (sheetContext) => CuboGameScope(child: builder(sheetContext)),
+  );
+}
+
 /// Carta protagonista: blanca, radio 32, sombra en dos capas, chip opcional
 /// arriba y barrita de acento abajo. El texto se reduce solo si no cabe, para
 /// aguantar las frases largas en catalán e inglés.
@@ -44,9 +105,13 @@ class CuboPlayCard extends StatelessWidget {
   final Color accent;
   final double maxFontSize;
 
+  /// Texto pequeño bajo la frase (p. ej. cómo añadir frases).
+  final String? hint;
+
   const CuboPlayCard({
     super.key,
     required this.text,
+    this.hint,
     this.chip,
     this.chipIcon,
     this.accent = CuboColors.fiesta,
@@ -83,12 +148,29 @@ class CuboPlayCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: SizedBox(
                     width: box.maxWidth,
-                    child: Text(
-                      translated,
-                      textAlign: TextAlign.center,
-                      style: CuboText.cardPhrase(
-                        size: fontSizeFor(translated, maxFontSize),
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          translated,
+                          textAlign: TextAlign.center,
+                          style: CuboText.cardPhrase(
+                            size: fontSizeFor(translated, maxFontSize),
+                          ),
+                        ),
+                        if (hint != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            hint!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: CuboColors.blueInk.withValues(alpha: 0.62),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),

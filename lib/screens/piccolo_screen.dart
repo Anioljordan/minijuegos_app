@@ -15,15 +15,9 @@ class PiccoloScreen extends StatefulWidget {
 class _PiccoloScreenState extends State<PiccoloScreen> {
   final Random random = Random();
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentPink = Color(0xFFFF4D6D);
+  static const String storageKey = 'piccolo_frases_personalizadas';
 
-  static const String storageKey =
-      'piccolo_frases_personalizadas';
-
-  final TextEditingController fraseController =
-  TextEditingController();
+  final TextEditingController fraseController = TextEditingController();
 
   List<String> frases = [];
   List<String> frasesDisponibles = [];
@@ -35,15 +29,12 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   bool cargando = true;
   bool configurando = false;
 
-  bool get _isNarrowScreen =>
-      MediaQuery.sizeOf(context).width < 380;
+  bool get _isNarrowScreen => MediaQuery.sizeOf(context).width < 380;
 
-  bool get _isVeryNarrowScreen =>
-      MediaQuery.sizeOf(context).width < 340;
+  bool get _isVeryNarrowScreen => MediaQuery.sizeOf(context).width < 340;
 
   bool get _isCompactScreen =>
-      MediaQuery.sizeOf(context).height < 740 ||
-          _isNarrowScreen;
+      MediaQuery.sizeOf(context).height < 740 || _isNarrowScreen;
 
   @override
   void initState() {
@@ -58,37 +49,27 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   Widget _singleLineResponsiveText(
-      String text, {
-        required TextStyle style,
-        Alignment alignment = Alignment.centerLeft,
-      }) {
+    String text, {
+    required TextStyle style,
+    Alignment alignment = Alignment.centerLeft,
+  }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
-      child: Text(
-        text,
-        maxLines: 1,
-        softWrap: false,
-        style: style,
-      ),
+      child: Text(text, maxLines: 1, softWrap: false, style: style),
     );
   }
 
   Future<void> cargarFrases() async {
-    final prefs =
-    await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-    final guardadas =
-        prefs.getStringList(storageKey) ?? [];
+    final guardadas = prefs.getStringList(storageKey) ?? [];
 
     if (!mounted) return;
 
-    final lista =
-    List<String>.from(guardadas);
+    final lista = List<String>.from(guardadas);
 
-    final baraja =
-    List<String>.from(lista)
-      ..shuffle(random);
+    final baraja = List<String>.from(lista)..shuffle(random);
 
     String actualBase = '';
     String actual = '';
@@ -102,10 +83,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
       frases = lista;
       frasesDisponibles = baraja;
 
-      frasesUsadas =
-      actualBase.isEmpty
-          ? []
-          : [actualBase];
+      frasesUsadas = actualBase.isEmpty ? [] : [actualBase];
 
       fraseActualBase = actualBase;
       fraseActual = actual;
@@ -116,13 +94,9 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   Future<void> guardarFrases() async {
-    final prefs =
-    await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setStringList(
-      storageKey,
-      frases,
-    );
+    await prefs.setStringList(storageKey, frases);
   }
 
   void mostrarMensaje(String text) {
@@ -131,9 +105,8 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
       ..showSnackBar(
         SnackBar(
           content: Text(text),
-          behavior:
-          SnackBarBehavior.floating,
-          backgroundColor: appBlue,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: CuboColors.blue,
         ),
       );
   }
@@ -145,57 +118,37 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
       return '';
     }
 
-    if (!frase.endsWith('.') &&
-        !frase.endsWith('?') &&
-        !frase.endsWith('!')) {
+    if (!frase.endsWith('.') && !frase.endsWith('?') && !frase.endsWith('!')) {
       frase = '$frase.';
     }
 
     return frase;
   }
 
-  String limpiarPrefijoImportado(
-      String texto,
-      ) {
+  String limpiarPrefijoImportado(String texto) {
     String limpio = texto.trim();
 
-    limpio = limpio.replaceFirst(
-      RegExp(
-        r'^\s*\d+\s*[\.\)\-:]\s*',
-      ),
-      '',
-    );
+    limpio = limpio.replaceFirst(RegExp(r'^\s*\d+\s*[\.\)\-:]\s*'), '');
 
-    limpio = limpio.replaceFirst(
-      RegExp(r'^\s*[-•*]\s*'),
-      '',
-    );
+    limpio = limpio.replaceFirst(RegExp(r'^\s*[-•*]\s*'), '');
 
     return limpio.trim();
   }
 
   Future<void> agregarFrase() async {
-    final nueva = normalizarFrase(
-      fraseController.text,
-    );
+    final nueva = normalizarFrase(fraseController.text);
 
     if (nueva.isEmpty) {
-      mostrarMensaje(
-        'Escribe una frase.',
-      );
+      mostrarMensaje('Escribe una frase.');
       return;
     }
 
     final repetida = frases.any(
-          (frase) =>
-      frase.toLowerCase() ==
-          nueva.toLowerCase(),
+      (frase) => frase.toLowerCase() == nueva.toLowerCase(),
     );
 
     if (repetida) {
-      mostrarMensaje(
-        'Esta frase ya está añadida.',
-      );
+      mostrarMensaje('Esta frase ya está añadida.');
       return;
     }
 
@@ -204,9 +157,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
       if (nueva != fraseActualBase) {
         frasesDisponibles.add(nueva);
-        frasesDisponibles.shuffle(
-          random,
-        );
+        frasesDisponibles.shuffle(random);
       }
 
       fraseController.clear();
@@ -215,16 +166,11 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     await guardarFrases();
   }
 
-  Future<int> importarFrasesDesdeTexto(
-      String texto,
-      ) async {
+  Future<int> importarFrasesDesdeTexto(String texto) async {
     final lineas = texto
         .split(RegExp(r'\r?\n'))
         .map(limpiarPrefijoImportado)
-        .where(
-          (linea) =>
-      linea.trim().isNotEmpty,
-    )
+        .where((linea) => linea.trim().isNotEmpty)
         .toList();
 
     if (lineas.isEmpty) {
@@ -232,22 +178,17 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     }
 
     final existentes = frases
-        .map(
-          (frase) =>
-          frase.toLowerCase().trim(),
-    )
+        .map((frase) => frase.toLowerCase().trim())
         .toSet();
 
     final nuevas = <String>[];
 
     for (final linea in lineas) {
-      final frase =
-      normalizarFrase(linea);
+      final frase = normalizarFrase(linea);
 
       if (frase.isEmpty) continue;
 
-      final clave =
-      frase.toLowerCase().trim();
+      final clave = frase.toLowerCase().trim();
 
       if (!existentes.contains(clave)) {
         existentes.add(clave);
@@ -263,15 +204,10 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
       frases.addAll(nuevas);
 
       frasesDisponibles.addAll(
-        nuevas.where(
-              (frase) =>
-          frase != fraseActualBase,
-        ),
+        nuevas.where((frase) => frase != fraseActualBase),
       );
 
-      frasesDisponibles.shuffle(
-        random,
-      );
+      frasesDisponibles.shuffle(random);
     });
 
     await guardarFrases();
@@ -279,11 +215,8 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     return nuevas.length;
   }
 
-  Future<void> eliminarFrase(
-      int index,
-      ) async {
-    if (index < 0 ||
-        index >= frases.length) {
+  Future<void> eliminarFrase(int index) async {
+    if (index < 0 || index >= frases.length) {
       return;
     }
 
@@ -292,13 +225,9 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     setState(() {
       frases.removeAt(index);
 
-      frasesDisponibles.removeWhere(
-            (frase) => frase == eliminada,
-      );
+      frasesDisponibles.removeWhere((frase) => frase == eliminada);
 
-      frasesUsadas.removeWhere(
-            (frase) => frase == eliminada,
-      );
+      frasesUsadas.removeWhere((frase) => frase == eliminada);
 
       if (fraseActualBase == eliminada) {
         fraseActualBase = '';
@@ -309,28 +238,19 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     await guardarFrases();
   }
 
-
-
   void siguienteFrase() {
     if (frases.isEmpty) {
-      mostrarMensaje(
-        'Añade frases con el botón de editar.',
-      );
+      mostrarMensaje('Añade frases con el botón de editar.');
       return;
     }
 
     if (frasesDisponibles.isEmpty) {
-      frasesDisponibles =
-      List<String>.from(frases)
-        ..shuffle(random);
+      frasesDisponibles = List<String>.from(frases)..shuffle(random);
 
       frasesUsadas.clear();
 
-      if (frasesDisponibles.length > 1 &&
-          fraseActualBase.isNotEmpty) {
-        frasesDisponibles.remove(
-          fraseActualBase,
-        );
+      if (frasesDisponibles.length > 1 && fraseActualBase.isNotEmpty) {
+        frasesDisponibles.remove(fraseActualBase);
       }
     }
 
@@ -375,18 +295,12 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     }
 
     final actualSigueExistiendo =
-        fraseActualBase.isNotEmpty &&
-            frases.contains(
-              fraseActualBase,
-            );
+        fraseActualBase.isNotEmpty && frases.contains(fraseActualBase);
 
     if (!actualSigueExistiendo) {
-      final baraja =
-      List<String>.from(frases)
-        ..shuffle(random);
+      final baraja = List<String>.from(frases)..shuffle(random);
 
-      final primera =
-      baraja.removeLast();
+      final primera = baraja.removeLast();
 
       setState(() {
         fraseActualBase = primera;
@@ -406,18 +320,14 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     });
   }
 
-  int get totalFrases =>
-      frases.length;
+  int get totalFrases => frases.length;
 
   double get progresoRestante {
     if (totalFrases == 0) {
       return 0;
     }
 
-    return (
-        frasesDisponibles.length /
-            totalFrases
-    ).clamp(0.0, 1.0);
+    return (frasesDisponibles.length / totalFrases).clamp(0.0, 1.0);
   }
 
   ButtonStyle mainButtonStyle() {
@@ -425,27 +335,24 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   Widget buildTopBar() {
-    final compact =
-        MediaQuery.of(context)
-            .size
-            .height <
-            740;
+    if (!configurando) {
+      return CuboGameHeader(
+        onRules: mostrarNormas,
+        status: CuboStatusChip('señala al mas...', dot: CuboColors.fiesta),
+      );
+    }
+
+    final compact = MediaQuery.of(context).size.height < 740;
 
     return Column(
-      crossAxisAlignment:
-      CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment
-              .spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             AppLogoButton(
               compact: compact,
-              onTap: () =>
-                  Navigator.pop(
-                    context,
-                  ),
+              onTap: () => Navigator.pop(context),
             ),
 
             CuboCircleButton(
@@ -458,18 +365,12 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
         const SizedBox(height: 24),
 
         Padding(
-          padding:
-          const EdgeInsets.only(
-            left: 28,
-          ),
+          padding: const EdgeInsets.only(left: 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (configurando) ...[
-                CuboIllustration(
-                  'senala',
-                  size: compact ? 72 : 100,
-                ),
+                CuboIllustration('senala', size: compact ? 72 : 100),
                 const SizedBox(height: 8),
               ],
               FittedBox(
@@ -482,7 +383,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const CuboPillBar(),
+              const CuboPillBar(width: 44, color: CuboColors.fiesta),
             ],
           ),
         ),
@@ -499,149 +400,90 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (_) => Dialog(
-        backgroundColor:
-        Colors.transparent,
-        insetPadding:
-        const EdgeInsets
-            .symmetric(
-          horizontal: 22,
-        ),
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding:
-          const EdgeInsets
-              .fromLTRB(
-            20,
-            20,
-            20,
-            18,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
           decoration: CuboDecorations.dialog(),
-          child:
-          ConstrainedBox(
-            constraints:
-            BoxConstraints(
-              maxHeight:
-              MediaQuery.of(
-                context,
-              ).size.height *
-                  0.78,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
             ),
-            child:
-            SingleChildScrollView(
+            child: SingleChildScrollView(
               child: Column(
-                mainAxisSize:
-                MainAxisSize.min,
-                crossAxisAlignment:
-                CrossAxisAlignment
-                    .stretch,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const CuboDialogHeader(),
 
-                  const SizedBox(
-                    height: 18,
-                  ),
+                  const SizedBox(height: 18),
 
                   const Text(
                     'SEÑALA AL MÁS PROBABLE',
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
-                      fontWeight:
-                      FontWeight
-                          .w900,
-                      letterSpacing:
-                      1.2,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 14,
+                  const SizedBox(height: 14),
+
+                  rulesItem(
+                    icon: Icons.edit_rounded,
+                    title: 'Tus frases',
+                    text: 'Crea tus propias frases desde el botón de editar.',
                   ),
 
                   rulesItem(
-                    icon: Icons
-                        .edit_rounded,
-                    title:
-                    'Tus frases',
+                    icon: Icons.content_paste_rounded,
+                    title: 'Importar lista',
                     text:
-                    'Crea tus propias frases desde el botón de editar.',
+                        'Puedes pegar una lista completa con cientos de frases y añadirlas todas de golpe.',
                   ),
 
                   rulesItem(
-                    icon: Icons
-                        .content_paste_rounded,
-                    title:
-                    'Importar lista',
+                    icon: Icons.record_voice_over_rounded,
+                    title: 'Lee la frase',
                     text:
-                    'Puedes pegar una lista completa con cientos de frases y añadirlas todas de golpe.',
+                        'Un jugador lee la frase en voz alta para todo el grupo.',
                   ),
 
                   rulesItem(
-                    icon: Icons
-                        .record_voice_over_rounded,
-                    title:
-                    'Lee la frase',
+                    icon: Icons.touch_app_rounded,
+                    title: 'Todos señalan',
                     text:
-                    'Un jugador lee la frase en voz alta para todo el grupo.',
+                        'Todos señalan a la persona que encaja mejor con la frase.',
                   ),
 
                   rulesItem(
-                    icon: Icons
-                        .touch_app_rounded,
-                    title:
-                    'Todos señalan',
-                    text:
-                    'Todos señalan a la persona que encaja mejor con la frase.',
+                    icon: Icons.groups_rounded,
+                    title: 'El más señalado',
+                    text: 'La persona con más votos tendra castigo.',
                   ),
 
-                  rulesItem(
-                    icon:
-                    Icons.groups_rounded,
-                    title:
-                    'El más señalado',
-                    text:
-                    'La persona con más votos tendra castigo.',
-                  ),
-
-                  const SizedBox(
-                    height: 8,
-                  ),
+                  const SizedBox(height: 8),
 
                   SizedBox(
-                    width:
-                    double.infinity,
-                    child:
-                    ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(
-                            context,
-                          ),
-                      style:
-                      mainButtonStyle(),
-                      child:
-                      const Padding(
-                        padding:
-                        EdgeInsets
-                            .symmetric(
-                          vertical: 14,
-                        ),
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         child: Text(
                           'ENTENDIDO',
                           maxLines: 1,
-                          style:
-                          TextStyle(
-                            fontSize:
-                            16,
-                            fontWeight:
-                            FontWeight
-                                .w900,
-                            letterSpacing:
-                            0.4,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
                           ),
                         ),
                       ),
@@ -658,36 +500,19 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
   InputDecoration inputDecoration() {
     return InputDecoration(
-      hintText:
-      tr('Ej: ¿Quién acabaría antes en la cárcel?'),
+      hintText: tr('Ej: ¿Quién acabaría antes en la cárcel?'),
       hintStyle: TextStyle(
-        color:
-        appWhite.withOpacity(
-          0.42,
-        ),
+        color: CuboColors.white.withValues(alpha: 0.42),
         fontSize: 13,
       ),
       filled: true,
-      fillColor:
-      appWhite.withOpacity(
-        0.07,
-      ),
-      contentPadding:
-      const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 14,
-      ),
+      fillColor: CuboColors.white.withValues(alpha: 0.07),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       enabledBorder: CuboInputs.rounded(
-        BorderSide(
-          color: CuboColors.whiteA(0.28),
-          width: 1.4,
-        ),
+        BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
       ),
       focusedBorder: CuboInputs.rounded(
-        const BorderSide(
-          color: accentPink,
-          width: 2,
-        ),
+        const BorderSide(color: CuboColors.fiesta, width: 2),
       ),
     );
   }
@@ -699,12 +524,8 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }) {
     return Container(
       width: double.infinity,
-      margin:
-      const EdgeInsets.only(
-        bottom: 8,
-      ),
-      padding:
-      EdgeInsets.fromLTRB(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.fromLTRB(
         compact ? 9 : 11,
         compact ? 7 : 8,
         4,
@@ -714,81 +535,51 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
       child: Row(
         children: [
           Container(
-            width:
-            compact ? 31 : 35,
-            height:
-            compact ? 31 : 35,
-            alignment:
-            Alignment.center,
-            decoration:
-            BoxDecoration(
-              shape:
-              BoxShape.circle,
-              color: accentPink.withValues(alpha: 0.14),
+            width: compact ? 31 : 35,
+            height: compact ? 31 : 35,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: CuboColors.fiesta.withValues(alpha: 0.14),
               border: Border.all(
-                color: accentPink.withValues(alpha: 0.70),
+                color: CuboColors.fiesta.withValues(alpha: 0.70),
                 width: 1.6,
               ),
             ),
             child: Text(
               '${index + 1}',
               style: TextStyle(
-                color: appWhite,
-                fontSize:
-                compact
-                    ? 12
-                    : 13,
-                fontWeight:
-                FontWeight
-                    .w900,
+                color: CuboColors.white,
+                fontSize: compact ? 12 : 13,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
 
-          const SizedBox(
-            width: 10,
-          ),
+          const SizedBox(width: 10),
 
           Expanded(
             child: Text(
               frase,
               maxLines: 2,
-              overflow:
-              TextOverflow
-                  .ellipsis,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: appWhite,
-                fontSize:
-                compact
-                    ? 12.5
-                    : 14,
+                color: CuboColors.white,
+                fontSize: compact ? 12.5 : 14,
                 height: 1.2,
-                fontWeight:
-                FontWeight
-                    .w700,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
 
           IconButton(
-            tooltip:
-            tr('Eliminar frase'),
-            constraints:
-            const BoxConstraints(
-              minWidth: 38,
-              minHeight: 38,
-            ),
-            padding:
-            EdgeInsets.zero,
-            onPressed: () =>
-                eliminarFrase(index),
+            tooltip: tr('Eliminar frase'),
+            constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+            padding: EdgeInsets.zero,
+            onPressed: () => eliminarFrase(index),
             icon: Icon(
-              Icons
-                  .delete_outline_rounded,
-              color: appWhite
-                  .withOpacity(
-                0.78,
-              ),
+              Icons.delete_outline_rounded,
+              color: CuboColors.white.withValues(alpha: 0.78),
             ),
           ),
         ],
@@ -796,312 +587,187 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     );
   }
 
-  Future<void>
-  mostrarImportarFrases() async {
-    final controller =
-    TextEditingController();
+  Future<void> mostrarImportarFrases() async {
+    final controller = TextEditingController();
 
-    final screenSize =
-    MediaQuery.sizeOf(context);
+    final screenSize = MediaQuery.sizeOf(context);
 
-    final resultado =
-    await showDialog<int>(
+    final resultado = await showCuboDialog<int>(
       context: context,
       barrierDismissible: false,
-      barrierColor:
-      Colors.black.withOpacity(
-        0.55,
-      ),
-      builder:
-          (dialogContext) {
+      barrierColor: Colors.black.withValues(alpha: 0.55),
+      builder: (dialogContext) {
         return Dialog(
-          backgroundColor:
-          Colors.transparent,
-          insetPadding:
-          EdgeInsets.symmetric(
-            horizontal:
-            _isVeryNarrowScreen
-                ? 10
-                : 18,
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: _isVeryNarrowScreen ? 10 : 18,
             vertical: 24,
           ),
           child: Container(
-            width:
-            double.infinity,
-            padding:
-            EdgeInsets.fromLTRB(
-              _isVeryNarrowScreen
-                  ? 14
-                  : 18,
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+              _isVeryNarrowScreen ? 14 : 18,
               18,
-              _isVeryNarrowScreen
-                  ? 14
-                  : 18,
+              _isVeryNarrowScreen ? 14 : 18,
               16,
             ),
             decoration: CuboDecorations.dialog(),
             child: SingleChildScrollView(
               child: Column(
-                mainAxisSize:
-                MainAxisSize.min,
-                crossAxisAlignment:
-                CrossAxisAlignment
-                    .stretch,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
                     children: [
                       Container(
                         width: 46,
                         height: 46,
-                        decoration:
-                        BoxDecoration(
-                          shape:
-                          BoxShape
-                              .circle,
-                          color: accentPink
-                              .withOpacity(
-                            0.14,
-                          ),
-                          border:
-                          Border.all(
-                            color:
-                            accentPink,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: CuboColors.fiesta.withValues(alpha: 0.14),
+                          border: Border.all(
+                            color: CuboColors.fiesta,
                             width: 2,
                           ),
                         ),
-                        child:
-                        const Icon(
-                          Icons
-                              .content_paste_rounded,
-                          color:
-                          accentPink,
+                        child: const Icon(
+                          Icons.content_paste_rounded,
+                          color: CuboColors.fiesta,
                           size: 24,
                         ),
                       ),
 
-                      const SizedBox(
-                        width: 11,
-                      ),
+                      const SizedBox(width: 11),
 
                       Expanded(
-                        child:
-                        _singleLineResponsiveText(
+                        child: _singleLineResponsiveText(
                           'IMPORTAR LISTA',
-                          style:
-                          const TextStyle(
-                            color:
-                            appWhite,
-                            fontSize:
-                            22,
-                            fontWeight:
-                            FontWeight
-                                .w900,
-                            letterSpacing:
-                            -0.3,
+                          style: const TextStyle(
+                            color: CuboColors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.3,
                           ),
                         ),
                       ),
 
                       IconButton(
-                        onPressed: () =>
-                            Navigator.pop(
-                              dialogContext,
-                            ),
-                        icon:
-                        const Icon(
-                          Icons
-                              .close_rounded,
-                          color:
-                          appWhite,
+                        onPressed: () => Navigator.pop(dialogContext),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: CuboColors.white,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(
-                    height: 10,
-                  ),
+                  const SizedBox(height: 10),
 
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: CuboPillBar(),
                   ),
 
-                  const SizedBox(
-                    height: 14,
-                  ),
+                  const SizedBox(height: 14),
 
                   Text(
                     'Pega todas tus frases aquí. Pon una frase en cada línea.',
-                    style:
-                    TextStyle(
-                      color: appWhite
-                          .withOpacity(
-                        0.75,
-                      ),
+                    style: TextStyle(
+                      color: CuboColors.white.withValues(alpha: 0.75),
                       fontSize: 12.5,
                       height: 1.3,
-                      fontWeight:
-                      FontWeight
-                          .w700,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 5,
-                  ),
+                  const SizedBox(height: 5),
 
                   Text(
                     'También puedes pegar listas numeradas: 1. ..., 2. ..., 3. ...',
-                    style:
-                    TextStyle(
-                      color: appWhite
-                          .withOpacity(
-                        0.50,
-                      ),
+                    style: TextStyle(
+                      color: CuboColors.white.withValues(alpha: 0.50),
                       fontSize: 11.5,
                       height: 1.25,
-                      fontWeight:
-                      FontWeight
-                          .w600,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  const SizedBox(height: 12),
 
                   SizedBox(
-                    height: min(
-                      360.0,
-                      screenSize.height *
-                          0.42,
-                    ),
+                    height: min(360.0, screenSize.height * 0.42),
                     child: TextField(
-                      controller:
-                      controller,
+                      controller: controller,
                       autofocus: true,
-                      keyboardType:
-                      TextInputType
-                          .multiline,
-                      textInputAction:
-                      TextInputAction
-                          .newline,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
                       maxLines: null,
                       expands: true,
-                      textAlignVertical:
-                      TextAlignVertical
-                          .top,
-                      style:
-                      const TextStyle(
-                        color:
-                        appWhite,
+                      textAlignVertical: TextAlignVertical.top,
+                      style: const TextStyle(
+                        color: CuboColors.white,
                         fontSize: 14,
                         height: 1.35,
-                        fontWeight:
-                        FontWeight
-                            .w600,
+                        fontWeight: FontWeight.w600,
                       ),
-                      cursorColor:
-                      appWhite,
-                      decoration:
-                      InputDecoration(
-                        hintText:
-                        tr('¿Quién es más probable que...?\nSeñala a quien...\n¿Quién acabaría antes...?'),
-                        hintStyle:
-                        TextStyle(
-                          color: appWhite
-                              .withOpacity(
-                            0.30,
-                          ),
+                      cursorColor: CuboColors.white,
+                      decoration: InputDecoration(
+                        hintText: tr(
+                          '¿Quién es más probable que...?\nSeñala a quien...\n¿Quién acabaría antes...?',
+                        ),
+                        hintStyle: TextStyle(
+                          color: CuboColors.white.withValues(alpha: 0.30),
                           fontSize: 13,
                           height: 1.4,
                         ),
                         filled: true,
-                        fillColor: appWhite
-                            .withOpacity(
-                          0.07,
-                        ),
-                        contentPadding:
-                        const EdgeInsets
-                            .all(14),
-                        enabledBorder:
-                        CuboInputs.rounded(
+                        fillColor: CuboColors.white.withValues(alpha: 0.07),
+                        contentPadding: const EdgeInsets.all(14),
+                        enabledBorder: CuboInputs.rounded(
                           BorderSide(
                             color: CuboColors.whiteA(0.28),
                             width: 1.4,
                           ),
                         ),
-                        focusedBorder:
-                        CuboInputs.rounded(
-                          const BorderSide(
-                            color:
-                            accentPink,
-                            width: 2,
-                          ),
+                        focusedBorder: CuboInputs.rounded(
+                          const BorderSide(color: CuboColors.fiesta, width: 2),
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  const SizedBox(height: 12),
 
                   SizedBox(
                     height: 54,
-                    child:
-                    ElevatedButton(
-                      onPressed:
-                          () async {
-                        final cantidad =
-                        await importarFrasesDesdeTexto(
-                          controller
-                              .text,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final cantidad = await importarFrasesDesdeTexto(
+                          controller.text,
                         );
 
-                        if (!dialogContext
-                            .mounted) {
+                        if (!dialogContext.mounted) {
                           return;
                         }
 
-                        Navigator.pop(
-                          dialogContext,
-                          cantidad,
-                        );
+                        Navigator.pop(dialogContext, cantidad);
                       },
-                      style:
-                      mainButtonStyle(),
+                      style: mainButtonStyle(),
                       child: Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment
-                            .center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
-                            Icons
-                                .playlist_add_rounded,
-                          ),
+                          const Icon(Icons.playlist_add_rounded),
 
-                          const SizedBox(
-                            width: 8,
-                          ),
+                          const SizedBox(width: 8),
 
                           Expanded(
-                            child:
-                            _singleLineResponsiveText(
+                            child: _singleLineResponsiveText(
                               'IMPORTAR FRASES',
-                              alignment:
-                              Alignment
-                                  .center,
-                              style:
-                              const TextStyle(
-                                fontSize:
-                                14,
-                                fontWeight:
-                                FontWeight
-                                    .w900,
-                                letterSpacing:
-                                0.4,
+                              alignment: Alignment.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ),
@@ -1119,15 +785,12 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
     controller.dispose();
 
-    if (!mounted ||
-        resultado == null) {
+    if (!mounted || resultado == null) {
       return;
     }
 
     if (resultado == 0) {
-      mostrarMensaje(
-        'No se ha añadido ninguna frase nueva.',
-      );
+      mostrarMensaje('No se ha añadido ninguna frase nueva.');
     } else {
       mostrarMensaje(
         '$resultado ${resultado == 1 ? 'frase importada' : 'frases importadas'}.',
@@ -1136,243 +799,143 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   Widget buildConfiguracion() {
-    final compact =
-        _isCompactScreen;
+    final compact = _isCompactScreen;
 
-    final veryNarrow =
-        _isVeryNarrowScreen;
+    final veryNarrow = _isVeryNarrowScreen;
 
     return Column(
-      crossAxisAlignment:
-      CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
             Container(
-              width:
-              compact ? 40 : 46,
-              height:
-              compact ? 40 : 46,
-              decoration:
-              BoxDecoration(
-                color: accentPink
-                    .withOpacity(
-                  0.14,
-                ),
-                shape:
-                BoxShape.circle,
+              width: compact ? 40 : 46,
+              height: compact ? 40 : 46,
+              decoration: BoxDecoration(
+                color: CuboColors.fiesta.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
                 border: Border.all(
-                  color: accentPink
-                      .withOpacity(
-                    0.70,
-                  ),
+                  color: CuboColors.fiesta.withValues(alpha: 0.70),
                   width: 2,
                 ),
               ),
               child: Icon(
-                Icons
-                    .ads_click_rounded,
-                color: accentPink,
-                size:
-                compact ? 22 : 25,
+                Icons.ads_click_rounded,
+                color: CuboColors.fiesta,
+                size: compact ? 22 : 25,
               ),
             ),
 
-            const SizedBox(
-              width: 10,
-            ),
+            const SizedBox(width: 10),
 
             Expanded(
-              child:
-              _singleLineResponsiveText(
+              child: _singleLineResponsiveText(
                 'TUS FRASES',
-                style:
-                TextStyle(
-                  color: appWhite,
-                  fontSize:
-                  compact
-                      ? 16
-                      : 19,
-                  fontWeight:
-                  FontWeight
-                      .w900,
-                  letterSpacing:
-                  0.4,
+                style: TextStyle(
+                  color: CuboColors.white,
+                  fontSize: compact ? 16 : 19,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
                 ),
               ),
             ),
 
             Container(
-              padding:
-              const EdgeInsets
-                  .symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: CuboColors.whiteA(0.12),
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: CuboColors.whiteA(0.28),
-                ),
+                border: Border.all(color: CuboColors.whiteA(0.28)),
               ),
               child: Text(
                 '${frases.length}',
-                style:
-                TextStyle(
-                  color: appWhite,
-                  fontSize:
-                  compact
-                      ? 12
-                      : 14,
-                  fontWeight:
-                  FontWeight
-                      .w900,
+                style: TextStyle(
+                  color: CuboColors.white,
+                  fontSize: compact ? 12 : 14,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
           ],
         ),
 
-        SizedBox(
-          height:
-          compact ? 12 : 16,
-        ),
+        SizedBox(height: compact ? 12 : 16),
 
         Row(
           children: [
             Expanded(
               child: TextField(
-                controller:
-                fraseController,
-                textInputAction:
-                TextInputAction
-                    .done,
-                onSubmitted:
-                    (_) =>
-                    agregarFrase(),
+                controller: fraseController,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => agregarFrase(),
                 maxLines: 1,
-                style:
-                const TextStyle(
-                  color: appWhite,
-                  fontWeight:
-                  FontWeight.w700,
+                style: const TextStyle(
+                  color: CuboColors.white,
+                  fontWeight: FontWeight.w700,
                 ),
-                cursorColor:
-                appWhite,
-                decoration:
-                inputDecoration(),
+                cursorColor: CuboColors.white,
+                decoration: inputDecoration(),
               ),
             ),
 
-            SizedBox(
-              width:
-              veryNarrow
-                  ? 6
-                  : 9,
-            ),
+            SizedBox(width: veryNarrow ? 6 : 9),
 
             SizedBox(
-              width:
-              veryNarrow
+              width: veryNarrow
                   ? 46
                   : compact
                   ? 50
                   : 54,
-              height:
-              veryNarrow
+              height: veryNarrow
                   ? 48
                   : compact
                   ? 50
                   : 54,
-              child:
-              ElevatedButton(
-                onPressed:
-                agregarFrase,
-                style:
-                ElevatedButton
-                    .styleFrom(
-                  backgroundColor:
-                  accentPink,
-                  foregroundColor:
-                  appWhite,
+              child: ElevatedButton(
+                onPressed: agregarFrase,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CuboColors.fiesta,
+                  foregroundColor: CuboColors.blueInk,
                   elevation: 0,
-                  padding:
-                  EdgeInsets.zero,
-                  minimumSize:
-                  Size.zero,
-                  tapTargetSize:
-                  MaterialTapTargetSize
-                      .shrinkWrap,
-                  shape:
-                  const RoundedRectangleBorder(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: const RoundedRectangleBorder(
                     borderRadius: CuboRadii.inputAll,
                   ),
                 ),
-                child:
-                const Icon(
-                  Icons.add_rounded,
-                  size: 28,
-                ),
+                child: const Icon(Icons.add_rounded, size: 28),
               ),
             ),
           ],
         ),
 
-        const SizedBox(
-          height: 8,
-        ),
+        const SizedBox(height: 8),
 
         SizedBox(
           width: double.infinity,
-          height:
-          compact ? 42 : 46,
+          height: compact ? 42 : 46,
           child: OutlinedButton(
-            onPressed:
-            mostrarImportarFrases,
+            onPressed: mostrarImportarFrases,
             style: CuboButtons.secondary(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
             child: Row(
-              mainAxisAlignment:
-              MainAxisAlignment
-                  .center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons
-                      .content_paste_rounded,
-                  size:
-                  compact
-                      ? 18
-                      : 20,
-                ),
+                Icon(Icons.content_paste_rounded, size: compact ? 18 : 20),
 
-                const SizedBox(
-                  width: 7,
-                ),
+                const SizedBox(width: 7),
 
                 Expanded(
-                  child:
-                  _singleLineResponsiveText(
+                  child: _singleLineResponsiveText(
                     'IMPORTAR LISTA',
-                    alignment:
-                    Alignment
-                        .center,
-                    style:
-                    TextStyle(
-                      color:
-                      appWhite,
-                      fontSize:
-                      compact
-                          ? 11.5
-                          : 13,
-                      fontWeight:
-                      FontWeight
-                          .w900,
-                      letterSpacing:
-                      0.5,
+                    alignment: Alignment.center,
+                    style: TextStyle(
+                      color: CuboColors.white,
+                      fontSize: compact ? 11.5 : 13,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -1381,222 +944,118 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
           ),
         ),
 
-        SizedBox(
-          height:
-          compact ? 12 : 16,
-        ),
+        SizedBox(height: compact ? 12 : 16),
 
         Row(
           children: [
             Expanded(
-              child:
-              _singleLineResponsiveText(
+              child: _singleLineResponsiveText(
                 'LISTA DE FRASES',
-                style:
-                TextStyle(
-                  color: appWhite
-                      .withOpacity(
-                    0.70,
-                  ),
-                  fontSize:
-                  compact
-                      ? 10.5
-                      : 12,
-                  fontWeight:
-                  FontWeight
-                      .w900,
-                  letterSpacing:
-                  0.7,
+                style: TextStyle(
+                  color: CuboColors.white.withValues(alpha: 0.70),
+                  fontSize: compact ? 10.5 : 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.7,
                 ),
               ),
             ),
 
-            const SizedBox(
-              width: 8,
-            ),
+            const SizedBox(width: 8),
 
             Text(
               '${frases.length}',
-              style:
-              TextStyle(
-                color: appWhite
-                    .withOpacity(
-                  0.62,
-                ),
-                fontSize:
-                compact
-                    ? 11
-                    : 12,
-                fontWeight:
-                FontWeight
-                    .w900,
+              style: TextStyle(
+                color: CuboColors.white.withValues(alpha: 0.62),
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ],
         ),
 
-        const SizedBox(
-          height: 9,
-        ),
+        const SizedBox(height: 9),
 
         Expanded(
           child: frases.isEmpty
               ? Center(
-            child: Padding(
-              padding:
-              const EdgeInsets
-                  .symmetric(
-                horizontal: 20,
-              ),
-              child: Column(
-                mainAxisSize:
-                MainAxisSize
-                    .min,
-                children: [
-                  Icon(
-                    Icons
-                        .edit_note_rounded,
-                    color: appWhite
-                        .withOpacity(
-                      0.38,
-                    ),
-                    size: 52,
-                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.edit_note_rounded,
+                          color: CuboColors.white.withValues(alpha: 0.38),
+                          size: 52,
+                        ),
 
-                  const SizedBox(
-                    height: 12,
-                  ),
+                        const SizedBox(height: 12),
 
-                  Text(
-                    'Todavía no has añadido ninguna frase',
-                    textAlign:
-                    TextAlign
-                        .center,
-                    style:
-                    TextStyle(
-                      color: appWhite
-                          .withOpacity(
-                        0.68,
-                      ),
-                      fontSize:
-                      14,
-                      fontWeight:
-                      FontWeight
-                          .w800,
+                        Text(
+                          'Todavía no has añadido ninguna frase',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: CuboColors.white.withValues(alpha: 0.68),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Text(
+                          'Añade una frase o importa una lista completa',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: CuboColors.white.withValues(alpha: 0.44),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(
-                    height: 5,
-                  ),
-
-                  Text(
-                    'Añade una frase o importa una lista completa',
-                    textAlign:
-                    TextAlign
-                        .center,
-                    style:
-                    TextStyle(
-                      color: appWhite
-                          .withOpacity(
-                        0.44,
-                      ),
-                      fontSize:
-                      12,
-                      fontWeight:
-                      FontWeight
-                          .w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
+                )
               : ListView.builder(
-            keyboardDismissBehavior:
-            ScrollViewKeyboardDismissBehavior
-                .onDrag,
-            padding:
-            EdgeInsets.only(
-              bottom:
-              compact
-                  ? 8
-                  : 12,
-            ),
-            itemCount:
-            frases.length,
-            itemBuilder:
-                (
-                context,
-                index,
-                ) {
-              return buildFraseTile(
-                frase:
-                frases[index],
-                index: index,
-                compact:
-                compact,
-              );
-            },
-          ),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: EdgeInsets.only(bottom: compact ? 8 : 12),
+                  itemCount: frases.length,
+                  itemBuilder: (context, index) {
+                    return buildFraseTile(
+                      frase: frases[index],
+                      index: index,
+                      compact: compact,
+                    );
+                  },
+                ),
         ),
 
-        SizedBox(
-          height:
-          compact ? 8 : 12,
-        ),
+        SizedBox(height: compact ? 8 : 12),
 
         SizedBox(
           width: double.infinity,
-          height:
-          compact ? 56 : 62,
+          height: compact ? 56 : 62,
           child: ElevatedButton(
-            onPressed:
-            volverAlJuego,
-            style:
-            mainButtonStyle(),
+            onPressed: volverAlJuego,
+            style: mainButtonStyle(),
             child: Padding(
-              padding:
-              const EdgeInsets
-                  .symmetric(
-                horizontal: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
-                mainAxisAlignment:
-                MainAxisAlignment
-                    .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons
-                        .arrow_back_rounded,
-                    size:
-                    compact
-                        ? 21
-                        : 24,
-                  ),
+                  Icon(Icons.arrow_back_rounded, size: compact ? 21 : 24),
 
-                  const SizedBox(
-                    width: 8,
-                  ),
+                  const SizedBox(width: 8),
 
                   Expanded(
-                    child:
-                    _singleLineResponsiveText(
+                    child: _singleLineResponsiveText(
                       'VOLVER AL JUEGO',
-                      alignment:
-                      Alignment
-                          .center,
-                      style:
-                      TextStyle(
-                        fontSize:
-                        compact
-                            ? 13
-                            : 15,
-                        fontWeight:
-                        FontWeight
-                            .w900,
-                        letterSpacing:
-                        0.4,
+                      alignment: Alignment.center,
+                      style: TextStyle(
+                        fontSize: compact ? 13 : 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.4,
                       ),
                     ),
                   ),
@@ -1610,356 +1069,118 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   }
 
   Widget buildPhraseCard() {
-    final cardKey =
-        fraseActual.isEmpty ? 'sin_frases' : fraseActual;
+    final cardKey = fraseActual.isEmpty ? 'sin_frases' : fraseActual;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 16,
-        ),
-        child: CuboCardSwitcher(
-          child: CuboHeroCard(
-            key: ValueKey(cardKey),
-            chip: 'SEÑALA AL MÁS PROBABLE',
-            chipIcon: Icons.ads_click_rounded,
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 30),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  fraseActual.isEmpty
-                      ? 'Añade tus frases para empezar'
-                      : fraseActual,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: CuboColors.blueInk,
-                    fontSize: 30,
-                    height: 1.14,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.7,
-                  ),
-                ),
-                if (fraseActual.isEmpty) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    'Pulsa el lápiz para crear o importar tu lista',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.blueInk.withValues(alpha: 0.62),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: CuboCardStack(
+        child: CuboPlayCard(
+          key: ValueKey(cardKey),
+          chip: 'SEÑALA AL MÁS PROBABLE',
+          chipIcon: Icons.ads_click_rounded,
+          maxFontSize: _isCompactScreen ? 27 : 31,
+          text: fraseActual.isEmpty
+              ? 'Añade tus frases para empezar'
+              : fraseActual,
+          hint: fraseActual.isEmpty
+              ? 'Pulsa el lápiz para crear o importar tu lista'
+              : null,
         ),
       ),
     );
   }
 
   Widget buildProgressInfo() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child:
-              _singleLineResponsiveText(
-                'FRASES RESTANTES',
-                style:
-                TextStyle(
-                  color: appWhite
-                      .withOpacity(
-                    0.76,
-                  ),
-                  fontSize: 12,
-                  fontWeight:
-                  FontWeight
-                      .w900,
-                  letterSpacing:
-                  0.7,
-                ),
-              ),
-            ),
-
-            const SizedBox(
-              width: 8,
-            ),
-
-            Text(
-              '${frasesDisponibles.length} / $totalFrases',
-              maxLines: 1,
-              softWrap: false,
-              style:
-              const TextStyle(
-                color: appWhite,
-                fontSize: 14,
-                fontWeight:
-                FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(
-          height: 9,
-        ),
-
-        TweenAnimationBuilder<double>(
-          tween: Tween<double>(
-            end:
-            progresoRestante,
-          ),
-          duration:
-          const Duration(
-            milliseconds: 350,
-          ),
-          curve:
-          Curves.easeOutCubic,
-          builder:
-              (
-              context,
-              value,
-              _,
-              ) {
-            return Container(
-              height: 10,
-              decoration: BoxDecoration(
-                color: CuboColors.whiteA(0.15),
-                borderRadius: BorderRadius.circular(99),
-              ),
-              clipBehavior:
-              Clip.antiAlias,
-              child:
-              LinearProgressIndicator(
-                value: value,
-                minHeight: 10,
-                backgroundColor:
-                Colors.transparent,
-                valueColor:
-                const AlwaysStoppedAnimation<
-                    Color>(
-                  appWhite,
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget buildActionButton({
-    required IconData icon,
-    required Color backgroundColor,
-    required Color foregroundColor,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: AspectRatio(
-        aspectRatio: 1.35,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: CuboRadii.mdAll,
-            boxShadow: backgroundColor == appWhite
-                ? CuboShadows.soft
-                : null,
-          ),
-          child: Material(
-          color: backgroundColor,
-          borderRadius: CuboRadii.mdAll,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: CuboRadii.mdAll,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: CuboRadii.mdAll,
-                border: Border.all(
-                  color: CuboColors.whiteA(0.55),
-                  width: 1.4,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  icon,
-                  color:
-                  foregroundColor,
-                  size: 54,
-                ),
-              ),
-            ),
-          ),
-        ),
-        ),
-      ),
+    return CuboProgressPill(
+      label: 'FRASES RESTANTES',
+      valueText: '${frasesDisponibles.length} / $totalFrases',
+      value: progresoRestante,
     );
   }
 
   Widget buildJuego() {
+    final gap = _isCompactScreen ? 12.0 : 18.0;
+
     return Column(
       children: [
-        Expanded(
-          child:
-          buildPhraseCard(),
-        ),
-
-        SizedBox(
-          height:
-          _isCompactScreen
-              ? 9
-              : 14,
-        ),
-
+        Expanded(child: buildPhraseCard()),
+        SizedBox(height: gap),
         buildProgressInfo(),
-
-        SizedBox(
-          height:
-          _isCompactScreen
-              ? 9
-              : 14,
-        ),
-
-        Row(
-          children: [
-            buildActionButton(
-              icon:
-              Icons.edit_rounded,
-              backgroundColor: CuboColors.whiteA(0.10),
-              foregroundColor:
-              appWhite,
-              onTap:
-              volverAEditar,
-            ),
-
-            const SizedBox(
-              width: 12,
-            ),
-
-            buildActionButton(
-              icon: Icons
-                  .arrow_forward_rounded,
-              backgroundColor:
-              appWhite,
-              foregroundColor:
-              appBlue,
-              onTap:
-              siguienteFrase,
-            ),
-          ],
+        SizedBox(height: gap),
+        CuboActionBar(
+          height: _isCompactScreen ? 60 : 68,
+          secondaryIcon: Icons.edit_rounded,
+          onSecondary: volverAEditar,
+          onPrimary: siguienteFrase,
         ),
       ],
     );
   }
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     if (cargando) {
       return const Scaffold(
-        backgroundColor:
-        appBlue,
-        body: Center(
-          child:
-          CircularProgressIndicator(
-            color: appWhite,
-          ),
-        ),
+        backgroundColor: CuboColors.blue,
+        body: Center(child: CircularProgressIndicator(color: CuboColors.white)),
       );
     }
 
     return Scaffold(
-      backgroundColor: appBlue,
-      body: CuboBackground(
+      backgroundColor: CuboColors.blue,
+      body: CuboGameBackground(
+        accent: CuboColors.fiesta,
         halo: CuboHalo.topRight,
         child: SafeArea(
-        child: LayoutBuilder(
-          builder:
-              (
-              context,
-              constraints,
-              ) {
-            final narrow =
-                constraints.maxWidth <
-                    380;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
 
-            final veryNarrow =
-                constraints.maxWidth <
-                    340;
+              final veryNarrow = constraints.maxWidth < 340;
 
-            final compact =
-                constraints.maxHeight <
-                    740 ||
-                    narrow;
+              final compact = constraints.maxHeight < 740 || narrow;
 
-            final horizontalPadding =
-            veryNarrow
-                ? 8.0
-                : compact
-                ? 12.0
-                : 18.0;
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
 
-            final verticalPadding =
-            compact
-                ? 10.0
-                : 18.0;
+              final verticalPadding = compact ? 10.0 : 18.0;
 
-            return Padding(
-              padding:
-              EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 10 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 10 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(),
 
-                  SizedBox(
-                    height:
-                    compact
-                        ? 8
-                        : 14,
-                  ),
+                    SizedBox(height: compact ? 8 : 14),
 
-                  Expanded(
-                    child:
-                    AnimatedSwitcher(
-                      duration:
-                      const Duration(
-                        milliseconds:
-                        280,
-                      ),
-                      child: configurando
-                          ? KeyedSubtree(
-                        key:
-                        const ValueKey(
-                          'config',
-                        ),
-                        child:
-                        buildConfiguracion(),
-                      )
-                          : KeyedSubtree(
-                        key:
-                        const ValueKey(
-                          'game',
-                        ),
-                        child:
-                        buildJuego(),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        child: configurando
+                            ? KeyedSubtree(
+                                key: const ValueKey('config'),
+                                child: buildConfiguracion(),
+                              )
+                            : KeyedSubtree(
+                                key: const ValueKey('game'),
+                                child: buildJuego(),
+                              ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                ),
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }
