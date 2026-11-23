@@ -8,6 +8,7 @@ import '../core/app_settings.dart';
 import '../core/impostor_i18n.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../widgets/cubo_setup_widgets.dart';
 
 enum ImpostorMode { classic, roles, question, football }
 
@@ -38,6 +39,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   int currentPlayerIndex = 0;
   bool showHints = true;
+
+  /// Paso visible de la configuración (solo interfaz).
+  int _setupStep = 0;
 
   bool secretCardOpen = false;
   double secretCardDragOffset = 0;
@@ -125,6 +129,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void goToSetup(ImpostorMode mode) {
     setState(() {
+      _setupStep = 0;
       selectedMode = mode;
       currentStep = ImpostorStep.setup;
       currentPlayerIndex = 0;
@@ -1417,196 +1422,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _buildPlayersEditor({required bool compact}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildCounter(
-          title: 'Jugadores',
-          icon: Icons.groups_rounded,
-          value: playersCount,
-          onMinus: playerNames.isEmpty ? null : () => _changePlayers(-1),
-          onPlus: playerNames.length >= maxPlayers
-              ? null
-              : () => _changePlayers(1),
-          compact: compact,
-        ),
-
-        SizedBox(height: compact ? 12 : 14),
-
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _singleLineResponsiveText(
-            'AÑADIR JUGADOR',
-            style: TextStyle(
-              color: CuboColors.white.withValues(alpha: 0.70),
-              fontSize: compact ? 10.5 : 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.7,
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: playerNameController,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _addPlayer(),
-                style: const TextStyle(
-                  color: CuboColors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-                cursorColor: CuboColors.white,
-                decoration: inputDecoration('Nombre opcional'),
-              ),
-            ),
-
-            const SizedBox(width: 9),
-
-            SizedBox(
-              width: compact ? 50 : 54,
-              height: compact ? 50 : 54,
-              child: ElevatedButton(
-                onPressed: playerNames.length >= maxPlayers ? null : _addPlayer,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: modeColor,
-                  foregroundColor: CuboColors.blueInk,
-                  disabledBackgroundColor: CuboColors.white.withValues(
-                    alpha: 0.18,
-                  ),
-                  disabledForegroundColor: CuboColors.white.withValues(
-                    alpha: 0.42,
-                  ),
-                  elevation: 0,
-
-                  // Esto centra correctamente el +
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  alignment: Alignment.center,
-
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: CuboRadii.inputAll,
-                  ),
-                ),
-                child: const Center(child: Icon(Icons.add_rounded, size: 29)),
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: compact ? 12 : 14),
-
-        if (playerNames.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: compact ? 16 : 20,
-            ),
-            decoration: BoxDecoration(
-              color: CuboColors.whiteA(0.05),
-              borderRadius: CuboRadii.mdAll,
-              border: Border.all(color: CuboColors.whiteA(0.18), width: 1.3),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.person_add_alt_1_rounded,
-                  color: CuboColors.white.withValues(alpha: 0.48),
-                  size: compact ? 28 : 34,
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  'Todavía no has añadido jugadores',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.66),
-                    fontSize: compact ? 12 : 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-              ],
-            ),
-          )
-        else
-          Column(
-            children: playerNames.asMap().entries.map((entry) {
-              final index = entry.key;
-              final name = entry.value;
-
-              return Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: EdgeInsets.fromLTRB(
-                  compact ? 9 : 11,
-                  compact ? 7 : 8,
-                  5,
-                  compact ? 7 : 8,
-                ),
-                decoration: CuboDecorations.glass(radius: CuboRadii.md),
-                child: Row(
-                  children: [
-                    Container(
-                      width: compact ? 31 : 35,
-                      height: compact ? 31 : 35,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: modeColor.withValues(alpha: 0.16),
-                        border: Border.all(color: modeColor, width: 1.6),
-                      ),
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: compact ? 12 : 13,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: compact ? 14 : 16,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-
-                    IconButton(
-                      tooltip: tr('Eliminar jugador'),
-                      onPressed: () => _removePlayer(index),
-                      icon: Icon(
-                        Icons.delete_outline_rounded,
-                        color: CuboColors.white.withValues(alpha: 0.78),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-      ],
-    );
-  }
-
   Widget _buildFootballCategories({required bool compact}) {
     final allSelected =
         selectedFootballCategories.length == FootballCategory.values.length;
@@ -1755,102 +1570,70 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         mode == ImpostorMode.roles ||
         mode == ImpostorMode.football;
 
-    return SingleChildScrollView(
-      child: buildPanel(
-        padding: EdgeInsets.all(compact ? 13 : 17),
-        borderColor: modeColor.withValues(alpha: 0.65),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: compact ? 50 : 60,
-                  height: compact ? 50 : 60,
-                  decoration: BoxDecoration(
-                    color: modeColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: modeColor, width: 2.2),
-                  ),
-                  child: Icon(
-                    modeIcon,
-                    color: modeColor,
-                    size: compact ? 28 : 34,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _singleLineResponsiveText(
-                    getModeTitle(mode),
-                    style: TextStyle(
-                      color: CuboColors.white,
-                      fontSize: compact ? 20 : 25,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
+    return CuboSetupSteps(
+      accent: modeColor,
+      index: _setupStep,
+      onStepChanged: (step) => setState(() => _setupStep = step),
+      onStart:
+          mode == ImpostorMode.football && selectedFootballCategories.isEmpty
+          ? null
+          : startGame,
+      steps: [
+        CuboSetupStep(
+          title: 'JUGADORES',
+          icon: Icons.groups_rounded,
+          child: CuboPlayersEditor(
+            players: playerNames,
+            maxPlayers: maxPlayers,
+            controller: playerNameController,
+            onAdd: _addPlayer,
+            onRemove: _removePlayer,
+            accent: modeColor,
+          ),
+        ),
+        CuboSetupStep(
+          title: 'CONFIGURACIÓN',
+          icon: modeIcon,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CuboLightCounter(
+                title: 'Impostores',
+                icon: Icons.visibility_off_rounded,
+                value: '$impostorsCount',
+                accent: modeColor,
+                onMinus: impostorsCount <= 1
+                    ? null
+                    : () => _changeImpostors(-1),
+                onPlus: playersCount < 2 || impostorsCount >= playersCount - 1
+                    ? null
+                    : () => _changeImpostors(1),
+              ),
+              if (showHintSwitch) ...[
+                const SizedBox(height: 12),
+                CuboLightSwitch(
+                  title: 'Pista para el impostor',
+                  icon: Icons.lightbulb_rounded,
+                  value: showHints,
+                  accent: modeColor,
+                  onChanged: (value) => setState(() => showHints = value),
                 ),
               ],
-            ),
-            if (mode == ImpostorMode.football) ...[
-              SizedBox(height: compact ? 16 : 20),
-              _buildFootballCategories(compact: compact),
-            ],
-            SizedBox(height: compact ? 16 : 20),
-            _buildPlayersEditor(compact: compact),
-
-            SizedBox(height: compact ? 14 : 17),
-
-            _buildCounter(
-              title: 'Impostores',
-              icon: Icons.visibility_off_rounded,
-              value: impostorsCount,
-              onMinus: impostorsCount <= 1 ? null : () => _changeImpostors(-1),
-              onPlus: playersCount < 2 || impostorsCount >= playersCount - 1
-                  ? null
-                  : () => _changeImpostors(1),
-              compact: compact,
-            ),
-            if (showHintSwitch) ...[
-              SizedBox(height: compact ? 13 : 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: CuboDecorations.glass(radius: CuboRadii.md),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: SwitchListTile(
-                    value: showHints,
-                    onChanged: (value) => setState(() => showHints = value),
-                    contentPadding: EdgeInsets.zero,
-                    activeColor: modeColor,
-                    title: const Text(
-                      'Pista para el impostor',
-                      style: TextStyle(
-                        color: CuboColors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
+              if (mode == ImpostorMode.football) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: const BoxDecoration(
+                    color: CuboColors.blue,
+                    borderRadius: BorderRadius.all(Radius.circular(22)),
                   ),
+                  child: _buildFootballCategories(compact: compact),
                 ),
-              ),
+              ],
             ],
-            SizedBox(height: compact ? 14 : 18),
-            buildActionButton(
-              icon: Icons.play_arrow_rounded,
-              label: 'EMPEZAR PARTIDA',
-              backgroundColor: modeColor,
-              foregroundColor: CuboColors.blueInk,
-              onTap:
-                  mode == ImpostorMode.football &&
-                      selectedFootballCategories.isEmpty
-                  ? null
-                  : startGame,
-              compact: compact,
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
