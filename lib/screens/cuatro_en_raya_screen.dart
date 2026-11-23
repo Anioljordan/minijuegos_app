@@ -53,7 +53,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   static const Color boardBlue = Color(0xFF24458E);
   static const Color boardBlueDark = Color(0xFF1D3979);
   static const Color boardBlueLight = Color(0xFF7E96D6);
-  static const Color emptyHoleColor = Color(0xFF2F4F9C);
+  static const Color emptyHoleColor = CuboColors.blue;
 
   static const Color redDisc = CuboColors.alert;
   static const Color yellowDisc = CuboColors.fiesta;
