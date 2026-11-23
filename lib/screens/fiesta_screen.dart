@@ -16,7 +16,7 @@ class FiestaScreen extends StatelessWidget {
     CuboMenuGame(
       title: 'Yo Nunca',
       illustration: 'yo_nunca',
-      fallbackIcon: Icons.local_bar_rounded,
+      fallbackIcon: Icons.front_hand_rounded,
       builder: (_) => const YoNuncaModesScreen(),
     ),
     CuboMenuGame(

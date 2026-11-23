@@ -1171,11 +1171,6 @@ const List<Map<String, String>> questionPairsData = [
     'hint': 'Cocina',
   },
   {
-    'normal': '¿Qué bebida alcohólica prefieres?',
-    'impostor': '¿Qué bebida pedirías para una celebración?',
-    'hint': 'Copas',
-  },
-  {
     'normal': '¿Qué idioma te gustaría aprender?',
     'impostor': '¿Qué idioma te parece más bonito?',
     'hint': 'Idiomas',
