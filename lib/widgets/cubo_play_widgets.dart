@@ -275,7 +275,7 @@ class CuboCardStack extends StatelessWidget {
                       fit: StackFit.expand,
                       children: [?current, ...previous],
                     ),
-                    transitionBuilder: (card, animation) => _CardTransition(
+                    transitionBuilder: (card, animation) => CuboCardTransition(
                       animation: animation,
                       incoming: card.key == child.key,
                       child: card,
@@ -326,12 +326,16 @@ class _GhostCard extends StatelessWidget {
   }
 }
 
-class _CardTransition extends StatelessWidget {
+/// Transición de carta: la que entra sube del mazo con rebote y la que sale
+/// se va hacia la izquierda girando. Usada por [CuboCardStack] y
+/// [CuboCardSwitcher].
+class CuboCardTransition extends StatelessWidget {
   final Animation<double> animation;
   final bool incoming;
   final Widget child;
 
-  const _CardTransition({
+  const CuboCardTransition({
+    super.key,
     required this.animation,
     required this.incoming,
     required this.child,

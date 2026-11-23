@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Text;
 
 import 'app_logo_button.dart';
+import 'cubo_play_widgets.dart';
 import 'cubo_widgets.dart';
 import 'i18n_text.dart';
 
@@ -283,7 +284,8 @@ class CuboCheckBadge extends StatelessWidget {
   }
 }
 
-/// Tarjeta central de juego: blanca, radio 28, texto blueInk y chip arriba.
+/// Tarjeta central de juego: blanca, radio 32, sombra en dos capas, texto
+/// blueInk y chip arriba a la izquierda (mismo aspecto que [CuboPlayCard]).
 class CuboHeroCard extends StatelessWidget {
   final Widget child;
   final String? chip;
@@ -295,7 +297,7 @@ class CuboHeroCard extends StatelessWidget {
     required this.child,
     this.chip,
     this.chipIcon,
-    this.padding = const EdgeInsets.fromLTRB(22, 18, 22, 24),
+    this.padding = const EdgeInsets.fromLTRB(22, 20, 22, 24),
   });
 
   @override
@@ -303,13 +305,16 @@ class CuboHeroCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: padding,
-      decoration: CuboDecorations.whiteCard(radius: CuboRadii.xl),
+      decoration: CuboDecorations.playCard,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (chip != null) ...[
-            CuboStatusChip(chip!, icon: chipIcon, light: true),
-            const SizedBox(height: 14),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: CuboStatusChip(chip!, icon: chipIcon, light: true),
+            ),
+            const SizedBox(height: 16),
           ],
           DefaultTextStyle.merge(
             style: const TextStyle(color: CuboColors.blueInk),
@@ -321,8 +326,9 @@ class CuboHeroCard extends StatelessWidget {
   }
 }
 
-/// Transición al cambiar de carta: deslizamiento lateral con fade.
-/// El hijo debe llevar una [Key] distinta por carta.
+/// Transición al cambiar de carta: la nueva sube con un pequeño rebote y la
+/// anterior sale hacia la izquierda girando. El hijo debe llevar una [Key]
+/// distinta por carta.
 class CuboCardSwitcher extends StatelessWidget {
   final Widget child;
   final Duration duration;
@@ -330,30 +336,22 @@ class CuboCardSwitcher extends StatelessWidget {
   const CuboCardSwitcher({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 320),
+    this.duration = const Duration(milliseconds: 340),
   });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: duration,
-      switchInCurve: Curves.easeOutCubic,
+      switchInCurve: Curves.easeOutBack,
       switchOutCurve: Curves.easeInCubic,
-      layoutBuilder: (current, previous) => Stack(
-        alignment: Alignment.center,
-        children: [...previous, ?current],
+      layoutBuilder: (current, previous) =>
+          Stack(alignment: Alignment.center, children: [?current, ...previous]),
+      transitionBuilder: (card, animation) => CuboCardTransition(
+        animation: animation,
+        incoming: card.key == child.key,
+        child: card,
       ),
-      transitionBuilder: (child, animation) {
-        final incoming = child.key == this.child.key;
-        final begin = Offset(incoming ? 0.18 : -0.18, 0);
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween(begin: begin, end: Offset.zero).animate(animation),
-            child: child,
-          ),
-        );
-      },
       child: child,
     );
   }
@@ -458,7 +456,10 @@ class CuboRulesItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: CuboText.label(size: 15, color: CuboColors.white)),
+                Text(
+                  title,
+                  style: CuboText.label(size: 15, color: CuboColors.white),
+                ),
                 const SizedBox(height: 3),
                 Text(
                   text,
