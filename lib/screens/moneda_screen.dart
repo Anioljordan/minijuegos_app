@@ -9,17 +9,12 @@ class MonedaScreen extends StatefulWidget {
   const MonedaScreen({super.key});
 
   @override
-  State<MonedaScreen> createState() =>
-      _CaraCruzScreenState();
+  State<MonedaScreen> createState() => _CaraCruzScreenState();
 }
 
 class _CaraCruzScreenState extends State<MonedaScreen>
     with SingleTickerProviderStateMixin {
   final math.Random _random = math.Random();
-
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentYellow = Color(0xFFFFD166);
 
   late final AnimationController _controller;
   late Animation<double> _coinAnimation;
@@ -28,22 +23,18 @@ class _CaraCruzScreenState extends State<MonedaScreen>
 
   String _result = '';
   bool _isFlipping = false;
-  static const String _probabilityStorageKey =
-      'moneda_porcentaje_cara';
+  static const String _probabilityStorageKey = 'moneda_porcentaje_cara';
 
   double _caraPercent = 50;
 
   double get _cruzPercent => 100 - _caraPercent;
 
-  bool get _isNarrowScreen =>
-      MediaQuery.sizeOf(context).width < 380;
+  bool get _isNarrowScreen => MediaQuery.sizeOf(context).width < 380;
 
-  bool get _isVeryNarrowScreen =>
-      MediaQuery.sizeOf(context).width < 340;
+  bool get _isVeryNarrowScreen => MediaQuery.sizeOf(context).width < 340;
 
   bool get _isCompactScreen =>
-      MediaQuery.sizeOf(context).height < 740 ||
-          _isNarrowScreen;
+      MediaQuery.sizeOf(context).height < 740 || _isNarrowScreen;
 
   @override
   void initState() {
@@ -54,38 +45,28 @@ class _CaraCruzScreenState extends State<MonedaScreen>
       duration: const Duration(milliseconds: 1100),
     );
 
-    _coinAnimation = AlwaysStoppedAnimation(
-      _currentAngle,
-    );
+    _coinAnimation = AlwaysStoppedAnimation(_currentAngle);
     _cargarProbabilidad();
   }
-  Future<void> _cargarProbabilidad() async {
-    final prefs =
-    await SharedPreferences.getInstance();
 
-    final guardado =
-    prefs.getDouble(
-      _probabilityStorageKey,
-    );
+  Future<void> _cargarProbabilidad() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final guardado = prefs.getDouble(_probabilityStorageKey);
 
     if (!mounted || guardado == null) {
       return;
     }
 
     setState(() {
-      _caraPercent =
-          guardado.clamp(0.0, 100.0);
+      _caraPercent = guardado.clamp(0.0, 100.0);
     });
   }
 
   Future<void> _guardarProbabilidad() async {
-    final prefs =
-    await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setDouble(
-      _probabilityStorageKey,
-      _caraPercent,
-    );
+    await prefs.setDouble(_probabilityStorageKey, _caraPercent);
   }
 
   @override
@@ -95,19 +76,14 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   }
 
   Widget _singleLineResponsiveText(
-      String text, {
-        required TextStyle style,
-        Alignment alignment = Alignment.center,
-      }) {
+    String text, {
+    required TextStyle style,
+    Alignment alignment = Alignment.center,
+  }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
-      child: Text(
-        text,
-        maxLines: 1,
-        softWrap: false,
-        style: style,
-      ),
+      child: Text(text, maxLines: 1, softWrap: false, style: style),
     );
   }
 
@@ -115,10 +91,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     return CuboButtons.primary(padding: EdgeInsets.zero);
   }
 
-  Widget circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-  }) {
+  Widget circleButton({required Widget child, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -127,7 +100,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: appWhite.withOpacity(0.85),
+            color: CuboColors.white.withValues(alpha: 0.85),
             width: 2.2,
           ),
         ),
@@ -137,15 +110,13 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   }
 
   Widget buildTopBar() {
-    final compact =
-        MediaQuery.of(context).size.height < 740;
+    final compact = MediaQuery.of(context).size.height < 740;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             AppLogoButton(
               compact: compact,
@@ -156,7 +127,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
               onTap: mostrarNormas,
               child: const Icon(
                 Icons.question_mark_rounded,
-                color: appWhite,
+                color: CuboColors.white,
                 size: 27,
               ),
             ),
@@ -183,7 +154,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                       'moneda',
                       maxLines: 1,
                       style: TextStyle(
-                        color: appWhite,
+                        color: CuboColors.white,
                         fontSize: 48,
                         height: 1.90,
                         fontWeight: FontWeight.w900,
@@ -196,16 +167,13 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                 const Positioned(
                   top: 82,
                   left: 0,
-                  child: CuboPillBar(),
+                  child: CuboPillBar(width: 44, color: CuboColors.fiesta),
                 ),
 
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: CuboIllustration(
-                    'moneda',
-                    size: compact ? 72 : 88,
-                  ),
+                  child: CuboIllustration('moneda', size: compact ? 72 : 88),
                 ),
               ],
             ),
@@ -224,7 +192,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -234,9 +202,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
 
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: narrow ? 14 : 22,
-          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: narrow ? 14 : 22),
           child: Container(
             padding: EdgeInsets.fromLTRB(
               narrow ? 16 : 20,
@@ -246,14 +212,11 @@ class _CaraCruzScreenState extends State<MonedaScreen>
             ),
             decoration: CuboDecorations.dialog(),
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: size.height * 0.78,
-              ),
+              constraints: BoxConstraints(maxHeight: size.height * 0.78),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment:
-                  CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const CuboDialogHeader(),
 
@@ -265,7 +228,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                         'CARA O CRUZ',
                         alignment: Alignment.centerLeft,
                         style: const TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.2,
@@ -279,35 +242,35 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                       icon: Icons.help_outline_rounded,
                       title: 'Haz una pregunta',
                       text:
-                      'La persona que tiene la moneda hace una pregunta al grupo, por ejemplo: “¿Quién crees que es el más inteligente?”.',
+                          'La persona que tiene la moneda hace una pregunta al grupo, por ejemplo: “¿Quién crees que es el más inteligente?”.',
                     ),
 
                     rulesItem(
                       icon: Icons.forward_rounded,
                       title: 'Pasa la moneda',
                       text:
-                      'La persona a la que se le hace la pregunta pasa la moneda a quien crea que es la respuesta.',
+                          'La persona a la que se le hace la pregunta pasa la moneda a quien crea que es la respuesta.',
                     ),
 
                     rulesItem(
                       icon: Icons.paid_rounded,
                       title: 'Lanza la moneda',
                       text:
-                      'Después de elegir a la persona, se lanza la moneda para decidir si la respuesta se dice o no.',
+                          'Después de elegir a la persona, se lanza la moneda para decidir si la respuesta se dice o no.',
                     ),
 
                     rulesItem(
                       icon: Icons.visibility_rounded,
                       title: 'Si sale cara',
                       text:
-                      'La respuesta se dice en voz alta y todo el grupo sabrá a quién ha elegido.',
+                          'La respuesta se dice en voz alta y todo el grupo sabrá a quién ha elegido.',
                     ),
 
                     rulesItem(
                       icon: Icons.visibility_off_rounded,
                       title: 'Si sale cruz',
                       text:
-                      'La respuesta no se dice. Solo la sabrán la persona que ha preguntado y la persona que ha respondido.',
+                          'La respuesta no se dice. Solo la sabrán la persona que ha preguntado y la persona que ha respondido.',
                     ),
 
                     const SizedBox(height: 8),
@@ -315,13 +278,10 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () =>
-                            Navigator.pop(context),
+                        onPressed: () => Navigator.pop(context),
                         style: mainButtonStyle(),
                         child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 14,
-                          ),
+                          padding: EdgeInsets.symmetric(vertical: 14),
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
@@ -330,8 +290,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                               softWrap: false,
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight:
-                                FontWeight.w900,
+                                fontWeight: FontWeight.w900,
                                 letterSpacing: 0.4,
                               ),
                             ),
@@ -352,22 +311,15 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   Future<void> lanzarMoneda() async {
     if (_isFlipping) return;
 
-    final bool cara =
-        _random.nextDouble() <
-            (_caraPercent / 100);
+    final bool cara = _random.nextDouble() < (_caraPercent / 100);
 
-    final bool currentlyShowingCara =
-        math.cos(_currentAngle) >= 0;
+    final bool currentlyShowingCara = math.cos(_currentAngle) >= 0;
 
-    final bool needsHalfTurn =
-        cara != currentlyShowingCara;
+    final bool needsHalfTurn = cara != currentlyShowingCara;
 
-    final extraRotation =
-        (math.pi * 8) +
-            (needsHalfTurn ? math.pi : 0);
+    final extraRotation = (math.pi * 8) + (needsHalfTurn ? math.pi : 0);
 
-    final targetAngle =
-        _currentAngle + extraRotation;
+    final targetAngle = _currentAngle + extraRotation;
 
     setState(() {
       _isFlipping = true;
@@ -377,12 +329,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     _coinAnimation = Tween<double>(
       begin: _currentAngle,
       end: targetAngle,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.reset();
 
@@ -397,22 +344,17 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     });
   }
 
-  Widget buildProbabilityControl({
-    required bool compact,
-  }) {
+  Widget buildProbabilityControl({required bool compact}) {
     return Row(
-      mainAxisAlignment:
-      MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Flexible(
           child: _singleLineResponsiveText(
             '',
             alignment: Alignment.center,
             style: TextStyle(
-              color:
-              appWhite.withOpacity(0.48),
-              fontSize:
-              compact ? 10.5 : 11.5,
+              color: CuboColors.white.withValues(alpha: 0.48),
+              fontSize: compact ? 10.5 : 11.5,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.3,
             ),
@@ -424,29 +366,21 @@ class _CaraCruzScreenState extends State<MonedaScreen>
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap:
-            mostrarEditarProbabilidades,
-            customBorder:
-            const CircleBorder(),
+            onTap: mostrarEditarProbabilidades,
+            customBorder: const CircleBorder(),
             child: Container(
               width: 28,
               height: 28,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color:
-                  appWhite.withOpacity(
-                    0.24,
-                  ),
+                  color: CuboColors.white.withValues(alpha: 0.24),
                   width: 1.1,
                 ),
               ),
               child: Icon(
                 Icons.edit_rounded,
-                color:
-                appWhite.withOpacity(
-                  0.55,
-                ),
+                color: CuboColors.white.withValues(alpha: 0.55),
                 size: 13,
               ),
             ),
@@ -456,185 +390,118 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     );
   }
 
-  Future<void>
-  mostrarEditarProbabilidades() async {
+  Future<void> mostrarEditarProbabilidades() async {
     double temporal = _caraPercent;
 
-    final resultado =
-    await showDialog<double>(
+    final resultado = await showCuboDialog<double>(
       context: context,
-      barrierColor:
-      Colors.black.withOpacity(0.50),
+      barrierColor: Colors.black.withValues(alpha: 0.50),
       builder: (dialogContext) {
         return StatefulBuilder(
-          builder:
-              (context, setDialogState) {
-            final cara =
-            temporal.round();
+          builder: (context, setDialogState) {
+            final cara = temporal.round();
 
-            final cruz =
-                100 - cara;
+            final cruz = 100 - cara;
 
             return Dialog(
-              backgroundColor:
-              Colors.transparent,
-              insetPadding:
-              EdgeInsets.symmetric(
-                horizontal:
-                _isVeryNarrowScreen
-                    ? 12
-                    : 22,
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.symmetric(
+                horizontal: _isVeryNarrowScreen ? 12 : 22,
               ),
               child: Container(
-                padding:
-                const EdgeInsets
-                    .fromLTRB(
-                  18,
-                  18,
-                  18,
-                  16,
-                ),
-                decoration:
-                CuboDecorations.dialog(),
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+                decoration: CuboDecorations.dialog(),
                 child: Column(
-                  mainAxisSize:
-                  MainAxisSize.min,
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Row(
                       children: [
                         Container(
                           width: 44,
                           height: 44,
-                          decoration:
-                          BoxDecoration(
-                            shape:
-                            BoxShape.circle,
-                            color:
-                            accentYellow
-                                .withOpacity(
-                              0.14,
-                            ),
-                            border:
-                            Border.all(
-                              color:
-                              accentYellow,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: CuboColors.fiesta.withValues(alpha: 0.14),
+                            border: Border.all(
+                              color: CuboColors.fiesta,
                               width: 2,
                             ),
                           ),
-                          child:
-                          const Icon(
-                            Icons
-                                .tune_rounded,
-                            color:
-                            accentYellow,
+                          child: const Icon(
+                            Icons.tune_rounded,
+                            color: CuboColors.fiesta,
                             size: 23,
                           ),
                         ),
 
-                        const SizedBox(
-                          width: 11,
-                        ),
+                        const SizedBox(width: 11),
 
                         Expanded(
-                          child:
-                          _singleLineResponsiveText(
+                          child: _singleLineResponsiveText(
                             'PROBABILIDADES',
-                            alignment:
-                            Alignment
-                                .centerLeft,
-                            style:
-                            const TextStyle(
-                              color:
-                              appWhite,
+                            alignment: Alignment.centerLeft,
+                            style: const TextStyle(
+                              color: CuboColors.white,
                               fontSize: 22,
-                              fontWeight:
-                              FontWeight
-                                  .w900,
-                              letterSpacing:
-                              -0.4,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.4,
                             ),
                           ),
                         ),
 
                         IconButton(
-                          onPressed: () =>
-                              Navigator.pop(
-                                dialogContext,
-                              ),
-                          icon:
-                          const Icon(
-                            Icons
-                                .close_rounded,
-                            color:
-                            appWhite,
+                          onPressed: () => Navigator.pop(dialogContext),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: CuboColors.white,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
 
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: CuboPillBar(),
                     ),
 
-                    const SizedBox(
-                      height: 22,
-                    ),
+                    const SizedBox(height: 22),
 
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            padding:
-                            const EdgeInsets
-                                .symmetric(
+                            padding: const EdgeInsets.symmetric(
                               vertical: 16,
                               horizontal: 8,
                             ),
-                            decoration:
-                            CuboDecorations.glass(
+                            decoration: CuboDecorations.glass(
                               radius: CuboRadii.md,
                             ),
                             child: Column(
                               children: [
                                 Text(
                                   'CARA',
-                                  style:
-                                  TextStyle(
-                                    color: appWhite
-                                        .withOpacity(
-                                      0.65,
+                                  style: TextStyle(
+                                    color: CuboColors.white.withValues(
+                                      alpha: 0.65,
                                     ),
                                     fontSize: 12,
-                                    fontWeight:
-                                    FontWeight
-                                        .w900,
-                                    letterSpacing:
-                                    0.8,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.8,
                                   ),
                                 ),
 
-                                const SizedBox(
-                                  height: 5,
-                                ),
+                                const SizedBox(height: 5),
 
                                 Text(
                                   '$cara%',
-                                  style:
-                                  const TextStyle(
-                                    color:
-                                    accentYellow,
+                                  style: const TextStyle(
+                                    color: CuboColors.fiesta,
                                     fontSize: 31,
-                                    fontWeight:
-                                    FontWeight
-                                        .w900,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
                               ],
@@ -642,55 +509,39 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                           ),
                         ),
 
-                        const SizedBox(
-                          width: 10,
-                        ),
+                        const SizedBox(width: 10),
 
                         Expanded(
                           child: Container(
-                            padding:
-                            const EdgeInsets
-                                .symmetric(
+                            padding: const EdgeInsets.symmetric(
                               vertical: 16,
                               horizontal: 8,
                             ),
-                            decoration:
-                            CuboDecorations.glass(
+                            decoration: CuboDecorations.glass(
                               radius: CuboRadii.md,
                             ),
                             child: Column(
                               children: [
                                 Text(
                                   'CRUZ',
-                                  style:
-                                  TextStyle(
-                                    color: appWhite
-                                        .withOpacity(
-                                      0.65,
+                                  style: TextStyle(
+                                    color: CuboColors.white.withValues(
+                                      alpha: 0.65,
                                     ),
                                     fontSize: 12,
-                                    fontWeight:
-                                    FontWeight
-                                        .w900,
-                                    letterSpacing:
-                                    0.8,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.8,
                                   ),
                                 ),
 
-                                const SizedBox(
-                                  height: 5,
-                                ),
+                                const SizedBox(height: 5),
 
                                 Text(
                                   '$cruz%',
-                                  style:
-                                  const TextStyle(
-                                    color:
-                                    appWhite,
+                                  style: const TextStyle(
+                                    color: CuboColors.white,
                                     fontSize: 31,
-                                    fontWeight:
-                                    FontWeight
-                                        .w900,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
                               ],
@@ -700,20 +551,14 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    const SizedBox(height: 20),
 
                     Text(
                       'PROBABILIDAD DE CARA',
                       style: TextStyle(
-                        color: appWhite
-                            .withOpacity(
-                          0.58,
-                        ),
+                        color: CuboColors.white.withValues(alpha: 0.58),
                         fontSize: 11,
-                        fontWeight:
-                        FontWeight.w900,
+                        fontWeight: FontWeight.w900,
                         letterSpacing: 0.7,
                       ),
                     ),
@@ -723,111 +568,71 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                       min: 0,
                       max: 100,
                       divisions: 100,
-                      activeColor:
-                      accentYellow,
-                      inactiveColor:
-                      appWhite.withOpacity(
-                        0.18,
-                      ),
+                      activeColor: CuboColors.fiesta,
+                      inactiveColor: CuboColors.white.withValues(alpha: 0.18),
                       onChanged: (value) {
                         setDialogState(() {
-                          temporal =
-                              value;
+                          temporal = value;
                         });
                       },
                     ),
 
                     Row(
-                      mainAxisAlignment:
-                      MainAxisAlignment
-                          .spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '0%',
-                          style:
-                          TextStyle(
-                            color: appWhite
-                                .withOpacity(
-                              0.38,
-                            ),
+                          style: TextStyle(
+                            color: CuboColors.white.withValues(alpha: 0.38),
                             fontSize: 11,
-                            fontWeight:
-                            FontWeight
-                                .w700,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
 
                         TextButton(
                           onPressed: () {
-                            setDialogState(
-                                  () {
-                                temporal =
-                                50;
-                              },
-                            );
+                            setDialogState(() {
+                              temporal = 50;
+                            });
                           },
-                          child:
-                          const Text(
+                          child: const Text(
                             '50 / 50',
-                            style:
-                            TextStyle(
-                              color:
-                              appWhite,
-                              fontWeight:
-                              FontWeight
-                                  .w900,
+                            style: TextStyle(
+                              color: CuboColors.white,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),
 
                         Text(
                           '100%',
-                          style:
-                          TextStyle(
-                            color: appWhite
-                                .withOpacity(
-                              0.38,
-                            ),
+                          style: TextStyle(
+                            color: CuboColors.white.withValues(alpha: 0.38),
                             fontSize: 11,
-                            fontWeight:
-                            FontWeight
-                                .w700,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 12,
-                    ),
+                    const SizedBox(height: 12),
 
                     SizedBox(
                       height: 54,
-                      child:
-                      ElevatedButton(
+                      child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(
-                            dialogContext,
-                            temporal,
-                          );
+                          Navigator.pop(dialogContext, temporal);
                         },
-                        style:
-                        CuboButtons.primary(),
-                        child:
-                        const FittedBox(
-                          fit:
-                          BoxFit.scaleDown,
+                        style: CuboButtons.primary(),
+                        child: const FittedBox(
+                          fit: BoxFit.scaleDown,
                           child: Text(
                             'GUARDAR',
                             maxLines: 1,
-                            style:
-                            TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              fontWeight:
-                              FontWeight
-                                  .w900,
-                              letterSpacing:
-                              0.4,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.4,
                             ),
                           ),
                         ),
@@ -842,26 +647,18 @@ class _CaraCruzScreenState extends State<MonedaScreen>
       },
     );
 
-    if (!mounted ||
-        resultado == null) {
+    if (!mounted || resultado == null) {
       return;
     }
 
     setState(() {
-      _caraPercent =
-          resultado.clamp(
-            0.0,
-            100.0,
-          );
+      _caraPercent = resultado.clamp(0.0, 100.0);
     });
 
     await _guardarProbabilidad();
   }
 
-  Widget _coinFace({
-    required bool cara,
-    required double size,
-  }) {
+  Widget _coinFace({required bool cara, required double size}) {
     final borderWidth = size < 180 ? 4.0 : 5.0;
     final ringInset = size < 180 ? 10.0 : 13.0;
     final innerInset = size < 180 ? 22.0 : 28.0;
@@ -882,18 +679,15 @@ class _CaraCruzScreenState extends State<MonedaScreen>
           ],
           stops: [0.0, 0.28, 0.72, 1.0],
         ),
-        border: Border.all(
-          color: const Color(0xFFFFF7D6),
-          width: borderWidth,
-        ),
+        border: Border.all(color: const Color(0xFFFFF7D6), width: borderWidth),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.30),
+            color: Colors.black.withValues(alpha: 0.30),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
           BoxShadow(
-            color: const Color(0xFFFFD166).withOpacity(0.28),
+            color: const Color(0xFFFFD166).withValues(alpha: 0.28),
             blurRadius: 20,
             offset: const Offset(0, 0),
           ),
@@ -914,10 +708,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFFFE590),
-                      Color(0xFFF2BA49),
-                    ],
+                    colors: [Color(0xFFFFE590), Color(0xFFF2BA49)],
                   ),
                 ),
               ),
@@ -958,8 +749,8 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                 borderRadius: BorderRadius.circular(999),
                 gradient: LinearGradient(
                   colors: [
-                    Colors.white.withOpacity(0.65),
-                    Colors.white.withOpacity(0.10),
+                    Colors.white.withValues(alpha: 0.65),
+                    Colors.white.withValues(alpha: 0.10),
                   ],
                 ),
               ),
@@ -975,9 +766,9 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   height: size * 0.34,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFFFF3BF).withOpacity(0.35),
+                    color: const Color(0xFFFFF3BF).withValues(alpha: 0.35),
                     border: Border.all(
-                      color: const Color(0xFFB27A18).withOpacity(0.65),
+                      color: const Color(0xFFB27A18).withValues(alpha: 0.65),
                       width: 1.5,
                     ),
                   ),
@@ -985,7 +776,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                     cara
                         ? Icons.record_voice_over_rounded
                         : Icons.visibility_off_rounded,
-                    color: appBlue.withOpacity(0.92),
+                    color: CuboColors.blue.withValues(alpha: 0.92),
                     size: size * 0.16,
                   ),
                 ),
@@ -997,7 +788,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appBlue.withOpacity(0.95),
+                    color: CuboColors.blue.withValues(alpha: 0.95),
                     fontSize: size * 0.115,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.4,
@@ -1011,7 +802,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appBlue.withOpacity(0.68),
+                    color: CuboColors.blue.withValues(alpha: 0.68),
                     fontSize: size * 0.055,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.1,
@@ -1028,13 +819,9 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   Widget buildCoin() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxAllowed =
-        _isVeryNarrowScreen ? 190.0 : 235.0;
+        final maxAllowed = _isVeryNarrowScreen ? 190.0 : 235.0;
 
-        final size = math.min(
-          constraints.maxWidth * 0.72,
-          maxAllowed,
-        );
+        final size = math.min(constraints.maxWidth * 0.72, maxAllowed);
 
         return AnimatedBuilder(
           animation: _controller,
@@ -1043,8 +830,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                 ? _coinAnimation.value
                 : _currentAngle;
 
-            final showingCara =
-                math.cos(angle) >= 0;
+            final showingCara = math.cos(angle) >= 0;
 
             return Transform(
               alignment: Alignment.center,
@@ -1054,13 +840,8 @@ class _CaraCruzScreenState extends State<MonedaScreen>
               child: Transform(
                 alignment: Alignment.center,
                 transform: Matrix4.identity()
-                  ..rotateY(
-                    showingCara ? 0 : math.pi,
-                  ),
-                child: _coinFace(
-                  cara: showingCara,
-                  size: size,
-                ),
+                  ..rotateY(showingCara ? 0 : math.pi),
+                child: _coinFace(cara: showingCara, size: size),
               ),
             );
           },
@@ -1069,9 +850,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     );
   }
 
-  Widget buildGameArea({
-    required bool compact,
-  }) {
+  Widget buildGameArea({required bool compact}) {
     return Expanded(
       child: Center(
         child: SingleChildScrollView(
@@ -1084,106 +863,99 @@ class _CaraCruzScreenState extends State<MonedaScreen>
             children: [
               buildCoin(),
 
-              SizedBox(
-                height: compact ? 22 : 30,
-              ),
+              SizedBox(height: compact ? 22 : 30),
 
               AnimatedSwitcher(
-                duration:
-                const Duration(milliseconds: 220),
+                duration: const Duration(milliseconds: 220),
                 child: _isFlipping
                     ? SizedBox(
-                  key: const ValueKey('flipping'),
-                  width: double.infinity,
-                  child: _singleLineResponsiveText(
-                    'LANZANDO...',
-                    alignment: Alignment.center,
-                    style: TextStyle(
-                      color: appWhite.withOpacity(0.65),
-                      fontSize: compact ? 13 : 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                )
+                        key: const ValueKey('flipping'),
+                        width: double.infinity,
+                        child: _singleLineResponsiveText(
+                          'LANZANDO...',
+                          alignment: Alignment.center,
+                          style: TextStyle(
+                            color: CuboColors.white.withValues(alpha: 0.65),
+                            fontSize: compact ? 13 : 15,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      )
                     : _result.isEmpty
                     ? Column(
-                  key: const ValueKey('empty'),
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: _singleLineResponsiveText(
-                        'HAZ UNA PREGUNTA Y PASA LA MONEDA',
-                        alignment: Alignment.center,
-                        style: TextStyle(
-                          color: appWhite.withOpacity(0.65),
-                          fontSize: compact ? 11.5 : 13.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Cara = se dice · Cruz = secreto',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: appWhite.withOpacity(0.52),
-                        fontSize: compact ? 11 : 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                )
+                        key: const ValueKey('empty'),
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            child: _singleLineResponsiveText(
+                              'HAZ UNA PREGUNTA Y PASA LA MONEDA',
+                              alignment: Alignment.center,
+                              style: TextStyle(
+                                color: CuboColors.white.withValues(alpha: 0.65),
+                                fontSize: compact ? 11.5 : 13.5,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Cara = se dice · Cruz = secreto',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: CuboColors.white.withValues(alpha: 0.52),
+                              fontSize: compact ? 11 : 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      )
                     : Column(
-                  key: ValueKey(_result),
-                  children: [
-                    Text(
-                      'HA SALIDO',
-                      style: TextStyle(
-                        color: appWhite.withOpacity(0.62),
-                        fontSize: compact ? 11 : 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
+                        key: ValueKey(_result),
+                        children: [
+                          Text(
+                            'HA SALIDO',
+                            style: TextStyle(
+                              color: CuboColors.white.withValues(alpha: 0.62),
+                              fontSize: compact ? 11 : 13,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          SizedBox(
+                            width: double.infinity,
+                            child: _singleLineResponsiveText(
+                              _result,
+                              alignment: Alignment.center,
+                              style: TextStyle(
+                                color: CuboColors.fiesta,
+                                fontSize: compact ? 40 : 50,
+                                height: 0.9,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            _result == 'CARA'
+                                ? 'La respuesta se dice'
+                                : 'La respuesta queda en secreto',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: CuboColors.white.withValues(alpha: 0.72),
+                              fontSize: compact ? 12 : 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    SizedBox(
-                      width: double.infinity,
-                      child: _singleLineResponsiveText(
-                        _result,
-                        alignment: Alignment.center,
-                        style: TextStyle(
-                          color: accentYellow,
-                          fontSize: compact ? 40 : 50,
-                          height: 0.9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _result == 'CARA'
-                          ? 'La respuesta se dice'
-                          : 'La respuesta queda en secreto',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: appWhite.withOpacity(0.72),
-                        fontSize: compact ? 12 : 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-              SizedBox(
-                height: compact ? 11 : 14,
-              ),
+              SizedBox(height: compact ? 11 : 14),
 
-              buildProbabilityControl(
-                compact: compact,
-              ),
+              buildProbabilityControl(compact: compact),
             ],
           ),
         ),
@@ -1191,40 +963,32 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     );
   }
 
-  Widget buildThrowButton({
-    required bool compact,
-  }) {
-    return SizedBox(
+  Widget buildThrowButton({required bool compact}) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
       width: double.infinity,
-      height: compact ? 58 : 66,
+      height: compact ? 60 : 68,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: _isFlipping ? null : CuboShadows.float,
+      ),
       child: ElevatedButton(
-        onPressed:
-        _isFlipping ? null : lanzarMoneda,
+        onPressed: _isFlipping ? null : lanzarMoneda,
         style: mainButtonStyle(),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal:
-            _isVeryNarrowScreen ? 8 : 16,
+            horizontal: _isVeryNarrowScreen ? 8 : 16,
           ),
           child: Row(
-            mainAxisAlignment:
-            MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.casino_rounded,
-                size: compact ? 22 : 26,
-              ),
+              Icon(Icons.casino_rounded, size: compact ? 22 : 26),
 
-              SizedBox(
-                width:
-                _isVeryNarrowScreen ? 6 : 9,
-              ),
+              SizedBox(width: _isVeryNarrowScreen ? 6 : 9),
 
               Expanded(
                 child: _singleLineResponsiveText(
-                  _isFlipping
-                      ? 'LANZANDO'
-                      : 'LANZAR MONEDA',
+                  _isFlipping ? 'LANZANDO' : 'LANZAR MONEDA',
                   alignment: Alignment.center,
                   style: TextStyle(
                     fontSize: compact ? 14 : 16,
@@ -1243,64 +1007,51 @@ class _CaraCruzScreenState extends State<MonedaScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: CuboBackground(
+      backgroundColor: CuboColors.blue,
+      body: CuboGameBackground(
+        accent: CuboColors.fiesta,
         halo: CuboHalo.topRight,
         child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final narrow =
-                constraints.maxWidth < 380;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
 
-            final veryNarrow =
-                constraints.maxWidth < 340;
+              final veryNarrow = constraints.maxWidth < 340;
 
-            final compact =
-                constraints.maxHeight < 740 ||
-                    narrow;
+              final compact = constraints.maxHeight < 740 || narrow;
 
-            final horizontalPadding =
-            veryNarrow
-                ? 8.0
-                : compact
-                ? 12.0
-                : 18.0;
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
 
-            final verticalPadding =
-            compact ? 10.0 : 18.0;
+              final verticalPadding = compact ? 10.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 10 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 10 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(),
 
-                  SizedBox(
-                    height: compact ? 8 : 14,
-                  ),
+                    SizedBox(height: compact ? 8 : 14),
 
-                  buildGameArea(
-                    compact: compact,
-                  ),
+                    buildGameArea(compact: compact),
 
-                  SizedBox(
-                    height: compact ? 8 : 12,
-                  ),
+                    SizedBox(height: compact ? 8 : 12),
 
-                  buildThrowButton(
-                    compact: compact,
-                  ),
-                ],
-              ),
-            );
-          },
+                    buildThrowButton(compact: compact),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }
