@@ -16,12 +16,6 @@ class PingPongScreen extends StatefulWidget {
 class _PingPongScreenState extends State<PingPongScreen> {
   final Random random = Random();
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentPink = Color(0xFFFF4D6D);
-  static const Color accentOrange = Color(0xFFFFB86C);
-  static const Color accentYellow = Color(0xFFFFD166);
-
   String preguntaActual = 'Pulsa empezar para jugar';
   int tiempoRestante = 10;
   Timer? timer;
@@ -99,7 +93,10 @@ class _PingPongScreenState extends State<PingPongScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: appWhite.withOpacity(0.85), width: 2.2),
+          border: Border.all(
+            color: CuboColors.white.withValues(alpha: 0.85),
+            width: 2.2,
+          ),
         ),
         child: Center(child: child),
       ),
@@ -126,7 +123,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
               onTap: mostrarNormas,
               child: Icon(
                 Icons.question_mark_rounded,
-                color: appWhite,
+                color: CuboColors.white,
                 size: compact ? 23 : 27,
               ),
             ),
@@ -151,7 +148,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
                         'ping pong',
                         maxLines: 1,
                         style: TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: titleSize,
                           height: 1.9,
                           fontWeight: FontWeight.w900,
@@ -161,7 +158,11 @@ class _PingPongScreenState extends State<PingPongScreen> {
                     ),
                   ),
                 ),
-                Positioned(top: lineTop, left: 0, child: const CuboPillBar()),
+                Positioned(
+                  top: lineTop,
+                  left: 0,
+                  child: const CuboPillBar(width: 44, color: CuboColors.fiesta),
+                ),
               ],
             ),
           ),
@@ -179,7 +180,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -203,7 +204,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
                   const Text(
                     'PING PONG',
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -266,10 +267,10 @@ class _PingPongScreenState extends State<PingPongScreen> {
     final bool finished = juegoIniciado && tiempoRestante == 0;
 
     final Color timerColor = finished
-        ? accentPink
+        ? CuboColors.alert
         : danger
-        ? accentOrange
-        : accentYellow;
+        ? CuboColors.fiesta
+        : CuboColors.white;
 
     final size = compact ? 82.0 : 104.0;
 
@@ -279,7 +280,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: timerColor.withOpacity(0.14),
+        color: timerColor.withValues(alpha: 0.14),
         border: Border.all(color: timerColor, width: 3),
       ),
       child: Center(
@@ -297,60 +298,36 @@ class _PingPongScreenState extends State<PingPongScreen> {
   }
 
   Widget buildGameCard({required bool compact}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(vertical: compact ? 6 : 12),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: max(0.0, constraints.maxHeight - (compact ? 12 : 24)),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 280),
-                  child: juegoIniciado
-                      ? KeyedSubtree(
-                          key: const ValueKey('timer'),
-                          child: buildTimer(compact: compact),
-                        )
-                      : CuboIllustration(
-                          'ping_pong',
-                          key: const ValueKey('illustration'),
-                          size: compact ? 92 : 120,
-                        ),
+    return Column(
+      children: [
+        SizedBox(height: compact ? 4 : 10),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 280),
+          child: juegoIniciado
+              ? KeyedSubtree(
+                  key: const ValueKey('timer'),
+                  child: buildTimer(compact: compact),
+                )
+              : CuboIllustration(
+                  'ping_pong',
+                  key: const ValueKey('illustration'),
+                  size: compact ? 82 : 110,
                 ),
-                SizedBox(height: compact ? 16 : 24),
-                CuboCardSwitcher(
-                  child: CuboHeroCard(
-                    key: ValueKey(preguntaActual),
-                    chip: 'ping pong',
-                    chipIcon: Icons.sports_tennis_rounded,
-                    padding: EdgeInsets.fromLTRB(
-                      compact ? 18 : 24,
-                      compact ? 16 : 20,
-                      compact ? 18 : 24,
-                      compact ? 22 : 30,
-                    ),
-                    child: Text(
-                      preguntaActual,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: CuboColors.blueInk,
-                        fontSize: compact ? 24 : 30,
-                        height: 1.14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.6,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+        ),
+        SizedBox(height: compact ? 8 : 14),
+        Expanded(
+          child: CuboCardStack(
+            maxHeight: 400,
+            child: CuboPlayCard(
+              key: ValueKey(preguntaActual),
+              chip: 'ping pong',
+              chipIcon: Icons.sports_tennis_rounded,
+              maxFontSize: compact ? 24 : 30,
+              text: preguntaActual,
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
@@ -368,7 +345,9 @@ class _PingPongScreenState extends State<PingPongScreen> {
       child: AspectRatio(
         aspectRatio: compact ? 1.55 : 1.4,
         child: Material(
-          color: disabled ? backgroundColor.withOpacity(0.35) : backgroundColor,
+          color: disabled
+              ? backgroundColor.withValues(alpha: 0.35)
+              : backgroundColor,
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
             onTap: onTap,
@@ -377,14 +356,16 @@ class _PingPongScreenState extends State<PingPongScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: appWhite.withOpacity(disabled ? 0.12 : 0.28),
+                  color: CuboColors.white.withValues(
+                    alpha: disabled ? 0.12 : 0.28,
+                  ),
                   width: 2.4,
                 ),
                 boxShadow: disabled
                     ? null
                     : [
                         BoxShadow(
-                          color: backgroundColor.withOpacity(0.28),
+                          color: backgroundColor.withValues(alpha: 0.28),
                           blurRadius: 16,
                           offset: const Offset(0, 7),
                         ),
@@ -395,14 +376,18 @@ class _PingPongScreenState extends State<PingPongScreen> {
                 children: [
                   Icon(
                     icon,
-                    color: foregroundColor.withOpacity(disabled ? 0.42 : 1),
+                    color: foregroundColor.withValues(
+                      alpha: disabled ? 0.42 : 1,
+                    ),
                     size: compact ? 36 : 48,
                   ),
                   const SizedBox(height: 5),
                   Text(
                     label,
                     style: TextStyle(
-                      color: foregroundColor.withOpacity(disabled ? 0.42 : 1),
+                      color: foregroundColor.withValues(
+                        alpha: disabled ? 0.42 : 1,
+                      ),
                       fontSize: compact ? 12.5 : 14,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.5,
@@ -420,8 +405,9 @@ class _PingPongScreenState extends State<PingPongScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: CuboBackground(
+      backgroundColor: CuboColors.blue,
+      body: CuboGameBackground(
+        accent: CuboColors.fiesta,
         halo: CuboHalo.topRight,
         child: SafeArea(
           child: LayoutBuilder(
@@ -443,9 +429,13 @@ class _PingPongScreenState extends State<PingPongScreen> {
                     SizedBox(height: compact ? 8 : 14),
                     Expanded(child: buildGameCard(compact: compact)),
                     SizedBox(height: compact ? 9 : 14),
-                    SizedBox(
+                    Container(
                       width: double.infinity,
-                      height: compact ? 72 : 82,
+                      height: compact ? 68 : 76,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                        boxShadow: CuboShadows.float,
+                      ),
                       child: ElevatedButton.icon(
                         onPressed: juegoIniciado
                             ? siguientePregunta

@@ -26,6 +26,9 @@ class CuboColors {
   /// Acento de los juegos de Chill.
   static const Color chill = Color(0xFF8FD3FF);
 
+  /// Aviso puntual (tiempo agotado, error). No es un acento decorativo.
+  static const Color alert = Color(0xFFFF6B6B);
+
   static Color whiteA(double alpha) => white.withValues(alpha: alpha);
 }
 
