@@ -23,14 +23,6 @@ class ImpostorScreen extends StatefulWidget {
 class _ImpostorScreenState extends State<ImpostorScreen> {
   final math.Random _random = math.Random();
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentPink = Color(0xFFFF4D6D);
-  static const Color accentOrange = Color(0xFFFFB86C);
-  static const Color accentGreen = Color(0xFF22C55E);
-  static const Color accentYellow = Color(0xFFFFD166);
-  static const Color accentPurple = Color(0xFF8B5CF6);
-
   ImpostorMode? selectedMode;
   ImpostorStep currentStep = ImpostorStep.modeSelection;
 
@@ -168,7 +160,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final newName = typedName.isEmpty ? _nextAutomaticPlayerName() : typedName;
 
     final duplicated = playerNames.any(
-          (name) => name.toLowerCase() == newName.toLowerCase(),
+      (name) => name.toLowerCase() == newName.toLowerCase(),
     );
 
     if (duplicated) {
@@ -279,7 +271,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void setupClassicMode() {
     final categoryData =
-    classicWordsData[_random.nextInt(classicWordsData.length)];
+        classicWordsData[_random.nextInt(classicWordsData.length)];
 
     final words = (categoryData['words'] as List)
         .map((item) => Map<String, String>.from(item as Map))
@@ -300,18 +292,18 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   void setupRolesMode() {
     final scenario =
-    rolesScenariosData[_random.nextInt(rolesScenariosData.length)];
+        rolesScenariosData[_random.nextInt(rolesScenariosData.length)];
 
     final language = AppSettings.instance.language;
     final placeSource = scenario['place'] as String;
     final place = localizeImpostorRoleValue(placeSource, language);
     final roles =
-    List<String>.from(scenario['roles'])
-        .map(
-          (role) => localizeImpostorRoleValue(role, language, isRole: true),
-    )
-        .toList()
-      ..shuffle(_random);
+        List<String>.from(scenario['roles'])
+            .map(
+              (role) => localizeImpostorRoleValue(role, language, isRole: true),
+            )
+            .toList()
+          ..shuffle(_random);
 
     selectedCategory = 'Lugar';
     selectedWord = place;
@@ -535,7 +527,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       ..showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: appBlue,
+          backgroundColor: CuboColors.blue,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -581,15 +573,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Color get modeColor {
     switch (selectedMode) {
       case ImpostorMode.classic:
-        return accentPink;
+        return CuboColors.fiesta;
       case ImpostorMode.roles:
-        return accentOrange;
+        return CuboColors.chill;
       case ImpostorMode.question:
-        return accentGreen;
+        return CuboColors.fiesta;
       case ImpostorMode.football:
-        return accentYellow;
+        return CuboColors.chill;
       case null:
-        return accentPink;
+        return CuboColors.fiesta;
     }
   }
 
@@ -611,13 +603,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   ButtonStyle mainButtonStyle({Color? background, Color? foreground}) {
     if (background == null) {
       return CuboButtons.primary(
-        foreground: foreground ?? appBlue,
+        foreground: foreground ?? CuboColors.blue,
         padding: EdgeInsets.zero,
       );
     }
     return ElevatedButton.styleFrom(
       backgroundColor: background,
-      foregroundColor: foreground ?? appBlue,
+      foregroundColor: foreground ?? CuboColors.blue,
       disabledBackgroundColor: CuboColors.whiteA(0.18),
       disabledForegroundColor: CuboColors.whiteA(0.42),
       elevation: 0,
@@ -643,7 +635,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: appWhite.withOpacity(0.85), width: 2.2),
+          border: Border.all(
+            color: CuboColors.white.withValues(alpha: 0.85),
+            width: 2.2,
+          ),
         ),
         child: Center(child: child),
       ),
@@ -689,7 +684,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   onTap: showRulesDialog,
                   child: Icon(
                     Icons.question_mark_rounded,
-                    color: appWhite,
+                    color: CuboColors.white,
                     size: compact ? 23 : 27,
                   ),
                 ),
@@ -729,7 +724,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                         maxLines: 1,
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: titleSize,
                           height: 1.4,
                           fontWeight: FontWeight.w900,
@@ -739,11 +734,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: lineTop,
-                  right: 0,
-                  child: const CuboPillBar(),
-                ),
+                Positioned(top: lineTop, right: 0, child: const CuboPillBar()),
               ],
             ),
           ),
@@ -764,7 +755,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         color: CuboColors.whiteA(0.08),
         borderRadius: CuboRadii.lgAll,
         border: Border.all(
-          color: borderColor ?? appWhite.withOpacity(0.28),
+          color: borderColor ?? CuboColors.white.withValues(alpha: 0.28),
           width: 1.4,
         ),
       ),
@@ -784,7 +775,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             Text(
               'JUGADOR $current DE $total',
               style: TextStyle(
-                color: appWhite.withOpacity(0.72),
+                color: CuboColors.white.withValues(alpha: 0.72),
                 fontSize: compact ? 10.5 : 12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.6,
@@ -794,7 +785,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             Text(
               '${(progress * 100).round()}%',
               style: TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: compact ? 12 : 14,
                 fontWeight: FontWeight.w900,
               ),
@@ -828,8 +819,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     required bool compact,
   }) {
     final disabled = onTap == null;
-    final outlined = backgroundColor == appBlue;
-    final fg = outlined ? appWhite : CuboColors.blueInk;
+    final outlined = backgroundColor == CuboColors.blue;
+    final fg = outlined ? CuboColors.white : CuboColors.blueInk;
     final fgColor = fg.withValues(alpha: disabled ? 0.45 : 1);
 
     return SizedBox(
@@ -837,7 +828,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       child: Material(
         color: outlined
             ? CuboColors.whiteA(0.08)
-            : (disabled ? CuboColors.whiteA(0.35) : appWhite),
+            : (disabled ? CuboColors.whiteA(0.35) : CuboColors.white),
         shape: StadiumBorder(
           side: outlined
               ? BorderSide(color: CuboColors.whiteA(0.55), width: 1.4)
@@ -914,7 +905,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         {
           'icon': Icons.visibility_off_rounded,
           'title': 'Disimula',
-          'text': 'El impostor debe evitar que lo descubran durante la conversación.',
+          'text':
+              'El impostor debe evitar que lo descubran durante la conversación.',
         },
         {
           'icon': Icons.how_to_vote_rounded,
@@ -1051,7 +1043,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       }
     }
 
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -1075,7 +1067,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   Text(
                     tr(title).toUpperCase(),
                     style: const TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -1083,7 +1075,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   ),
                   const SizedBox(height: 14),
                   ...rules.map(
-                        (rule) => rulesItem(
+                    (rule) => rulesItem(
                       icon: rule['icon'] as IconData,
                       title: rule['title'] as String,
                       text: rule['text'] as String,
@@ -1135,7 +1127,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             horizontal: compact ? 10 : 13,
             vertical: compact ? 11 : 15,
           ),
-          decoration: CuboDecorations.glass(),
+          decoration: CuboDecorations.glassRaised(radius: CuboRadii.lg),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1143,11 +1135,21 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 width: compact ? 54 : 66,
                 height: compact ? 54 : 66,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color.withOpacity(0.75), width: 2),
+                  color: color,
+                  borderRadius: BorderRadius.circular(compact ? 18 : 22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.35),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: color, size: compact ? 30 : 38),
+                child: Icon(
+                  icon,
+                  color: CuboColors.blueInk,
+                  size: compact ? 30 : 38,
+                ),
               ),
               SizedBox(height: compact ? 8 : 11),
               Text(
@@ -1156,7 +1158,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: appWhite,
+                  color: CuboColors.white,
                   fontSize: compact ? 12 : 14,
                   height: 1.05,
                   fontWeight: FontWeight.w900,
@@ -1170,7 +1172,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 maxLines: compact ? 3 : 4,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.68),
+                  color: CuboColors.white.withValues(alpha: 0.68),
                   fontSize: compact ? 10.2 : 11.5,
                   height: 1.22,
                   fontWeight: FontWeight.w600,
@@ -1186,36 +1188,36 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Widget buildModeSelection({required bool compact}) {
     final cards = [
       (
-      title: 'Clásico',
-      subtitle: 'Todos tienen una palabra menos el impostor.',
-      icon: Icons.visibility_off_rounded,
-      color: accentPink,
-      mode: ImpostorMode.classic,
+        title: 'Clásico',
+        subtitle: 'Todos tienen una palabra menos el impostor.',
+        icon: Icons.visibility_off_rounded,
+        color: CuboColors.fiesta,
+        mode: ImpostorMode.classic,
       ),
       (
-      title: 'Con roles',
-      subtitle: 'Mismo lugar, roles distintos y alguien no sabe nada.',
-      icon: Icons.theater_comedy_rounded,
-      color: accentOrange,
-      mode: ImpostorMode.roles,
+        title: 'Con roles',
+        subtitle: 'Mismo lugar, roles distintos y alguien no sabe nada.',
+        icon: Icons.theater_comedy_rounded,
+        color: CuboColors.chill,
+        mode: ImpostorMode.roles,
       ),
       (
-      title: 'Pregunta distinta',
-      subtitle: 'Uno recibe una pregunta parecida, pero diferente.',
-      icon: Icons.quiz_rounded,
-      color: accentGreen,
-      mode: ImpostorMode.question,
+        title: 'Pregunta distinta',
+        subtitle: 'Uno recibe una pregunta parecida, pero diferente.',
+        icon: Icons.quiz_rounded,
+        color: CuboColors.fiesta,
+        mode: ImpostorMode.question,
       ),
       (
-      title: _footballText('Fútbol', 'Futbol', 'Football'),
-      subtitle: _footballText(
-        'Jugadores, leyendas, entrenadores y clubes.',
-        'Jugadors, llegendes, entrenadors i clubs.',
-        'Players, legends, coaches and clubs.',
-      ),
-      icon: Icons.sports_soccer_rounded,
-      color: accentYellow,
-      mode: ImpostorMode.football,
+        title: _footballText('Fútbol', 'Futbol', 'Football'),
+        subtitle: _footballText(
+          'Jugadores, leyendas, entrenadores y clubes.',
+          'Jugadors, llegendes, entrenadors i clubs.',
+          'Players, legends, coaches and clubs.',
+        ),
+        icon: Icons.sports_soccer_rounded,
+        color: CuboColors.chill,
+        mode: ImpostorMode.football,
       ),
     ];
 
@@ -1233,12 +1235,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         return CuboEntrance(
           index: index,
           child: buildModeCard(
-          title: card.title,
-          subtitle: card.subtitle,
-          icon: card.icon,
-          color: card.color,
-          compact: compact,
-          onTap: () => goToSetup(card.mode),
+            title: card.title,
+            subtitle: card.subtitle,
+            icon: card.icon,
+            color: card.color,
+            compact: compact,
+            onTap: () => goToSetup(card.mode),
           ),
         );
       },
@@ -1246,10 +1248,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   Widget _singleLineResponsiveText(
-      String text, {
-        required TextStyle style,
-        Alignment alignment = Alignment.centerLeft,
-      }) {
+    String text, {
+    required TextStyle style,
+    Alignment alignment = Alignment.centerLeft,
+  }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
@@ -1289,7 +1291,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           alignment: Alignment.center,
           child: Icon(
             icon,
-            color: appWhite.withOpacity(onTap == null ? 0.28 : 1),
+            color: CuboColors.white.withValues(alpha: onTap == null ? 0.28 : 1),
             size: veryNarrow
                 ? 19
                 : compact
@@ -1342,10 +1344,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 width: iconSize,
                 height: iconSize,
                 decoration: BoxDecoration(
-                  color: modeColor.withOpacity(0.14),
+                  color: modeColor.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: modeColor.withOpacity(0.75),
+                    color: modeColor.withValues(alpha: 0.75),
                     width: 2,
                   ),
                 ),
@@ -1366,7 +1368,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 child: _singleLineResponsiveText(
                   tr(title).toUpperCase(),
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 10.5
                         : compact
@@ -1393,7 +1395,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 18
                         : compact
@@ -1438,7 +1440,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           child: _singleLineResponsiveText(
             'AÑADIR JUGADOR',
             style: TextStyle(
-              color: appWhite.withOpacity(0.70),
+              color: CuboColors.white.withValues(alpha: 0.70),
               fontSize: compact ? 10.5 : 12,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.7,
@@ -1457,10 +1459,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _addPlayer(),
                 style: const TextStyle(
-                  color: appWhite,
+                  color: CuboColors.white,
                   fontWeight: FontWeight.w700,
                 ),
-                cursorColor: appWhite,
+                cursorColor: CuboColors.white,
                 decoration: inputDecoration('Nombre opcional'),
               ),
             ),
@@ -1474,11 +1476,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 onPressed: playerNames.length >= maxPlayers ? null : _addPlayer,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: modeColor,
-                  foregroundColor: selectedMode == ImpostorMode.football
-                      ? appBlue
-                      : appWhite,
-                  disabledBackgroundColor: appWhite.withOpacity(0.18),
-                  disabledForegroundColor: appWhite.withOpacity(0.42),
+                  foregroundColor: CuboColors.blueInk,
+                  disabledBackgroundColor: CuboColors.white.withValues(
+                    alpha: 0.18,
+                  ),
+                  disabledForegroundColor: CuboColors.white.withValues(
+                    alpha: 0.42,
+                  ),
                   elevation: 0,
 
                   // Esto centra correctamente el +
@@ -1515,7 +1519,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               children: [
                 Icon(
                   Icons.person_add_alt_1_rounded,
-                  color: appWhite.withOpacity(0.48),
+                  color: CuboColors.white.withValues(alpha: 0.48),
                   size: compact ? 28 : 34,
                 ),
 
@@ -1525,7 +1529,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   'Todavía no has añadido jugadores',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.66),
+                    color: CuboColors.white.withValues(alpha: 0.66),
                     fontSize: compact ? 12 : 13,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1565,7 +1569,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: compact ? 12 : 13,
                           fontWeight: FontWeight.w900,
                         ),
@@ -1580,7 +1584,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: compact ? 14 : 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -1592,7 +1596,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       onPressed: () => _removePlayer(index),
                       icon: Icon(
                         Icons.delete_outline_rounded,
-                        color: appWhite.withOpacity(0.78),
+                        color: CuboColors.white.withValues(alpha: 0.78),
                       ),
                     ),
                   ],
@@ -1624,36 +1628,39 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
           borderRadius: CuboRadii.mdAll,
           border: Border.all(
             color: value == false
-                ? appWhite.withOpacity(0.22)
-                : modeColor.withOpacity(0.65),
+                ? CuboColors.white.withValues(alpha: 0.22)
+                : modeColor.withValues(alpha: 0.65),
             width: 1.3,
           ),
         ),
         child: Material(
           type: MaterialType.transparency,
           child: CheckboxListTile(
-          key: ValueKey(keyName),
-          value: value,
-          tristate: tristate,
-          onChanged: onChanged,
-          controlAffinity: ListTileControlAffinity.leading,
-          contentPadding: EdgeInsets.symmetric(horizontal: compact ? 4 : 8),
-          shape: const RoundedRectangleBorder(borderRadius: CuboRadii.mdAll),
-          activeColor: modeColor,
-          checkColor: appBlue,
-          side: BorderSide(color: appWhite.withOpacity(0.65), width: 1.7),
-          checkboxShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              color: appWhite,
-              fontSize: compact ? 13 : 15,
-              fontWeight: FontWeight.w800,
+            key: ValueKey(keyName),
+            value: value,
+            tristate: tristate,
+            onChanged: onChanged,
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.symmetric(horizontal: compact ? 4 : 8),
+            shape: const RoundedRectangleBorder(borderRadius: CuboRadii.mdAll),
+            activeColor: modeColor,
+            checkColor: CuboColors.blue,
+            side: BorderSide(
+              color: CuboColors.white.withValues(alpha: 0.65),
+              width: 1.7,
+            ),
+            checkboxShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            title: Text(
+              title,
+              style: TextStyle(
+                color: CuboColors.white,
+                fontSize: compact ? 13 : 15,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-        ),
         ),
       );
     }
@@ -1668,7 +1675,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             'FOOTBALL CONTENT',
           ),
           style: TextStyle(
-            color: appWhite.withOpacity(0.70),
+            color: CuboColors.white.withValues(alpha: 0.70),
             fontSize: compact ? 10.5 : 12,
             fontWeight: FontWeight.w900,
             letterSpacing: 0.7,
@@ -1682,7 +1689,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             'Combine any categories you like.',
           ),
           style: TextStyle(
-            color: appWhite.withOpacity(0.68),
+            color: CuboColors.white.withValues(alpha: 0.68),
             fontSize: compact ? 12 : 13,
             fontWeight: FontWeight.w600,
           ),
@@ -1721,17 +1728,19 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         Text(
           noneSelected
               ? _footballText(
-            'Marca al menos una categoría para empezar.',
-            'Marca com a mínim una categoria per començar.',
-            'Select at least one category to start.',
-          )
+                  'Marca al menos una categoría para empezar.',
+                  'Marca com a mínim una categoria per començar.',
+                  'Select at least one category to start.',
+                )
               : _footballText(
-            '$availableNames nombres disponibles',
-            '$availableNames noms disponibles',
-            '$availableNames names available',
-          ),
+                  '$availableNames nombres disponibles',
+                  '$availableNames noms disponibles',
+                  '$availableNames names available',
+                ),
           style: TextStyle(
-            color: noneSelected ? accentPink : appWhite.withOpacity(0.68),
+            color: noneSelected
+                ? CuboColors.alert
+                : CuboColors.white.withValues(alpha: 0.68),
             fontSize: compact ? 12 : 13,
             fontWeight: FontWeight.w700,
           ),
@@ -1744,13 +1753,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final mode = selectedMode!;
     final showHintSwitch =
         mode == ImpostorMode.classic ||
-            mode == ImpostorMode.roles ||
-            mode == ImpostorMode.football;
+        mode == ImpostorMode.roles ||
+        mode == ImpostorMode.football;
 
     return SingleChildScrollView(
       child: buildPanel(
         padding: EdgeInsets.all(compact ? 13 : 17),
-        borderColor: modeColor.withOpacity(0.65),
+        borderColor: modeColor.withValues(alpha: 0.65),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -1760,7 +1769,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   width: compact ? 50 : 60,
                   height: compact ? 50 : 60,
                   decoration: BoxDecoration(
-                    color: modeColor.withOpacity(0.15),
+                    color: modeColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                     border: Border.all(color: modeColor, width: 2.2),
                   ),
@@ -1775,7 +1784,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   child: _singleLineResponsiveText(
                     getModeTitle(mode),
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: compact ? 20 : 25,
                       height: 1,
                       fontWeight: FontWeight.w900,
@@ -1812,18 +1821,18 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 child: Material(
                   type: MaterialType.transparency,
                   child: SwitchListTile(
-                  value: showHints,
-                  onChanged: (value) => setState(() => showHints = value),
-                  contentPadding: EdgeInsets.zero,
-                  activeColor: modeColor,
-                  title: const Text(
-                    'Pista para el impostor',
-                    style: TextStyle(
-                      color: appWhite,
-                      fontWeight: FontWeight.w900,
+                    value: showHints,
+                    onChanged: (value) => setState(() => showHints = value),
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: modeColor,
+                    title: const Text(
+                      'Pista para el impostor',
+                      style: TextStyle(
+                        color: CuboColors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                ),
                 ),
               ),
             ],
@@ -1832,12 +1841,10 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               icon: Icons.play_arrow_rounded,
               label: 'EMPEZAR PARTIDA',
               backgroundColor: modeColor,
-              foregroundColor: mode == ImpostorMode.football
-                  ? appBlue
-                  : appWhite,
+              foregroundColor: CuboColors.blueInk,
               onTap:
-              mode == ImpostorMode.football &&
-                  selectedFootballCategories.isEmpty
+                  mode == ImpostorMode.football &&
+                      selectedFootballCategories.isEmpty
                   ? null
                   : startGame,
               compact: compact,
@@ -1851,7 +1858,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Widget buildSecretContent({required bool compact}) {
     final secret = getPlayerSecretDisplay();
     final isImpostor = currentPlayerIsImpostor();
-    final secretColor = isImpostor ? accentPink : modeColor;
+    final secretColor = isImpostor ? CuboColors.alert : modeColor;
     final progress = secretRevealProgress;
 
     return AnimatedOpacity(
@@ -1926,16 +1933,16 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               width: double.infinity,
               padding: EdgeInsets.all(compact ? 11 : 14),
               decoration: BoxDecoration(
-                color: accentOrange.withValues(alpha: 0.16),
+                color: CuboColors.fiesta.withValues(alpha: 0.16),
                 borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: accentOrange.withValues(alpha: 0.70),
+                  color: CuboColors.fiesta.withValues(alpha: 0.70),
                   width: 1.4,
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.lightbulb_rounded, color: accentOrange),
+                  const Icon(Icons.lightbulb_rounded, color: CuboColors.fiesta),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -1982,12 +1989,15 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             vertical: compact ? 18 : 24,
           ),
           decoration: BoxDecoration(
-            color: appBlue,
+            color: CuboColors.blue,
             borderRadius: CuboRadii.xlAll,
-            border: Border.all(color: modeColor.withOpacity(0.85), width: 2.4),
+            border: Border.all(
+              color: modeColor.withValues(alpha: 0.85),
+              width: 2.4,
+            ),
             boxShadow: [
               BoxShadow(
-                color: modeColor.withOpacity(0.22),
+                color: modeColor.withValues(alpha: 0.22),
                 blurRadius: 28,
                 offset: const Offset(0, 14),
               ),
@@ -2000,7 +2010,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 width: compact ? 78 : 96,
                 height: compact ? 78 : 96,
                 decoration: BoxDecoration(
-                  color: modeColor.withOpacity(0.16),
+                  color: modeColor.withValues(alpha: 0.16),
                   shape: BoxShape.circle,
                   border: Border.all(color: modeColor, width: 2.6),
                 ),
@@ -2016,7 +2026,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               Text(
                 'TARJETA SECRETA',
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.58),
+                  color: CuboColors.white.withValues(alpha: 0.58),
                   fontSize: compact ? 11 : 13,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
@@ -2031,7 +2041,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   playerName.toLowerCase(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: compact ? 40 : 52,
                     height: 0.95,
                     fontWeight: FontWeight.w900,
@@ -2053,7 +2063,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                   children: [
                     Icon(
                       Icons.keyboard_double_arrow_up_rounded,
-                      color: appWhite.withOpacity(0.88),
+                      color: CuboColors.white.withValues(alpha: 0.88),
                       size: compact ? 30 : 34,
                     ),
 
@@ -2063,7 +2073,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       'ARRASTRA DESDE AQUÍ',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: appWhite,
+                        color: CuboColors.white,
                         fontSize: compact ? 13 : 15,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
@@ -2076,7 +2086,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       'sube para revelar · baja para ocultar',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: appWhite.withOpacity(0.62),
+                        color: CuboColors.white.withValues(alpha: 0.62),
                         fontSize: compact ? 11.5 : 12.5,
                         height: 1.25,
                         fontWeight: FontWeight.w700,
@@ -2104,7 +2114,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         Expanded(
           child: buildPanel(
             padding: EdgeInsets.all(compact ? 10 : 14),
-            borderColor: modeColor.withOpacity(0.65),
+            borderColor: modeColor.withValues(alpha: 0.65),
             child: Stack(
               children: [
                 Positioned.fill(
@@ -2141,9 +2151,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               ? 'FINALIZAR'
               : 'SIGUIENTE JUGADOR',
           backgroundColor: modeColor,
-          foregroundColor: selectedMode == ImpostorMode.football
-              ? appBlue
-              : appWhite,
+          foregroundColor: CuboColors.blueInk,
           onTap: nextPlayer,
           compact: compact,
         ),
@@ -2154,7 +2162,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   Widget buildReveal({required bool compact}) {
     final secret = getPlayerSecretDisplay();
     final isImpostor = currentPlayerIsImpostor();
-    final secretColor = isImpostor ? accentPink : modeColor;
+    final secretColor = isImpostor ? CuboColors.alert : modeColor;
 
     return Column(
       children: [
@@ -2184,8 +2192,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               child: buildActionButton(
                 icon: Icons.visibility_off_rounded,
                 label: 'OCULTAR',
-                backgroundColor: appBlue,
-                foregroundColor: appWhite,
+                backgroundColor: CuboColors.blue,
+                foregroundColor: CuboColors.white,
                 onTap: hideRole,
                 compact: compact,
               ),
@@ -2200,9 +2208,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     ? 'FINALIZAR'
                     : 'SIGUIENTE',
                 backgroundColor: modeColor,
-                foregroundColor: selectedMode == ImpostorMode.football
-                    ? appBlue
-                    : appWhite,
+                foregroundColor: CuboColors.blueInk,
                 onTap: nextPlayer,
                 compact: compact,
               ),
@@ -2218,13 +2224,16 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     switch (selectedMode!) {
       case ImpostorMode.classic:
-        summaryText = 'Todos conocen su palabra. Haced preguntas sin decirla exactamente y votad quién es el impostor.';
+        summaryText =
+            'Todos conocen su palabra. Haced preguntas sin decirla exactamente y votad quién es el impostor.';
         break;
       case ImpostorMode.roles:
-        summaryText = 'Todos conocen su lugar y su rol. El impostor debe disimular y descubrir el lugar.';
+        summaryText =
+            'Todos conocen su lugar y su rol. El impostor debe disimular y descubrir el lugar.';
         break;
       case ImpostorMode.question:
-        summaryText = 'Las preguntas ya están repartidas. Responded y descubrid quién recibió la pregunta distinta.';
+        summaryText =
+            'Las preguntas ya están repartidas. Responded y descubrid quién recibió la pregunta distinta.';
         break;
       case ImpostorMode.football:
         summaryText = _footballText(
@@ -2243,7 +2252,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
               horizontal: compact ? 18 : 24,
               vertical: compact ? 18 : 28,
             ),
-            borderColor: accentGreen.withOpacity(0.75),
+            borderColor: CuboColors.chill.withValues(alpha: 0.75),
             child: Center(
               child: SingleChildScrollView(
                 child: Column(
@@ -2258,7 +2267,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       'EMPEZAD A JUGAR',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: appWhite,
+                        color: CuboColors.white,
                         fontSize: compact ? 28 : 36,
                         height: 0.95,
                         fontWeight: FontWeight.w900,
@@ -2269,14 +2278,12 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(compact ? 13 : 16),
-                      decoration: CuboDecorations.glass(
-                        radius: CuboRadii.md,
-                      ),
+                      decoration: CuboDecorations.glass(radius: CuboRadii.md),
                       child: Text(
                         summaryText,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: appWhite.withOpacity(0.84),
+                          color: CuboColors.white.withValues(alpha: 0.84),
                           fontSize: compact ? 14 : 16,
                           height: 1.4,
                           fontWeight: FontWeight.w700,
@@ -2293,8 +2300,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         buildActionButton(
           icon: Icons.replay_rounded,
           label: 'NUEVA PARTIDA',
-          backgroundColor: accentGreen,
-          foregroundColor: appBlue,
+          backgroundColor: CuboColors.chill,
+          foregroundColor: CuboColors.blue,
           onTap: resetGame,
           compact: compact,
         ),
@@ -2320,7 +2327,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
+      backgroundColor: CuboColors.blue,
 
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -2328,69 +2335,70 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         // Cuando la tarjeta está abierta, capturamos también
         // el arrastre de la parte que queda fuera del panel.
         onVerticalDragStart:
-        currentStep == ImpostorStep.passPhone && secretCardOpen
+            currentStep == ImpostorStep.passPhone && secretCardOpen
             ? _globalSecretDragStart
             : null,
 
         onVerticalDragUpdate:
-        currentStep == ImpostorStep.passPhone && secretCardOpen
+            currentStep == ImpostorStep.passPhone && secretCardOpen
             ? _globalSecretDragUpdate
             : null,
 
         onVerticalDragEnd:
-        currentStep == ImpostorStep.passPhone && secretCardOpen
+            currentStep == ImpostorStep.passPhone && secretCardOpen
             ? _globalSecretDragEnd
             : null,
 
-        child: CuboBackground(
+        child: CuboGameBackground(
+          accent: CuboColors.chill,
           halo: CuboHalo.topLeft,
           child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final narrow = constraints.maxWidth < 380;
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final narrow = constraints.maxWidth < 380;
 
-              final veryNarrow = constraints.maxWidth < 340;
+                final veryNarrow = constraints.maxWidth < 340;
 
-              final compact = constraints.maxHeight < 740 || narrow;
+                final compact = constraints.maxHeight < 740 || narrow;
 
-              final horizontalPadding = veryNarrow
-                  ? 8.0
-                  : compact
-                  ? 12.0
-                  : 18.0;
+                final horizontalPadding = veryNarrow
+                    ? 8.0
+                    : compact
+                    ? 12.0
+                    : 18.0;
 
-              final verticalPadding = compact ? 10.0 : 18.0;
+                final verticalPadding = compact ? 10.0 : 18.0;
 
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  verticalPadding,
-                  horizontalPadding,
-                  compact ? 11 : 16,
-                ),
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    verticalPadding,
+                    horizontalPadding,
+                    compact ? 11 : 16,
+                  ),
 
-                child: Column(
-                  children: [
-                    buildTopBar(compact: compact),
+                  child: Column(
+                    children: [
+                      buildTopBar(compact: compact),
 
-                    SizedBox(height: compact ? 10 : 14),
+                      SizedBox(height: compact ? 10 : 14),
 
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
+                      Expanded(
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 220),
 
-                        child: KeyedSubtree(
-                          key: ValueKey(currentStep),
+                          child: KeyedSubtree(
+                            key: ValueKey(currentStep),
 
-                          child: buildCurrentStep(compact: compact),
+                            child: buildCurrentStep(compact: compact),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

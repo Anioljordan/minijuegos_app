@@ -12,15 +12,19 @@ enum CuboHalo { topRight, topLeft }
 
 /// Fondo de la app: degradado vertical azul → azul profundo con halos
 /// radiales muy suaves. En Fiesta el halo va arriba a la derecha y en Chill
-/// arriba a la izquierda.
+/// arriba a la izquierda. Con [accent] se añade un halo tenue de ese color
+/// (amarillo en los juegos de Fiesta, celeste en los de Chill); sin él, el
+/// fondo queda igual que en los menús.
 class CuboBackground extends StatelessWidget {
   final Widget child;
   final CuboHalo halo;
+  final Color? accent;
 
   const CuboBackground({
     super.key,
     required this.child,
     this.halo = CuboHalo.topRight,
+    this.accent,
   });
 
   @override
@@ -48,6 +52,13 @@ class CuboBackground extends StatelessWidget {
             right: right ? null : -150,
             child: const _Halo(size: 360, alpha: 0.28),
           ),
+          if (accent != null)
+            Positioned(
+              top: -120,
+              right: right ? -110 : null,
+              left: right ? null : -110,
+              child: _Halo(size: 340, alpha: 0.14, color: accent!),
+            ),
           Positioned.fill(child: child),
         ],
       ),
@@ -58,8 +69,13 @@ class CuboBackground extends StatelessWidget {
 class _Halo extends StatelessWidget {
   final double size;
   final double alpha;
+  final Color color;
 
-  const _Halo({required this.size, required this.alpha});
+  const _Halo({
+    required this.size,
+    required this.alpha,
+    this.color = CuboColors.blueLight,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +87,8 @@ class _Halo extends StatelessWidget {
           shape: BoxShape.circle,
           gradient: RadialGradient(
             colors: [
-              CuboColors.blueLight.withValues(alpha: alpha),
-              CuboColors.blueLight.withValues(alpha: 0),
+              color.withValues(alpha: alpha),
+              color.withValues(alpha: 0),
             ],
           ),
         ),
@@ -87,11 +103,15 @@ class CuboPillBar extends StatelessWidget {
   final double height;
   final double alpha;
 
+  /// Color de acento; si es nulo, blanco con [alpha].
+  final Color? color;
+
   const CuboPillBar({
     super.key,
     this.width = 56,
     this.height = 6,
     this.alpha = 0.92,
+    this.color,
   });
 
   @override
@@ -100,7 +120,7 @@ class CuboPillBar extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: CuboColors.whiteA(alpha),
+        color: color ?? CuboColors.whiteA(alpha),
         borderRadius: BorderRadius.circular(height / 2),
       ),
     );

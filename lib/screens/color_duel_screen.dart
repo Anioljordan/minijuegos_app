@@ -6,18 +6,9 @@ import '../widgets/color_wheel_picker.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
 
-enum ColorDuelPhase {
-  setup,
-  memorize,
-  pick,
-  roundResult,
-  finalResult,
-}
+enum ColorDuelPhase { setup, memorize, pick, roundResult, finalResult }
 
-enum ColorDuelMode {
-  sameColorForAll,
-  differentColorPerPlayer,
-}
+enum ColorDuelMode { sameColorForAll, differentColorPerPlayer }
 
 class ColorDuelPlayer {
   final String name;
@@ -43,29 +34,21 @@ class ColorDuelScreen extends StatefulWidget {
 class _ColorDuelScreenState extends State<ColorDuelScreen> {
   final Random _random = Random();
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentPurple = Color(0xFF8B5CF6);
-  static const Color accentGreen = Color(0xFF22C55E);
-
   static const int minPlayers = 2;
   static const int maxPlayers = 12;
 
-  bool get _isNarrowScreen =>
-      MediaQuery.sizeOf(context).width < 380;
+  bool get _isNarrowScreen => MediaQuery.sizeOf(context).width < 380;
 
-  bool get _isVeryNarrowScreen =>
-      MediaQuery.sizeOf(context).width < 340;
+  bool get _isVeryNarrowScreen => MediaQuery.sizeOf(context).width < 340;
 
   bool get _isCompactScreen =>
-      MediaQuery.sizeOf(context).height < 740 ||
-          _isNarrowScreen;
+      MediaQuery.sizeOf(context).height < 740 || _isNarrowScreen;
 
   Widget _singleLineResponsiveText(
-      String text, {
-        required TextStyle style,
-        Alignment alignment = Alignment.centerLeft,
-      }) {
+    String text, {
+    required TextStyle style,
+    Alignment alignment = Alignment.centerLeft,
+  }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
@@ -81,12 +64,12 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
   ColorDuelPhase _phase = ColorDuelPhase.setup;
 
-  final TextEditingController _playerNameController =
-  TextEditingController();
-  final TextEditingController _roundsController =
-  TextEditingController(text: '5');
+  final TextEditingController _playerNameController = TextEditingController();
+  final TextEditingController _roundsController = TextEditingController(
+    text: '5',
+  );
   final TextEditingController _memorizeSecondsController =
-  TextEditingController(text: '3');
+      TextEditingController(text: '3');
 
   final List<String> _setupPlayerNames = [];
 
@@ -151,7 +134,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: appWhite.withOpacity(0.85),
+            color: CuboColors.white.withValues(alpha: 0.85),
             width: 2.2,
           ),
         ),
@@ -187,25 +170,21 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         onPressed: onPressed,
         style: mainButtonStyle(),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: veryNarrow ? 7 : 14,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: veryNarrow ? 7 : 14),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(
                   icon,
-                  color: appBlue,
+                  color: CuboColors.blue,
                   size: veryNarrow
                       ? 19
                       : compact
                       ? 21
                       : 24,
                 ),
-                SizedBox(
-                  width: veryNarrow ? 5 : 9,
-                ),
+                SizedBox(width: veryNarrow ? 5 : 9),
               ],
 
               Expanded(
@@ -213,7 +192,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   tr(text).toUpperCase(),
                   alignment: Alignment.center,
                   style: TextStyle(
-                    color: appBlue,
+                    color: CuboColors.blue,
                     fontSize: compact ? 13.5 : 16,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.4,
@@ -231,29 +210,20 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return InputDecoration(
       labelText: tr(label),
       labelStyle: TextStyle(
-        color: appWhite.withOpacity(0.65),
+        color: CuboColors.white.withValues(alpha: 0.65),
         fontWeight: FontWeight.w700,
       ),
       filled: true,
-      fillColor: appWhite.withOpacity(0.07),
+      fillColor: CuboColors.white.withValues(alpha: 0.07),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: CuboInputs.rounded(
-        BorderSide(
-          color: appWhite.withValues(alpha: 0.28),
-          width: 1.4,
-        ),
+        BorderSide(color: CuboColors.white.withValues(alpha: 0.28), width: 1.4),
       ),
       enabledBorder: CuboInputs.rounded(
-        BorderSide(
-          color: appWhite.withValues(alpha: 0.28),
-          width: 1.4,
-        ),
+        BorderSide(color: CuboColors.white.withValues(alpha: 0.28), width: 1.4),
       ),
       focusedBorder: CuboInputs.rounded(
-        const BorderSide(
-          color: appWhite,
-          width: 2,
-        ),
+        const BorderSide(color: CuboColors.white, width: 2),
       ),
     );
   }
@@ -280,7 +250,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               onTap: _showRulesDialog,
               child: Icon(
                 Icons.question_mark_rounded,
-                color: appWhite,
+                color: CuboColors.white,
                 size: compact ? 23 : 27,
               ),
             ),
@@ -293,10 +263,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             alignment: Alignment.centerRight,
             child: Padding(
               padding: EdgeInsets.only(right: compact ? 18 : 28),
-              child: CuboIllustration(
-                'color_memory',
-                size: compact ? 76 : 108,
-              ),
+              child: CuboIllustration('color_memory', size: compact ? 76 : 108),
             ),
           ),
           SizedBox(height: compact ? 2 : 4),
@@ -304,9 +271,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           SizedBox(height: compact ? 14 : 24),
 
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
+          padding: EdgeInsets.only(right: compact ? 18 : 28),
           child: SizedBox(
             width: double.infinity,
             height: titleHeight,
@@ -325,7 +290,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                         maxLines: 1,
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: titleSize,
                           height: 1.4,
                           fontWeight: FontWeight.w900,
@@ -336,11 +301,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   ),
                 ),
 
-                Positioned(
-                  top: lineTop,
-                  right: 0,
-                  child: const CuboPillBar(),
-                ),
+                Positioned(top: lineTop, right: 0, child: const CuboPillBar()),
               ],
             ),
           ),
@@ -361,7 +322,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   child: _singleLineResponsiveText(
                     'RONDA $_currentRound DE $_totalRounds',
                     style: TextStyle(
-                      color: appWhite.withValues(alpha: 0.82),
+                      color: CuboColors.white.withValues(alpha: 0.82),
                       fontSize: compact ? 11.5 : 12,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.1,
@@ -396,7 +357,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   }
 
   Future<void> _showRulesDialog() {
-    return showDialog(
+    return showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -422,7 +383,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   const Text(
                     'MEMORIA FOTOGRÁFICA',
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -435,29 +396,28 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     icon: Icons.visibility_rounded,
                     title: 'Memoriza',
                     text:
-                    'Cada jugador verá un color durante unos segundos. Cuando termine el tiempo aparecerá directamente la ruleta para recrearlo.',
+                        'Cada jugador verá un color durante unos segundos. Cuando termine el tiempo aparecerá directamente la ruleta para recrearlo.',
                   ),
-
 
                   _rulesItem(
                     icon: Icons.palette_rounded,
                     title: 'Recrea el color',
                     text:
-                    'Usa la ruleta para elegir el color que crees que era el original.',
+                        'Usa la ruleta para elegir el color que crees que era el original.',
                   ),
 
                   _rulesItem(
                     icon: Icons.group_work_rounded,
                     title: 'Modos',
                     text:
-                    'Podéis jugar con el mismo color para todos o con un color distinto para cada jugador.',
+                        'Podéis jugar con el mismo color para todos o con un color distinto para cada jugador.',
                   ),
 
                   _rulesItem(
                     icon: Icons.emoji_events_rounded,
                     title: 'Puntuación',
                     text:
-                    'Cuanto más se parezca tu color al objetivo, más puntos ganas.',
+                        'Cuanto más se parezca tu color al objetivo, más puntos ganas.',
                   ),
 
                   const SizedBox(height: 8),
@@ -496,7 +456,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         SnackBar(
           content: Text(message),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: appBlue,
+          backgroundColor: CuboColors.blue,
         ),
       );
   }
@@ -504,11 +464,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   String _nextAutomaticPlayerName() {
     int number = 1;
 
-    while (
-    _setupPlayerNames.any(
-          (name) => name.toLowerCase() == 'jugador $number',
-    )
-    ) {
+    while (_setupPlayerNames.any(
+      (name) => name.toLowerCase() == 'jugador $number',
+    )) {
       number++;
     }
 
@@ -517,27 +475,20 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
   void _addSetupPlayer() {
     if (_setupPlayerNames.length >= maxPlayers) {
-      _showSetupMessage(
-        'El máximo es de $maxPlayers jugadores.',
-      );
+      _showSetupMessage('El máximo es de $maxPlayers jugadores.');
       return;
     }
 
     final typedName = _playerNameController.text.trim();
 
-    final name = typedName.isEmpty
-        ? _nextAutomaticPlayerName()
-        : typedName;
+    final name = typedName.isEmpty ? _nextAutomaticPlayerName() : typedName;
 
     final duplicated = _setupPlayerNames.any(
-          (playerName) =>
-      playerName.toLowerCase() == name.toLowerCase(),
+      (playerName) => playerName.toLowerCase() == name.toLowerCase(),
     );
 
     if (duplicated) {
-      _showSetupMessage(
-        'Ese jugador ya está añadido.',
-      );
+      _showSetupMessage('Ese jugador ya está añadido.');
       return;
     }
 
@@ -566,9 +517,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     if (_setupPlayerNames.isEmpty) return;
 
-    _removeSetupPlayer(
-      _setupPlayerNames.length - 1,
-    );
+    _removeSetupPlayer(_setupPlayerNames.length - 1);
   }
 
   void _changeRounds(int delta) {
@@ -622,26 +571,19 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return (normalized * 100).round();
   }
 
-  Color get _currentSelectedColor => Color.fromARGB(
-    255,
-    _red.round(),
-    _green.round(),
-    _blue.round(),
-  );
+  Color get _currentSelectedColor =>
+      Color.fromARGB(255, _red.round(), _green.round(), _blue.round());
 
   void _startGame() {
     if (_setupPlayerNames.length < minPlayers) {
-      _showSetupMessage(
-        'Añade al menos $minPlayers jugadores.',
-      );
+      _showSetupMessage('Añade al menos $minPlayers jugadores.');
       return;
     }
 
-    _totalRounds =
-        (int.tryParse(_roundsController.text) ?? 5).clamp(1, 20);
+    _totalRounds = (int.tryParse(_roundsController.text) ?? 5).clamp(1, 20);
 
-    _memorizeSeconds =
-        (int.tryParse(_memorizeSecondsController.text) ?? 3).clamp(1, 10);
+    _memorizeSeconds = (int.tryParse(_memorizeSecondsController.text) ?? 3)
+        .clamp(1, 10);
 
     _players = _setupPlayerNames
         .map((name) => ColorDuelPlayer(name: name))
@@ -683,23 +625,20 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   void _startMemorizeCountdown() {
     _timer?.cancel();
 
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-          (timer) {
-        if (_secondsLeft <= 1) {
-          timer.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsLeft <= 1) {
+        timer.cancel();
 
-          if (!mounted) return;
+        if (!mounted) return;
 
-          // Al terminar, abre directamente el selector de color.
-          _goToPickPhase();
-        } else {
-          setState(() {
-            _secondsLeft--;
-          });
-        }
-      },
-    );
+        // Al terminar, abre directamente el selector de color.
+        _goToPickPhase();
+      } else {
+        setState(() {
+          _secondsLeft--;
+        });
+      }
+    });
   }
 
   void _goToPickPhase() {
@@ -707,10 +646,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     _green = 128;
     _blue = 128;
 
-    if (_gameMode ==
-        ColorDuelMode.differentColorPerPlayer) {
-      _targetColor =
-      _playerTargetColors[_currentPlayerIndex]!;
+    if (_gameMode == ColorDuelMode.differentColorPerPlayer) {
+      _targetColor = _playerTargetColors[_currentPlayerIndex]!;
     }
 
     setState(() {
@@ -805,7 +742,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: appWhite, size: 26),
+          Icon(icon, color: CuboColors.white, size: 26),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -814,7 +751,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 Text(
                   tr(title).toUpperCase(),
                   style: const TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.4,
@@ -824,7 +761,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.62),
+                    color: CuboColors.white.withValues(alpha: 0.62),
                     fontSize: 11.5,
                     height: 1.2,
                     fontWeight: FontWeight.w600,
@@ -835,19 +772,19 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ),
           IconButton(
             onPressed: onMinus,
-            icon: const Icon(Icons.remove_rounded, color: appWhite),
+            icon: const Icon(Icons.remove_rounded, color: CuboColors.white),
           ),
           Text(
             value,
             style: const TextStyle(
-              color: appWhite,
+              color: CuboColors.white,
               fontSize: 22,
               fontWeight: FontWeight.w900,
             ),
           ),
           IconButton(
             onPressed: onPlus,
-            icon: const Icon(Icons.add_rounded, color: appWhite),
+            icon: const Icon(Icons.add_rounded, color: CuboColors.white),
           ),
         ],
       ),
@@ -870,7 +807,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         decoration: CuboDecorations.glass(selected: selected),
         child: Row(
           children: [
-            Icon(icon, color: selected ? appWhite : accentPurple, size: 28),
+            Icon(
+              icon,
+              color: selected ? CuboColors.white : CuboColors.chill,
+              size: 28,
+            ),
             const SizedBox(width: 13),
             Expanded(
               child: Column(
@@ -879,7 +820,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   Text(
                     tr(title).toUpperCase(),
                     style: const TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.4,
@@ -889,7 +830,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.68),
+                      color: CuboColors.white.withValues(alpha: 0.68),
                       fontSize: 12.5,
                       height: 1.25,
                       fontWeight: FontWeight.w600,
@@ -911,7 +852,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       child: _singleLineResponsiveText(
         tr(text).toLowerCase(),
         style: TextStyle(
-          color: appWhite,
+          color: CuboColors.white,
           fontSize: _isCompactScreen ? 24 : 30,
           height: 0.95,
           fontWeight: FontWeight.w900,
@@ -936,8 +877,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return Material(
       color: onTap == null
-          ? appWhite.withValues(alpha: 0.04)
-          : appWhite.withValues(alpha: 0.10),
+          ? CuboColors.white.withValues(alpha: 0.04)
+          : CuboColors.white.withValues(alpha: 0.10),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -948,8 +889,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           child: Center(
             child: Icon(
               icon,
-              color: appWhite.withOpacity(
-                onTap == null ? 0.28 : 1,
+              color: CuboColors.white.withValues(
+                alpha: onTap == null ? 0.28 : 1,
               ),
               size: veryNarrow
                   ? 19
@@ -963,9 +904,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _buildSetupPlayersCounter({
-    required bool compact,
-  }) {
+  Widget _buildSetupPlayersCounter({required bool compact}) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final veryNarrow = constraints.maxWidth < 330;
@@ -1000,16 +939,16 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 width: leadingSize,
                 height: leadingSize,
                 decoration: BoxDecoration(
-                  color: accentPurple.withOpacity(0.14),
+                  color: CuboColors.chill.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: accentPurple.withOpacity(0.75),
+                    color: CuboColors.chill.withValues(alpha: 0.75),
                     width: 2,
                   ),
                 ),
                 child: Icon(
                   Icons.groups_rounded,
-                  color: accentPurple,
+                  color: CuboColors.chill,
                   size: veryNarrow
                       ? 19
                       : compact
@@ -1024,15 +963,14 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 child: _singleLineResponsiveText(
                   'JUGADORES',
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 10.5
                         : compact
                         ? 12
                         : 13.5,
                     fontWeight: FontWeight.w900,
-                    letterSpacing:
-                    veryNarrow ? 0.1 : 0.4,
+                    letterSpacing: veryNarrow ? 0.1 : 0.4,
                   ),
                 ),
               ),
@@ -1055,7 +993,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   softWrap: false,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 18
                         : compact
@@ -1068,8 +1006,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
               _buildSetupCounterButton(
                 icon: Icons.add_rounded,
-                onTap:
-                _setupPlayerNames.length >= maxPlayers
+                onTap: _setupPlayerNames.length >= maxPlayers
                     ? null
                     : () => _changeSetupPlayers(1),
                 compact: compact,
@@ -1104,16 +1041,16 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: accentPurple.withValues(alpha: 0.18),
+              color: CuboColors.chill.withValues(alpha: 0.18),
               border: Border.all(
-                color: accentPurple.withValues(alpha: 0.85),
+                color: CuboColors.chill.withValues(alpha: 0.85),
                 width: 1.6,
               ),
             ),
             child: Text(
               '${index + 1}',
               style: TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: compact ? 12 : 13,
                 fontWeight: FontWeight.w900,
               ),
@@ -1128,7 +1065,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: compact ? 14 : 16,
                 fontWeight: FontWeight.w900,
               ),
@@ -1140,7 +1077,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             onPressed: () => _removeSetupPlayer(index),
             icon: Icon(
               Icons.delete_outline_rounded,
-              color: appWhite.withOpacity(0.78),
+              color: CuboColors.white.withValues(alpha: 0.78),
             ),
           ),
         ],
@@ -1148,9 +1085,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _buildSetupPlayersEditor({
-    required bool compact,
-  }) {
+  Widget _buildSetupPlayersEditor({required bool compact}) {
     final veryNarrow = _isVeryNarrowScreen;
 
     return _glassCard(
@@ -1158,9 +1093,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSetupPlayersCounter(
-            compact: compact,
-          ),
+          _buildSetupPlayersCounter(compact: compact),
 
           SizedBox(height: compact ? 12 : 14),
 
@@ -1169,7 +1102,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             child: _singleLineResponsiveText(
               'AÑADIR JUGADOR',
               style: TextStyle(
-                color: appWhite.withOpacity(0.70),
+                color: CuboColors.white.withValues(alpha: 0.70),
                 fontSize: compact ? 10.5 : 12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.7,
@@ -1188,13 +1121,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _addSetupPlayer(),
                   style: const TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontWeight: FontWeight.w700,
                   ),
-                  cursorColor: appWhite,
-                  decoration: _fancyInput(
-                    'Nombre opcional',
-                  ),
+                  cursorColor: CuboColors.white,
+                  decoration: _fancyInput('Nombre opcional'),
                 ),
               ),
 
@@ -1212,33 +1143,28 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     ? 50
                     : 54,
                 child: ElevatedButton(
-                  onPressed:
-                  _setupPlayerNames.length >= maxPlayers
+                  onPressed: _setupPlayerNames.length >= maxPlayers
                       ? null
                       : _addSetupPlayer,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: accentPurple,
-                    foregroundColor: appWhite,
-                    disabledBackgroundColor:
-                    appWhite.withOpacity(0.18),
-                    disabledForegroundColor:
-                    appWhite.withOpacity(0.42),
+                    backgroundColor: CuboColors.chill,
+                    foregroundColor: CuboColors.blueInk,
+                    disabledBackgroundColor: CuboColors.white.withValues(
+                      alpha: 0.18,
+                    ),
+                    disabledForegroundColor: CuboColors.white.withValues(
+                      alpha: 0.42,
+                    ),
                     elevation: 0,
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
-                    tapTargetSize:
-                    MaterialTapTargetSize.shrinkWrap,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     alignment: Alignment.center,
                     shape: const RoundedRectangleBorder(
                       borderRadius: CuboRadii.mdAll,
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.add_rounded,
-                      size: 29,
-                    ),
-                  ),
+                  child: const Center(child: Icon(Icons.add_rounded, size: 29)),
                 ),
               ),
             ],
@@ -1254,10 +1180,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 vertical: compact ? 16 : 20,
               ),
               decoration: BoxDecoration(
-                color: appWhite.withValues(alpha: 0.05),
+                color: CuboColors.white.withValues(alpha: 0.05),
                 borderRadius: CuboRadii.mdAll,
                 border: Border.all(
-                  color: appWhite.withValues(alpha: 0.18),
+                  color: CuboColors.white.withValues(alpha: 0.18),
                   width: 1.3,
                 ),
               ),
@@ -1265,7 +1191,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 children: [
                   Icon(
                     Icons.person_add_alt_1_rounded,
-                    color: appWhite.withOpacity(0.48),
+                    color: CuboColors.white.withValues(alpha: 0.48),
                     size: compact ? 28 : 34,
                   ),
 
@@ -1275,7 +1201,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     'Todavía no has añadido jugadores',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.66),
+                      color: CuboColors.white.withValues(alpha: 0.66),
                       fontSize: compact ? 12 : 13,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1287,7 +1213,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.44),
+                      color: CuboColors.white.withValues(alpha: 0.44),
                       fontSize: compact ? 10.5 : 11.5,
                       height: 1.3,
                     ),
@@ -1302,7 +1228,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   child: _singleLineResponsiveText(
                     'LISTA DE JUGADORES',
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.70),
+                      color: CuboColors.white.withValues(alpha: 0.70),
                       fontSize: compact ? 10.5 : 12,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.7,
@@ -1317,7 +1243,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   maxLines: 1,
                   softWrap: false,
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.62),
+                    color: CuboColors.white.withValues(alpha: 0.62),
                     fontSize: compact ? 11 : 12,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1328,7 +1254,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             const SizedBox(height: 9),
 
             ..._setupPlayerNames.asMap().entries.map(
-                  (entry) => _buildSetupPlayerTile(
+              (entry) => _buildSetupPlayerTile(
                 player: entry.value,
                 index: entry.key,
                 compact: compact,
@@ -1352,8 +1278,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return Material(
       color: selected
-          ? accentPurple.withValues(alpha: 0.24)
-          : appWhite.withValues(alpha: 0.06),
+          ? CuboColors.chill.withValues(alpha: 0.24)
+          : CuboColors.white.withValues(alpha: 0.06),
       borderRadius: CuboRadii.mdAll,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -1377,8 +1303,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             borderRadius: CuboRadii.mdAll,
             border: Border.all(
               color: selected
-                  ? appWhite.withValues(alpha: 0.85)
-                  : appWhite.withValues(alpha: 0.22),
+                  ? CuboColors.white.withValues(alpha: 0.85)
+                  : CuboColors.white.withValues(alpha: 0.22),
               width: selected ? 1.8 : 1.2,
             ),
           ),
@@ -1391,8 +1317,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   Icon(
                     icon,
                     color: selected
-                        ? accentPurple
-                        : appWhite.withOpacity(0.75),
+                        ? CuboColors.chill
+                        : CuboColors.white.withValues(alpha: 0.75),
                     size: veryNarrow
                         ? 20
                         : compact
@@ -1402,10 +1328,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
                   if (selected) ...[
                     SizedBox(width: veryNarrow ? 3 : 5),
-                    CuboCheckBadge(
-                      selected: true,
-                      size: veryNarrow ? 15 : 18,
-                    ),
+                    CuboCheckBadge(selected: true, size: veryNarrow ? 15 : 18),
                   ],
                 ],
               ),
@@ -1424,7 +1347,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   tr(title).toUpperCase(),
                   alignment: Alignment.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: compact ? 10.5 : 12,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.2,
@@ -1440,7 +1363,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.58),
+                  color: CuboColors.white.withValues(alpha: 0.58),
                   fontSize: veryNarrow
                       ? 8
                       : compact
@@ -1457,9 +1380,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _buildGameConfiguration({
-    required bool compact,
-  }) {
+  Widget _buildGameConfiguration({required bool compact}) {
     final veryNarrow = _isVeryNarrowScreen;
     return _glassCard(
       padding: EdgeInsets.all(compact ? 12 : 15),
@@ -1469,7 +1390,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           _singleLineResponsiveText(
             'CONFIGURACIÓN',
             style: TextStyle(
-              color: appWhite,
+              color: CuboColors.white,
               fontSize: compact ? 14 : 16,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.5,
@@ -1535,12 +1456,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   title: 'Mismo color',
                   subtitle: 'Uno para todos',
                   icon: Icons.group_work_rounded,
-                  selected:
-                  _gameMode == ColorDuelMode.sameColorForAll,
+                  selected: _gameMode == ColorDuelMode.sameColorForAll,
                   onTap: () {
                     setState(() {
-                      _gameMode =
-                          ColorDuelMode.sameColorForAll;
+                      _gameMode = ColorDuelMode.sameColorForAll;
                     });
                   },
                   compact: compact,
@@ -1560,13 +1479,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   title: 'Color distinto',
                   subtitle: 'Uno por jugador',
                   icon: Icons.auto_awesome_rounded,
-                  selected:
-                  _gameMode ==
-                      ColorDuelMode.differentColorPerPlayer,
+                  selected: _gameMode == ColorDuelMode.differentColorPerPlayer,
                   onTap: () {
                     setState(() {
-                      _gameMode =
-                          ColorDuelMode.differentColorPerPlayer;
+                      _gameMode = ColorDuelMode.differentColorPerPlayer;
                     });
                   },
                   compact: compact,
@@ -1593,7 +1509,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
         : 35.0;
 
     return Material(
-      color: appWhite.withValues(alpha: 0.10),
+      color: CuboColors.white.withValues(alpha: 0.10),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -1603,7 +1519,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           height: size,
           child: Icon(
             icon,
-            color: appWhite,
+            color: CuboColors.white,
             size: veryNarrow
                 ? 17
                 : compact
@@ -1645,7 +1561,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             children: [
               Icon(
                 icon,
-                color: accentPurple,
+                color: CuboColors.chill,
                 size: veryNarrow
                     ? 17
                     : compact
@@ -1659,7 +1575,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 child: _singleLineResponsiveText(
                   tr(title).toUpperCase(),
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: compact ? 10.5 : 12,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.25,
@@ -1686,7 +1602,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   softWrap: false,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 18
                         : compact
@@ -1714,8 +1630,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     return SingleChildScrollView(
       key: const ValueKey('setup'),
-      keyboardDismissBehavior:
-      ScrollViewKeyboardDismissBehavior.onDrag,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.only(
         top: compact ? 6 : 10,
         bottom: compact ? 14 : 18,
@@ -1723,15 +1638,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSetupPlayersEditor(
-            compact: compact,
-          ),
+          _buildSetupPlayersEditor(compact: compact),
 
           SizedBox(height: compact ? 10 : 14),
 
-          _buildGameConfiguration(
-            compact: compact,
-          ),
+          _buildGameConfiguration(compact: compact),
 
           SizedBox(height: compact ? 12 : 16),
 
@@ -1786,7 +1697,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   'Turno de ${_players[_currentPlayerIndex].name}',
                   alignment: Alignment.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: _isCompactScreen ? 21 : 25,
                     height: 0.95,
                     fontWeight: FontWeight.w900,
@@ -1803,7 +1714,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     : 'Memoriza tu color',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.70),
+                  color: CuboColors.white.withValues(alpha: 0.70),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1828,7 +1739,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                       color: _targetColor,
                       borderRadius: CuboRadii.lgAll,
                       border: Border.all(
-                        color: appWhite.withValues(alpha: 0.75),
+                        color: CuboColors.white.withValues(alpha: 0.75),
                         width: 3,
                       ),
                       boxShadow: CuboShadows.soft,
@@ -1845,7 +1756,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: appWhite.withOpacity(0.85),
+                    color: CuboColors.white.withValues(alpha: 0.85),
                     width: 2.2,
                   ),
                 ),
@@ -1853,7 +1764,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   child: Text(
                     '$_secondsLeft',
                     style: const TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
                     ),
@@ -1867,223 +1778,122 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-
   Widget _buildPickPhase() {
-    final player =
-    _players[_currentPlayerIndex];
+    final player = _players[_currentPlayerIndex];
 
-    final compact =
-        _isCompactScreen;
+    final compact = _isCompactScreen;
 
     return Padding(
       key: const ValueKey('pick'),
-      padding: EdgeInsets.only(
-        top: compact ? 6 : 10,
-        bottom: compact ? 8 : 12,
-      ),
+      padding: EdgeInsets.only(top: compact ? 6 : 10, bottom: compact ? 8 : 12),
       child: Column(
         children: [
           Expanded(
             child: _glassCard(
-              padding: EdgeInsets.all(
-                compact ? 11 : 15,
-              ),
+              padding: EdgeInsets.all(compact ? 11 : 15),
               child: LayoutBuilder(
-                builder:
-                    (
-                    context,
-                    constraints,
-                    ) {
+                builder: (context, constraints) {
                   return Column(
                     children: [
                       SizedBox(
-                        width:
-                        double.infinity,
-                        child:
-                        _singleLineResponsiveText(
+                        width: double.infinity,
+                        child: _singleLineResponsiveText(
                           'Turno de ${player.name}',
-                          alignment:
-                          Alignment
-                              .center,
+                          alignment: Alignment.center,
                           style: TextStyle(
-                            color:
-                            appWhite,
-                            fontSize:
-                            compact
-                                ? 19
-                                : 24,
+                            color: CuboColors.white,
+                            fontSize: compact ? 19 : 24,
                             height: 0.95,
-                            fontWeight:
-                            FontWeight
-                                .w900,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
 
-                      SizedBox(
-                        height:
-                        compact
-                            ? 5
-                            : 7,
-                      ),
+                      SizedBox(height: compact ? 5 : 7),
 
                       Text(
                         'Recrea el color que acabas de memorizar',
-                        textAlign:
-                        TextAlign.center,
+                        textAlign: TextAlign.center,
                         maxLines: 1,
-                        overflow:
-                        TextOverflow
-                            .ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: appWhite
-                              .withOpacity(
-                            0.65,
-                          ),
-                          fontSize:
-                          compact
-                              ? 11
-                              : 12.5,
-                          fontWeight:
-                          FontWeight
-                              .w700,
+                          color: CuboColors.white.withValues(alpha: 0.65),
+                          fontSize: compact ? 11 : 12.5,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
 
-                      SizedBox(
-                        height:
-                        compact
-                            ? 9
-                            : 12,
-                      ),
+                      SizedBox(height: compact ? 9 : 12),
 
                       // PREVISUALIZACIÓN MÁS PEQUEÑA
                       Container(
-                        width:
-                        double.infinity,
-                        height:
-                        compact
-                            ? 52
-                            : 68,
-                        decoration:
-                        BoxDecoration(
-                          color:
-                          _currentSelectedColor,
-                          borderRadius:
-                          CuboRadii.mdAll,
-                          border:
-                          Border.all(
-                            color: appWhite
-                                .withOpacity(
-                              0.70,
-                            ),
+                        width: double.infinity,
+                        height: compact ? 52 : 68,
+                        decoration: BoxDecoration(
+                          color: _currentSelectedColor,
+                          borderRadius: CuboRadii.mdAll,
+                          border: Border.all(
+                            color: CuboColors.white.withValues(alpha: 0.70),
                             width: 2.4,
                           ),
                         ),
                       ),
 
-                      SizedBox(
-                        height:
-                        compact
-                            ? 9
-                            : 13,
-                      ),
+                      SizedBox(height: compact ? 9 : 13),
 
                       Expanded(
                         child: Center(
-                          child:
-                          ColorWheelPicker(
+                          child: ColorWheelPicker(
                             // Fuerza un selector
                             // nuevo para cada turno.
                             key: ValueKey(
                               'color_picker_${_currentRound}_${_currentPlayerIndex}',
                             ),
 
-                            maxWheelSize:
-                            compact
-                                ? 185
-                                : 225,
+                            maxWheelSize: compact ? 185 : 225,
 
                             // Coincide con el gris
                             // inicial RGB(128,128,128)
                             initialHue: 0,
-                            initialSaturation:
-                            0,
-                            initialValue:
-                            128 / 255,
+                            initialSaturation: 0,
+                            initialValue: 128 / 255,
 
-                            onColorChanged:
-                                (color) {
+                            onColorChanged: (color) {
                               setState(() {
-                                _red = color
-                                    .red
-                                    .toDouble();
+                                _red = color.red.toDouble();
 
-                                _green = color
-                                    .green
-                                    .toDouble();
+                                _green = color.green.toDouble();
 
-                                _blue = color
-                                    .blue
-                                    .toDouble();
+                                _blue = color.blue.toDouble();
                               });
                             },
                           ),
                         ),
                       ),
 
-                      SizedBox(
-                        height:
-                        compact
-                            ? 5
-                            : 8,
-                      ),
+                      SizedBox(height: compact ? 5 : 8),
 
                       Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment
-                            .center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons
-                                .touch_app_rounded,
-                            color: appWhite
-                                .withOpacity(
-                              0.42,
-                            ),
-                            size:
-                            compact
-                                ? 14
-                                : 16,
+                            Icons.touch_app_rounded,
+                            color: CuboColors.white.withValues(alpha: 0.42),
+                            size: compact ? 14 : 16,
                           ),
 
-                          const SizedBox(
-                            width: 5,
-                          ),
+                          const SizedBox(width: 5),
 
                           Flexible(
                             child: Text(
                               'Toca para elegir · arrastra el punto para afinar',
                               maxLines: 1,
-                              overflow:
-                              TextOverflow
-                                  .ellipsis,
-                              textAlign:
-                              TextAlign
-                                  .center,
-                              style:
-                              TextStyle(
-                                color: appWhite
-                                    .withOpacity(
-                                  0.44,
-                                ),
-                                fontSize:
-                                compact
-                                    ? 9.5
-                                    : 10.5,
-                                fontWeight:
-                                FontWeight
-                                    .w700,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: CuboColors.white.withValues(alpha: 0.44),
+                                fontSize: compact ? 9.5 : 10.5,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -2096,28 +1906,20 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             ),
           ),
 
-          SizedBox(
-            height:
-            compact ? 8 : 12,
-          ),
+          SizedBox(height: compact ? 8 : 12),
 
           // SIEMPRE VISIBLE
           _primaryButton(
             text: 'Confirmar color',
-            icon: Icons
-                .check_circle_outline_rounded,
-            onPressed:
-            _confirmCurrentPlayerColor,
+            icon: Icons.check_circle_outline_rounded,
+            onPressed: _confirmCurrentPlayerColor,
           ),
         ],
       ),
     );
   }
 
-  Widget _colorBlock({
-    required String label,
-    required Color color,
-  }) {
+  Widget _colorBlock({required String label, required Color color}) {
     return Expanded(
       child: Column(
         children: [
@@ -2127,7 +1929,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               tr(label).toUpperCase(),
               alignment: Alignment.center,
               style: TextStyle(
-                color: appWhite.withOpacity(0.72),
+                color: CuboColors.white.withValues(alpha: 0.72),
                 fontSize: 11,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.7,
@@ -2141,7 +1943,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
               color: color,
               borderRadius: CuboRadii.mdAll,
               border: Border.all(
-                color: appWhite.withValues(alpha: 0.50),
+                color: CuboColors.white.withValues(alpha: 0.50),
                 width: 2,
               ),
             ),
@@ -2151,10 +1953,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _scoreBox({
-    required String label,
-    required String value,
-  }) {
+  Widget _scoreBox({required String label, required String value}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -2167,7 +1966,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                 tr(label).toUpperCase(),
                 alignment: Alignment.center,
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.62),
+                  color: CuboColors.white.withValues(alpha: 0.62),
                   fontSize: 10.5,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.7,
@@ -2178,7 +1977,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             Text(
               value,
               style: const TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
               ),
@@ -2202,12 +2001,10 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
           const SizedBox(height: 14),
 
-
-
           ...roundRanking.map((player) {
             final playerIndex = _players.indexOf(player);
             final Color targetForPlayer =
-            _gameMode == ColorDuelMode.sameColorForAll
+                _gameMode == ColorDuelMode.sameColorForAll
                 ? _targetColor
                 : _playerTargetColors[playerIndex]!;
 
@@ -2225,7 +2022,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     Text(
                       player.name,
                       style: const TextStyle(
-                        color: appWhite,
+                        color: CuboColors.white,
                         fontSize: 21,
                         fontWeight: FontWeight.w900,
                       ),
@@ -2235,10 +2032,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
                     Row(
                       children: [
-                        _colorBlock(
-                          label: 'Objetivo',
-                          color: targetForPlayer,
-                        ),
+                        _colorBlock(label: 'Objetivo', color: targetForPlayer),
                         const SizedBox(width: 12),
                         _colorBlock(
                           label: 'Elegido',
@@ -2253,13 +2047,11 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                       borderRadius: BorderRadius.circular(99),
                       child: Container(
                         height: 8,
-                        color: appWhite.withValues(alpha: 0.12),
+                        color: CuboColors.white.withValues(alpha: 0.12),
                         child: FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: accuracy / 100,
-                          child: Container(
-                            color: accentGreen,
-                          ),
+                          child: Container(color: CuboColors.chill),
                         ),
                       ),
                     ),
@@ -2269,7 +2061,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     Text(
                       'PRECISIÓN: $accuracy%',
                       style: TextStyle(
-                        color: appWhite.withOpacity(0.74),
+                        color: CuboColors.white.withValues(alpha: 0.74),
                         fontSize: 12,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.6,
@@ -2336,7 +2128,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   'resultado\nfinal',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: 38,
                     height: 0.9,
                     fontWeight: FontWeight.w900,
@@ -2354,7 +2146,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                   'Ganador: ${winner.name}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.76),
+                    color: CuboColors.white.withValues(alpha: 0.76),
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                   ),
@@ -2384,7 +2176,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: appWhite.withOpacity(0.85),
+                          color: CuboColors.white.withValues(alpha: 0.85),
                           width: 2,
                         ),
                       ),
@@ -2392,7 +2184,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                         child: Text(
                           '${index + 1}',
                           style: const TextStyle(
-                            color: appWhite,
+                            color: CuboColors.white,
                             fontWeight: FontWeight.w900,
                             fontSize: 17,
                           ),
@@ -2406,7 +2198,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                       child: Text(
                         player.name,
                         style: const TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.w900,
                         ),
@@ -2416,7 +2208,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
                     Text(
                       '${player.totalScore} pts',
                       style: TextStyle(
-                        color: appWhite.withOpacity(0.78),
+                        color: CuboColors.white.withValues(alpha: 0.78),
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
                       ),
@@ -2443,59 +2235,50 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CuboColors.blue,
-      body: CuboBackground(
+      body: CuboGameBackground(
+        accent: CuboColors.chill,
         halo: CuboHalo.topLeft,
         child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final narrow =
-                constraints.maxWidth < 380;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
 
-            final veryNarrow =
-                constraints.maxWidth < 340;
+              final veryNarrow = constraints.maxWidth < 340;
 
-            final compact =
-                constraints.maxHeight < 740 ||
-                    narrow;
+              final compact = constraints.maxHeight < 740 || narrow;
 
-            final horizontalPadding = veryNarrow
-                ? 8.0
-                : compact
-                ? 12.0
-                : 18.0;
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
 
-            final verticalPadding =
-            compact ? 10.0 : 18.0;
+              final verticalPadding = compact ? 10.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 10 : 16,
-              ),
-              child: Column(
-                children: [
-                  _buildTopBar(
-                    compact: compact,
-                  ),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 10 : 16,
+                ),
+                child: Column(
+                  children: [
+                    _buildTopBar(compact: compact),
 
-                  SizedBox(
-                    height: compact ? 8 : 14,
-                  ),
+                    SizedBox(height: compact ? 8 : 14),
 
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration:
-                      const Duration(milliseconds: 300),
-                      child: _buildCurrentPhase(),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: _buildCurrentPhase(),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

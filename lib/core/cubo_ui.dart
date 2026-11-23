@@ -17,6 +17,18 @@ class CuboColors {
   static const Color blueTint = Color(0xFFE3E9F7);
   static const Color white = Color(0xFFF7F7F7);
 
+  /// Blanco puro para el brillo superior de las tarjetas.
+  static const Color paper = Color(0xFFFFFFFF);
+
+  /// Acento de los juegos de Fiesta.
+  static const Color fiesta = Color(0xFFFFCC3D);
+
+  /// Acento de los juegos de Chill.
+  static const Color chill = Color(0xFF8FD3FF);
+
+  /// Aviso puntual (tiempo agotado, error). No es un acento decorativo.
+  static const Color alert = Color(0xFFFF6B6B);
+
   static Color whiteA(double alpha) => white.withValues(alpha: alpha);
 }
 
@@ -38,11 +50,15 @@ class CuboRadii {
   /// Tarjeta central de juego y parte superior de los sheets.
   static const double xl = 28;
 
+  /// Carta protagonista de las partidas (frase, pregunta, palabra...).
+  static const double card = 32;
+
   static const BorderRadius smAll = BorderRadius.all(Radius.circular(sm));
   static const BorderRadius inputAll = BorderRadius.all(Radius.circular(input));
   static const BorderRadius mdAll = BorderRadius.all(Radius.circular(md));
   static const BorderRadius lgAll = BorderRadius.all(Radius.circular(lg));
   static const BorderRadius xlAll = BorderRadius.all(Radius.circular(xl));
+  static const BorderRadius cardAll = BorderRadius.all(Radius.circular(card));
   static const BorderRadius sheetTop = BorderRadius.vertical(
     top: Radius.circular(xl),
   );
@@ -59,10 +75,62 @@ class CuboShadows {
       offset: Offset(0, 9),
     ),
   ];
+
+  /// Carta protagonista: sombra corta de contacto + sombra larga azulada.
+  static const List<BoxShadow> card = [
+    BoxShadow(
+      color: Color(0x2E0F1E46),
+      blurRadius: 6,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: Color(0x660F1E5A),
+      blurRadius: 48,
+      offset: Offset(0, 24),
+    ),
+  ];
+
+  /// Elementos que flotan sobre el azul (tarjetas de modo, botón principal).
+  static const List<BoxShadow> float = [
+    BoxShadow(
+      color: Color(0x260A143C),
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: Color(0x520C1A46),
+      blurRadius: 30,
+      offset: Offset(0, 16),
+    ),
+  ];
+
+  /// Cartas fantasma del mazo, detrás de la protagonista.
+  static const List<BoxShadow> ghost = [
+    BoxShadow(
+      color: Color(0x400C1A46),
+      blurRadius: 30,
+      offset: Offset(0, 16),
+    ),
+  ];
 }
 
 class CuboText {
   CuboText._();
+
+  /// Tipografía de las pantallas de juego (assets/fonts/inter).
+  static const String fontFamily = 'Inter';
+
+  /// Frase o pregunta dentro de la carta protagonista.
+  static TextStyle cardPhrase({double size = 31}) {
+    return TextStyle(
+      fontFamily: fontFamily,
+      color: CuboColors.blueInk,
+      fontSize: size,
+      height: 1.14,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -size * 0.026,
+    );
+  }
 
   /// Título grande en minúscula (fiesta, chill, normas...).
   static TextStyle title({double size = 66, Color color = CuboColors.white}) {
@@ -103,6 +171,32 @@ class CuboText {
 
 class CuboDecorations {
   CuboDecorations._();
+
+  /// Tarjeta de cristal con más profundidad: degradado blanco translúcido
+  /// en diagonal, borde fino y sombra flotante.
+  static BoxDecoration glassRaised({double radius = CuboRadii.xl}) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [CuboColors.whiteA(0.20), CuboColors.whiteA(0.07)],
+      ),
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: CuboColors.whiteA(0.28)),
+      boxShadow: CuboShadows.float,
+    );
+  }
+
+  /// Carta protagonista de las partidas.
+  static const BoxDecoration playCard = BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [CuboColors.paper, CuboColors.white],
+    ),
+    borderRadius: CuboRadii.cardAll,
+    boxShadow: CuboShadows.card,
+  );
 
   /// Tarjeta translúcida dentro de los juegos. Con [selected] se marca la
   /// selección con fondo más claro y borde más opaco (sin barra lateral).
@@ -167,7 +261,10 @@ class CuboButtons {
       shadowColor: Colors.transparent,
       padding: padding,
       shape: const StadiumBorder(),
-      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+      textStyle: const TextStyle(
+        fontFamily: CuboText.fontFamily,
+        fontWeight: FontWeight.w800,
+      ),
     );
   }
 
@@ -180,7 +277,10 @@ class CuboButtons {
       padding: padding,
       side: BorderSide(color: CuboColors.whiteA(0.55), width: 1.4),
       shape: const StadiumBorder(),
-      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+      textStyle: const TextStyle(
+        fontFamily: CuboText.fontFamily,
+        fontWeight: FontWeight.w800,
+      ),
     );
   }
 
@@ -198,7 +298,10 @@ class CuboButtons {
       padding: padding,
       side: BorderSide(color: CuboColors.whiteA(0.55), width: 1.4),
       shape: const StadiumBorder(),
-      textStyle: const TextStyle(fontWeight: FontWeight.w800),
+      textStyle: const TextStyle(
+        fontFamily: CuboText.fontFamily,
+        fontWeight: FontWeight.w800,
+      ),
     );
   }
 }

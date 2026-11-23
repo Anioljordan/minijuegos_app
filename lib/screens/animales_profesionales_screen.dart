@@ -22,10 +22,6 @@ class _AnimalesProfesionalesScreenState
   AnimalProfesionalItem? _itemActual;
   bool _oculto = false;
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentGreen = Color(0xFF22C55E);
-
   @override
   void initState() {
     super.initState();
@@ -39,8 +35,10 @@ class _AnimalesProfesionalesScreenState
     final animal = AnimalesProfesionalesData
         .animales[_random.nextInt(AnimalesProfesionalesData.animales.length)];
 
-    final profesion = AnimalesProfesionalesData.profesiones[
-    _random.nextInt(AnimalesProfesionalesData.profesiones.length)];
+    final profesion =
+        AnimalesProfesionalesData.profesiones[_random.nextInt(
+          AnimalesProfesionalesData.profesiones.length,
+        )];
 
     setState(() {
       _itemActual = AnimalProfesionalItem(
@@ -84,7 +82,7 @@ class _AnimalesProfesionalesScreenState
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: appWhite.withOpacity(0.85),
+            color: CuboColors.white.withValues(alpha: 0.85),
             width: 2.2,
           ),
         ),
@@ -114,7 +112,7 @@ class _AnimalesProfesionalesScreenState
               onTap: mostrarNormas,
               child: Icon(
                 Icons.question_mark_rounded,
-                color: appWhite,
+                color: CuboColors.white,
                 size: compact ? 23 : 27,
               ),
             ),
@@ -124,9 +122,7 @@ class _AnimalesProfesionalesScreenState
         SizedBox(height: compact ? 14 : 24),
 
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 18 : 28,
-          ),
+          padding: EdgeInsets.only(right: compact ? 18 : 28),
           child: SizedBox(
             width: double.infinity,
             height: titleHeight,
@@ -145,7 +141,7 @@ class _AnimalesProfesionalesScreenState
                         maxLines: 1,
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontSize: titleSize,
                           height: 2.6,
                           fontWeight: FontWeight.w900,
@@ -156,11 +152,7 @@ class _AnimalesProfesionalesScreenState
                   ),
                 ),
 
-                Positioned(
-                  top: lineTop,
-                  right: 0,
-                  child: const CuboPillBar(),
-                ),
+                Positioned(top: lineTop, right: 0, child: const CuboPillBar()),
               ],
             ),
           ),
@@ -178,7 +170,7 @@ class _AnimalesProfesionalesScreenState
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -204,7 +196,7 @@ class _AnimalesProfesionalesScreenState
                   const Text(
                     'ANIMALES PROFESIONALES',
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -217,28 +209,27 @@ class _AnimalesProfesionalesScreenState
                     icon: Icons.casino_rounded,
                     title: 'Genera combinación',
                     text:
-                    'Pulsa generar para sacar un animal y una profesión aleatorios.',
+                        'Pulsa generar para sacar un animal y una profesión aleatorios.',
                   ),
 
                   _rulesItem(
                     icon: Icons.theater_comedy_rounded,
                     title: 'Haz la mímica',
-                    text:
-                    'Representa el animal mientras haces esa profesión.',
+                    text: 'Representa el animal mientras haces esa profesión.',
                   ),
 
                   _rulesItem(
                     icon: Icons.visibility_off_rounded,
                     title: 'Oculta la carta',
                     text:
-                    'Puedes ocultar el contenido para pasar el móvil sin enseñar la respuesta.',
+                        'Puedes ocultar el contenido para pasar el móvil sin enseñar la respuesta.',
                   ),
 
                   _rulesItem(
                     icon: Icons.groups_rounded,
                     title: 'Adivinad',
                     text:
-                    'Los demás tienen que adivinar el animal y la profesión.',
+                        'Los demás tienen que adivinar el animal y la profesión.',
                   ),
 
                   const SizedBox(height: 8),
@@ -337,43 +328,40 @@ class _AnimalesProfesionalesScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appBlue,
-      body: CuboBackground(
+      backgroundColor: CuboColors.blue,
+      body: CuboGameBackground(
+        accent: CuboColors.chill,
         halo: CuboHalo.topLeft,
         child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxHeight < 740;
-            final horizontalPadding = compact ? 13.0 : 18.0;
-            final verticalPadding = compact ? 11.0 : 18.0;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 740;
+              final horizontalPadding = compact ? 13.0 : 18.0;
+              final verticalPadding = compact ? 11.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 11 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(compact: compact),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 11 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
 
-                  SizedBox(height: compact ? 10 : 14),
+                    SizedBox(height: compact ? 10 : 14),
 
-                  Expanded(
-                    child: Center(
-                      child: buildMainCard(),
-                    ),
-                  ),
+                    Expanded(child: Center(child: buildMainCard())),
 
-                  SizedBox(height: compact ? 10 : 14),
+                    SizedBox(height: compact ? 10 : 14),
 
-                  buildButtons(),
-                ],
-              ),
-            );
-          },
-        ),
+                    buildButtons(),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

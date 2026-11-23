@@ -9,22 +9,14 @@ import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
 
-enum AsambleaRole {
-  izquierda,
-  derecha,
-  liderOculto,
-}
+enum AsambleaRole { izquierda, derecha, liderOculto }
 
 class AsambleaPlayer {
   final String name;
   AsambleaRole? role;
   bool isAlive;
 
-  AsambleaPlayer({
-    required this.name,
-    this.role,
-    this.isAlive = true,
-  });
+  AsambleaPlayer({required this.name, this.role, this.isAlive = true});
 }
 
 class AsambleaSetupScreen extends StatefulWidget {
@@ -37,12 +29,6 @@ class AsambleaSetupScreen extends StatefulWidget {
 class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   static const String lastPlayersKey = 'asamblea_last_players';
   static const String savedGameKey = 'asamblea_partida_guardada';
-
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color accentRed = Color(0xFFE63946);
-  static const Color accentGold = Color(0xFFFFD166);
-  static const Color accentGreen = Color(0xFF22C55E);
 
   static const int minPlayers = 5;
   static const int maxPlayers = 10;
@@ -69,7 +55,6 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
       if (!_startupDialogShown) {
         _startupDialogShown = true;
 
-
         if (!mounted) return;
 
         await _showStartupDialogIfNeeded();
@@ -85,7 +70,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     if (!hasSavedGame && !hasLastPlayers) return;
     if (!mounted) return;
 
-    await showDialog(
+    await showCuboDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -108,7 +93,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                 Text(
                   'Tienes datos guardados. ¿Qué quieres hacer?',
                   style: TextStyle(
-                    color: appWhite.withValues(alpha: 0.76),
+                    color: CuboColors.white.withValues(alpha: 0.76),
                     fontSize: 14,
                     height: 1.35,
                     fontWeight: FontWeight.w700,
@@ -193,7 +178,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
       child: ElevatedButton.icon(
         onPressed: onPressed,
         style: mainButtonStyle(),
-        icon: Icon(icon, color: appBlue),
+        icon: Icon(icon, color: CuboColors.blue),
         label: Padding(
           padding: const EdgeInsets.symmetric(vertical: 13),
           child: FittedBox(
@@ -203,7 +188,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               maxLines: 1,
               softWrap: false,
               style: const TextStyle(
-                color: appBlue,
+                color: CuboColors.blue,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.4,
               ),
@@ -219,9 +204,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => const AsambleaBoardScreen(players: []),
-      ),
+      MaterialPageRoute(builder: (_) => const AsambleaBoardScreen(players: [])),
     );
   }
 
@@ -284,12 +267,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   String _nextAutomaticPlayerName() {
     int number = 1;
 
-    while (
-    _players.any(
-          (player) =>
-      player.name.toLowerCase() == 'jugador $number',
-    )
-    ) {
+    while (_players.any(
+      (player) => player.name.toLowerCase() == 'jugador $number',
+    )) {
       number++;
     }
 
@@ -304,13 +284,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
     final typedName = _controller.text.trim();
 
-    final name = typedName.isEmpty
-        ? _nextAutomaticPlayerName()
-        : typedName;
+    final name = typedName.isEmpty ? _nextAutomaticPlayerName() : typedName;
 
     final duplicated = _players.any(
-          (player) =>
-      player.name.toLowerCase() == name.toLowerCase(),
+      (player) => player.name.toLowerCase() == name.toLowerCase(),
     );
 
     if (duplicated) {
@@ -319,9 +296,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     }
 
     setState(() {
-      _players.add(
-        AsambleaPlayer(name: name),
-      );
+      _players.add(AsambleaPlayer(name: name));
 
       _controller.clear();
     });
@@ -372,11 +347,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   }
 
   void _startGame() {
-    if (_players.length < minPlayers ||
-        _players.length > maxPlayers) {
+    if (_players.length < minPlayers || _players.length > maxPlayers) {
       _snack(
         'La Asamblea necesita entre '
-            '$minPlayers y $maxPlayers jugadores',
+        '$minPlayers y $maxPlayers jugadores',
       );
       return;
     }
@@ -386,19 +360,16 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AsambleaRolesScreen(
-          players: playersWithRoles,
-        ),
+        builder: (_) => AsambleaRolesScreen(players: playersWithRoles),
       ),
     );
   }
 
   List<AsambleaPlayer> _assignRoles(List<AsambleaPlayer> originalPlayers) {
     final random = Random();
-    final players = originalPlayers
-        .map((p) => AsambleaPlayer(name: p.name))
-        .toList()
-      ..shuffle(random);
+    final players =
+        originalPlayers.map((p) => AsambleaPlayer(name: p.name)).toList()
+          ..shuffle(random);
 
     final total = players.length;
 
@@ -431,7 +402,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         SnackBar(
           content: Text(text),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: appBlue,
+          backgroundColor: CuboColors.blue,
         ),
       );
   }
@@ -465,10 +436,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: CuboColors.whiteA(0.08),
-          border: Border.all(
-            color: CuboColors.whiteA(0.85),
-            width: 2.2,
-          ),
+          border: Border.all(color: CuboColors.whiteA(0.85), width: 2.2),
         ),
         child: Center(child: child),
       ),
@@ -494,7 +462,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               onTap: () => showAsambleaRulesDialog(context),
               child: Icon(
                 Icons.question_mark_rounded,
-                color: appWhite,
+                color: CuboColors.white,
                 size: compact ? 23 : 27,
               ),
             ),
@@ -504,9 +472,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         SizedBox(height: compact ? 8 : 14),
 
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 4 : 8,
-          ),
+          padding: EdgeInsets.only(right: compact ? 4 : 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -525,12 +491,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     );
   }
 
-
-
-  Widget buildGlassCard({
-    required Widget child,
-    EdgeInsets? padding,
-  }) {
+  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
@@ -543,11 +504,11 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     return InputDecoration(
       hintText: tr(hint),
       hintStyle: TextStyle(
-        color: appWhite.withOpacity(0.45),
+        color: CuboColors.white.withValues(alpha: 0.45),
         fontWeight: FontWeight.w600,
       ),
       filled: true,
-      fillColor: appWhite.withOpacity(0.07),
+      fillColor: CuboColors.white.withValues(alpha: 0.07),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: CuboInputs.rounded(
         BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
@@ -556,7 +517,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
       ),
       focusedBorder: CuboInputs.rounded(
-        const BorderSide(color: appWhite, width: 2),
+        const BorderSide(color: CuboColors.white, width: 2),
       ),
     );
   }
@@ -565,7 +526,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     return Text(
       tr(text).toLowerCase(),
       style: const TextStyle(
-        color: appWhite,
+        color: CuboColors.white,
         fontSize: 30,
         height: 0.95,
         fontWeight: FontWeight.w900,
@@ -589,7 +550,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             Text(
               tr(title).toUpperCase(),
               style: TextStyle(
-                color: appWhite.withOpacity(0.62),
+                color: CuboColors.white.withValues(alpha: 0.62),
                 fontSize: 10.5,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.6,
@@ -599,7 +560,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             Text(
               value,
               style: const TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
               ),
@@ -611,10 +572,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   }
 
   Widget _playerTile(
-      AsambleaPlayer player,
-      int index, {
-        required bool compact,
-      }) {
+    AsambleaPlayer player,
+    int index, {
+    required bool compact,
+  }) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
@@ -633,16 +594,16 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: accentGreen.withValues(alpha: 0.16),
+              color: CuboColors.chill.withValues(alpha: 0.16),
               border: Border.all(
-                color: accentGreen.withValues(alpha: 0.80),
+                color: CuboColors.chill.withValues(alpha: 0.80),
                 width: 1.6,
               ),
             ),
             child: Text(
               '${index + 1}',
               style: TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: compact ? 12 : 13,
                 fontWeight: FontWeight.w900,
               ),
@@ -657,7 +618,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: compact ? 14 : 16,
                 fontWeight: FontWeight.w900,
               ),
@@ -669,18 +630,19 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             onPressed: () => _removePlayer(index),
             icon: Icon(
               Icons.delete_outline_rounded,
-              color: appWhite.withOpacity(0.78),
+              color: CuboColors.white.withValues(alpha: 0.78),
             ),
           ),
         ],
       ),
     );
   }
+
   Widget _singleLineResponsiveText(
-      String text, {
-        required TextStyle style,
-        Alignment alignment = Alignment.centerLeft,
-      }) {
+    String text, {
+    required TextStyle style,
+    Alignment alignment = Alignment.centerLeft,
+  }) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: alignment,
@@ -710,8 +672,8 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
     return Material(
       color: onTap == null
-          ? appWhite.withValues(alpha: 0.04)
-          : appWhite.withValues(alpha: 0.10),
+          ? CuboColors.white.withValues(alpha: 0.04)
+          : CuboColors.white.withValues(alpha: 0.10),
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -722,8 +684,8 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
           child: Center(
             child: Icon(
               icon,
-              color: appWhite.withOpacity(
-                onTap == null ? 0.28 : 1,
+              color: CuboColors.white.withValues(
+                alpha: onTap == null ? 0.28 : 1,
               ),
               size: veryNarrow
                   ? 19
@@ -737,9 +699,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     );
   }
 
-  Widget _buildPlayersCounter({
-    required bool compact,
-  }) {
+  Widget _buildPlayersCounter({required bool compact}) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final veryNarrow = constraints.maxWidth < 330;
@@ -774,16 +734,16 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                 width: leadingSize,
                 height: leadingSize,
                 decoration: BoxDecoration(
-                  color: accentGreen.withOpacity(0.14),
+                  color: CuboColors.chill.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: accentGreen.withOpacity(0.75),
+                    color: CuboColors.chill.withValues(alpha: 0.75),
                     width: 2,
                   ),
                 ),
                 child: Icon(
                   Icons.groups_rounded,
-                  color: accentGreen,
+                  color: CuboColors.chill,
                   size: veryNarrow
                       ? 19
                       : compact
@@ -798,7 +758,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                 child: _singleLineResponsiveText(
                   'JUGADORES',
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 10.5
                         : compact
@@ -814,9 +774,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
               _buildCounterButton(
                 icon: Icons.remove_rounded,
-                onTap: _players.isEmpty
-                    ? null
-                    : () => _changePlayers(-1),
+                onTap: _players.isEmpty ? null : () => _changePlayers(-1),
                 compact: compact,
               ),
 
@@ -828,7 +786,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                   softWrap: false,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: veryNarrow
                         ? 18
                         : compact
@@ -853,9 +811,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     );
   }
 
-  Widget _buildPlayersEditor({
-    required bool compact,
-  }) {
+  Widget _buildPlayersEditor({required bool compact}) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final veryNarrow = screenWidth < 350;
     return buildGlassCard(
@@ -863,9 +819,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildPlayersCounter(
-            compact: compact,
-          ),
+          _buildPlayersCounter(compact: compact),
 
           SizedBox(height: compact ? 12 : 14),
 
@@ -874,7 +828,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             child: _singleLineResponsiveText(
               'AÑADIR JUGADOR',
               style: TextStyle(
-                color: appWhite.withOpacity(0.70),
+                color: CuboColors.white.withValues(alpha: 0.70),
                 fontSize: compact ? 10.5 : 12,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.7,
@@ -893,13 +847,11 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _addPlayer(),
                   style: const TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontWeight: FontWeight.w700,
                   ),
-                  cursorColor: appWhite,
-                  decoration: inputDecoration(
-                    'Nombre opcional',
-                  ),
+                  cursorColor: CuboColors.white,
+                  decoration: inputDecoration('Nombre opcional'),
                 ),
               ),
 
@@ -917,35 +869,29 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     ? 50
                     : 54,
                 child: ElevatedButton(
-                  onPressed: _players.length >= maxPlayers
-                      ? null
-                      : _addPlayer,
+                  onPressed: _players.length >= maxPlayers ? null : _addPlayer,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: accentGreen,
-                    foregroundColor: appWhite,
-                    disabledBackgroundColor:
-                    appWhite.withOpacity(0.18),
-                    disabledForegroundColor:
-                    appWhite.withOpacity(0.42),
+                    backgroundColor: CuboColors.chill,
+                    foregroundColor: CuboColors.blueInk,
+                    disabledBackgroundColor: CuboColors.white.withValues(
+                      alpha: 0.18,
+                    ),
+                    disabledForegroundColor: CuboColors.white.withValues(
+                      alpha: 0.42,
+                    ),
                     elevation: 0,
 
                     // Centra correctamente el símbolo +
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
-                    tapTargetSize:
-                    MaterialTapTargetSize.shrinkWrap,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     alignment: Alignment.center,
 
                     shape: const RoundedRectangleBorder(
                       borderRadius: CuboRadii.inputAll,
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.add_rounded,
-                      size: 29,
-                    ),
-                  ),
+                  child: const Center(child: Icon(Icons.add_rounded, size: 29)),
                 ),
               ),
             ],
@@ -963,16 +909,13 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               decoration: BoxDecoration(
                 color: CuboColors.whiteA(0.05),
                 borderRadius: CuboRadii.mdAll,
-                border: Border.all(
-                  color: CuboColors.whiteA(0.18),
-                  width: 1.3,
-                ),
+                border: Border.all(color: CuboColors.whiteA(0.18), width: 1.3),
               ),
               child: Column(
                 children: [
                   Icon(
                     Icons.person_add_alt_1_rounded,
-                    color: appWhite.withOpacity(0.48),
+                    color: CuboColors.white.withValues(alpha: 0.48),
                     size: compact ? 28 : 34,
                   ),
 
@@ -982,7 +925,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     'Todavía no has añadido jugadores',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.66),
+                      color: CuboColors.white.withValues(alpha: 0.66),
                       fontSize: compact ? 12 : 13,
                       fontWeight: FontWeight.w700,
                     ),
@@ -994,7 +937,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                     'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.44),
+                      color: CuboColors.white.withValues(alpha: 0.44),
                       fontSize: compact ? 10.5 : 11.5,
                       height: 1.3,
                     ),
@@ -1009,7 +952,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                   child: _singleLineResponsiveText(
                     'LISTA DE JUGADORES',
                     style: TextStyle(
-                      color: appWhite.withOpacity(0.70),
+                      color: CuboColors.white.withValues(alpha: 0.70),
                       fontSize: compact ? 10.5 : 12,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.7,
@@ -1024,7 +967,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
                   maxLines: 1,
                   softWrap: false,
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.62),
+                    color: CuboColors.white.withValues(alpha: 0.62),
                     fontSize: compact ? 11 : 12,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1035,14 +978,10 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
             const SizedBox(height: 9),
 
             ..._players.asMap().entries.map(
-                  (entry) => CuboEntrance(
-                    key: ObjectKey(entry.value),
-                    child: _playerTile(
-                      entry.value,
-                      entry.key,
-                      compact: compact,
-                    ),
-                  ),
+              (entry) => CuboEntrance(
+                key: ObjectKey(entry.value),
+                child: _playerTile(entry.value, entry.key, compact: compact),
+              ),
             ),
           ],
         ],
@@ -1054,91 +993,81 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CuboColors.blue,
-      body: CuboBackground(
+      body: CuboGameBackground(
+        accent: CuboColors.chill,
         halo: CuboHalo.topLeft,
         child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final narrow = constraints.maxWidth < 380;
-            final veryNarrow = constraints.maxWidth < 340;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
+              final veryNarrow = constraints.maxWidth < 340;
 
-            final compact =
-                constraints.maxHeight < 740 || narrow;
+              final compact = constraints.maxHeight < 740 || narrow;
 
-            final horizontalPadding = veryNarrow
-                ? 8.0
-                : compact
-                ? 12.0
-                : 18.0;
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
 
-            final verticalPadding = compact ? 10.0 : 18.0;
+              final verticalPadding = compact ? 10.0 : 18.0;
 
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                verticalPadding,
-                horizontalPadding,
-                compact ? 11 : 16,
-              ),
-              child: Column(
-                children: [
-                  buildTopBar(
-                    compact: compact,
-                  ),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 11 : 16,
+                ),
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
 
-                  SizedBox(
-                    height: compact ? 9 : 14,
-                  ),
+                    SizedBox(height: compact ? 9 : 14),
 
-                  Expanded(
-                    child: SingleChildScrollView(
-                      keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildPlayersEditor(
-                            compact: compact,
-                          ),
-                        ],
+                    Expanded(
+                      child: SingleChildScrollView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [_buildPlayersEditor(compact: compact)],
+                        ),
                       ),
                     ),
-                  ),
 
-                  SizedBox(
-                    height: compact ? 10 : 14,
-                  ),
+                    SizedBox(height: compact ? 10 : 14),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: compact ? 62 : 72,
-                    child: ElevatedButton.icon(
-                      onPressed: _startGame,
-                      style: CuboButtons.primary(padding: null),
-                      icon: Icon(
-                        Icons.play_arrow_rounded,
-                        size: compact ? 30 : 36,
-                      ),
-                      label: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          'EMPEZAR PARTIDA',
-                          maxLines: 1,
-                          softWrap: false,
-                          style: TextStyle(
-                            fontSize: compact ? 14 : 16,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
+                    SizedBox(
+                      width: double.infinity,
+                      height: compact ? 62 : 72,
+                      child: ElevatedButton.icon(
+                        onPressed: _startGame,
+                        style: CuboButtons.primary(padding: null),
+                        icon: Icon(
+                          Icons.play_arrow_rounded,
+                          size: compact ? 30 : 36,
+                        ),
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'EMPEZAR PARTIDA',
+                            maxLines: 1,
+                            softWrap: false,
+                            style: TextStyle(
+                              fontSize: compact ? 14 : 16,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
