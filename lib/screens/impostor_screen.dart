@@ -751,14 +751,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CuboColors.whiteA(0.08),
-        borderRadius: CuboRadii.lgAll,
-        border: Border.all(
-          color: borderColor ?? CuboColors.white.withValues(alpha: 0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: borderColor == null
+          ? CuboDecorations.glassRaised(radius: CuboRadii.card)
+          : BoxDecoration(
+              color: CuboColors.whiteA(0.08),
+              borderRadius: CuboRadii.lgAll,
+              border: Border.all(color: borderColor, width: 1.4),
+            ),
       child: child,
     );
   }

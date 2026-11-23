@@ -354,6 +354,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
         Padding(
           padding: EdgeInsets.only(right: compact ? 6 : 10),
           child: CuboSectionTitle(
+            barColor: CuboColors.chill,
             'escala mental',
             alignEnd: true,
             size: titleSize,
@@ -415,7 +416,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 ? 13
                 : 17,
           ),
-      decoration: CuboDecorations.glass(),
+      decoration: CuboDecorations.glassRaised(radius: CuboRadii.card),
       child: child,
     );
   }

@@ -309,6 +309,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
 
               Expanded(
                 child: CuboSectionTitle(
+                  barColor: CuboColors.chill,
                   'reparto de roles',
                   alignEnd: true,
                   size: titleSize,

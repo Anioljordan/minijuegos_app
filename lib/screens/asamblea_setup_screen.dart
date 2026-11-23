@@ -479,6 +479,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               CuboIllustration('asamblea', size: illustrationSize),
               SizedBox(height: compact ? 6 : 10),
               CuboSectionTitle(
+                barColor: CuboColors.chill,
                 'la asamblea',
                 alignEnd: true,
                 size: titleSize,
@@ -495,7 +496,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: CuboDecorations.glass(),
+      decoration: CuboDecorations.glassRaised(radius: CuboRadii.card),
       child: child,
     );
   }

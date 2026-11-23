@@ -1961,6 +1961,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         Padding(
           padding: EdgeInsets.only(right: compact ? 4 : 8),
           child: CuboSectionTitle(
+            barColor: CuboColors.chill,
             'tablero asamblea',
             alignEnd: true,
             size: titleSize,

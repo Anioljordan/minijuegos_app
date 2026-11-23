@@ -150,7 +150,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return Container(
       width: double.infinity,
       padding: padding,
-      decoration: CuboDecorations.glass(),
+      decoration: CuboDecorations.glassRaised(radius: CuboRadii.card),
       child: child,
     );
   }
