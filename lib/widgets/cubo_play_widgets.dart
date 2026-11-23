@@ -380,12 +380,20 @@ class CuboProgressPill extends StatelessWidget {
   final double value;
   final Color accent;
 
+  /// Elemento junto a la etiqueta (p. ej. botón discreto de editar).
+  final Widget? labelTrailing;
+
+  /// Línea pequeña bajo la etiqueta.
+  final String? caption;
+
   const CuboProgressPill({
     super.key,
     required this.label,
     required this.valueText,
     required this.value,
     this.accent = CuboColors.fiesta,
+    this.labelTrailing,
+    this.caption,
   });
 
   @override
@@ -396,17 +404,27 @@ class CuboProgressPill extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: CuboText.chip(
-                    color: CuboColors.whiteA(0.76),
-                    size: 12,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        style: CuboText.chip(
+                          color: CuboColors.whiteA(0.76),
+                          size: 12,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  if (labelTrailing != null) ...[
+                    const SizedBox(width: 8),
+                    labelTrailing!,
+                  ],
+                ],
               ),
             ),
             const SizedBox(width: 8),
@@ -421,6 +439,22 @@ class CuboProgressPill extends StatelessWidget {
             ),
           ],
         ),
+        if (caption != null) ...[
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              caption!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: CuboColors.whiteA(0.62),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 9),
         Container(
           height: 10,
@@ -515,6 +549,85 @@ class CuboActionBar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Botón grande de elección (Prueba / Verdad, Cara / Cruz...). [primary]
+/// es la píldora blanca con sombra; si no, cristal translúcido. [accent]
+/// pinta el icono para distinguir cada opción.
+class CuboChoiceButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool primary;
+  final Color? accent;
+  final double height;
+
+  const CuboChoiceButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.primary = false,
+    this.accent,
+    this.height = 92,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = primary ? CuboColors.blue : CuboColors.white;
+    return CuboPressable(
+      onTap: onTap,
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: primary
+            ? const BoxDecoration(
+                color: CuboColors.white,
+                borderRadius: CuboRadii.xlAll,
+                boxShadow: CuboShadows.float,
+              )
+            : BoxDecoration(
+                color: CuboColors.whiteA(0.10),
+                borderRadius: CuboRadii.xlAll,
+                border: Border.all(color: CuboColors.whiteA(0.45), width: 1.4),
+              ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: height * 0.44,
+              height: height * 0.44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color:
+                    accent ??
+                    (primary ? CuboColors.blueTint : CuboColors.whiteA(0.14)),
+              ),
+              child: Icon(
+                icon,
+                color: accent != null ? CuboColors.blueInk : fg,
+                size: height * 0.26,
+              ),
+            ),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: fg,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
