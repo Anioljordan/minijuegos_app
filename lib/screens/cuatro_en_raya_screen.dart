@@ -7,10 +7,7 @@ import '../core/app_settings.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
 
-enum CuatroEnRayaMode {
-  twoPlayers,
-  vsMachine,
-}
+enum CuatroEnRayaMode { twoPlayers, vsMachine }
 
 class CuatroEnRayaScreen extends StatefulWidget {
   const CuatroEnRayaScreen({super.key});
@@ -25,7 +22,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
   List<List<int>> tablero = List.generate(
     filas,
-        (_) => List.filled(columnas, 0),
+    (_) => List.filled(columnas, 0),
   );
 
   int jugadorActual = 1;
@@ -36,8 +33,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   bool maquinaPensando = false;
 
   bool get esTurnoMaquina =>
-      modoJuego == CuatroEnRayaMode.vsMachine &&
-          jugadorActual == 2;
+      modoJuego == CuatroEnRayaMode.vsMachine && jugadorActual == 2;
 
   int puntosRojo = 0;
   int puntosAmarillo = 0;
@@ -54,16 +50,13 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-
   static const Color boardBlue = Color(0xFF24458E);
   static const Color boardBlueDark = Color(0xFF1D3979);
   static const Color boardBlueLight = Color(0xFF7E96D6);
   static const Color emptyHoleColor = Color(0xFF2F4F9C);
 
-  static const Color redDisc = Color(0xFFE63946);
-  static const Color yellowDisc = Color(0xFFFFD166);
+  static const Color redDisc = CuboColors.alert;
+  static const Color yellowDisc = CuboColors.fiesta;
 
   @override
   void initState() {
@@ -139,14 +132,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     }
 
     if (modoJuego == CuatroEnRayaMode.vsMachine) {
-      return jugadorActual == 1
-          ? 'Tu turno'
-          : 'Turno de la máquina';
+      return jugadorActual == 1 ? 'Tu turno' : 'Turno de la máquina';
     }
 
-    return jugadorActual == 1
-        ? 'Turno del rojo'
-        : 'Turno del amarillo';
+    return jugadorActual == 1 ? 'Turno del rojo' : 'Turno del amarillo';
   }
 
   Widget _buildDisc({
@@ -178,7 +167,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                   height: outerSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: boardBlueLight.withOpacity(0.85),
+                    color: boardBlueLight.withValues(alpha: 0.85),
                   ),
                 ),
 
@@ -192,19 +181,21 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                     border: Border.all(
                       color: vacio
                           ? boardBlueDark
-                          : appWhite.withOpacity(ganadora ? 0.95 : 0.45),
+                          : CuboColors.white.withValues(
+                              alpha: ganadora ? 0.95 : 0.45,
+                            ),
                       width: ganadora ? 3 : 1.8,
                     ),
                     boxShadow: [
                       if (!vacio)
                         BoxShadow(
-                          color: discColor.withOpacity(0.35),
+                          color: discColor.withValues(alpha: 0.35),
                           blurRadius: 8,
                           spreadRadius: 1,
                         ),
                       if (ganadora)
                         BoxShadow(
-                          color: appWhite.withOpacity(0.75),
+                          color: CuboColors.white.withValues(alpha: 0.75),
                           blurRadius: 18,
                           spreadRadius: 3,
                         ),
@@ -223,8 +214,8 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                         borderRadius: BorderRadius.circular(999),
                         gradient: LinearGradient(
                           colors: [
-                            appWhite.withOpacity(0.42),
-                            appWhite.withOpacity(0.0),
+                            CuboColors.white.withValues(alpha: 0.42),
+                            CuboColors.white.withValues(alpha: 0.0),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -239,6 +230,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       },
     );
   }
+
   int? obtenerFilaDisponible(int columna) {
     for (int fila = filas - 1; fila >= 0; fila--) {
       if (tablero[fila][columna] == 0) return fila;
@@ -247,24 +239,20 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   List<int> _columnasDisponibles() {
-    return List.generate(columnas, (index) => index)
-        .where((columna) =>
-    obtenerFilaDisponible(columna) != null)
-        .toList();
+    return List.generate(
+      columnas,
+      (index) => index,
+    ).where((columna) => obtenerFilaDisponible(columna) != null).toList();
   }
 
-  bool _esMovimientoGanador(
-      int columna,
-      int jugador,
-      ) {
+  bool _esMovimientoGanador(int columna, int jugador) {
     final fila = obtenerFilaDisponible(columna);
 
     if (fila == null) return false;
 
     tablero[fila][columna] = jugador;
 
-    final gana =
-        obtenerFichasGanadoras(jugador).isNotEmpty;
+    final gana = obtenerFichasGanadoras(jugador).isNotEmpty;
 
     tablero[fila][columna] = 0;
 
@@ -280,8 +268,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     tablero[fila][columna] = 2;
 
     final humanoPuedeGanar = _columnasDisponibles().any(
-          (columnaHumano) =>
-          _esMovimientoGanador(columnaHumano, 1),
+      (columnaHumano) => _esMovimientoGanador(columnaHumano, 1),
     );
 
     tablero[fila][columna] = 0;
@@ -315,9 +302,9 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     final seguras = prioridad
         .where(
           (columna) =>
-      disponibles.contains(columna) &&
-          _movimientoSeguroParaMaquina(columna),
-    )
+              disponibles.contains(columna) &&
+              _movimientoSeguroParaMaquina(columna),
+        )
         .toList();
 
     if (seguras.isNotEmpty) {
@@ -328,8 +315,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     // elegir la mejor columna disponible.
     return prioridad.firstWhere(
       disponibles.contains,
-      orElse: () =>
-      disponibles[_randomIndex(disponibles.length)],
+      orElse: () => disponibles[_randomIndex(disponibles.length)],
     );
   }
 
@@ -353,22 +339,15 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     });
 
     try {
-      await Future.delayed(
-        const Duration(milliseconds: 650),
-      );
+      await Future.delayed(const Duration(milliseconds: 650));
 
-      if (!mounted ||
-          juegoTerminado ||
-          jugadorActual != 2) {
+      if (!mounted || juegoTerminado || jugadorActual != 2) {
         return;
       }
 
       final columna = _elegirColumnaMaquina();
 
-      await colocarFicha(
-        columna,
-        movimientoMaquina: true,
-      );
+      await colocarFicha(columna, movimientoMaquina: true);
     } finally {
       if (mounted) {
         setState(() {
@@ -379,9 +358,9 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   Future<void> colocarFicha(
-      int columna, {
-        bool movimientoMaquina = false,
-      }) async {
+    int columna, {
+    bool movimientoMaquina = false,
+  }) async {
     if (juegoTerminado || animando) return;
 
     if (modoJuego == CuatroEnRayaMode.vsMachine) {
@@ -394,8 +373,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       }
     }
 
-    final filaDisponible =
-    obtenerFilaDisponible(columna);
+    final filaDisponible = obtenerFilaDisponible(columna);
 
     if (filaDisponible == null) return;
 
@@ -407,12 +385,8 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       hoverColumna = null;
     });
 
-    for (int fila = 0;
-    fila <= filaDisponible;
-    fila++) {
-      await Future.delayed(
-        const Duration(milliseconds: 80),
-      );
+    for (int fila = 0; fila <= filaDisponible; fila++) {
+      await Future.delayed(const Duration(milliseconds: 80));
 
       if (!mounted) return;
 
@@ -429,14 +403,9 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     final jugadorQueHaJugado = jugadorActual;
 
     setState(() {
-      tablero[filaDisponible][columna] =
-          jugadorQueHaJugado;
+      tablero[filaDisponible][columna] = jugadorQueHaJugado;
 
-      historialJugadas.add([
-        filaDisponible,
-        columna,
-        jugadorQueHaJugado,
-      ]);
+      historialJugadas.add([filaDisponible, columna, jugadorQueHaJugado]);
 
       animando = false;
       animColumna = null;
@@ -444,8 +413,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       animFilaVisual = 0;
     });
 
-    final ganadoras =
-    obtenerFichasGanadoras(jugadorQueHaJugado);
+    final ganadoras = obtenerFichasGanadoras(jugadorQueHaJugado);
 
     if (ganadoras.isNotEmpty) {
       setState(() {
@@ -462,16 +430,12 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       vibrarHeavy();
       await reproducirSonido('sounds/win.wav');
 
-      await Future.delayed(
-        const Duration(milliseconds: 1100),
-      );
+      await Future.delayed(const Duration(milliseconds: 1100));
 
       if (!mounted) return;
 
       mostrarResultado(
-        jugadorQueHaJugado == 1
-            ? 'Ha ganado el rojo'
-            : 'Ha ganado el amarillo',
+        jugadorQueHaJugado == 1 ? 'Ha ganado el rojo' : 'Ha ganado el amarillo',
       );
 
       return;
@@ -485,9 +449,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
       vibrarClick();
 
-      await Future.delayed(
-        const Duration(milliseconds: 600),
-      );
+      await Future.delayed(const Duration(milliseconds: 600));
 
       if (!mounted) return;
 
@@ -496,12 +458,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     }
 
     setState(() {
-      jugadorActual =
-      jugadorQueHaJugado == 1 ? 2 : 1;
+      jugadorActual = jugadorQueHaJugado == 1 ? 2 : 1;
     });
 
-    if (modoJuego == CuatroEnRayaMode.vsMachine &&
-        jugadorActual == 2) {
+    if (modoJuego == CuatroEnRayaMode.vsMachine && jugadorActual == 2) {
       await _jugarMaquina();
     }
   }
@@ -519,20 +479,40 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     for (int fila = 0; fila < filas; fila++) {
       for (int columna = 0; columna < columnas; columna++) {
         if (tablero[fila][columna] == jugador) {
-          final horizontal =
-          comprobarDireccionConCoords(fila, columna, 0, 1, jugador);
+          final horizontal = comprobarDireccionConCoords(
+            fila,
+            columna,
+            0,
+            1,
+            jugador,
+          );
           if (horizontal.isNotEmpty) return horizontal;
 
-          final vertical =
-          comprobarDireccionConCoords(fila, columna, 1, 0, jugador);
+          final vertical = comprobarDireccionConCoords(
+            fila,
+            columna,
+            1,
+            0,
+            jugador,
+          );
           if (vertical.isNotEmpty) return vertical;
 
-          final diagonalDerecha =
-          comprobarDireccionConCoords(fila, columna, 1, 1, jugador);
+          final diagonalDerecha = comprobarDireccionConCoords(
+            fila,
+            columna,
+            1,
+            1,
+            jugador,
+          );
           if (diagonalDerecha.isNotEmpty) return diagonalDerecha;
 
-          final diagonalIzquierda =
-          comprobarDireccionConCoords(fila, columna, 1, -1, jugador);
+          final diagonalIzquierda = comprobarDireccionConCoords(
+            fila,
+            columna,
+            1,
+            -1,
+            jugador,
+          );
           if (diagonalIzquierda.isNotEmpty) return diagonalIzquierda;
         }
       }
@@ -542,12 +522,12 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   List<List<int>> comprobarDireccionConCoords(
-      int fila,
-      int columna,
-      int deltaFila,
-      int deltaColumna,
-      int jugador,
-      ) {
+    int fila,
+    int columna,
+    int deltaFila,
+    int deltaColumna,
+    int jugador,
+  ) {
     final List<List<int>> coords = [];
 
     for (int i = 0; i < 4; i++) {
@@ -570,18 +550,16 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
   bool esFichaGanadora(int fila, int columna) {
     return fichasGanadoras.any(
-          (coord) => coord[0] == fila && coord[1] == columna,
+      (coord) => coord[0] == fila && coord[1] == columna,
     );
   }
 
   void deshacerJugada() {
-    final movimientosAEliminar =
-    modoJuego == CuatroEnRayaMode.vsMachine
+    final movimientosAEliminar = modoJuego == CuatroEnRayaMode.vsMachine
         ? 2
         : 1;
 
-    if (historialJugadas.length <
-        movimientosAEliminar ||
+    if (historialJugadas.length < movimientosAEliminar ||
         animando ||
         maquinaPensando ||
         juegoTerminado) {
@@ -591,18 +569,14 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     int jugadorQueRepite = jugadorActual;
 
     setState(() {
-      for (int i = 0;
-      i < movimientosAEliminar;
-      i++) {
-        final ultima =
-        historialJugadas.removeLast();
+      for (int i = 0; i < movimientosAEliminar; i++) {
+        final ultima = historialJugadas.removeLast();
 
         tablero[ultima[0]][ultima[1]] = 0;
         jugadorQueRepite = ultima[2];
       }
 
-      jugadorActual =
-      modoJuego == CuatroEnRayaMode.vsMachine
+      jugadorActual = modoJuego == CuatroEnRayaMode.vsMachine
           ? 1
           : jugadorQueRepite;
 
@@ -614,14 +588,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   void reiniciarJuego() {
-    final siguienteJugadorInicial =
-    jugadorInicial == 1 ? 2 : 1;
+    final siguienteJugadorInicial = jugadorInicial == 1 ? 2 : 1;
 
     setState(() {
-      tablero = List.generate(
-        filas,
-            (_) => List.filled(columnas, 0),
-      );
+      tablero = List.generate(filas, (_) => List.filled(columnas, 0));
 
       jugadorInicial = siguienteJugadorInicial;
       jugadorActual = siguienteJugadorInicial;
@@ -636,18 +606,15 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       historialJugadas = [];
     });
 
-    if (modoJuego == CuatroEnRayaMode.vsMachine &&
-        jugadorActual == 2) {
-      Future.delayed(
-        const Duration(milliseconds: 400),
-            () {
-          if (mounted) {
-            _jugarMaquina();
-          }
-        },
-      );
+    if (modoJuego == CuatroEnRayaMode.vsMachine && jugadorActual == 2) {
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          _jugarMaquina();
+        }
+      });
     }
   }
+
   void reiniciarMarcadorYJuego() {
     setState(() {
       puntosRojo = 0;
@@ -675,7 +642,6 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     return CuboButtons.secondary(padding: null);
   }
 
-
   Widget glassCard({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
@@ -686,7 +652,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -712,7 +678,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                   const Text(
                     '4 EN RAYA',
                     style: TextStyle(
-                      color: appWhite,
+                      color: CuboColors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -725,40 +691,39 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                     icon: Icons.touch_app_rounded,
                     title: 'Coloca ficha',
                     text:
-                    'Pulsa una columna. La ficha caerá hasta el hueco más bajo.',
-                    color: appWhite,
+                        'Pulsa una columna. La ficha caerá hasta el hueco más bajo.',
+                    color: CuboColors.white,
                   ),
 
                   _rulesItem(
                     icon: Icons.swap_horiz_rounded,
                     title: 'Turnos',
-                    text:
-                    'Los jugadores se alternan entre rojo y amarillo.',
-                    color: appWhite,
+                    text: 'Los jugadores se alternan entre rojo y amarillo.',
+                    color: CuboColors.white,
                   ),
 
                   _rulesItem(
                     icon: Icons.blur_linear_rounded,
                     title: 'Objetivo',
                     text:
-                    'Gana quien conecte 4 fichas en horizontal, vertical o diagonal.',
-                    color: appWhite,
+                        'Gana quien conecte 4 fichas en horizontal, vertical o diagonal.',
+                    color: CuboColors.white,
                   ),
 
                   _rulesItem(
                     icon: Icons.undo_rounded,
                     title: 'Deshacer',
                     text:
-                    'Puedes deshacer la última jugada antes de que termine la partida.',
-                    color: appWhite,
+                        'Puedes deshacer la última jugada antes de que termine la partida.',
+                    color: CuboColors.white,
                   ),
 
                   _rulesItem(
                     icon: Icons.emoji_events_rounded,
                     title: 'Marcador',
                     text:
-                    'Cada victoria suma un punto. Los empates también se cuentan.',
-                    color: appWhite,
+                        'Cada victoria suma un punto. Los empates también se cuentan.',
+                    color: CuboColors.white,
                   ),
 
                   const SizedBox(height: 8),
@@ -767,7 +732,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      style: mainButtonStyle(appWhite),
+                      style: mainButtonStyle(CuboColors.white),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 14),
                         child: Text(
@@ -795,7 +760,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     final bool ganaRojo = mensaje == 'Ha ganado el rojo';
 
     final Color accentColor = empate
-        ? appWhite
+        ? CuboColors.white
         : ganaRojo
         ? redDisc
         : yellowDisc;
@@ -806,12 +771,8 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
     if (empate) {
       subtitulo = 'La partida termina sin ganador';
-    } else if (
-    modoJuego == CuatroEnRayaMode.vsMachine
-    ) {
-      subtitulo = ganaRojo
-          ? 'Has ganado a la máquina'
-          : 'Ha ganado la máquina';
+    } else if (modoJuego == CuatroEnRayaMode.vsMachine) {
+      subtitulo = ganaRojo ? 'Has ganado a la máquina' : 'Ha ganado la máquina';
     } else {
       subtitulo = ganaRojo
           ? 'Gana el jugador rojo'
@@ -851,26 +812,19 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
                   Row(
                     children: [
-                      CuboIconCircle(
-                        icon: icon,
-                        size: 52,
-                        color: accentColor,
-                      ),
+                      CuboIconCircle(icon: icon, size: 52, color: accentColor),
 
                       const SizedBox(width: 14),
 
                       Expanded(
-                        child: Text(
-                          titulo,
-                          style: CuboText.title(size: 40),
-                        ),
+                        child: Text(titulo, style: CuboText.title(size: 40)),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 12),
 
-                  const CuboPillBar(),
+                  const CuboPillBar(width: 44, color: CuboColors.chill),
 
                   const SizedBox(height: 18),
 
@@ -902,7 +856,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                           tr(subtitulo).toUpperCase(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: appWhite,
+                            color: CuboColors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.6,
@@ -917,7 +871,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                               : 'Se ha conectado una línea de 4 fichas.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: appWhite.withOpacity(0.72),
+                            color: CuboColors.white.withValues(alpha: 0.72),
                             fontSize: 13,
                             height: 1.3,
                             fontWeight: FontWeight.w600,
@@ -937,7 +891,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                             Navigator.pop(context);
                             reiniciarJuego();
                           },
-                          style: mainButtonStyle(appWhite),
+                          style: mainButtonStyle(CuboColors.white),
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: Text(
@@ -990,14 +944,12 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
         return Transform.scale(
           scale: 0.92 + (curved.value * 0.08),
-          child: Opacity(
-            opacity: animation.value,
-            child: child,
-          ),
+          child: Opacity(opacity: animation.value, child: child),
         );
       },
     );
   }
+
   Widget circleButton({
     required Widget child,
     required VoidCallback onTap,
@@ -1013,15 +965,13 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: CuboColors.whiteA(0.12),
-          border: Border.all(
-            color: CuboColors.whiteA(0.55),
-            width: 1.6,
-          ),
+          border: Border.all(color: CuboColors.whiteA(0.55), width: 1.6),
         ),
         child: Center(child: child),
       ),
     );
   }
+
   Widget buildTopBar({required bool compact}) {
     final titleSize = compact ? 34.0 : 42.0;
 
@@ -1041,7 +991,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
               onTap: mostrarNormas,
               child: Icon(
                 Icons.question_mark_rounded,
-                color: appWhite,
+                color: CuboColors.white,
                 size: compact ? 23 : 27,
               ),
             ),
@@ -1053,10 +1003,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            CuboIllustration(
-              'cuatro_raya',
-              size: compact ? 64 : 96,
-            ),
+            CuboIllustration('cuatro_raya', size: compact ? 64 : 96),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -1073,7 +1020,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                     ),
                   ),
                   SizedBox(height: compact ? 9 : 12),
-                  const CuboPillBar(),
+                  const CuboPillBar(width: 44, color: CuboColors.chill),
                   const SizedBox(height: 4),
                 ],
               ),
@@ -1137,12 +1084,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
     return Expanded(
       child: Material(
-        color: selected
-            ? appWhite
-            : CuboColors.whiteA(0.08),
+        color: selected ? CuboColors.white : CuboColors.whiteA(0.08),
         shape: StadiumBorder(
           side: BorderSide(
-            color: selected ? appWhite : CuboColors.whiteA(0.45),
+            color: selected ? CuboColors.white : CuboColors.whiteA(0.45),
             width: 1.4,
           ),
         ),
@@ -1158,7 +1103,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                 Icon(
                   icon,
                   size: compact ? 18 : 20,
-                  color: selected ? appBlue : appWhite,
+                  color: selected ? CuboColors.blue : CuboColors.white,
                 ),
                 const SizedBox(width: 7),
                 Flexible(
@@ -1167,7 +1112,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: selected ? appBlue : appWhite,
+                      color: selected ? CuboColors.blue : CuboColors.white,
                       fontSize: compact ? 10.5 : 12,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.25,
@@ -1182,9 +1127,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     );
   }
 
-  Widget buildGameModeSelector({
-    required bool compact,
-  }) {
+  Widget buildGameModeSelector({required bool compact}) {
     return Row(
       children: [
         _buildModeOption(
@@ -1215,10 +1158,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       puntosAmarillo = 0;
       empates = 0;
 
-      tablero = List.generate(
-        filas,
-            (_) => List.filled(columnas, 0),
-      );
+      tablero = List.generate(filas, (_) => List.filled(columnas, 0));
 
       jugadorInicial = 1;
       jugadorActual = 1;
@@ -1232,6 +1172,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       historialJugadas = [];
     });
   }
+
   Widget buildTurnCard() {
     final colorTurno = colorJugadorActual();
 
@@ -1246,10 +1187,12 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
             width: 26,
             height: 26,
             decoration: BoxDecoration(
-              color: juegoTerminado ? appWhite.withOpacity(0.55) : colorTurno,
+              color: juegoTerminado
+                  ? CuboColors.white.withValues(alpha: 0.55)
+                  : colorTurno,
               shape: BoxShape.circle,
               border: Border.all(
-                color: appWhite.withOpacity(0.75),
+                color: CuboColors.white.withValues(alpha: 0.75),
                 width: 1.6,
               ),
             ),
@@ -1262,7 +1205,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                 Text(
                   textoTurno(),
                   style: const TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: 17,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.2,
@@ -1278,7 +1221,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                       ? 'Espera la jugada de la máquina'
                       : 'Pulsa una columna para jugar',
                   style: TextStyle(
-                    color: appWhite.withOpacity(0.68),
+                    color: CuboColors.white.withValues(alpha: 0.68),
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1296,11 +1239,11 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       children: List.generate(columnas, (columna) {
         final bool mostrarPreview =
             !juegoTerminado &&
-                !animando &&
-                !maquinaPensando &&
-                !esTurnoMaquina &&
-                hoverColumna == columna &&
-                obtenerFilaDisponible(columna) != null;
+            !animando &&
+            !maquinaPensando &&
+            !esTurnoMaquina &&
+            hoverColumna == columna &&
+            obtenerFilaDisponible(columna) != null;
 
         return Expanded(
           child: MouseRegion(
@@ -1334,7 +1277,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                         height: 20,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: colorJugadorActual().withOpacity(0.85),
+                          color: colorJugadorActual().withValues(alpha: 0.85),
                         ),
                       ),
                     ),
@@ -1349,7 +1292,8 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   Widget buildCelda(int fila, int columna) {
-    final bool mostrarFichaAnimada = animando &&
+    final bool mostrarFichaAnimada =
+        animando &&
         animColumna == columna &&
         animFilaVisual == fila &&
         animJugador != null;
@@ -1402,7 +1346,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
                   child: Row(
                     children: List.generate(
                       columnas,
-                          (columna) => buildCelda(fila, columna),
+                      (columna) => buildCelda(fila, columna),
                     ),
                   ),
                 );
@@ -1436,26 +1380,18 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
           colors: [boardBlue, boardBlueDark],
         ),
         borderRadius: CuboRadii.lgAll,
-        border: Border.all(
-          color: CuboColors.whiteA(0.35),
-          width: 1.4,
-        ),
+        border: Border.all(color: CuboColors.whiteA(0.35), width: 1.4),
         boxShadow: CuboShadows.soft,
       ),
-      child: AspectRatio(
-        aspectRatio: columnas / filas,
-        child: buildTablero(),
-      ),
+      child: AspectRatio(aspectRatio: columnas / filas, child: buildTablero()),
     );
   }
+
   Widget buildMarcador() {
     return Row(
       children: [
         scorePill(
-          label: modoJuego ==
-              CuatroEnRayaMode.vsMachine
-              ? 'Tú'
-              : 'Rojo',
+          label: modoJuego == CuatroEnRayaMode.vsMachine ? 'Tú' : 'Rojo',
           value: '$puntosRojo',
           color: const Color(0xFFFF4D6D),
           icon: Icons.circle,
@@ -1473,20 +1409,19 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         const SizedBox(width: 10),
 
         scorePill(
-          label: modoJuego ==
-              CuatroEnRayaMode.vsMachine
+          label: modoJuego == CuatroEnRayaMode.vsMachine
               ? 'Máquina'
               : 'Amarillo',
           value: '$puntosAmarillo',
           color: const Color(0xFFFFD166),
-          icon: modoJuego ==
-              CuatroEnRayaMode.vsMachine
+          icon: modoJuego == CuatroEnRayaMode.vsMachine
               ? Icons.smart_toy_rounded
               : Icons.circle,
         ),
       ],
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -1494,111 +1429,110 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
       builder: (context, _) {
         return Scaffold(
           backgroundColor: CuboColors.blue,
-          body: CuboBackground(
+          body: CuboGameBackground(
+            accent: CuboColors.chill,
             halo: CuboHalo.topLeft,
             child: SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final compact = constraints.maxHeight < 740;
-                final horizontalPadding = compact ? 13.0 : 18.0;
-                final verticalPadding = compact ? 11.0 : 18.0;
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxHeight < 740;
+                  final horizontalPadding = compact ? 13.0 : 18.0;
+                  final verticalPadding = compact ? 11.0 : 18.0;
 
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    verticalPadding,
-                    horizontalPadding,
-                    compact ? 11 : 16,
-                  ),
-                  child: Column(
-                    children: [
-                      buildTopBar(compact: compact),
+                  return Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      verticalPadding,
+                      horizontalPadding,
+                      compact ? 11 : 16,
+                    ),
+                    child: Column(
+                      children: [
+                        buildTopBar(compact: compact),
 
-                      SizedBox(height: compact ? 10 : 14),
-                      buildGameModeSelector(
-                        compact: compact,
-                      ),
+                        SizedBox(height: compact ? 10 : 14),
+                        buildGameModeSelector(compact: compact),
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      buildMarcador(),
+                        buildMarcador(),
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      buildTurnCard(),
+                        buildTurnCard(),
 
-                      const SizedBox(height: 4),
+                        const SizedBox(height: 4),
 
-                      buildPreviewRow(),
+                        buildPreviewRow(),
 
-                      const SizedBox(height: 4),
+                        const SizedBox(height: 4),
 
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: buildBoardCard(),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: buildBoardCard(),
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed:
-                              animando ||
-                                  maquinaPensando ||
-                                  juegoTerminado ||
-                                  historialJugadas.length <
-                                      (modoJuego ==
-                                          CuatroEnRayaMode.vsMachine
-                                          ? 2
-                                          : 1)
-                                  ? null
-                                  : deshacerJugada,
-                              style: secondaryButtonStyle(),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 13),
-                                child: Text(
-                                  'DESHACER',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.4,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed:
+                                    animando ||
+                                        maquinaPensando ||
+                                        juegoTerminado ||
+                                        historialJugadas.length <
+                                            (modoJuego ==
+                                                    CuatroEnRayaMode.vsMachine
+                                                ? 2
+                                                : 1)
+                                    ? null
+                                    : deshacerJugada,
+                                style: secondaryButtonStyle(),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 13),
+                                  child: Text(
+                                    'DESHACER',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.4,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
 
-                          const SizedBox(width: 12),
+                            const SizedBox(width: 12),
 
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: reiniciarJuego,
-                              style: mainButtonStyle(appWhite),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 13),
-                                child: Text(
-                                  'REINICIAR',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.4,
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: reiniciarJuego,
+                                style: mainButtonStyle(CuboColors.white),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 13),
+                                  child: Text(
+                                    'REINICIAR',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.4,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
           ),
         );
       },
@@ -1641,7 +1575,7 @@ class WinningLinePainter extends CustomPainter {
     );
 
     final glowPaint = Paint()
-      ..color = Colors.white.withOpacity(0.55)
+      ..color = Colors.white.withValues(alpha: 0.55)
       ..strokeWidth = 16
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
