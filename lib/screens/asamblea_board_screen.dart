@@ -9,10 +9,7 @@ import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
 
-enum LeyType {
-  izquierda,
-  derecha,
-}
+enum LeyType { izquierda, derecha }
 
 enum PoderDerecha {
   none,
@@ -25,10 +22,7 @@ enum PoderDerecha {
 class AsambleaBoardScreen extends StatefulWidget {
   final List<AsambleaPlayer> players;
 
-  const AsambleaBoardScreen({
-    super.key,
-    required this.players,
-  });
+  const AsambleaBoardScreen({super.key, required this.players});
 
   @override
   State<AsambleaBoardScreen> createState() => _AsambleaBoardScreenState();
@@ -36,14 +30,6 @@ class AsambleaBoardScreen extends StatefulWidget {
 
 class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   static const String saveKey = 'asamblea_partida_guardada';
-
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color leftBlue = Color(0xFF60A5FA);
-  static const Color rightRed = Color(0xFFE63946);
-  static const Color leaderGold = Color(0xFFFFD166);
-  static const Color accentPurple = Color(0xFF8B5CF6);
-  static const Color accentGreen = Color(0xFF22C55E);
 
   static final ShapeBorder _alertShape = RoundedRectangleBorder(
     borderRadius: CuboRadii.xlAll,
@@ -64,7 +50,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
   bool partidaTerminada = false;
   Future<void> _mostrarDialogoSalirTablero() async {
-    await showDialog(
+    await showCuboDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.45),
@@ -86,7 +72,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               Text(
                 'La partida está guardada automáticamente. ¿Qué quieres hacer?',
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.76),
+                  color: CuboColors.white.withValues(alpha: 0.76),
                   fontSize: 14,
                   height: 1.35,
                   fontWeight: FontWeight.w700,
@@ -151,6 +137,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       ),
     );
   }
+
   @override
   void initState() {
     super.initState();
@@ -161,11 +148,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     final cargado = await _cargarPartida();
     if (!cargado) {
       players = widget.players.map((p) {
-        return AsambleaPlayer(
-          name: p.name,
-          role: p.role,
-          isAlive: p.isAlive,
-        );
+        return AsambleaPlayer(name: p.name, role: p.role, isAlive: p.isAlive);
       }).toList();
 
       _crearMazo();
@@ -199,20 +182,16 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
   List<LeyType> _robarTresCartas() {
     _rellenarMazoSiHaceFalta();
-    return [
-      mazo.removeAt(0),
-      mazo.removeAt(0),
-      mazo.removeAt(0),
-    ];
+    return [mazo.removeAt(0), mazo.removeAt(0), mazo.removeAt(0)];
   }
 
   Future<void> _sacarLeyAleatoria() async {
     if (partidaTerminada) return;
 
-    final confirmado = await showDialog<bool>(
+    final confirmado = await showCuboDialog<bool>(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.55),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
@@ -231,7 +210,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               Text(
                 '¿Seguro que quieres sacar una ley aleatoria? Una vez confirmada se añadirá directamente al tablero.',
                 style: TextStyle(
-                  color: appWhite.withOpacity(0.78),
+                  color: CuboColors.white.withValues(alpha: 0.78),
                   fontSize: 14,
                   height: 1.35,
                   fontWeight: FontWeight.w700,
@@ -261,8 +240,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(dialogContext, true),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: rightRed,
-                        foregroundColor: appWhite,
+                        backgroundColor: CuboColors.alert,
+                        foregroundColor: CuboColors.white,
                         elevation: 0,
                         shape: const StadiumBorder(),
                       ),
@@ -305,9 +284,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
     if (!mounted) return;
 
-    await showDialog(
+    await showCuboDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.55),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
@@ -323,13 +302,13 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 decoration: BoxDecoration(
                   color: _colorLey(ley),
                   shape: BoxShape.circle,
-                  border: Border.all(color: appWhite, width: 2.4),
+                  border: Border.all(color: CuboColors.white, width: 2.4),
                 ),
                 child: Icon(
                   ley == LeyType.izquierda
                       ? Icons.shield_outlined
                       : Icons.gavel_rounded,
-                  color: appWhite,
+                  color: CuboColors.white,
                   size: 38,
                 ),
               ),
@@ -338,7 +317,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 'ley aprobada',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite,
+                  color: CuboColors.white,
                   fontSize: 32,
                   height: 0.95,
                   fontWeight: FontWeight.w900,
@@ -357,13 +336,13 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 decoration: BoxDecoration(
                   color: _colorLey(ley),
                   borderRadius: CuboRadii.lgAll,
-                  border: Border.all(color: appWhite, width: 2),
+                  border: Border.all(color: CuboColors.white, width: 2),
                 ),
                 child: Text(
                   tr(_textoLey(ley)).toUpperCase(),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: 21,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.4,
@@ -496,7 +475,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     }
   }
 
-
   PoderDerecha _getPoderDerechaPorCasilla(int casillaDerecha) {
     final total = players.length;
 
@@ -565,12 +543,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       opciones.add(i);
     }
 
-    final seleccionado = await showDialog<int>(
+    final seleccionado = await showCuboDialog<int>(
       context: context,
       builder: (_) {
         return AlertDialog(
           backgroundColor: CuboColors.blue,
-        shape: _alertShape,
+          shape: _alertShape,
           title: const Text(
             'Elegir jugador',
             style: TextStyle(color: Colors.white),
@@ -625,7 +603,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<void> _jugarTurno() async {
     if (partidaTerminada) return;
 
-
     final cartas = _robarTresCartas();
     final cartasTrasPresidente = await _modalPresidente(cartas);
 
@@ -672,7 +649,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           builder: (context, setModalState) {
             return AlertDialog(
               backgroundColor: CuboColors.blue,
-        shape: _alertShape,
+              shape: _alertShape,
 
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
 
@@ -700,9 +677,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: tr(cartasVisibles
-                        ? 'Ocultar cartas'
-                        : 'Mostrar cartas'),
+                    tooltip: tr(
+                      cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
+                    ),
                   ),
                 ],
               ),
@@ -717,15 +694,13 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: CuboRadii.smAll,
-                      border: Border.all(
-                        color: Colors.white12,
-                      ),
+                      border: Border.all(color: Colors.white12),
                     ),
                     child: Text(
                       cartasVisibles
                           ? cartasSeleccionadas.length == 2
-                          ? '2 de 2 seleccionadas · pulsa CONFIRMAR'
-                          : 'Selecciona las 2 cartas que pasarán a la siguiente elección'
+                                ? '2 de 2 seleccionadas · pulsa CONFIRMAR'
+                                : 'Selecciona las 2 cartas que pasarán a la siguiente elección'
                           : 'Cartas ocultas para pasar el móvil',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -737,8 +712,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                   ...List.generate(cartas.length, (index) {
                     final ley = cartas[index];
-                    final seleccionada =
-                    cartasSeleccionadas.contains(index);
+                    final seleccionada = cartasSeleccionadas.contains(index);
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -748,8 +722,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           backgroundColor: cartasVisibles
                               ? _colorLey(ley)
                               : CuboColors.blueDeep,
-                          disabledBackgroundColor:
-                          CuboColors.blueDeep,
+                          disabledBackgroundColor: CuboColors.blueDeep,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 16,
@@ -767,15 +740,14 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                         onPressed: cartasVisibles
                             ? () {
-                          setModalState(() {
-                            if (seleccionada) {
-                              cartasSeleccionadas.remove(index);
-                            } else if (
-                            cartasSeleccionadas.length < 2) {
-                              cartasSeleccionadas.add(index);
-                            }
-                          });
-                        }
+                                setModalState(() {
+                                  if (seleccionada) {
+                                    cartasSeleccionadas.remove(index);
+                                  } else if (cartasSeleccionadas.length < 2) {
+                                    cartasSeleccionadas.add(index);
+                                  }
+                                });
+                              }
                             : null,
 
                         child: Row(
@@ -783,8 +755,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                             Icon(
                               cartasVisibles
                                   ? ley == LeyType.izquierda
-                                  ? Icons.gavel_outlined
-                                  : Icons.policy_outlined
+                                        ? Icons.gavel_outlined
+                                        : Icons.policy_outlined
                                   : Icons.visibility_off_outlined,
                               color: Colors.white,
                             ),
@@ -821,48 +793,35 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed:
-                      cartasVisibles &&
-                          cartasSeleccionadas.length == 2
+                          cartasVisibles && cartasSeleccionadas.length == 2
                           ? () {
-                        // La única carta no seleccionada
-                        // se descarta.
-                        final indiceDescartado =
-                        List.generate(
-                          cartas.length,
-                              (index) => index,
-                        ).firstWhere(
-                              (index) =>
-                          !cartasSeleccionadas
-                              .contains(index),
-                        );
+                              // La única carta no seleccionada
+                              // se descarta.
+                              final indiceDescartado =
+                                  List.generate(
+                                    cartas.length,
+                                    (index) => index,
+                                  ).firstWhere(
+                                    (index) =>
+                                        !cartasSeleccionadas.contains(index),
+                                  );
 
-                        descarte.add(
-                          cartas[indiceDescartado],
-                        );
+                              descarte.add(cartas[indiceDescartado]);
 
-                        // Las dos seleccionadas pasan al portavoz.
-                        final indicesSeleccionados =
-                        cartasSeleccionadas.toList()
-                          ..sort();
+                              // Las dos seleccionadas pasan al portavoz.
+                              final indicesSeleccionados =
+                                  cartasSeleccionadas.toList()..sort();
 
-                        final cartasParaPortavoz =
-                        indicesSeleccionados
-                            .map(
-                              (index) => cartas[index],
-                        )
-                            .toList();
+                              final cartasParaPortavoz = indicesSeleccionados
+                                  .map((index) => cartas[index])
+                                  .toList();
 
-                        Navigator.pop(
-                          context,
-                          cartasParaPortavoz,
-                        );
-                      }
+                              Navigator.pop(context, cartasParaPortavoz);
+                            }
                           : null,
                       style: CuboButtons.primary(padding: null),
                       child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         child: Text(
                           'CONFIRMAR CARTAS',
                           style: TextStyle(
@@ -886,7 +845,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<LeyType?> _modalPortavoz(List<LeyType> cartas) async {
     bool cartasVisibles = true;
 
-    return showDialog<LeyType>(
+    return showCuboDialog<LeyType>(
       context: context,
       barrierDismissible: false,
       builder: (_) {
@@ -894,7 +853,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           builder: (context, setModalState) {
             return AlertDialog(
               backgroundColor: CuboColors.blue,
-        shape: _alertShape,
+              shape: _alertShape,
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
               title: Row(
                 children: [
@@ -916,7 +875,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: tr(cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas'),
+                    tooltip: tr(
+                      cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
+                    ),
                   ),
                 ],
               ),
@@ -928,7 +889,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white12),
                     ),
@@ -962,18 +923,18 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         ),
                         onPressed: visible
                             ? () {
-                          final restante = cartas.firstWhere(
-                                (c) => c != ley,
-                            orElse: () => ley,
-                          );
+                                final restante = cartas.firstWhere(
+                                  (c) => c != ley,
+                                  orElse: () => ley,
+                                );
 
-                          if (restante != ley ||
-                              cartas.where((c) => c == ley).length > 1) {
-                            descarte.add(restante);
-                          }
+                                if (restante != ley ||
+                                    cartas.where((c) => c == ley).length > 1) {
+                                  descarte.add(restante);
+                                }
 
-                          Navigator.pop(context, ley);
-                        }
+                                Navigator.pop(context, ley);
+                              }
                             : null,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -981,8 +942,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                             Icon(
                               visible
                                   ? (ley == LeyType.izquierda
-                                  ? Icons.gavel_outlined
-                                  : Icons.policy_outlined)
+                                        ? Icons.gavel_outlined
+                                        : Icons.policy_outlined)
                                   : Icons.visibility_off_outlined,
                               color: Colors.white,
                             ),
@@ -1055,7 +1016,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       opciones.add(i);
     }
 
-    final elegido = await showDialog<int>(
+    final elegido = await showCuboDialog<int>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: CuboColors.blue,
@@ -1086,15 +1047,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
     if (elegido == null) return;
 
-    await showDialog(
+    await showCuboDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: CuboColors.blue,
         shape: _alertShape,
-        title: const Text(
-          'Resultado',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Resultado', style: TextStyle(color: Colors.white)),
         content: Text(
           '${players[elegido].name} es ${_textoRol(players[elegido].role)}',
           style: const TextStyle(color: Colors.white70),
@@ -1115,7 +1073,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
     bool cartasVisibles = false;
 
-    await showDialog(
+    await showCuboDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) {
@@ -1123,7 +1081,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
           builder: (context, setModalState) {
             return AlertDialog(
               backgroundColor: CuboColors.blue,
-        shape: _alertShape,
+              shape: _alertShape,
               titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
               title: Row(
                 children: [
@@ -1145,7 +1103,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : Icons.visibility_off_outlined,
                       color: Colors.white70,
                     ),
-                    tooltip: tr(cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas'),
+                    tooltip: tr(
+                      cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
+                    ),
                   ),
                 ],
               ),
@@ -1157,7 +1117,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white12),
                     ),
@@ -1183,9 +1143,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: visible
-                            ? _colorLey(ley)
-                            : CuboColors.blueDeep,
+                        color: visible ? _colorLey(ley) : CuboColors.blueDeep,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: visible ? Colors.white24 : Colors.white10,
@@ -1197,8 +1155,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           Icon(
                             visible
                                 ? (ley == LeyType.izquierda
-                                ? Icons.gavel_outlined
-                                : Icons.policy_outlined)
+                                      ? Icons.gavel_outlined
+                                      : Icons.policy_outlined)
                                 : Icons.visibility_off_outlined,
                             color: Colors.white,
                           ),
@@ -1239,7 +1197,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       opciones.add(i);
     }
 
-    final elegido = await showDialog<int>(
+    final elegido = await showCuboDialog<int>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: CuboColors.blue,
@@ -1293,7 +1251,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       opciones.add(i);
     }
 
-    final elegido = await showDialog<int>(
+    final elegido = await showCuboDialog<int>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: CuboColors.blue,
@@ -1353,18 +1311,15 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<void> _mostrarNormas() async {
     await showAsambleaRulesDialog(context);
   }
+
   List<AsambleaPlayer> _crearNuevaPartidaMismosJugadores() {
     final random = Random();
 
-    final nuevosJugadores = players
-        .map(
-          (player) => AsambleaPlayer(
-        name: player.name,
-        isAlive: true,
-      ),
-    )
-        .toList()
-      ..shuffle(random);
+    final nuevosJugadores =
+        players
+            .map((player) => AsambleaPlayer(name: player.name, isAlive: true))
+            .toList()
+          ..shuffle(random);
 
     final total = nuevosJugadores.length;
 
@@ -1391,24 +1346,20 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     return nuevosJugadores;
   }
 
-  Future<void> _mostrarGanador(
-      String titulo,
-      String mensaje,
-      ) async {
-    final bool ganaIzquierda =
-    titulo.toLowerCase().contains('izquierda');
+  Future<void> _mostrarGanador(String titulo, String mensaje) async {
+    final bool ganaIzquierda = titulo.toLowerCase().contains('izquierda');
 
-    final Color winnerColor =
-    ganaIzquierda ? leftBlue : rightRed;
+    final Color winnerColor = ganaIzquierda
+        ? CuboColors.chill
+        : CuboColors.alert;
 
-    final String winnerName =
-    ganaIzquierda ? 'IZQUIERDA' : 'DERECHA';
+    final String winnerName = ganaIzquierda ? 'IZQUIERDA' : 'DERECHA';
 
     final IconData winnerIcon = ganaIzquierda
         ? Icons.shield_outlined
         : Icons.gavel_rounded;
 
-    await showDialog(
+    await showCuboDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.70),
@@ -1428,14 +1379,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // CABECERA GANADORA
-
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      20,
-                      22,
-                      20,
-                      4,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 4),
                     child: Column(
                       children: [
                         const CuboIllustration(
@@ -1457,7 +1402,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           '¡GANA!',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: appWhite,
+                            color: CuboColors.white,
                             fontSize: 28,
                             height: 0.9,
                             fontWeight: FontWeight.w900,
@@ -1471,7 +1416,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           winnerName,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: appWhite,
+                            color: CuboColors.white,
                             fontSize: 43,
                             height: 0.9,
                             fontWeight: FontWeight.w900,
@@ -1494,20 +1439,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                   ),
 
                   // CONTENIDO
-
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      18,
-                      18,
-                      18,
-                      18,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // MOTIVO DE LA VICTORIA
-
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(15),
@@ -1517,8 +1454,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                             accent: winnerColor,
                           ),
                           child: Row(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CuboIconCircle(
                                 icon: winnerIcon,
@@ -1530,16 +1466,14 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
                                       'MOTIVO DE LA VICTORIA',
                                       style: TextStyle(
-                                        color: appWhite,
+                                        color: CuboColors.white,
                                         fontSize: 11,
-                                        fontWeight:
-                                        FontWeight.w900,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: 0.8,
                                       ),
                                     ),
@@ -1549,13 +1483,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                     Text(
                                       mensaje,
                                       style: TextStyle(
-                                        color: appWhite.withOpacity(
-                                          0.82,
+                                        color: CuboColors.white.withValues(
+                                          alpha: 0.82,
                                         ),
                                         fontSize: 14,
                                         height: 1.3,
-                                        fontWeight:
-                                        FontWeight.w700,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ],
@@ -1568,12 +1501,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         const SizedBox(height: 14),
 
                         // MARCADOR FINAL
-
                         const Text(
                           'MARCADOR FINAL',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: appWhite,
+                            color: CuboColors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 1.1,
@@ -1586,16 +1518,16 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           children: [
                             Expanded(
                               child: Container(
-                                padding:
-                                const EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color:
-                                  leftBlue.withValues(alpha: 0.22),
+                                  color: CuboColors.chill.withValues(
+                                    alpha: 0.22,
+                                  ),
                                   borderRadius: CuboRadii.mdAll,
                                   border: Border.all(
-                                    color: leftBlue,
+                                    color: CuboColors.chill,
                                     width: 2,
                                   ),
                                 ),
@@ -1603,7 +1535,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                   children: [
                                     const Icon(
                                       Icons.shield_outlined,
-                                      color: appWhite,
+                                      color: CuboColors.white,
                                       size: 25,
                                     ),
 
@@ -1612,10 +1544,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                     const Text(
                                       'IZQUIERDA',
                                       style: TextStyle(
-                                        color: appWhite,
+                                        color: CuboColors.white,
                                         fontSize: 10,
-                                        fontWeight:
-                                        FontWeight.w900,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -1625,11 +1556,10 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                     Text(
                                       '$leyesIzquierda',
                                       style: const TextStyle(
-                                        color: appWhite,
+                                        color: CuboColors.white,
                                         fontSize: 32,
                                         height: 0.9,
-                                        fontWeight:
-                                        FontWeight.w900,
+                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                   ],
@@ -1641,16 +1571,16 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                             Expanded(
                               child: Container(
-                                padding:
-                                const EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color:
-                                  rightRed.withValues(alpha: 0.22),
+                                  color: CuboColors.alert.withValues(
+                                    alpha: 0.22,
+                                  ),
                                   borderRadius: CuboRadii.mdAll,
                                   border: Border.all(
-                                    color: rightRed,
+                                    color: CuboColors.alert,
                                     width: 2,
                                   ),
                                 ),
@@ -1658,7 +1588,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                   children: [
                                     const Icon(
                                       Icons.gavel_rounded,
-                                      color: appWhite,
+                                      color: CuboColors.white,
                                       size: 25,
                                     ),
 
@@ -1667,10 +1597,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                     const Text(
                                       'DERECHA',
                                       style: TextStyle(
-                                        color: appWhite,
+                                        color: CuboColors.white,
                                         fontSize: 10,
-                                        fontWeight:
-                                        FontWeight.w900,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -1680,11 +1609,10 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                                     Text(
                                       '$leyesDerecha',
                                       style: const TextStyle(
-                                        color: appWhite,
+                                        color: CuboColors.white,
                                         fontSize: 32,
                                         height: 0.9,
-                                        fontWeight:
-                                        FontWeight.w900,
+                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                   ],
@@ -1697,13 +1625,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         const SizedBox(height: 20),
 
                         // MISMOS JUGADORES
-
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () async {
                               final nuevosJugadores =
-                              _crearNuevaPartidaMismosJugadores();
+                                  _crearNuevaPartidaMismosJugadores();
 
                               await _borrarPartidaGuardada();
 
@@ -1713,10 +1640,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      AsambleaRolesScreen(
-                                        players: nuevosJugadores,
-                                      ),
+                                  builder: (_) => AsambleaRolesScreen(
+                                    players: nuevosJugadores,
+                                  ),
                                 ),
                               );
                             },
@@ -1728,10 +1654,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.replay_rounded,
-                                    size: 22,
-                                  ),
+                                  Icon(Icons.replay_rounded, size: 22),
                                   SizedBox(width: 9),
                                   Expanded(
                                     child: Text(
@@ -1756,7 +1679,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         const SizedBox(height: 10),
 
                         // CAMBIAR JUGADORES
-
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton(
@@ -1767,35 +1689,26 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                               Navigator.of(dialogContext).pop();
 
-                              Navigator.of(context)
-                                  .pushAndRemoveUntil(
+                              Navigator.of(context).pushAndRemoveUntil(
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                  const AsambleaSetupScreen(),
+                                  builder: (_) => const AsambleaSetupScreen(),
                                 ),
-                                    (route) => route.isFirst,
+                                (route) => route.isFirst,
                               );
                             },
                             style: secondaryButtonStyle(),
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
+                              padding: EdgeInsets.symmetric(vertical: 14),
                               child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.group_add_outlined,
-                                    size: 21,
-                                  ),
+                                  Icon(Icons.group_add_outlined, size: 21),
                                   SizedBox(width: 9),
                                   Text(
                                     'CAMBIAR JUGADORES',
                                     style: TextStyle(
                                       fontSize: 13.5,
-                                      fontWeight:
-                                      FontWeight.w900,
+                                      fontWeight: FontWeight.w900,
                                       letterSpacing: 0.3,
                                     ),
                                   ),
@@ -1808,7 +1721,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                         const SizedBox(height: 10),
 
                         // MENÚ PRINCIPAL
-
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton(
@@ -1819,9 +1731,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
                               Navigator.of(dialogContext).pop();
 
-                              Navigator.of(context).popUntil(
-                                    (route) => route.isFirst,
-                              );
+                              Navigator.of(
+                                context,
+                              ).popUntil((route) => route.isFirst);
                             },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: CuboColors.whiteA(0.78),
@@ -1832,24 +1744,17 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                               shape: const StadiumBorder(),
                             ),
                             child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 13,
-                              ),
+                              padding: EdgeInsets.symmetric(vertical: 13),
                               child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.home_outlined,
-                                    size: 20,
-                                  ),
+                                  Icon(Icons.home_outlined, size: 20),
                                   SizedBox(width: 9),
                                   Text(
                                     'MENÚ PRINCIPAL',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      fontWeight:
-                                      FontWeight.w900,
+                                      fontWeight: FontWeight.w900,
                                       letterSpacing: 0.3,
                                     ),
                                   ),
@@ -1871,7 +1776,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Future<void> _reiniciarPartida() async {
-    final confirmado = await showDialog<bool>(
+    final confirmado = await showCuboDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: CuboColors.blue,
@@ -1911,7 +1816,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         SnackBar(
           content: Text(text),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: appBlue,
+          backgroundColor: CuboColors.blue,
         ),
       );
   }
@@ -1927,11 +1832,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       'mazo': mazo.map((e) => e.name).toList(),
       'descarte': descarte.map((e) => e.name).toList(),
       'players': players.map((p) {
-        return {
-          'name': p.name,
-          'role': p.role?.name,
-          'isAlive': p.isAlive,
-        };
+        return {'name': p.name, 'role': p.role?.name, 'isAlive': p.isAlive};
       }).toList(),
     };
   }
@@ -1983,7 +1884,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await prefs.remove(saveKey);
   }
 
-
   ButtonStyle mainButtonStyle() {
     return CuboButtons.primary(padding: null);
   }
@@ -2007,10 +1907,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: CuboColors.whiteA(0.08),
-          border: Border.all(
-            color: CuboColors.whiteA(0.85),
-            width: 2.2,
-          ),
+          border: Border.all(color: CuboColors.whiteA(0.85), width: 2.2),
         ),
         child: Center(child: child),
       ),
@@ -2038,7 +1935,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                   onTap: _reiniciarPartida,
                   child: Icon(
                     Icons.restart_alt_rounded,
-                    color: appWhite,
+                    color: CuboColors.white,
                     size: compact ? 23 : 27,
                   ),
                 ),
@@ -2050,7 +1947,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                   onTap: _mostrarNormas,
                   child: Icon(
                     Icons.question_mark_rounded,
-                    color: appWhite,
+                    color: CuboColors.white,
                     size: compact ? 23 : 27,
                   ),
                 ),
@@ -2062,9 +1959,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         SizedBox(height: compact ? 12 : 20),
 
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 4 : 8,
-          ),
+          padding: EdgeInsets.only(right: compact ? 4 : 8),
           child: CuboSectionTitle(
             'tablero asamblea',
             alignEnd: true,
@@ -2076,12 +1971,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     );
   }
 
-
-
-  Widget buildPanel({
-    required Widget child,
-    EdgeInsets? padding,
-  }) {
+  Widget buildPanel({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(14),
@@ -2094,7 +1984,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     return Text(
       tr(text).toLowerCase(),
       style: const TextStyle(
-        color: appWhite,
+        color: CuboColors.white,
         fontSize: 28,
         height: 0.95,
         fontWeight: FontWeight.w900,
@@ -2131,12 +2021,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 width: compact ? 42 : 50,
                 height: compact ? 42 : 50,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.18),
+                  color: color.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color,
-                    width: 2,
-                  ),
+                  border: Border.all(color: color, width: 2),
                 ),
                 child: Icon(
                   title == 'Izquierda'
@@ -2151,7 +2038,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 child: Text(
                   tr(title).toLowerCase(),
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: compact ? 29 : 34,
                     height: 0.92,
                     fontWeight: FontWeight.w900,
@@ -2167,15 +2054,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: color,
-                    width: 1.8,
-                  ),
+                  border: Border.all(color: color, width: 1.8),
                 ),
                 child: Text(
                   '$active / $total',
                   style: TextStyle(
-                    color: appWhite,
+                    color: CuboColors.white,
                     fontSize: compact ? 15 : 17,
                     fontWeight: FontWeight.w900,
                   ),
@@ -2196,9 +2080,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               return Expanded(
                 child: Container(
                   height: cellHeight,
-                  margin: EdgeInsets.symmetric(
-                    horizontal: compact ? 2 : 3,
-                  ),
+                  margin: EdgeInsets.symmetric(horizontal: compact ? 2 : 3),
                   padding: EdgeInsets.symmetric(
                     horizontal: compact ? 3 : 5,
                     vertical: compact ? 6 : 8,
@@ -2207,68 +2089,70 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     color: filled ? color : CuboColors.whiteA(0.07),
                     borderRadius: CuboRadii.smAll,
                     border: Border.all(
-                      color: filled ? appWhite : appWhite.withOpacity(0.28),
+                      color: filled
+                          ? CuboColors.white
+                          : CuboColors.white.withValues(alpha: 0.28),
                       width: filled ? 2.2 : 1.4,
                     ),
                     boxShadow: filled
                         ? [
-                      BoxShadow(
-                        color: color.withOpacity(0.32),
-                        blurRadius: 12,
-                        offset: const Offset(0, 5),
-                      ),
-                    ]
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.32),
+                              blurRadius: 12,
+                              offset: const Offset(0, 5),
+                            ),
+                          ]
                         : null,
                   ),
                   child: mostrarAcciones && tienePoder
                       ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _iconoPoder(poder),
-                        color: appWhite,
-                        size: compact ? 22 : 27,
-                      ),
-                      SizedBox(height: compact ? 5 : 7),
-                      Text(
-                        _textoPoder(poder),
-                        textAlign: TextAlign.center,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: appWhite.withOpacity(
-                            filled ? 1 : 0.80,
-                          ),
-                          fontSize: compact ? 8.2 : 9.5,
-                          fontWeight: FontWeight.w900,
-                          height: 1.05,
-                        ),
-                      ),
-                    ],
-                  )
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _iconoPoder(poder),
+                              color: CuboColors.white,
+                              size: compact ? 22 : 27,
+                            ),
+                            SizedBox(height: compact ? 5 : 7),
+                            Text(
+                              _textoPoder(poder),
+                              textAlign: TextAlign.center,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: CuboColors.white.withValues(
+                                  alpha: filled ? 1 : 0.80,
+                                ),
+                                fontSize: compact ? 8.2 : 9.5,
+                                fontWeight: FontWeight.w900,
+                                height: 1.05,
+                              ),
+                            ),
+                          ],
+                        )
                       : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$casilla',
-                        style: TextStyle(
-                          color: filled
-                              ? appWhite
-                              : appWhite.withOpacity(0.42),
-                          fontSize: compact ? 22 : 27,
-                          fontWeight: FontWeight.w900,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '$casilla',
+                              style: TextStyle(
+                                color: filled
+                                    ? CuboColors.white
+                                    : CuboColors.white.withValues(alpha: 0.42),
+                                fontSize: compact ? 22 : 27,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            if (filled) ...[
+                              SizedBox(height: compact ? 3 : 5),
+                              Icon(
+                                Icons.check_rounded,
+                                color: CuboColors.white,
+                                size: compact ? 16 : 19,
+                              ),
+                            ],
+                          ],
                         ),
-                      ),
-                      if (filled) ...[
-                        SizedBox(height: compact ? 3 : 5),
-                        Icon(
-                          Icons.check_rounded,
-                          color: appWhite,
-                          size: compact ? 16 : 19,
-                        ),
-                      ],
-                    ],
-                  ),
                 ),
               );
             }),
@@ -2278,20 +2162,24 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     );
   }
 
-
-  Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
+  Widget _buildInfoCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: buildPanel(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(
           children: [
-            Icon(icon, color: appWhite, size: 28),
+            Icon(icon, color: CuboColors.white, size: 28),
             const SizedBox(height: 8),
             Text(
               tr(title).toUpperCase(),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: appWhite.withOpacity(0.62),
+                color: CuboColors.white.withValues(alpha: 0.62),
                 fontSize: 10.5,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.6,
@@ -2304,7 +2192,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: appWhite,
+                color: CuboColors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
                 height: 1.1,
@@ -2336,7 +2224,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       color: CuboColors.whiteA(0.035),
                       borderRadius: CuboRadii.mdAll,
                       border: Border.all(
-                        color: rightRed.withValues(alpha: 0.55),
+                        color: CuboColors.alert.withValues(alpha: 0.55),
                         width: 1.2,
                       ),
                     ),
@@ -2348,7 +2236,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: appWhite.withOpacity(0.85),
+                        color: CuboColors.white.withValues(alpha: 0.85),
                         width: 2,
                       ),
                     ),
@@ -2356,7 +2244,7 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       child: Text(
                         '${i + 1}',
                         style: const TextStyle(
-                          color: appWhite,
+                          color: CuboColors.white,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -2370,8 +2258,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                           : '${player.name} (eliminado)',
                       style: TextStyle(
                         color: player.isAlive
-                            ? appWhite
-                            : appWhite.withOpacity(0.45),
+                            ? CuboColors.white
+                            : CuboColors.white.withValues(alpha: 0.45),
                         fontWeight: FontWeight.w900,
                         fontSize: 15.5,
                       ),
@@ -2415,17 +2303,19 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: appWhite.withOpacity(enabled ? 0.30 : 0.12),
+                  color: CuboColors.white.withValues(
+                    alpha: enabled ? 0.30 : 0.12,
+                  ),
                   width: 2,
                 ),
                 boxShadow: enabled
                     ? [
-                  BoxShadow(
-                    color: backgroundColor.withOpacity(0.22),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: backgroundColor.withValues(alpha: 0.22),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Row(
@@ -2433,7 +2323,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                 children: [
                   Icon(
                     icon,
-                    color: foregroundColor.withOpacity(enabled ? 1 : 0.40),
+                    color: foregroundColor.withValues(
+                      alpha: enabled ? 1 : 0.40,
+                    ),
                     size: compact ? 22 : 25,
                   ),
                   SizedBox(width: compact ? 7 : 9),
@@ -2444,8 +2336,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: foregroundColor.withOpacity(
-                          enabled ? 1 : 0.40,
+                        color: foregroundColor.withValues(
+                          alpha: enabled ? 1 : 0.40,
                         ),
                         fontSize: compact ? 10.5 : 12,
                         fontWeight: FontWeight.w900,
@@ -2467,15 +2359,15 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     if (!mounted || (players.isEmpty && mazo.isEmpty && descarte.isEmpty)) {
       return const Scaffold(
         backgroundColor: CuboColors.blue,
-        body: CuboBackground(
+        body: CuboGameBackground(
+          accent: CuboColors.chill,
           halo: CuboHalo.topLeft,
           child: Center(
-            child: CircularProgressIndicator(color: appWhite),
+            child: CircularProgressIndicator(color: CuboColors.white),
           ),
         ),
       );
     }
-
 
     return PopScope(
       canPop: false,
@@ -2485,82 +2377,82 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       },
       child: Scaffold(
         backgroundColor: CuboColors.blue,
-        body: CuboBackground(
+        body: CuboGameBackground(
+          accent: CuboColors.chill,
           halo: CuboHalo.topLeft,
           child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final compact = constraints.maxHeight < 740;
-              final horizontalPadding = compact ? 13.0 : 18.0;
-              final verticalPadding = compact ? 11.0 : 18.0;
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 740;
+                final horizontalPadding = compact ? 13.0 : 18.0;
+                final verticalPadding = compact ? 11.0 : 18.0;
 
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  verticalPadding,
-                  horizontalPadding,
-                  compact ? 11 : 16,
-                ),
-                child: Column(
-                  children: [
-                    buildTopBar(compact: compact),
-                    SizedBox(height: compact ? 9 : 13),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildLeyTrack(
-                              title: 'Izquierda',
-                              total: 5,
-                              active: leyesIzquierda,
-                              color: leftBlue,
-                              compact: compact,
-                            ),
-                            SizedBox(height: compact ? 9 : 12),
-                            _buildLeyTrack(
-                              title: 'Derecha',
-                              total: 6,
-                              active: leyesDerecha,
-                              color: rightRed,
-                              compact: compact,
-                              mostrarAcciones: true,
-                            ),
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    verticalPadding,
+                    horizontalPadding,
+                    compact ? 11 : 16,
+                  ),
+                  child: Column(
+                    children: [
+                      buildTopBar(compact: compact),
+                      SizedBox(height: compact ? 9 : 13),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _buildLeyTrack(
+                                title: 'Izquierda',
+                                total: 5,
+                                active: leyesIzquierda,
+                                color: CuboColors.chill,
+                                compact: compact,
+                              ),
+                              SizedBox(height: compact ? 9 : 12),
+                              _buildLeyTrack(
+                                title: 'Derecha',
+                                total: 6,
+                                active: leyesDerecha,
+                                color: CuboColors.alert,
+                                compact: compact,
+                                mostrarAcciones: true,
+                              ),
 
-
-                            SizedBox(height: compact ? 9 : 12),
-                            _buildJugadoresList(),
-                          ],
+                              SizedBox(height: compact ? 9 : 12),
+                              _buildJugadoresList(),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: compact ? 6 : 9),
-                    Row(
-                      children: [
-                        _buildBoardActionButton(
-                          icon: Icons.casino_rounded,
-                          label: 'LEY ALEATORIA',
-                          backgroundColor: rightRed,
-                          foregroundColor: appWhite,
-                          onTap: partidaTerminada ? null : _sacarLeyAleatoria,
-                          compact: compact,
-                        ),
-                        const SizedBox(width: 10),
-                        _buildBoardActionButton(
-                          icon: Icons.play_arrow_rounded,
-                          label: 'JUGAR TURNO',
-                          backgroundColor: leaderGold,
-                          foregroundColor: appBlue,
-                          onTap: partidaTerminada ? null : _jugarTurno,
-                          compact: compact,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
+                      SizedBox(height: compact ? 6 : 9),
+                      Row(
+                        children: [
+                          _buildBoardActionButton(
+                            icon: Icons.casino_rounded,
+                            label: 'LEY ALEATORIA',
+                            backgroundColor: CuboColors.alert,
+                            foregroundColor: CuboColors.white,
+                            onTap: partidaTerminada ? null : _sacarLeyAleatoria,
+                            compact: compact,
+                          ),
+                          const SizedBox(width: 10),
+                          _buildBoardActionButton(
+                            icon: Icons.play_arrow_rounded,
+                            label: 'JUGAR TURNO',
+                            backgroundColor: CuboColors.fiesta,
+                            foregroundColor: CuboColors.blue,
+                            onTap: partidaTerminada ? null : _jugarTurno,
+                            compact: compact,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
         ),
       ),
     );

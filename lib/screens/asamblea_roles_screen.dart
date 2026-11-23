@@ -9,10 +9,7 @@ import '../widgets/cubo_game_widgets.dart';
 class AsambleaRolesScreen extends StatefulWidget {
   final List<AsambleaPlayer> players;
 
-  const AsambleaRolesScreen({
-    super.key,
-    required this.players,
-  });
+  const AsambleaRolesScreen({super.key, required this.players});
 
   @override
   State<AsambleaRolesScreen> createState() => _AsambleaRolesScreenState();
@@ -36,11 +33,6 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   // completamente abierta durante el movimiento.
   bool _draggingRaisedSecretCard = false;
   bool _roleHasBeenRevealed = false;
-  static const Color appBlue = Color(0xFF2F4F9C);
-  static const Color appWhite = Color(0xFFF7F7F7);
-  static const Color leftBlue = Color(0xFF60A5FA);
-  static const Color rightRed = Color(0xFFE63946);
-  static const Color leaderGold = Color(0xFFFFD166);
 
   double get secretRevealProgress {
     return (-secretCardDragOffset / maxRevealOffset).clamp(0.0, 1.0);
@@ -85,16 +77,16 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   Color _roleColor(AsambleaRole? role) {
     switch (role) {
       case AsambleaRole.izquierda:
-        return leftBlue;
+        return CuboColors.chill;
 
       case AsambleaRole.derecha:
-        return rightRed;
+        return CuboColors.alert;
 
       case AsambleaRole.liderOculto:
-        return leaderGold;
+        return CuboColors.fiesta;
 
       default:
-        return appWhite;
+        return CuboColors.white;
     }
   }
 
@@ -120,11 +112,10 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
 
   void _updateSecretCardDrag(DragUpdateDetails details) {
     setState(() {
-      secretCardDragOffset =
-          (secretCardDragOffset + details.delta.dy).clamp(
-            -maxRevealOffset,
-            0.0,
-          );
+      secretCardDragOffset = (secretCardDragOffset + details.delta.dy).clamp(
+        -maxRevealOffset,
+        0.0,
+      );
 
       // Una vez revelado el rol, el botón queda habilitado.
       if (secretRevealProgress >= 0.88) {
@@ -174,28 +165,18 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
       return false;
     }
 
-    final topLeft = renderObject.localToGlobal(
-      Offset.zero,
-    );
+    final topLeft = renderObject.localToGlobal(Offset.zero);
 
     final bottomRight = renderObject.localToGlobal(
-      Offset(
-        renderObject.size.width,
-        renderObject.size.height,
-      ),
+      Offset(renderObject.size.width, renderObject.size.height),
     );
 
-    final cardRect = Rect.fromPoints(
-      topLeft,
-      bottomRight,
-    );
+    final cardRect = Rect.fromPoints(topLeft, bottomRight);
 
     return cardRect.contains(globalPosition);
   }
 
-  void _globalSecretDragStart(
-      DragStartDetails details,
-      ) {
+  void _globalSecretDragStart(DragStartDetails details) {
     // Solo necesitamos este detector especial cuando
     // la tarjeta ya está arriba.
     if (!roleVisibleEnough) {
@@ -203,15 +184,12 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
       return;
     }
 
-    _draggingRaisedSecretCard =
-        _isPointInsideSecretCard(
-          details.globalPosition,
-        );
+    _draggingRaisedSecretCard = _isPointInsideSecretCard(
+      details.globalPosition,
+    );
   }
 
-  void _globalSecretDragUpdate(
-      DragUpdateDetails details,
-      ) {
+  void _globalSecretDragUpdate(DragUpdateDetails details) {
     if (!_draggingRaisedSecretCard) {
       return;
     }
@@ -219,9 +197,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     _updateSecretCardDrag(details);
   }
 
-  void _globalSecretDragEnd(
-      DragEndDetails details,
-      ) {
+  void _globalSecretDragEnd(DragEndDetails details) {
     if (!_draggingRaisedSecretCard) {
       return;
     }
@@ -244,10 +220,8 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
 
       // Si se cancela el gesto, tampoco dejamos
       // la tarjeta a medio camino.
-      if (secretCardDragOffset <=
-          -(maxRevealOffset / 2)) {
-        secretCardDragOffset =
-        -maxRevealOffset;
+      if (secretCardDragOffset <= -(maxRevealOffset / 2)) {
+        secretCardDragOffset = -maxRevealOffset;
       } else {
         secretCardDragOffset = 0;
       }
@@ -279,51 +253,36 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: CuboColors.whiteA(0.08),
-          border: Border.all(
-            color: CuboColors.whiteA(0.85),
-            width: 2.2,
-          ),
+          border: Border.all(color: CuboColors.whiteA(0.85), width: 2.2),
         ),
-        child: Center(
-          child: child,
-        ),
+        child: Center(child: child),
       ),
     );
   }
 
-  Widget buildTopBar({
-    required bool compact,
-  }) {
-    final titleSize =
-    compact ? 34.0 : 42.0;
+  Widget buildTopBar({required bool compact}) {
+    final titleSize = compact ? 34.0 : 42.0;
 
     return Column(
-      crossAxisAlignment:
-      CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             AppLogoButton(
               compact: compact,
-              onTap: () =>
-                  Navigator.pop(context),
+              onTap: () => Navigator.pop(context),
             ),
 
             Row(
               children: [
                 circleButton(
                   compact: compact,
-                  onTap: () =>
-                      showAsambleaRulesDialog(
-                        context,
-                      ),
+                  onTap: () => showAsambleaRulesDialog(context),
                   child: Icon(
                     Icons.question_mark_rounded,
-                    color: appWhite,
-                    size:
-                    compact ? 23 : 27,
+                    color: CuboColors.white,
+                    size: compact ? 23 : 27,
                   ),
                 ),
               ],
@@ -331,22 +290,15 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
           ],
         ),
 
-        SizedBox(
-          height: compact ? 12 : 20,
-        ),
+        SizedBox(height: compact ? 12 : 20),
 
         Padding(
-          padding: EdgeInsets.only(
-            right: compact ? 4 : 8,
-          ),
+          padding: EdgeInsets.only(right: compact ? 4 : 8),
           child: Row(
-            crossAxisAlignment:
-            CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                  bottom: 1,
-                ),
+                padding: const EdgeInsets.only(bottom: 1),
                 child: CuboProgressDots(
                   total: widget.players.length,
                   current: currentIndex,
@@ -375,35 +327,25 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     required AsambleaRole? role,
     required bool compact,
   }) {
-    final roleColor =
-    _roleColor(role);
+    final roleColor = _roleColor(role);
 
-    final progress =
-        secretRevealProgress;
+    final progress = secretRevealProgress;
 
     return AnimatedOpacity(
-      duration:
-      const Duration(milliseconds: 110),
-      opacity:
-      0.08 + (progress * 0.92),
+      duration: const Duration(milliseconds: 110),
+      opacity: 0.08 + (progress * 0.92),
       child: Transform.scale(
-        scale:
-        0.96 + (progress * 0.04),
+        scale: 0.96 + (progress * 0.04),
         child: Column(
-          mainAxisAlignment:
-          MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: compact ? 78 : 98,
               height: compact ? 78 : 98,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: roleColor
-                    .withOpacity(0.18),
-                border: Border.all(
-                  color: roleColor,
-                  width: 2.7,
-                ),
+                color: roleColor.withValues(alpha: 0.18),
+                border: Border.all(color: roleColor, width: 2.7),
               ),
               child: Icon(
                 _roleIcon(role),
@@ -412,21 +354,15 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
               ),
             ),
 
-            SizedBox(
-              height: compact ? 16 : 22,
-            ),
+            SizedBox(height: compact ? 16 : 22),
 
             Text(
               'TU ROL',
-              textAlign:
-              TextAlign.center,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: appWhite
-                    .withOpacity(0.62),
-                fontSize:
-                compact ? 10.5 : 12,
-                fontWeight:
-                FontWeight.w900,
+                color: CuboColors.white.withValues(alpha: 0.62),
+                fontSize: compact ? 10.5 : 12,
+                fontWeight: FontWeight.w900,
                 letterSpacing: 0.9,
               ),
             ),
@@ -436,32 +372,23 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                tr(
-                  _roleTitle(role),
-                ).toLowerCase(),
-                textAlign:
-                TextAlign.center,
+                tr(_roleTitle(role)).toLowerCase(),
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite,
-                  fontSize:
-                  compact ? 35 : 44,
+                  color: CuboColors.white,
+                  fontSize: compact ? 35 : 44,
                   height: 0.94,
-                  fontWeight:
-                  FontWeight.w900,
+                  fontWeight: FontWeight.w900,
                   letterSpacing: -1,
                 ),
               ),
             ),
 
-            SizedBox(
-              height: compact ? 14 : 18,
-            ),
+            SizedBox(height: compact ? 14 : 18),
 
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(
-                compact ? 12 : 15,
-              ),
+              padding: EdgeInsets.all(compact ? 12 : 15),
               decoration: CuboDecorations.glass(
                 selected: true,
                 radius: CuboRadii.md,
@@ -469,36 +396,26 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
               ),
               child: Text(
                 _roleDescription(role),
-                textAlign:
-                TextAlign.center,
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: appWhite
-                      .withOpacity(0.82),
-                  fontSize:
-                  compact ? 13 : 14,
+                  color: CuboColors.white.withValues(alpha: 0.82),
+                  fontSize: compact ? 13 : 14,
                   height: 1.35,
-                  fontWeight:
-                  FontWeight.w700,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
 
-            SizedBox(
-              height: compact ? 12 : 16,
-            ),
+            SizedBox(height: compact ? 12 : 16),
 
             Text(
               'Baja la tarjeta para ocultarlo antes de pasar el móvil.',
-              textAlign:
-              TextAlign.center,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: appWhite
-                    .withOpacity(0.52),
-                fontSize:
-                compact ? 11.5 : 12.5,
+                color: CuboColors.white.withValues(alpha: 0.52),
+                fontSize: compact ? 11.5 : 12.5,
                 height: 1.25,
-                fontWeight:
-                FontWeight.w700,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -520,10 +437,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     return AnimatedSlide(
       duration: const Duration(milliseconds: 90),
       curve: Curves.easeOutCubic,
-      offset: Offset(
-        0,
-        -0.88 * progress,
-      ),
+      offset: Offset(0, -0.88 * progress),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onVerticalDragUpdate: _updateSecretCardDrag,
@@ -536,111 +450,105 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
             horizontal: compact ? 16 : 22,
             vertical: compact ? 18 : 24,
           ),
-          decoration: CuboDecorations.whiteCard(
-            radius: CuboRadii.xl,
-          ),
+          decoration: CuboDecorations.whiteCard(radius: CuboRadii.xl),
           child: CuboCardSwitcher(
             child: Column(
-            key: ValueKey(currentIndex),
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: compact ? 78 : 96,
-                height: compact ? 78 : 96,
-                decoration: BoxDecoration(
-                  color: CuboColors.blueTint,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: cardColor.withValues(alpha: 0.18),
-                    width: 2,
+              key: ValueKey(currentIndex),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: compact ? 78 : 96,
+                  height: compact ? 78 : 96,
+                  decoration: BoxDecoration(
+                    color: CuboColors.blueTint,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: cardColor.withValues(alpha: 0.18),
+                      width: 2,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.lock_rounded,
+                    color: CuboColors.blue,
+                    size: compact ? 39 : 48,
                   ),
                 ),
-                child: Icon(
-                  Icons.lock_rounded,
-                  color: CuboColors.blue,
-                  size: compact ? 39 : 48,
+
+                SizedBox(height: compact ? 18 : 24),
+
+                const CuboStatusChip(
+                  'TARJETA SECRETA',
+                  icon: Icons.visibility_off_rounded,
+                  light: true,
                 ),
-              ),
 
-              SizedBox(
-                height: compact ? 18 : 24,
-              ),
+                const SizedBox(height: 12),
 
-              const CuboStatusChip(
-                'TARJETA SECRETA',
-                icon: Icons.visibility_off_rounded,
-                light: true,
-              ),
-
-              const SizedBox(height: 12),
-
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  player.name.toLowerCase(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: cardColor,
-                    fontSize: compact ? 40 : 52,
-                    height: 0.95,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.2,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    player.name.toLowerCase(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: cardColor,
+                      fontSize: compact ? 40 : 52,
+                      height: 0.95,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.2,
+                    ),
                   ),
                 ),
-              ),
 
-              SizedBox(
-                height: compact ? 20 : 26,
-              ),
+                SizedBox(height: compact ? 20 : 26),
 
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 12 : 15,
-                  vertical: compact ? 12 : 14,
-                ),
-                decoration: const BoxDecoration(
-                  color: CuboColors.blueTint,
-                  borderRadius: CuboRadii.mdAll,
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.keyboard_double_arrow_up_rounded,
-                      color: CuboColors.blue,
-                      size: compact ? 30 : 34,
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      'ARRASTRA DESDE AQUÍ',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: cardColor,
-                        fontSize: compact ? 13 : 15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 12 : 15,
+                    vertical: compact ? 12 : 14,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: CuboColors.blueTint,
+                    borderRadius: CuboRadii.mdAll,
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.keyboard_double_arrow_up_rounded,
+                        color: CuboColors.blue,
+                        size: compact ? 30 : 34,
                       ),
-                    ),
 
-                    const SizedBox(height: 4),
+                      const SizedBox(height: 5),
 
-                    Text(
-                      'sube para revelar · baja para ocultar',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: cardColor.withValues(alpha: 0.62),
-                        fontSize: compact ? 11.5 : 12.5,
-                        height: 1.25,
-                        fontWeight: FontWeight.w700,
+                      Text(
+                        'ARRASTRA DESDE AQUÍ',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: cardColor,
+                          fontSize: compact ? 13 : 15,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        'sube para revelar · baja para ocultar',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: cardColor.withValues(alpha: 0.62),
+                          fontSize: compact ? 11.5 : 12.5,
+                          height: 1.25,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         ),
       ),
@@ -648,10 +556,10 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   }
 
   Widget buildMainCard(
-      AsambleaPlayer player,
-      AsambleaRole? role, {
-        required bool compact,
-      }) {
+    AsambleaPlayer player,
+    AsambleaRole? role, {
+    required bool compact,
+  }) {
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -711,9 +619,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => AsambleaBoardScreen(
-          players: widget.players,
-        ),
+        builder: (_) => AsambleaBoardScreen(players: widget.players),
       ),
     );
   }
@@ -727,12 +633,12 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     final enabled = _roleHasBeenRevealed;
 
     final color = enabled
-        ? appWhite
-        : appWhite.withOpacity(0.16);
+        ? CuboColors.white
+        : CuboColors.white.withValues(alpha: 0.16);
 
     final foreground = enabled
-        ? appBlue
-        : appWhite.withOpacity(0.50);
+        ? CuboColors.blue
+        : CuboColors.white.withValues(alpha: 0.50);
 
     final icon = !enabled
         ? Icons.keyboard_double_arrow_up_rounded
@@ -759,20 +665,14 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
-                color: CuboColors.whiteA(
-                  enabled ? 0.30 : 0.28,
-                ),
+                color: CuboColors.whiteA(enabled ? 0.30 : 0.28),
                 width: 1.4,
               ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  color: foreground,
-                  size: compact ? 31 : 37,
-                ),
+                Icon(icon, color: foreground, size: compact ? 31 : 37),
                 const SizedBox(width: 10),
                 Flexible(
                   child: Text(
@@ -796,11 +696,9 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final player =
-    widget.players[currentIndex];
+    final player = widget.players[currentIndex];
 
-    final role =
-        player.role;
+    final role = player.role;
 
     // Mientras la tarjeta esté suficientemente abierta
     // O mientras YA estemos arrastrando desde fuera del panel,
@@ -808,98 +706,68 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
     //
     // Esto es lo que evita que deje de responder
     // al bajar los primeros 20-30 px.
-    final globalDragEnabled =
-        roleVisibleEnough ||
-            _draggingRaisedSecretCard;
+    final globalDragEnabled = roleVisibleEnough || _draggingRaisedSecretCard;
 
     return Scaffold(
       backgroundColor: CuboColors.blue,
 
-      body: CuboBackground(
+      body: CuboGameBackground(
+        accent: CuboColors.chill,
         halo: CuboHalo.topLeft,
         child: GestureDetector(
-        behavior:
-        HitTestBehavior.translucent,
+          behavior: HitTestBehavior.translucent,
 
-        onVerticalDragStart:
-        globalDragEnabled
-            ? _globalSecretDragStart
-            : null,
+          onVerticalDragStart: globalDragEnabled
+              ? _globalSecretDragStart
+              : null,
 
-        onVerticalDragUpdate:
-        globalDragEnabled
-            ? _globalSecretDragUpdate
-            : null,
+          onVerticalDragUpdate: globalDragEnabled
+              ? _globalSecretDragUpdate
+              : null,
 
-        onVerticalDragEnd:
-        globalDragEnabled
-            ? _globalSecretDragEnd
-            : null,
+          onVerticalDragEnd: globalDragEnabled ? _globalSecretDragEnd : null,
 
-        onVerticalDragCancel:
-        globalDragEnabled
-            ? _globalSecretDragCancel
-            : null,
+          onVerticalDragCancel: globalDragEnabled
+              ? _globalSecretDragCancel
+              : null,
 
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder:
-                (context, constraints) {
-              final compact =
-                  constraints.maxHeight <
-                      740;
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxHeight < 740;
 
-              final horizontalPadding =
-              compact ? 13.0 : 18.0;
+                final horizontalPadding = compact ? 13.0 : 18.0;
 
-              final verticalPadding =
-              compact ? 11.0 : 18.0;
+                final verticalPadding = compact ? 11.0 : 18.0;
 
-              return Padding(
-                padding:
-                EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  verticalPadding,
-                  horizontalPadding,
-                  compact ? 11 : 16,
-                ),
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    verticalPadding,
+                    horizontalPadding,
+                    compact ? 11 : 16,
+                  ),
 
-                child: Column(
-                  children: [
-                    buildTopBar(
-                      compact: compact,
-                    ),
+                  child: Column(
+                    children: [
+                      buildTopBar(compact: compact),
 
-                    SizedBox(
-                      height:
-                      compact ? 10 : 16,
-                    ),
+                      SizedBox(height: compact ? 10 : 16),
 
-                    Expanded(
-                      child:
-                      buildMainCard(
-                        player,
-                        role,
-                        compact: compact,
+                      Expanded(
+                        child: buildMainCard(player, role, compact: compact),
                       ),
-                    ),
 
-                    SizedBox(
-                      height:
-                      compact ? 10 : 14,
-                    ),
+                      SizedBox(height: compact ? 10 : 14),
 
-                    _buildNextButton(
-                      compact: compact,
-                      role: role,
-                    ),
-                  ],
-                ),
-              );
-            },
+                      _buildNextButton(compact: compact, role: role),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
       ),
     );
   }
