@@ -26,14 +26,9 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
   String resultado = 'Pulsa girar para empezar';
 
   final List<Color> wheelColors = const [
-    Color(0xFFFF4D6D),
-    Color(0xFFFFB86C),
-    Color(0xFFFFD166),
-    Color(0xFF22C55E),
-    Color(0xFF60A5FA),
-    Color(0xFF8B5CF6),
-    Color(0xFFF472B6),
-    Color(0xFF14B8A6),
+    CuboColors.fiesta,
+    CuboColors.white,
+    CuboColors.chill,
   ];
 
   @override
@@ -501,85 +496,95 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
     );
   }
 
+  /// Un único botón: GIRAR en reposo, PARAR mientras gira.
+  void toggleSpin() => spinning ? pararRuleta() : girarRuleta();
+
   Widget buildStatus(bool compact) {
-    final icon = spinning
-        ? (stopping ? Icons.slow_motion_video_rounded : Icons.autorenew_rounded)
-        : Icons.touch_app_rounded;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 260),
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
-        child: ScaleTransition(
-          scale: Tween(begin: 0.9, end: 1.0).animate(animation),
-          child: child,
-        ),
-      ),
-      child: Container(
+      child: Text(
+        resultado,
         key: ValueKey(resultado),
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 16 : 20,
-          vertical: compact ? 9 : 11,
-        ),
-        decoration: BoxDecoration(
-          color: CuboColors.whiteA(0.14),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: CuboColors.whiteA(0.28)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: CuboColors.white, size: compact ? 18 : 20),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                resultado,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: CuboText.label(
-                  size: compact ? 15 : 17,
-                  color: CuboColors.white,
-                ),
-              ),
-            ),
-          ],
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: CuboColors.white,
+          fontSize: compact ? 18 : 21,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.2,
         ),
       ),
     );
   }
 
-  Widget buildGameCard({required bool compact}) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: CuboDecorations.glass(radius: CuboRadii.xl),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final statusSpace = compact ? 70.0 : 86.0;
-          final availableWheel = min(
-            constraints.maxWidth - (compact ? 32 : 40),
-            (constraints.maxHeight - statusSpace) / 1.07,
-          );
-          final wheelSize = availableWheel
-              .clamp(180.0, compact ? 300.0 : 360.0)
-              .toDouble();
+  Widget buildGameArea({required bool compact}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final statusSpace = compact ? 44.0 : 56.0;
+        final wheelSize = min(
+          constraints.maxWidth,
+          (constraints.maxHeight - statusSpace) / 1.08,
+        ).clamp(180.0, 420.0).toDouble();
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(vertical: compact ? 12 : 18),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - (compact ? 24 : 36),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  buildWheel(wheelSize),
-                  SizedBox(height: compact ? 14 : 22),
-                  buildStatus(compact),
-                ],
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: stopping ? null : toggleSpin,
+              child: buildWheel(wheelSize),
+            ),
+            SizedBox(height: compact ? 14 : 20),
+            buildStatus(compact),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildSpinButton({required bool compact}) {
+    final label = !spinning
+        ? 'GIRAR'
+        : stopping
+        ? 'FRENANDO'
+        : 'PARAR';
+    final icon = spinning
+        ? Icons.pan_tool_alt_rounded
+        : Icons.rotate_right_rounded;
+    final enabled = !stopping;
+    final background = !spinning
+        ? CuboColors.fiesta
+        : enabled
+        ? CuboColors.white
+        : CuboColors.whiteA(0.16);
+    final fg = enabled ? CuboColors.blueInk : CuboColors.whiteA(0.6);
+
+    return CuboPressable(
+      onTap: enabled ? toggleSpin : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        height: compact ? 64 : 72,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: const BorderRadius.all(Radius.circular(999)),
+          boxShadow: enabled ? CuboShadows.soft : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: fg, size: 28),
+            const SizedBox(width: 10),
+            Text(
+              label,
+              style: TextStyle(
+                color: fg,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.6,
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -609,32 +614,9 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
                   children: [
                     buildTopBar(compact: compact),
                     SizedBox(height: compact ? 10 : 14),
-                    Expanded(child: buildGameCard(compact: compact)),
-                    SizedBox(height: compact ? 10 : 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CuboChoiceButton(
-                            icon: Icons.rotate_right_rounded,
-                            label: 'GIRAR',
-                            primary: true,
-                            accent: CuboColors.fiesta,
-                            height: compact ? 84 : 100,
-                            onTap: spinning ? null : girarRuleta,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: CuboChoiceButton(
-                            icon: Icons.pan_tool_alt_rounded,
-                            label: stopping ? 'FRENANDO' : 'PARAR',
-                            primary: true,
-                            height: compact ? 84 : 100,
-                            onTap: spinning && !stopping ? pararRuleta : null,
-                          ),
-                        ),
-                      ],
-                    ),
+                    Expanded(child: buildGameArea(compact: compact)),
+                    SizedBox(height: compact ? 12 : 16),
+                    buildSpinButton(compact: compact),
                   ],
                 ),
               );
@@ -690,7 +672,7 @@ class _DrinkWheelPainter extends CustomPainter {
 
     // Casillas con un degradado suave hacia el centro.
     for (int i = 0; i < itemCount; i++) {
-      final color = colors[i % colors.length];
+      final color = _segmentColor(i);
       final paint = Paint()
         ..shader = RadialGradient(
           colors: [
@@ -711,8 +693,8 @@ class _DrinkWheelPainter extends CustomPainter {
 
     // Separadores finos.
     final divider = Paint()
-      ..color = Colors.white.withValues(alpha: 0.55)
-      ..strokeWidth = max(1.5, radius * 0.014)
+      ..color = CuboColors.blue.withValues(alpha: 0.35)
+      ..strokeWidth = max(1.5, radius * 0.012)
       ..strokeCap = StrokeCap.round;
     for (int i = 0; i < itemCount; i++) {
       final a = -pi / 2 + segmentAngle * i;
@@ -759,7 +741,6 @@ class _DrinkWheelPainter extends CustomPainter {
         radius: faceRadius,
         angle: -pi / 2 + segmentAngle * (i + 0.5),
         number: i + 1,
-        color: colors[i % colors.length],
       );
     }
   }
@@ -770,15 +751,15 @@ class _DrinkWheelPainter extends CustomPainter {
     required double radius,
     required double angle,
     required int number,
-    required Color color,
   }) {
     final badgeRadius = radius * 0.13;
     final textPainter = TextPainter(
       text: TextSpan(
-        text: '$number',
+        // 6 y 9 llevan punto para no confundirlos al revés.
+        text: number == 6 || number == 9 ? '$number.' : '$number',
         style: TextStyle(
-          color: Colors.white,
-          fontSize: badgeRadius * 1.15,
+          color: CuboColors.blueInk,
+          fontSize: badgeRadius * 1.7,
           fontFamily: CuboText.fontFamily,
           fontWeight: FontWeight.w900,
           height: 1,
@@ -793,23 +774,20 @@ class _DrinkWheelPainter extends CustomPainter {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
     canvas.rotate(angle + pi / 2);
-    canvas.drawCircle(
-      const Offset(0, 1.5),
-      badgeRadius,
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.12)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
-    );
-    canvas.drawCircle(
-      Offset.zero,
-      badgeRadius,
-      Paint()..color = Color.lerp(color, CuboColors.blueDeep, 0.45)!,
-    );
     textPainter.paint(
       canvas,
       Offset(-textPainter.width / 2, -textPainter.height / 2),
     );
     canvas.restore();
+  }
+
+  /// Color de la casilla [i]; la última evita repetir con sus dos vecinas.
+  Color _segmentColor(int i) {
+    final k = colors.length;
+    if (i == itemCount - 1 && itemCount % k == 1 && k > 2) {
+      return colors[(itemCount - 2) % k == 1 ? 2 : 1];
+    }
+    return colors[i % k];
   }
 
   @override
@@ -853,7 +831,7 @@ class _WheelPointerPainter extends CustomPainter {
       5,
       false,
     );
-    canvas.drawPath(path, Paint()..color = CuboColors.white);
+    canvas.drawPath(path, Paint()..color = CuboColors.fiesta);
     canvas.drawCircle(
       head,
       headRadius * 0.42,
