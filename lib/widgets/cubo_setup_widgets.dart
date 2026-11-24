@@ -368,7 +368,7 @@ class CuboSetupInfoRow extends StatelessWidget {
 /// Opción elegible (una de varias): icono, título, subtítulo y marca.
 class CuboSetupOption extends StatelessWidget {
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final IconData icon;
   final bool selected;
   final VoidCallback onTap;
@@ -377,7 +377,7 @@ class CuboSetupOption extends StatelessWidget {
   const CuboSetupOption({
     super.key,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.icon,
     required this.selected,
     required this.onTap,
@@ -431,16 +431,18 @@ class CuboSetupOption extends StatelessWidget {
                       letterSpacing: 0.4,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 2,
-                    style: TextStyle(
-                      color: _SetupColors.soft,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      maxLines: 2,
+                      style: TextStyle(
+                        color: _SetupColors.soft,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -451,6 +453,62 @@ class CuboSetupOption extends StatelessWidget {
               child: Icon(Icons.check_circle_rounded, color: accent, size: 26),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Campo de texto relleno, sin borde, para la configuración.
+class CuboSetupTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final int minLines;
+  final int maxLines;
+  final Color accent;
+
+  const CuboSetupTextField({
+    super.key,
+    required this.controller,
+    required this.hint,
+    this.minLines = 1,
+    this.maxLines = 1,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = BorderRadius.all(Radius.circular(20));
+    return TextField(
+      controller: controller,
+      minLines: minLines,
+      maxLines: maxLines,
+      cursorColor: CuboColors.white,
+      style: const TextStyle(
+        color: _SetupColors.ink,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
+      decoration: InputDecoration(
+        hintText: tr(hint),
+        hintStyle: TextStyle(
+          color: _SetupColors.faint,
+          fontWeight: FontWeight.w600,
+        ),
+        filled: true,
+        fillColor: _SetupColors.row,
+        contentPadding: const EdgeInsets.all(18),
+        border: const OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: accent, width: 2),
         ),
       ),
     );

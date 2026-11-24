@@ -1,9 +1,11 @@
 import 'package:cubo/core/app_settings.dart';
 import 'package:cubo/screens/chill_screen.dart';
+import 'package:cubo/screens/describe_la_palabra_screen.dart';
 import 'package:cubo/screens/escala_screen.dart';
 import 'package:cubo/screens/fiesta_screen.dart';
 import 'package:cubo/widgets/cubo_game_widgets.dart';
 import 'package:cubo/widgets/cubo_menu_layout.dart';
+import 'package:cubo/widgets/cubo_setup_widgets.dart';
 import 'package:cubo/widgets/i18n_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,11 +41,12 @@ void main() {
     expect(find.text('Yo Nunca'), findsOneWidget);
   });
 
-  testWidgets('Chill alinea el título a la derecha (efecto espejo)',
-      (tester) async {
+  testWidgets('Chill alinea el título a la derecha (efecto espejo)', (
+    tester,
+  ) async {
     await _pumpMenu(tester, const ChillScreen());
-    final screenWidth = tester.view.physicalSize.width /
-        tester.view.devicePixelRatio;
+    final screenWidth =
+        tester.view.physicalSize.width / tester.view.devicePixelRatio;
 
     expect(
       tester.getCenter(find.text('chill')).dx,
@@ -95,5 +98,30 @@ void main() {
       expect(find.text('Red flag'), findsOneWidget);
       expect(find.text('QUE NO MIRE EL JUGADOR 2'), findsOneWidget);
     });
+  });
+
+  testWidgets('Describe la palabra: tocar un jugador lo cambia de equipo', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(412, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _pumpMenu(tester, const DescribeLaPalabraScreen());
+
+    for (final name in ['Ana', 'Pau', 'Marta', 'Jordi']) {
+      await tester.enterText(find.byType(TextField), name);
+      tester.widget<CuboPlayersEditor>(find.byType(CuboPlayersEditor)).onAdd();
+      await tester.pumpAndSettle();
+    }
+    tester.widget<CuboSetupSteps>(find.byType(CuboSetupSteps)).onStepChanged(1);
+    await tester.pumpAndSettle();
+
+    double anaTop() => tester.getTopLeft(find.text('Ana')).dy;
+    final before = anaTop();
+    await tester.tap(find.text('Ana'));
+    await tester.pumpAndSettle();
+
+    expect(anaTop(), isNot(before));
+    expect(find.text('Ana'), findsOneWidget);
   });
 }
