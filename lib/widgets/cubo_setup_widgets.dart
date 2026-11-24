@@ -12,6 +12,7 @@ class _SetupColors {
   static final Color soft = CuboColors.whiteA(0.72);
   static final Color row = CuboColors.whiteA(0.12);
   static final Color roundBg = CuboColors.whiteA(0.16);
+  static final Color faint = CuboColors.whiteA(0.5);
 }
 
 /// Un paso de la configuración por pasos: título (clave de traducción),
@@ -239,7 +240,7 @@ class _PrimaryPill extends StatelessWidget {
   }
 }
 
-/// Fila clara (para cartas blancas) con icono, título y − valor +.
+/// Fila con icono, título y − valor +.
 class CuboLightCounter extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -307,7 +308,64 @@ class CuboLightCounter extends StatelessWidget {
   }
 }
 
-/// Fila clara con título e interruptor.
+/// Fila informativa con icono, título y un valor grande (sin botones).
+class CuboSetupInfoRow extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String value;
+  final Color accent;
+
+  const CuboSetupInfoRow({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.value,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 20, 12),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
+      ),
+      child: Row(
+        children: [
+          _AccentIcon(icon: icon, accent: accent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: m.Text(
+                tr(title).toUpperCase(),
+                maxLines: 1,
+                style: const TextStyle(
+                  color: _SetupColors.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          ),
+          m.Text(
+            value,
+            style: const TextStyle(
+              color: _SetupColors.ink,
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fila con título e interruptor.
 class CuboLightSwitch extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -358,8 +416,9 @@ class CuboLightSwitch extends StatelessWidget {
   }
 }
 
-/// Editor de jugadores para carta blanca: campo + botón de añadir y los
-/// jugadores como fichas con inicial que se quitan con la ✕.
+/// Editor de jugadores: campo + botón de añadir y los jugadores como fichas
+/// con inicial que se quitan con la ✕. [emptyHint] se muestra bajo el aviso
+/// de lista vacía.
 class CuboPlayersEditor extends StatelessWidget {
   final List<String> players;
   final int maxPlayers;
@@ -367,6 +426,7 @@ class CuboPlayersEditor extends StatelessWidget {
   final VoidCallback onAdd;
   final ValueChanged<int> onRemove;
   final Color accent;
+  final String? emptyHint;
 
   const CuboPlayersEditor({
     super.key,
@@ -376,6 +436,7 @@ class CuboPlayersEditor extends StatelessWidget {
     required this.onAdd,
     required this.onRemove,
     this.accent = CuboColors.chill,
+    this.emptyHint,
   });
 
   @override
@@ -471,6 +532,18 @@ class CuboPlayersEditor extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                if (emptyHint != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    emptyHint!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _SetupColors.faint,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
               ],
             ),
           )
