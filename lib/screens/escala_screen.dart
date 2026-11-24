@@ -381,26 +381,6 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
-  Color _phaseColor() {
-    switch (fase) {
-      case 0:
-        return CuboColors.chill;
-
-      case 1:
-      case 2:
-        return CuboColors.fiesta;
-
-      case 3:
-        return CuboColors.white;
-
-      case 4:
-        return CuboColors.chill;
-
-      default:
-        return CuboColors.chill;
-    }
-  }
-
   Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
     final compact = _isCompactScreen;
     final veryNarrow = _isVeryNarrowScreen;
@@ -512,19 +492,18 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 size: 20,
               ),
         filled: true,
-        fillColor: CuboColors.white.withValues(alpha: 0.07),
+        fillColor: CuboColors.whiteA(0.12),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+          horizontal: 16,
+          vertical: 16,
         ),
-        enabledBorder: CuboInputs.rounded(
-          BorderSide(
-            color: CuboColors.white.withValues(alpha: 0.28),
-            width: 1.4,
-          ),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          borderSide: BorderSide.none,
         ),
-        focusedBorder: CuboInputs.rounded(
-          const BorderSide(color: CuboColors.white, width: 2),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          borderSide: BorderSide(color: CuboColors.chill, width: 2),
         ),
       ),
     );
@@ -940,7 +919,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
     icon: Icons.casino_rounded,
     trailingIcon: Icons.play_arrow_rounded,
     onTap: usarEscalaAleatoria,
-    light: true,
+    primary: true,
   );
 
   Widget buildPickScaleCard() => buildOptionCard(
@@ -949,43 +928,40 @@ class _EscalaScreenState extends State<EscalaScreen> {
     icon: Icons.format_list_bulleted_rounded,
     trailingIcon: Icons.chevron_right_rounded,
     onTap: abrirSelectorEscalas,
-    light: false,
+    primary: false,
   );
 
-  /// Tarjeta de opción: blanca ([light]) o de cristal sobre el azul.
+  /// Tarjeta de opción de cristal; la [primary] lleva el acento en el icono
+  /// y en el botón.
   Widget buildOptionCard({
     required String title,
     required String subtitle,
     required IconData icon,
     required IconData trailingIcon,
     required VoidCallback onTap,
-    required bool light,
+    required bool primary,
   }) {
     final compact = _isCompactScreen;
     final iconBox = compact ? 50.0 : 58.0;
-    final ink = light ? CuboColors.blueInk : CuboColors.white;
+    const ink = CuboColors.white;
 
     return CuboPressable(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(compact ? 14 : 18),
-        decoration: light
-            ? CuboDecorations.whiteCard()
-            : CuboDecorations.glass(radius: CuboRadii.lg),
+        decoration: CuboDecorations.glassRaised(radius: CuboRadii.lg),
         child: Row(
           children: [
             Container(
               width: iconBox,
               height: iconBox,
               decoration: BoxDecoration(
-                color: light
-                    ? CuboColors.blueTint
-                    : CuboColors.white.withValues(alpha: 0.14),
+                color: primary ? CuboColors.chill : CuboColors.whiteA(0.14),
                 borderRadius: CuboRadii.mdAll,
               ),
               child: Icon(
                 icon,
-                color: light ? CuboColors.blue : CuboColors.white,
+                color: primary ? CuboColors.blueInk : CuboColors.white,
                 size: compact ? 28 : 32,
               ),
             ),
@@ -1020,12 +996,12 @@ class _EscalaScreenState extends State<EscalaScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: light ? CuboColors.blue : CuboColors.white,
+                color: primary ? CuboColors.chill : CuboColors.whiteA(0.16),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 trailingIcon,
-                color: light ? CuboColors.white : CuboColors.blue,
+                color: primary ? CuboColors.blueInk : CuboColors.white,
                 size: 24,
               ),
             ),
