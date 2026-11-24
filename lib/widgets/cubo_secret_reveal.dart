@@ -36,6 +36,10 @@ class _CuboSecretRevealState extends State<CuboSecretReveal>
   /// Alto de la franja de tapa que queda visible al subirla.
   static const double _handleHeight = 58;
 
+  /// Fracción de subida a partir de la cual el secreto cuenta como visto:
+  /// basta con levantar la tapa hasta la mitad.
+  static const double _revealAt = 0.45;
+
   /// Velocidad (px/s) a partir de la cual un gesto abre o cierra del todo.
   static const double _flingVelocity = 500;
 
@@ -60,6 +64,7 @@ class _CuboSecretRevealState extends State<CuboSecretReveal>
 
   void _onDragUpdate(DragUpdateDetails details) {
     _lift.value = (_lift.value - details.delta.dy / _travel).clamp(0.0, 1.0);
+    if (_lift.value >= _revealAt) widget.onRevealed?.call();
   }
 
   void _onDragEnd(DragEndDetails details) {
@@ -94,7 +99,7 @@ class _CuboSecretRevealState extends State<CuboSecretReveal>
                   child: AnimatedBuilder(
                     animation: _lift,
                     builder: (context, child) => Opacity(
-                      opacity: Curves.easeIn.transform(_lift.value),
+                      opacity: const Interval(0.1, _revealAt).transform(_lift.value),
                       child: child,
                     ),
                     child: SingleChildScrollView(

@@ -49,6 +49,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   List<String> playerSecrets = [];
   List<int> impostorIndexes = [];
+
+  /// Jugador que abre la ronda de preguntas.
+  int _starterIndex = 0;
+
+  /// Peso de un impostor al sortear quién empieza (los demás pesan 1):
+  /// puede empezar, pero es poco probable.
+  static const double _impostorStarterWeight = 0.2;
   List<String> playerNames = [];
 
   int get playersCount => playerNames.length;
@@ -359,6 +366,23 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     }
   }
 
+  /// Sorteo ponderado de quién empieza: un impostor tiene
+  /// [_impostorStarterWeight] veces la probabilidad de un jugador normal.
+  int pickStarter() {
+    double weightOf(int i) =>
+        impostorIndexes.contains(i) ? _impostorStarterWeight : 1.0;
+    final total = List.generate(
+      playersCount,
+      weightOf,
+    ).fold(0.0, (a, b) => a + b);
+    var roll = _random.nextDouble() * total;
+    for (var i = 0; i < playersCount; i++) {
+      roll -= weightOf(i);
+      if (roll <= 0) return i;
+    }
+    return playersCount - 1;
+  }
+
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
     final Set<int> indexes = {};
 
@@ -379,6 +403,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     } else {
       setState(() {
         _secretSeen = false;
+        _starterIndex = pickStarter();
         currentStep = ImpostorStep.finished;
       });
     }
@@ -1357,6 +1382,72 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
+  /// Carta destacada con el jugador que empieza a preguntar.
+  Widget buildStarterCard({required bool compact}) {
+    final name = playerNames.isEmpty ? '' : playerNames[_starterIndex];
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: compact ? 14 : 18,
+      ),
+      decoration: BoxDecoration(
+        color: CuboColors.fiesta,
+        borderRadius: CuboRadii.mdAll,
+        boxShadow: CuboShadows.soft,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: compact ? 44 : 52,
+            height: compact ? 44 : 52,
+            decoration: const BoxDecoration(
+              color: CuboColors.blue,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.record_voice_over_rounded,
+              color: CuboColors.white,
+              size: compact ? 22 : 26,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'EMPIEZA',
+                  style: TextStyle(
+                    color: CuboColors.blueInk,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.9,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    name,
+                    style: TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: compact ? 26 : 30,
+                      height: 1.05,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.6,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget buildFinished({required bool compact}) {
     String summaryText;
 
@@ -1413,6 +1504,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       ),
                     ),
                     SizedBox(height: compact ? 16 : 20),
+                    buildStarterCard(compact: compact),
+                    SizedBox(height: compact ? 12 : 14),
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(compact ? 13 : 16),
