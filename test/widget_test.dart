@@ -1,9 +1,10 @@
 import 'package:cubo/core/app_settings.dart';
-import 'package:cubo/core/cubo_ui.dart';
 import 'package:cubo/screens/chill_screen.dart';
 import 'package:cubo/screens/escala_screen.dart';
 import 'package:cubo/screens/fiesta_screen.dart';
 import 'package:cubo/widgets/cubo_game_widgets.dart';
+import 'package:cubo/widgets/cubo_menu_layout.dart';
+import 'package:cubo/widgets/i18n_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,32 +20,39 @@ void main() {
     AppSettings.instance.language = 'es';
   });
 
-  testWidgets('Fiesta muestra sus 7 juegos en tarjetas', (tester) async {
-    tester.view.physicalSize = const Size(412, 1200);
+  void tallView(WidgetTester tester) {
+    tester.view.physicalSize = const Size(412, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+  }
+
+  testWidgets('Fiesta muestra sus 7 juegos en la cuadrícula', (tester) async {
+    tallView(tester);
     await _pumpMenu(tester, const FiestaScreen());
 
     expect(find.text('fiesta'), findsOneWidget);
-    expect(find.byType(CuboGameTile), findsNWidgets(7));
+    final layout = tester.widget<CuboMenuLayout>(find.byType(CuboMenuLayout));
+    expect(layout.games, hasLength(7));
+    for (final game in layout.games) {
+      expect(find.text(tr(game.title)), findsOneWidget);
+    }
     expect(find.text('Yo Nunca'), findsOneWidget);
   });
 
-  testWidgets('Chill invierte el orden de las tarjetas (efecto espejo)',
+  testWidgets('Chill alinea el título a la derecha (efecto espejo)',
       (tester) async {
     await _pumpMenu(tester, const ChillScreen());
+    final screenWidth = tester.view.physicalSize.width /
+        tester.view.devicePixelRatio;
 
-    expect(find.text('chill'), findsOneWidget);
-    final tile = find.byType(CuboGameTile).first;
-    final arrow = find.descendant(
-      of: tile,
-      matching: find.byIcon(Icons.arrow_back_rounded),
+    expect(
+      tester.getCenter(find.text('chill')).dx,
+      greaterThan(screenWidth / 2),
     );
-    final title = find.descendant(of: tile, matching: find.text('Impostor'));
-    expect(tester.getCenter(arrow).dx, lessThan(tester.getCenter(title).dx));
   });
 
   testWidgets('Los menús siguen el idioma elegido', (tester) async {
+    tallView(tester);
     AppSettings.instance.language = 'en';
     await _pumpMenu(tester, const ChillScreen());
 
