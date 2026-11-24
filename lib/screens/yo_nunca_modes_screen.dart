@@ -162,150 +162,82 @@ class YoNuncaModesScreen extends StatelessWidget {
     );
   }
 
-  /// Carta grande del modo clásico: icono sobre un círculo del acento,
-  /// título, subtítulo y botón de jugar (mismo lenguaje que los menús).
-  Widget buildFeaturedCard({required VoidCallback onTap}) {
-    return CuboPressable(
-      onTap: onTap,
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final h = c.maxHeight;
-          return Container(
-            decoration: CuboDecorations.playCard,
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -h * 0.18,
-                  top: -h * 0.1,
-                  bottom: -h * 0.1,
-                  child: Container(
-                    width: h * 1.2,
-                    decoration: BoxDecoration(
-                      color: CuboColors.fiesta.withValues(alpha: 0.45),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: h * 0.12,
-                  top: 0,
-                  bottom: 0,
-                  child: Icon(
-                    Icons.chat_bubble_rounded,
-                    color: CuboColors.blue,
-                    size: h * 0.42,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Yo Nunca', style: CuboText.cardPhrase(size: 30)),
-                      const SizedBox(height: 4),
-                      Text(
-                        'El clásico de siempre',
-                        style: TextStyle(
-                          color: CuboColors.blueInk.withValues(alpha: 0.65),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        height: 46,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: const BoxDecoration(
-                          color: CuboColors.blue,
-                          borderRadius: BorderRadius.all(Radius.circular(999)),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.play_arrow_rounded,
-                              color: CuboColors.white,
-                              size: 24,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              'JUGAR',
-                              style: TextStyle(
-                                color: CuboColors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.6,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  /// Carta de variante: icono grande en un recuadro y título abajo.
-  /// [highlighted] la pinta en el acento.
+  /// Carta de modo de cristal (la de antes, más grande): icono en un
+  /// recuadro del color del modo, título, descripción y flecha.
   Widget buildModeCard({
     required String title,
+    required String description,
     required IconData icon,
-    required Color accent,
-    required bool highlighted,
+    required Color color,
+    required double height,
     required VoidCallback onTap,
   }) {
+    final tile = (height * 0.56).clamp(54.0, 80.0);
     return CuboPressable(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
-        decoration: BoxDecoration(
-          color: highlighted ? accent : CuboColors.paper,
-          borderRadius: CuboRadii.cardAll,
-          boxShadow: CuboShadows.card,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: CuboDecorations.glassRaised(),
+        child: Row(
           children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: highlighted
-                      ? CuboColors.white.withValues(alpha: 0.45)
-                      : CuboColors.blueTint,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                alignment: Alignment.center,
-                child: LayoutBuilder(
-                  builder: (context, c) => Icon(
-                    icon,
-                    color: CuboColors.blue,
-                    size: (c.maxHeight * 0.5).clamp(28.0, 72.0),
+            Container(
+              width: tile,
+              height: tile,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(tile / 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
                   ),
-                ),
+                ],
+              ),
+              child: Icon(icon, color: CuboColors.blueInk, size: tile * 0.5),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: CuboColors.white,
+                        fontSize: 20,
+                        height: 1.1,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: CuboColors.whiteA(0.72),
+                      fontSize: 13.5,
+                      height: 1.25,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: CuboColors.blueInk,
-                  fontSize: 17,
-                  height: 1.1,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: CuboColors.whiteA(0.7),
+              size: 28,
             ),
           ],
         ),
@@ -315,6 +247,30 @@ class YoNuncaModesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final modes = [
+      (
+        title: 'Yo Nunca',
+        description: 'El clásico de siempre',
+        icon: Icons.chat_bubble_rounded,
+        color: CuboColors.fiesta,
+        modo: 'normal',
+      ),
+      (
+        title: 'Por equipos',
+        description: 'Forma equipos y competid durante las rondas.',
+        icon: Icons.groups_rounded,
+        color: CuboColors.white,
+        modo: 'equipos',
+      ),
+      (
+        title: 'Yo Nunca Lobo',
+        description: 'Un modo con identidades ocultas y sospechas.',
+        icon: Icons.visibility_off_rounded,
+        color: CuboColors.chill,
+        modo: 'lobo',
+      ),
+    ];
+
     return Scaffold(
       backgroundColor: CuboColors.blue,
       body: CuboGameScope(
@@ -327,10 +283,6 @@ class YoNuncaModesScreen extends StatelessWidget {
                 final narrow = constraints.maxWidth < 380;
                 final compact = constraints.maxHeight < 680;
                 final gap = compact ? 12.0 : 14.0;
-                final featuredHeight = (constraints.maxHeight * 0.3).clamp(
-                  170.0,
-                  240.0,
-                );
 
                 return Padding(
                   padding: EdgeInsets.fromLTRB(
@@ -344,46 +296,41 @@ class YoNuncaModesScreen extends StatelessWidget {
                     children: [
                       buildTopBar(context),
                       SizedBox(height: compact ? 18 : 26),
-                      SizedBox(
-                        height: featuredHeight,
-                        child: CuboEntrance(
-                          index: 1,
-                          child: buildFeaturedCard(
-                            onTap: () => abrirModo(context, 'normal'),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: gap),
+                      // Las tres cartas reparten el espacio que queda, con
+                      // un alto máximo para que no queden desproporcionadas.
                       Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: CuboEntrance(
-                                index: 2,
-                                child: buildModeCard(
-                                  title: 'Yo Nunca por equipos',
-                                  icon: Icons.groups_rounded,
-                                  accent: CuboColors.fiesta,
-                                  highlighted: false,
-                                  onTap: () => abrirModo(context, 'equipos'),
+                        child: LayoutBuilder(
+                          builder: (context, area) {
+                            final height = ((area.maxHeight - gap * 2) / 3)
+                                .clamp(88.0, 170.0);
+                            return SingleChildScrollView(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: area.maxHeight,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    for (var i = 0; i < modes.length; i++) ...[
+                                      if (i > 0) SizedBox(height: gap),
+                                      CuboEntrance(
+                                        index: i + 1,
+                                        child: buildModeCard(
+                                          title: modes[i].title,
+                                          description: modes[i].description,
+                                          icon: modes[i].icon,
+                                          color: modes[i].color,
+                                          height: height,
+                                          onTap: () =>
+                                              abrirModo(context, modes[i].modo),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
-                            ),
-                            SizedBox(width: gap),
-                            Expanded(
-                              child: CuboEntrance(
-                                index: 3,
-                                child: buildModeCard(
-                                  title: 'Yo Nunca Lobo',
-                                  icon: Icons.visibility_off_rounded,
-                                  accent: CuboColors.fiesta,
-                                  highlighted: true,
-                                  onTap: () => abrirModo(context, 'lobo'),
-                                ),
-                              ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ),
                     ],
