@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_coin.dart';
 import '../widgets/cubo_game_widgets.dart';
 
 class MonedaScreen extends StatefulWidget {
@@ -658,164 +659,6 @@ class _CaraCruzScreenState extends State<MonedaScreen>
     await _guardarProbabilidad();
   }
 
-  Widget _coinFace({required bool cara, required double size}) {
-    final borderWidth = size < 180 ? 4.0 : 5.0;
-    final ringInset = size < 180 ? 10.0 : 13.0;
-    final innerInset = size < 180 ? 22.0 : 28.0;
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFF4B0),
-            Color(0xFFFFD166),
-            Color(0xFFE3A72F),
-            Color(0xFFFFE08A),
-          ],
-          stops: [0.0, 0.28, 0.72, 1.0],
-        ),
-        border: Border.all(color: const Color(0xFFFFF7D6), width: borderWidth),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-          BoxShadow(
-            color: const Color(0xFFFFD166).withValues(alpha: 0.28),
-            blurRadius: 20,
-            offset: const Offset(0, 0),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.all(ringInset),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFB27A18),
-                    width: 2.2,
-                  ),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFFFE590), Color(0xFFF2BA49)],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.all(innerInset),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const RadialGradient(
-                    center: Alignment(-0.2, -0.3),
-                    radius: 0.95,
-                    colors: [
-                      Color(0xFFFFF7C8),
-                      Color(0xFFFFD86A),
-                      Color(0xFFE0A22D),
-                    ],
-                  ),
-                  border: Border.all(
-                    color: const Color(0xFFB27A18),
-                    width: 1.8,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          Positioned(
-            top: size * 0.16,
-            left: size * 0.18,
-            right: size * 0.18,
-            child: Container(
-              height: size * 0.10,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.65),
-                    Colors.white.withValues(alpha: 0.10),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: size * 0.34,
-                  height: size * 0.34,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFFFFF3BF).withValues(alpha: 0.35),
-                    border: Border.all(
-                      color: const Color(0xFFB27A18).withValues(alpha: 0.65),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(
-                    cara
-                        ? Icons.record_voice_over_rounded
-                        : Icons.visibility_off_rounded,
-                    color: CuboColors.blue.withValues(alpha: 0.92),
-                    size: size * 0.16,
-                  ),
-                ),
-
-                SizedBox(height: size * 0.045),
-
-                Text(
-                  cara ? 'CARA' : 'CRUZ',
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.blue.withValues(alpha: 0.95),
-                    fontSize: size * 0.115,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-
-                SizedBox(height: size * 0.018),
-
-                Text(
-                  cara ? '' : '',
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.blue.withValues(alpha: 0.68),
-                    fontSize: size * 0.055,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget buildCoin() {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -841,7 +684,7 @@ class _CaraCruzScreenState extends State<MonedaScreen>
                 alignment: Alignment.center,
                 transform: Matrix4.identity()
                   ..rotateY(showingCara ? 0 : math.pi),
-                child: _coinFace(cara: showingCara, size: size),
+                child: CuboCoinFace(cara: showingCara, size: size),
               ),
             );
           },
