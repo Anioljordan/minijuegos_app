@@ -365,6 +365,98 @@ class CuboSetupInfoRow extends StatelessWidget {
   }
 }
 
+/// Opción elegible (una de varias): icono, título, subtítulo y marca.
+class CuboSetupOption extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color accent;
+
+  const CuboSetupOption({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CuboPressable(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
+        decoration: BoxDecoration(
+          color: selected ? CuboColors.whiteA(0.2) : _SetupColors.row,
+          borderRadius: const BorderRadius.all(Radius.circular(22)),
+          border: Border.all(
+            color: selected ? accent : CuboColors.whiteA(0),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: selected ? accent : _SetupColors.roundBg,
+                borderRadius: const BorderRadius.all(Radius.circular(14)),
+              ),
+              child: Icon(
+                icon,
+                color: selected ? CuboColors.blueInk : CuboColors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  m.Text(
+                    tr(title).toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: _SetupColors.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    style: TextStyle(
+                      color: _SetupColors.soft,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: selected ? 1 : 0,
+              child: Icon(Icons.check_circle_rounded, color: accent, size: 26),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Fila con título e interruptor.
 class CuboLightSwitch extends StatelessWidget {
   final String title;
