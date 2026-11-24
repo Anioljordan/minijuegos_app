@@ -381,11 +381,17 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
-  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
+  /// Tarjeta de cristal. Con [fill] ocupa todo el alto libre y centra su
+  /// contenido, para que el botón quede abajo y no sobre espacio.
+  Widget buildGlassCard({
+    required Widget child,
+    EdgeInsets? padding,
+    bool fill = false,
+  }) {
     final compact = _isCompactScreen;
     final veryNarrow = _isVeryNarrowScreen;
 
-    return Container(
+    final card = Container(
       width: double.infinity,
       padding:
           padding ??
@@ -397,8 +403,9 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 : 17,
           ),
       decoration: CuboDecorations.glassRaised(radius: CuboRadii.card),
-      child: child,
+      child: fill ? Center(child: SingleChildScrollView(child: child)) : child,
     );
+    return fill ? Expanded(child: card) : card;
   }
 
   Widget buildFancyButton({
@@ -1209,6 +1216,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             children: [
               const CuboStatusChip(
@@ -1257,6 +1265,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -1281,7 +1290,8 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 ],
               ),
               SizedBox(height: compact ? 14 : 18),
-              buildScaleEnds(),
+              // El jugador 1 sigue viendo la posición mientras escribe.
+              buildMedidorSemicircular(valor: valorReal, mostrarNumero: false),
               SizedBox(height: compact ? 14 : 18),
               buildCustomField(
                 controller: respuestaController,
@@ -1309,6 +1319,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             children: [
               Text(
@@ -1448,6 +1459,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             children: [
               Container(
@@ -1617,14 +1629,17 @@ class _EscalaScreenState extends State<EscalaScreen> {
         );
       },
 
-      child: Align(
-        key: ValueKey(fase),
-        alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: SizedBox(width: double.infinity, child: contenido),
-        ),
-      ),
+      child: fase == 0
+          ? Align(
+              key: ValueKey(fase),
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: SizedBox(width: double.infinity, child: contenido),
+              ),
+            )
+          // Las fases de juego llenan el alto: tarjeta arriba, botón abajo.
+          : KeyedSubtree(key: ValueKey(fase), child: contenido),
     );
   }
 
@@ -1709,23 +1724,24 @@ class NeedleGaugePainter extends CustomPainter {
     canvas.drawPath(
       track,
       Paint()
+        // Cada extremo de la escala con su color: azul claro a la izquierda,
+        // amarillo a la derecha.
         ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
           colors: [
-            Colors.white.withValues(alpha: 0.30),
-            Colors.white.withValues(alpha: 0.10),
+            CuboColors.chill.withValues(alpha: 0.45),
+            Colors.white.withValues(alpha: 0.18),
+            CuboColors.fiesta.withValues(alpha: 0.45),
           ],
         ).createShader(outerRect),
     );
 
     if (mostrarZonasPuntuacion) {
       const zonas = [
-        (-15.0, -9.0, Color(0xFFFFE45E), '1'),
-        (-8.0, -4.0, Color(0xFFFFB84D), '2'),
-        (-3.0, 3.0, Color(0xFFFF7A3D), '4'),
-        (4.0, 8.0, Color(0xFFFFB84D), '2'),
-        (9.0, 15.0, Color(0xFFFFE45E), '1'),
+        (-15.0, -9.0, CuboColors.white, '1'),
+        (-8.0, -4.0, CuboColors.chill, '2'),
+        (-3.0, 3.0, CuboColors.fiesta, '4'),
+        (4.0, 8.0, CuboColors.chill, '2'),
+        (9.0, 15.0, CuboColors.white, '1'),
       ];
       for (final zona in zonas) {
         drawZonaRellenaConTexto(
