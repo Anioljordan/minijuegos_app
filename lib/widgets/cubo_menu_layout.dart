@@ -37,6 +37,12 @@ class CuboMenuLayout extends StatelessWidget {
     required this.games,
   });
 
+  /// Franja bajo los iconos donde el contenido se desvanece al hacer scroll.
+  static const double _sidePadding = 24;
+
+  static const double _fadeStart = 60;
+  static const double _fadeEnd = 92;
+
   /// Chill va en espejo; Fiesta no.
   Color get _accent => mirrored ? CuboColors.chill : CuboColors.fiesta;
 
@@ -98,42 +104,66 @@ class CuboMenuLayout extends StatelessWidget {
     );
   }
 
-  Widget _gamesGrid(BuildContext context, bool compact) {
+  /// Título y juegos se desplazan juntos, así las cartas nunca tapan el
+  /// título; solo los iconos de arriba quedan fijos.
+  Widget _scrollContent(BuildContext context, bool compact) {
     final featured = games.first;
     final rest = games.skip(1).toList();
     return CustomScrollView(
-      clipBehavior: Clip.none,
       slivers: [
-        SliverToBoxAdapter(
-          child: CuboEntrance(
-            index: 1,
-            child: _FeaturedGameCard(
-              game: featured,
-              accent: _accent,
-              height: compact ? 150 : 176,
-              onTap: () => _open(context, featured),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            _sidePadding,
+            compact ? 92 : 120,
+            _sidePadding,
+            0,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: Align(
+              alignment: mirrored
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: CuboEntrance(child: _titleBlock(compact)),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(child: SizedBox(height: compact ? 24 : 40)),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+          sliver: SliverToBoxAdapter(
+            child: CuboEntrance(
+              index: 1,
+              child: _FeaturedGameCard(
+                game: featured,
+                accent: _accent,
+                height: compact ? 150 : 176,
+                onTap: () => _open(context, featured),
+              ),
             ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 14)),
-        SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 14,
-            crossAxisSpacing: 14,
-            childAspectRatio: compact ? 1.05 : 0.95,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) => CuboEntrance(
-              index: index + 2,
-              child: _GridGameCard(
-                game: rest[index],
-                accent: _accent,
-                highlighted: index % 3 == 2,
-                onTap: () => _open(context, rest[index]),
-              ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+          sliver: SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              childAspectRatio: compact ? 1.05 : 0.95,
             ),
-            childCount: rest.length,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => CuboEntrance(
+                index: index + 2,
+                child: _GridGameCard(
+                  game: rest[index],
+                  accent: _accent,
+                  highlighted: index % 3 == 2,
+                  onTap: () => _open(context, rest[index]),
+                ),
+              ),
+              childCount: rest.length,
+            ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 28)),
@@ -159,18 +189,16 @@ class CuboMenuLayout extends StatelessWidget {
             child: Stack(
               children: [
                 SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, compact ? 92 : 120, 24, 0),
-                    child: Column(
-                      crossAxisAlignment: mirrored
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        CuboEntrance(child: _titleBlock(compact)),
-                        SizedBox(height: compact ? 24 : 40),
-                        Expanded(child: _gamesGrid(context, compact)),
-                      ],
-                    ),
+                  child: ShaderMask(
+                    // Las cartas se desvanecen al pasar bajo los iconos.
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (rect) => LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: const [Colors.transparent, Colors.black],
+                      stops: [_fadeStart / rect.height, _fadeEnd / rect.height],
+                    ).createShader(rect),
+                    child: _scrollContent(context, compact),
                   ),
                 ),
                 _topIcons(context, compact),
