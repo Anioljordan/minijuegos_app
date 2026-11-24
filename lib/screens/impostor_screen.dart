@@ -104,28 +104,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
   }
 
-  void _goBack() {
-    if (currentStep == ImpostorStep.modeSelection) {
-      Navigator.pop(context);
-      return;
-    }
-
-    setState(() {
-      selectedMode = null;
-      currentStep = ImpostorStep.modeSelection;
-      currentPlayerIndex = 0;
-      secretCardOpen = false;
-      secretCardDragOffset = 0;
-
-      playerSecrets = [];
-      impostorIndexes = [];
-      playerNames = [];
-
-      selectedWord = '';
-      selectedCategory = '';
-      selectedHint = '';
-    });
-  }
 
   void goToSetup(ImpostorMode mode) {
     setState(() {
@@ -195,17 +173,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
   }
 
-  void _changePlayers(int change) {
-    if (change > 0) {
-      playerNameController.clear();
-      _addPlayer();
-      return;
-    }
-
-    if (playerNames.isEmpty) return;
-
-    _removePlayer(playerNames.length - 1);
-  }
 
   void _changeImpostors(int change) {
     if (playerNames.length < 2) {
@@ -1263,164 +1230,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _buildCounterButton({
-    required IconData icon,
-    required VoidCallback? onTap,
-    required bool compact,
-  }) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final veryNarrow = screenWidth < 350;
 
-    final size = veryNarrow
-        ? 34.0
-        : compact
-        ? 38.0
-        : 44.0;
-
-    return Material(
-      color: CuboColors.whiteA(onTap == null ? 0.04 : 0.10),
-      shape: RoundedRectangleBorder(
-        borderRadius: CuboRadii.smAll,
-        side: BorderSide(
-          color: CuboColors.whiteA(onTap == null ? 0.12 : 0.35),
-          width: 1.5,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          child: Icon(
-            icon,
-            color: CuboColors.white.withValues(alpha: onTap == null ? 0.28 : 1),
-            size: veryNarrow
-                ? 19
-                : compact
-                ? 21
-                : 24,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCounter({
-    required String title,
-    required IconData icon,
-    required int value,
-    required VoidCallback? onMinus,
-    required VoidCallback? onPlus,
-    required bool compact,
-  }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final veryNarrow = constraints.maxWidth < 330;
-
-        final iconSize = veryNarrow
-            ? 34.0
-            : compact
-            ? 38.0
-            : 44.0;
-
-        final horizontalGap = veryNarrow ? 6.0 : 9.0;
-        final valueWidth = veryNarrow
-            ? 27.0
-            : compact
-            ? 33.0
-            : 40.0;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(
-            veryNarrow
-                ? 8
-                : compact
-                ? 10
-                : 12,
-          ),
-          decoration: CuboDecorations.glass(radius: CuboRadii.md),
-          child: Row(
-            children: [
-              Container(
-                width: iconSize,
-                height: iconSize,
-                decoration: BoxDecoration(
-                  color: modeColor.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: modeColor.withValues(alpha: 0.75),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: modeColor,
-                  size: veryNarrow
-                      ? 19
-                      : compact
-                      ? 21
-                      : 24,
-                ),
-              ),
-
-              SizedBox(width: horizontalGap),
-
-              Expanded(
-                child: _singleLineResponsiveText(
-                  tr(title).toUpperCase(),
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 10.5
-                        : compact
-                        ? 12
-                        : 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: veryNarrow ? 0.1 : 0.4,
-                  ),
-                ),
-              ),
-
-              SizedBox(width: horizontalGap),
-
-              _buildCounterButton(
-                icon: Icons.remove_rounded,
-                onTap: onMinus,
-                compact: compact,
-              ),
-
-              SizedBox(
-                width: valueWidth,
-                child: Text(
-                  '$value',
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 18
-                        : compact
-                        ? 20
-                        : 23,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-
-              _buildCounterButton(
-                icon: Icons.add_rounded,
-                onTap: onPlus,
-                compact: compact,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildFootballCategories({required bool compact}) {
     final allSelected =
@@ -1623,9 +1433,9 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(
-                    color: CuboColors.blue,
-                    borderRadius: BorderRadius.all(Radius.circular(22)),
+                  decoration: BoxDecoration(
+                    color: CuboColors.whiteA(0.08),
+                    borderRadius: const BorderRadius.all(Radius.circular(22)),
                   ),
                   child: _buildFootballCategories(compact: compact),
                 ),

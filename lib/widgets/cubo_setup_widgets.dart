@@ -4,6 +4,16 @@ import 'package:flutter/material.dart' as m show Text;
 import 'cubo_game_widgets.dart';
 import 'i18n_text.dart';
 
+/// Colores de la configuración sobre cristal azul.
+class _SetupColors {
+  _SetupColors._();
+
+  static const Color ink = CuboColors.white;
+  static final Color soft = CuboColors.whiteA(0.72);
+  static final Color row = CuboColors.whiteA(0.12);
+  static final Color roundBg = CuboColors.whiteA(0.16);
+}
+
 /// Un paso de la configuración por pasos: título (clave de traducción),
 /// icono del chip y contenido de la carta.
 class CuboSetupStep {
@@ -49,6 +59,10 @@ class CuboSetupSteps extends StatelessWidget {
         const SizedBox(height: 14),
         Expanded(
           child: AnimatedSwitcher(
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
+            ),
             duration: const Duration(milliseconds: 280),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
@@ -92,33 +106,33 @@ class CuboSetupSteps extends StatelessWidget {
   }
 
   Widget _card(CuboSetupStep step, {required Key key}) {
+    final counter = m.Text(
+      '${index + 1} / ${steps.length}',
+      style: TextStyle(
+        color: _SetupColors.soft,
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+    final header = Row(
+      children: [
+        CuboStatusChip(step.title, icon: step.icon),
+        const Spacer(),
+        counter,
+      ],
+    );
     return Container(
       key: key,
       width: double.infinity,
-      decoration: CuboDecorations.playCard,
+      decoration: CuboDecorations.glassRaised(),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-            child: Row(
-              children: [
-                CuboStatusChip(step.title, icon: step.icon, light: true),
-                const Spacer(),
-                m.Text(
-                  '${index + 1} / ${steps.length}',
-                  style: const TextStyle(
-                    color: CuboColors.blueLight,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
+          Padding(padding: EdgeInsets.fromLTRB(20, 18, 20, 0), child: header),
+          Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
+              padding: EdgeInsets.fromLTRB(20, 18, 20, 22),
               child: step.child,
             ),
           ),
@@ -248,34 +262,39 @@ class CuboLightCounter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-      decoration: const BoxDecoration(
-        color: CuboColors.blueTint,
-        borderRadius: BorderRadius.all(Radius.circular(22)),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
       ),
       child: Row(
         children: [
           _AccentIcon(icon: icon, accent: accent),
           const SizedBox(width: 12),
           Expanded(
-            child: m.Text(
-              tr(title).toUpperCase(),
-              maxLines: 2,
-              style: const TextStyle(
-                color: CuboColors.blueInk,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.4,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: m.Text(
+                tr(title).toUpperCase(),
+                maxLines: 1,
+                style: TextStyle(
+                  color: _SetupColors.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                ),
               ),
             ),
           ),
+          const SizedBox(width: 4),
           _RoundButton(icon: Icons.remove_rounded, onTap: onMinus),
           SizedBox(
-            width: 52,
+            width: 48,
             child: m.Text(
               value,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: CuboColors.blueInk,
+              style: TextStyle(
+                color: _SetupColors.ink,
                 fontSize: 26,
                 fontWeight: FontWeight.w900,
               ),
@@ -309,9 +328,9 @@ class CuboLightSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-      decoration: const BoxDecoration(
-        color: CuboColors.blueTint,
-        borderRadius: BorderRadius.all(Radius.circular(22)),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
       ),
       child: Row(
         children: [
@@ -320,8 +339,8 @@ class CuboLightSwitch extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
-                color: CuboColors.blueInk,
+              style: TextStyle(
+                color: _SetupColors.ink,
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
               ),
@@ -373,19 +392,19 @@ class CuboPlayersEditor extends StatelessWidget {
                 enabled: !full,
                 textCapitalization: TextCapitalization.words,
                 onSubmitted: (_) => onAdd(),
-                style: const TextStyle(
-                  color: CuboColors.blueInk,
+                style: TextStyle(
+                  color: _SetupColors.ink,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                 ),
                 decoration: InputDecoration(
                   hintText: tr('Nombre opcional'),
-                  hintStyle: const TextStyle(
-                    color: CuboColors.blueLight,
+                  hintStyle: TextStyle(
+                    color: _SetupColors.soft,
                     fontWeight: FontWeight.w600,
                   ),
                   filled: true,
-                  fillColor: CuboColors.blueTint,
+                  fillColor: _SetupColors.row,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 18,
                     vertical: 18,
@@ -409,7 +428,7 @@ class CuboPlayersEditor extends StatelessWidget {
                     color: accent,
                     borderRadius: const BorderRadius.all(Radius.circular(20)),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.add_rounded,
                     color: CuboColors.blueInk,
                     size: 30,
@@ -424,8 +443,8 @@ class CuboPlayersEditor extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: m.Text(
             '${players.length} / $maxPlayers',
-            style: const TextStyle(
-              color: CuboColors.blueLight,
+            style: TextStyle(
+              color: _SetupColors.soft,
               fontSize: 13,
               fontWeight: FontWeight.w800,
             ),
@@ -433,21 +452,21 @@ class CuboPlayersEditor extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (players.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 26),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 26),
             child: Column(
               children: [
                 Icon(
                   Icons.person_add_alt_1_rounded,
-                  color: CuboColors.blueLight,
+                  color: _SetupColors.soft,
                   size: 40,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   'Todavía no has añadido jugadores',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: CuboColors.blueLight,
+                    color: _SetupColors.soft,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -489,9 +508,9 @@ class _PlayerChip extends StatelessWidget {
     final initial = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     return Container(
       padding: const EdgeInsets.fromLTRB(5, 5, 4, 5),
-      decoration: const BoxDecoration(
-        color: CuboColors.blueTint,
-        borderRadius: BorderRadius.all(Radius.circular(999)),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(999)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -501,7 +520,7 @@ class _PlayerChip extends StatelessWidget {
             backgroundColor: accent,
             child: m.Text(
               initial,
-              style: const TextStyle(
+              style: TextStyle(
                 color: CuboColors.blueInk,
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
@@ -515,8 +534,8 @@ class _PlayerChip extends StatelessWidget {
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: CuboColors.blueInk,
+              style: TextStyle(
+                color: _SetupColors.ink,
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
               ),
@@ -525,11 +544,7 @@ class _PlayerChip extends StatelessWidget {
           IconButton(
             onPressed: onRemove,
             visualDensity: VisualDensity.compact,
-            icon: const Icon(
-              Icons.close_rounded,
-              color: CuboColors.blueLight,
-              size: 18,
-            ),
+            icon: Icon(Icons.close_rounded, color: _SetupColors.soft, size: 18),
           ),
         ],
       ),
@@ -572,11 +587,11 @@ class _RoundButton extends StatelessWidget {
         child: Container(
           width: 42,
           height: 42,
-          decoration: const BoxDecoration(
-            color: CuboColors.white,
+          decoration: BoxDecoration(
+            color: _SetupColors.roundBg,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: CuboColors.blue, size: 24),
+          child: Icon(icon, color: CuboColors.white, size: 24),
         ),
       ),
     );
