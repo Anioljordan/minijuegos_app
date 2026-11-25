@@ -375,10 +375,15 @@ class CuboDialogHeader extends StatelessWidget {
   final String title;
   final IconData icon;
 
+  /// Botón de cerrar a la derecha. Por defecto solo en las normas, que se
+  /// abren para leer y no piden ninguna decisión.
+  final bool? showClose;
+
   const CuboDialogHeader({
     super.key,
     this.title = 'normas',
     this.icon = Icons.question_mark_rounded,
+    this.showClose,
   });
 
   @override
@@ -399,6 +404,24 @@ class CuboDialogHeader extends StatelessWidget {
                 style: CuboText.title(size: 38),
               ),
             ),
+            if (showClose ?? title == 'normas')
+              CuboPressable(
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: CuboColors.whiteA(0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: CuboColors.whiteA(0.28)),
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: CuboColors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 12),
