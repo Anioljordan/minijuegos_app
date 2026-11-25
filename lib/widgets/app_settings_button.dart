@@ -10,36 +10,21 @@ class AppSettingsButton extends StatelessWidget {
   final Color blue;
   final Color white;
 
-  const AppSettingsButton({
-    super.key,
-    required this.blue,
-    required this.white,
-  });
+  const AppSettingsButton({super.key, required this.blue, required this.white});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => AppSettingsSheet.show(
-        context,
-        blue: blue,
-        white: white,
-      ),
+      onTap: () => AppSettingsSheet.show(context, blue: blue, white: white),
       child: Container(
         width: 54,
         height: 54,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: white.withValues(alpha: 0.08),
-          border: Border.all(
-            color: white.withValues(alpha: 0.85),
-            width: 2.2,
-          ),
+          border: Border.all(color: white.withValues(alpha: 0.85), width: 2.2),
         ),
-        child: Icon(
-          Icons.settings_rounded,
-          color: white,
-          size: 30,
-        ),
+        child: Icon(Icons.settings_rounded, color: white, size: 30),
       ),
     );
   }
@@ -47,18 +32,18 @@ class AppSettingsButton extends StatelessWidget {
 
 class AppSettingsSheet {
   static Future<void> show(
-      BuildContext context, {
-        required Color blue,
-        required Color white,
-      }) async {
+    BuildContext context, {
+    required Color blue,
+    required Color white,
+  }) async {
     final settings = AppSettings.instance;
     await settings.load();
 
-     Future<void> _showCuboAboutDialog(
-        BuildContext context, {
-          required Color blue,
-          required Color white,
-        }) {
+    Future<void> _showCuboAboutDialog(
+      BuildContext context, {
+      required Color blue,
+      required Color white,
+    }) {
       return showDialog(
         context: context,
         barrierColor: Colors.black.withOpacity(0.55),
@@ -68,14 +53,10 @@ class AppSettingsSheet {
 
           return Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(
-              horizontal: narrow ? 18 : 28,
-            ),
+            insetPadding: EdgeInsets.symmetric(horizontal: narrow ? 18 : 28),
             child: Container(
               width: double.infinity,
-              constraints: const BoxConstraints(
-                maxWidth: 420,
-              ),
+              constraints: const BoxConstraints(maxWidth: 420),
               padding: EdgeInsets.fromLTRB(
                 narrow ? 18 : 24,
                 24,
@@ -94,17 +75,14 @@ class AppSettingsSheet {
                   Align(
                     alignment: Alignment.centerRight,
                     child: GestureDetector(
-                      onTap: () =>
-                          Navigator.pop(dialogContext),
+                      onTap: () => Navigator.pop(dialogContext),
                       child: Container(
                         width: 38,
                         height: 38,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: white.withOpacity(0.08),
-                          border: Border.all(
-                            color: white.withOpacity(0.24),
-                          ),
+                          border: Border.all(color: white.withOpacity(0.24)),
                         ),
                         child: Icon(
                           Icons.close_rounded,
@@ -114,8 +92,6 @@ class AppSettingsSheet {
                       ),
                     ),
                   ),
-
-
 
                   // ICONO CUBO
                   const SizedBox(height: 2),
@@ -182,9 +158,7 @@ class AppSettingsSheet {
                     decoration: BoxDecoration(
                       color: white.withOpacity(0.09),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: white.withOpacity(0.20),
-                      ),
+                      border: Border.all(color: white.withOpacity(0.20)),
                     ),
                     child: Text(
                       'VERSIÓN 1.0.5',
@@ -226,7 +200,7 @@ class AppSettingsSheet {
                   const SizedBox(height: 4),
 
                   Text(
-                    'anioldev.com',
+                    'cubo.anioldev.com',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: white.withOpacity(0.42),
@@ -241,8 +215,7 @@ class AppSettingsSheet {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () =>
-                          Navigator.pop(dialogContext),
+                      onPressed: () => Navigator.pop(dialogContext),
                       style: CuboButtons.primary(foreground: blue).copyWith(
                         backgroundColor: WidgetStatePropertyAll(white),
                       ),
@@ -275,6 +248,7 @@ class AppSettingsSheet {
         },
       );
     }
+
     if (!context.mounted) return;
 
     showModalBottomSheet(
@@ -379,6 +353,45 @@ class AppSettingsSheet {
                                   white: white,
                                   label: settings.t(lang.$1),
                                   value: lang.$2,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      _sectionLabel(settings.t('menuStyle'), white),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: white.withValues(alpha: 0.22),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            for (final option in const [
+                              ('menuGrid', 'grid', Icons.grid_view_rounded),
+                              (
+                                'menuCarousel',
+                                'carousel',
+                                Icons.view_carousel_rounded,
+                              ),
+                            ])
+                              Expanded(
+                                child: _segmentButton(
+                                  blue: blue,
+                                  white: white,
+                                  label: settings.t(option.$1),
+                                  icon: option.$3,
+                                  selected: settings.menuStyle == option.$2,
+                                  onSelect: () =>
+                                      settings.setMenuStyle(option.$2),
                                 ),
                               ),
                           ],
@@ -544,7 +557,7 @@ class AppSettingsSheet {
                             const SizedBox(height: 4),
 
                             Text(
-                              'anioldev.com',
+                              'cubo.anioldev.com',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: white.withValues(alpha: 0.42),
@@ -600,8 +613,23 @@ class AppSettingsSheet {
     required String label,
     required String value,
   }) {
-    final selected = settings.language == value;
+    return _segmentButton(
+      blue: blue,
+      white: white,
+      label: label,
+      selected: settings.language == value,
+      onSelect: () => settings.setLanguage(value),
+    );
+  }
 
+  static Widget _segmentButton({
+    required Color blue,
+    required Color white,
+    required String label,
+    required bool selected,
+    required Future<void> Function() onSelect,
+    IconData? icon,
+  }) {
     return Semantics(
       selected: selected,
       button: true,
@@ -613,7 +641,7 @@ class AppSettingsSheet {
         child: InkWell(
           onTap: () async {
             if (selected) return;
-            await settings.setLanguage(value);
+            await onSelect();
           },
           child: Container(
             height: 40,
@@ -621,10 +649,10 @@ class AppSettingsSheet {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (selected) ...[
+                if (selected || icon != null) ...[
                   Icon(
-                    Icons.check_rounded,
-                    color: blue,
+                    selected ? Icons.check_rounded : icon,
+                    color: selected ? blue : white,
                     size: 17,
                   ),
                   const SizedBox(width: 4),
@@ -705,10 +733,7 @@ class AppSettingsSheet {
             CuboIconCircle(icon: icon, size: 38, color: white),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                title,
-                style: CuboText.label(size: 16, color: white),
-              ),
+              child: Text(title, style: CuboText.label(size: 16, color: white)),
             ),
             Icon(
               Icons.chevron_right_rounded,
@@ -720,27 +745,17 @@ class AppSettingsSheet {
       ),
     );
   }
-  static Future<void> _openAniolDev(
-      BuildContext context,
-      ) async {
-    final uri = Uri.parse(
-      'https://anioldev.com/cubo',
-    );
 
-    final opened = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+  static Future<void> _openAniolDev(BuildContext context) async {
+    final uri = Uri.parse('https://cubo.anioldev.com');
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
 
     if (!opened && context.mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text(
-              'No se ha podido abrir la web.',
-            ),
-          ),
+          const SnackBar(content: Text('No se ha podido abrir la web.')),
         );
     }
   }
