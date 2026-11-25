@@ -299,73 +299,88 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
-      builder: (_) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
           decoration: CuboDecorations.dialog(),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const CuboIllustration('ruleta', size: 88, popIn: true),
+              // El número que ha salido, como la casilla de la ruleta.
+              Center(
+                child: Container(
+                  width: 84,
+                  height: 84,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: CuboColors.fiesta,
+                    shape: BoxShape.circle,
+                    boxShadow: CuboShadows.soft,
+                  ),
+                  child: Text(
+                    '$number',
+                    style: const TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 14),
               Text(
-                'número $number',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: CuboColors.fiesta,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'te ha tocado',
+                tr('te ha tocado').toUpperCase(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: CuboColors.white,
-                  fontSize: 34,
-                  height: 0.95,
+                  color: CuboColors.whiteA(0.7),
+                  fontSize: 13,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
+                  letterSpacing: 1,
                 ),
               ),
-              const SizedBox(height: 12),
-              const CuboPillBar(),
-              const SizedBox(height: 18),
+              const SizedBox(height: 10),
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: CuboDecorations.whiteCard(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 22,
+                ),
+                decoration: BoxDecoration(
+                  color: CuboColors.whiteA(0.12),
+                  borderRadius: CuboRadii.mdAll,
+                ),
                 child: Text(
                   text,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: CuboColors.blueInk,
-                    fontSize: 23,
-                    height: 1.18,
+                    color: CuboColors.white,
+                    fontSize: 26,
+                    height: 1.15,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.4,
                   ),
                 ),
               ),
               const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: mainButtonStyle(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      'OK',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.4,
-                      ),
+              CuboPressable(
+                onTap: () => Navigator.pop(dialogContext),
+                child: Container(
+                  height: 56,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: CuboColors.fiesta,
+                    borderRadius: BorderRadius.all(Radius.circular(999)),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
