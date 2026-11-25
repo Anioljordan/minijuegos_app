@@ -134,12 +134,16 @@ class CuboSectionTitle extends StatelessWidget {
   final double size;
   final double gap;
 
+  /// Color de la barra bajo el título (blanca si es null).
+  final Color? barColor;
+
   const CuboSectionTitle(
     this.text, {
     super.key,
     this.alignEnd = false,
     this.size = 66,
     this.gap = 12,
+    this.barColor,
   });
 
   @override
@@ -147,8 +151,9 @@ class CuboSectionTitle extends StatelessWidget {
     final alignment = alignEnd ? Alignment.centerRight : Alignment.centerLeft;
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment:
-          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         FittedBox(
           fit: BoxFit.scaleDown,
@@ -162,7 +167,7 @@ class CuboSectionTitle extends StatelessWidget {
           ),
         ),
         SizedBox(height: gap),
-        const CuboPillBar(),
+        CuboPillBar(color: barColor),
       ],
     );
   }

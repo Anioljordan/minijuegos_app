@@ -354,6 +354,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
         Padding(
           padding: EdgeInsets.only(right: compact ? 6 : 10),
           child: CuboSectionTitle(
+            barColor: CuboColors.chill,
             'escala mental',
             alignEnd: true,
             size: titleSize,
@@ -380,31 +381,17 @@ class _EscalaScreenState extends State<EscalaScreen> {
     );
   }
 
-  Color _phaseColor() {
-    switch (fase) {
-      case 0:
-        return CuboColors.chill;
-
-      case 1:
-      case 2:
-        return CuboColors.fiesta;
-
-      case 3:
-        return CuboColors.white;
-
-      case 4:
-        return CuboColors.chill;
-
-      default:
-        return CuboColors.chill;
-    }
-  }
-
-  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
+  /// Tarjeta de cristal. Con [fill] ocupa todo el alto libre y centra su
+  /// contenido, para que el botón quede abajo y no sobre espacio.
+  Widget buildGlassCard({
+    required Widget child,
+    EdgeInsets? padding,
+    bool fill = false,
+  }) {
     final compact = _isCompactScreen;
     final veryNarrow = _isVeryNarrowScreen;
 
-    return Container(
+    final card = Container(
       width: double.infinity,
       padding:
           padding ??
@@ -415,9 +402,10 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 ? 13
                 : 17,
           ),
-      decoration: CuboDecorations.glass(),
-      child: child,
+      decoration: CuboDecorations.glassRaised(radius: CuboRadii.card),
+      child: fill ? Center(child: SingleChildScrollView(child: child)) : child,
     );
+    return fill ? Expanded(child: card) : card;
   }
 
   Widget buildFancyButton({
@@ -511,19 +499,18 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 size: 20,
               ),
         filled: true,
-        fillColor: CuboColors.white.withValues(alpha: 0.07),
+        fillColor: CuboColors.whiteA(0.12),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+          horizontal: 16,
+          vertical: 16,
         ),
-        enabledBorder: CuboInputs.rounded(
-          BorderSide(
-            color: CuboColors.white.withValues(alpha: 0.28),
-            width: 1.4,
-          ),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          borderSide: BorderSide.none,
         ),
-        focusedBorder: CuboInputs.rounded(
-          const BorderSide(color: CuboColors.white, width: 2),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          borderSide: BorderSide(color: CuboColors.chill, width: 2),
         ),
       ),
     );
@@ -939,7 +926,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
     icon: Icons.casino_rounded,
     trailingIcon: Icons.play_arrow_rounded,
     onTap: usarEscalaAleatoria,
-    light: true,
+    primary: true,
   );
 
   Widget buildPickScaleCard() => buildOptionCard(
@@ -948,43 +935,40 @@ class _EscalaScreenState extends State<EscalaScreen> {
     icon: Icons.format_list_bulleted_rounded,
     trailingIcon: Icons.chevron_right_rounded,
     onTap: abrirSelectorEscalas,
-    light: false,
+    primary: false,
   );
 
-  /// Tarjeta de opción: blanca ([light]) o de cristal sobre el azul.
+  /// Tarjeta de opción de cristal; la [primary] lleva el acento en el icono
+  /// y en el botón.
   Widget buildOptionCard({
     required String title,
     required String subtitle,
     required IconData icon,
     required IconData trailingIcon,
     required VoidCallback onTap,
-    required bool light,
+    required bool primary,
   }) {
     final compact = _isCompactScreen;
     final iconBox = compact ? 50.0 : 58.0;
-    final ink = light ? CuboColors.blueInk : CuboColors.white;
+    const ink = CuboColors.white;
 
     return CuboPressable(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(compact ? 14 : 18),
-        decoration: light
-            ? CuboDecorations.whiteCard()
-            : CuboDecorations.glass(radius: CuboRadii.lg),
+        decoration: CuboDecorations.glassRaised(radius: CuboRadii.lg),
         child: Row(
           children: [
             Container(
               width: iconBox,
               height: iconBox,
               decoration: BoxDecoration(
-                color: light
-                    ? CuboColors.blueTint
-                    : CuboColors.white.withValues(alpha: 0.14),
+                color: primary ? CuboColors.chill : CuboColors.whiteA(0.14),
                 borderRadius: CuboRadii.mdAll,
               ),
               child: Icon(
                 icon,
-                color: light ? CuboColors.blue : CuboColors.white,
+                color: primary ? CuboColors.blueInk : CuboColors.white,
                 size: compact ? 28 : 32,
               ),
             ),
@@ -1019,12 +1003,12 @@ class _EscalaScreenState extends State<EscalaScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: light ? CuboColors.blue : CuboColors.white,
+                color: primary ? CuboColors.chill : CuboColors.whiteA(0.16),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 trailingIcon,
-                color: light ? CuboColors.white : CuboColors.blue,
+                color: primary ? CuboColors.blueInk : CuboColors.white,
                 size: 24,
               ),
             ),
@@ -1232,6 +1216,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             children: [
               const CuboStatusChip(
@@ -1280,6 +1265,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -1304,7 +1290,8 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 ],
               ),
               SizedBox(height: compact ? 14 : 18),
-              buildScaleEnds(),
+              // El jugador 1 sigue viendo la posición mientras escribe.
+              buildMedidorSemicircular(valor: valorReal, mostrarNumero: false),
               SizedBox(height: compact ? 14 : 18),
               buildCustomField(
                 controller: respuestaController,
@@ -1332,6 +1319,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             children: [
               Text(
@@ -1471,6 +1459,7 @@ class _EscalaScreenState extends State<EscalaScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         buildGlassCard(
+          fill: true,
           child: Column(
             children: [
               Container(
@@ -1640,14 +1629,17 @@ class _EscalaScreenState extends State<EscalaScreen> {
         );
       },
 
-      child: Align(
-        key: ValueKey(fase),
-        alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: SizedBox(width: double.infinity, child: contenido),
-        ),
-      ),
+      child: fase == 0
+          ? Align(
+              key: ValueKey(fase),
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: SizedBox(width: double.infinity, child: contenido),
+              ),
+            )
+          // Las fases de juego llenan el alto: tarjeta arriba, botón abajo.
+          : KeyedSubtree(key: ValueKey(fase), child: contenido),
     );
   }
 
@@ -1732,23 +1724,24 @@ class NeedleGaugePainter extends CustomPainter {
     canvas.drawPath(
       track,
       Paint()
+        // Cada extremo de la escala con su color: azul claro a la izquierda,
+        // amarillo a la derecha.
         ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
           colors: [
-            Colors.white.withValues(alpha: 0.30),
-            Colors.white.withValues(alpha: 0.10),
+            CuboColors.chill.withValues(alpha: 0.45),
+            Colors.white.withValues(alpha: 0.18),
+            CuboColors.fiesta.withValues(alpha: 0.45),
           ],
         ).createShader(outerRect),
     );
 
     if (mostrarZonasPuntuacion) {
       const zonas = [
-        (-15.0, -9.0, Color(0xFFFFE45E), '1'),
-        (-8.0, -4.0, Color(0xFFFFB84D), '2'),
-        (-3.0, 3.0, Color(0xFFFF7A3D), '4'),
-        (4.0, 8.0, Color(0xFFFFB84D), '2'),
-        (9.0, 15.0, Color(0xFFFFE45E), '1'),
+        (-15.0, -9.0, CuboColors.white, '1'),
+        (-8.0, -4.0, CuboColors.chill, '2'),
+        (-3.0, 3.0, CuboColors.fiesta, '4'),
+        (4.0, 8.0, CuboColors.chill, '2'),
+        (9.0, 15.0, CuboColors.white, '1'),
       ];
       for (final zona in zonas) {
         drawZonaRellenaConTexto(

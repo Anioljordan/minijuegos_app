@@ -162,19 +162,86 @@ class YoNuncaModesScreen extends StatelessWidget {
     );
   }
 
+  /// Carta de modo de cristal (la de antes, más grande): icono en un
+  /// recuadro del color del modo, título, descripción y flecha.
   Widget buildModeCard({
     required String title,
+    required String description,
     required IconData icon,
     required Color color,
+    required double height,
     required VoidCallback onTap,
-    required bool compact,
   }) {
-    return CuboModeCard(
-      title: title,
-      icon: icon,
-      iconBackground: color,
-      compact: compact,
+    final tile = (height * 0.56).clamp(54.0, 80.0);
+    return CuboPressable(
       onTap: onTap,
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: CuboDecorations.glassRaised(),
+        child: Row(
+          children: [
+            Container(
+              width: tile,
+              height: tile,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(tile / 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: CuboColors.blueInk, size: tile * 0.5),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      style: const TextStyle(
+                        color: CuboColors.white,
+                        fontSize: 20,
+                        height: 1.1,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: CuboColors.whiteA(0.72),
+                      fontSize: 13.5,
+                      height: 1.25,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: CuboColors.whiteA(0.7),
+              size: 28,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -183,18 +250,21 @@ class YoNuncaModesScreen extends StatelessWidget {
     final modes = [
       (
         title: 'Yo Nunca',
-        icon: Icons.chat_bubble_outline_rounded,
+        description: 'El clásico de siempre',
+        icon: Icons.chat_bubble_rounded,
         color: CuboColors.fiesta,
         modo: 'normal',
       ),
       (
-        title: 'Yo Nunca por equipos',
+        title: 'Por equipos',
+        description: 'Forma equipos y competid durante las rondas.',
         icon: Icons.groups_rounded,
         color: CuboColors.white,
         modo: 'equipos',
       ),
       (
         title: 'Yo Nunca Lobo',
+        description: 'Un modo con identidades ocultas y sospechas.',
         icon: Icons.visibility_off_rounded,
         color: CuboColors.chill,
         modo: 'lobo',
@@ -211,49 +281,59 @@ class YoNuncaModesScreen extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final narrow = constraints.maxWidth < 380;
-                final veryNarrow = constraints.maxWidth < 340;
                 final compact = constraints.maxHeight < 680;
+                final gap = compact ? 12.0 : 14.0;
 
-                final horizontalPadding = veryNarrow
-                    ? 10.0
-                    : narrow
-                    ? 14.0
-                    : 20.0;
-
-                return SingleChildScrollView(
+                return Padding(
                   padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
+                    narrow ? 14 : 20,
                     18,
-                    horizontalPadding,
+                    narrow ? 14 : 20,
                     20,
                   ),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - 38,
-                    ),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          buildTopBar(context),
-                          const Spacer(),
-                          SizedBox(height: compact ? 20 : 28),
-                          for (var i = 0; i < modes.length; i++) ...[
-                            if (i > 0) SizedBox(height: compact ? 10 : 14),
-                            CuboEntrance(
-                              index: i + 1,
-                              child: buildModeCard(
-                                title: modes[i].title,
-                                icon: modes[i].icon,
-                                color: modes[i].color,
-                                compact: compact,
-                                onTap: () => abrirModo(context, modes[i].modo),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      buildTopBar(context),
+                      SizedBox(height: compact ? 18 : 26),
+                      // Las tres cartas reparten el espacio que queda, con
+                      // un alto máximo para que no queden desproporcionadas.
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, area) {
+                            final height = ((area.maxHeight - gap * 2) / 3)
+                                .clamp(88.0, 170.0);
+                            return SingleChildScrollView(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: area.maxHeight,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    for (var i = 0; i < modes.length; i++) ...[
+                                      if (i > 0) SizedBox(height: gap),
+                                      CuboEntrance(
+                                        index: i + 1,
+                                        child: buildModeCard(
+                                          title: modes[i].title,
+                                          description: modes[i].description,
+                                          icon: modes[i].icon,
+                                          color: modes[i].color,
+                                          height: height,
+                                          onTap: () =>
+                                              abrirModo(context, modes[i].modo),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ],
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 );
               },

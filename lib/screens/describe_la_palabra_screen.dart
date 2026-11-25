@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../widgets/cubo_setup_widgets.dart';
 
 enum DescribeStep { setup, roundIntro, turn, roundFinished, gameFinished }
 
@@ -50,12 +51,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   static const int minPlayers = 2;
   static const int maxPlayers = 12;
 
-  bool get _isNarrowScreen => MediaQuery.sizeOf(context).width < 380;
-
   bool get _isVeryNarrowScreen => MediaQuery.sizeOf(context).width < 340;
-
-  bool get _isCompactScreen =>
-      MediaQuery.sizeOf(context).height < 740 || _isNarrowScreen;
 
   Widget _singleLineResponsiveText(
     String text, {
@@ -76,6 +72,9 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
   }
 
   DescribeStep currentStep = DescribeStep.setup;
+
+  /// Paso visible de la configuración (solo interfaz).
+  int _setupStep = 0;
   DescribeRoundType currentRound = DescribeRoundType.describe;
   WordsSource wordsSource = WordsSource.app;
 
@@ -197,6 +196,7 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     timer?.cancel();
     setState(() {
       currentStep = DescribeStep.setup;
+      _setupStep = 0;
       currentRound = DescribeRoundType.describe;
       wordsSource = WordsSource.app;
 
@@ -314,19 +314,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
       // Al cambiar la lista, se deben crear los equipos otra vez.
       teams.clear();
     });
-  }
-
-  void _changePlayers(int change) {
-    if (change > 0) {
-      // El + del contador siempre crea un jugador automático.
-      playerController.clear();
-      addPlayer();
-      return;
-    }
-
-    if (allPlayers.isEmpty) return;
-
-    removePlayer(allPlayers.length - 1);
   }
 
   void createEmptyTeams() {
@@ -796,32 +783,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     );
   }
 
-  InputDecoration inputDecoration(String hint, {bool dense = false}) {
-    return InputDecoration(
-      hintText: tr(hint),
-      hintStyle: TextStyle(
-        color: CuboColors.whiteA(0.50),
-        fontWeight: FontWeight.w600,
-      ),
-      filled: true,
-      fillColor: CuboColors.whiteA(0.07),
-      isDense: dense,
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 13,
-        vertical: dense ? 11 : 14,
-      ),
-      border: CuboInputs.rounded(
-        BorderSide(color: CuboColors.whiteA(0.28), width: 1.2),
-      ),
-      enabledBorder: CuboInputs.rounded(
-        BorderSide(color: CuboColors.whiteA(0.28), width: 1.2),
-      ),
-      focusedBorder: CuboInputs.rounded(
-        BorderSide(color: CuboColors.whiteA(0.75), width: 1.6),
-      ),
-    );
-  }
-
   Widget sectionTitle(String text, {bool compact = false}) {
     return Text(
       tr(text).toLowerCase(),
@@ -977,139 +938,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _sourceSelector({required bool compact}) {
-    Widget option({
-      required WordsSource value,
-      required String label,
-      required IconData icon,
-    }) {
-      final selected = wordsSource == value;
-      return Expanded(
-        child: GestureDetector(
-          onTap: () => setState(() => wordsSource = value),
-          child: Container(
-            height: compact ? 58 : 66,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: CuboDecorations.glass(
-              selected: selected,
-              radius: CuboRadii.md,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                selected
-                    ? CuboCheckBadge(selected: true, size: compact ? 20 : 22)
-                    : Icon(
-                        icon,
-                        color: CuboColors.white,
-                        size: compact ? 21 : 24,
-                      ),
-                SizedBox(width: _isVeryNarrowScreen ? 5 : 7),
-                Expanded(
-                  child: _singleLineResponsiveText(
-                    label,
-                    alignment: Alignment.center,
-                    style: TextStyle(
-                      color: CuboColors.white,
-                      fontSize: compact ? 10.5 : 12,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Row(
-      children: [
-        option(
-          value: WordsSource.app,
-          label: 'PALABRAS APP',
-          icon: Icons.auto_awesome_rounded,
-        ),
-        const SizedBox(width: 9),
-        option(
-          value: WordsSource.custom,
-          label: 'MI LISTA',
-          icon: Icons.edit_note_rounded,
-        ),
-      ],
-    );
-  }
-
-  Widget _teamSummaryCard(DescribeTeam team, int index) {
-    final colors = [
-      CuboColors.chill,
-      CuboColors.fiesta,
-      CuboColors.white,
-      CuboColors.blueLight,
-    ];
-    final color = colors[index % colors.length];
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 9),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: CuboDecorations.glass(radius: CuboRadii.md),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.20),
-              border: Border.all(color: color, width: 1.5),
-            ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: const TextStyle(
-                  color: CuboColors.white,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(team.name).toUpperCase(),
-                  style: const TextStyle(
-                    color: CuboColors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  team.players.isEmpty
-                      ? 'Sin jugadores'
-                      : team.players.join(' · '),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.66),
-                    fontSize: 11.5,
-                    height: 1.2,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1356,404 +1184,288 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     );
   }
 
-  Widget _buildPlayerCounterButton({
-    required IconData icon,
-    required VoidCallback? onTap,
-    required bool compact,
-  }) {
-    final veryNarrow = _isVeryNarrowScreen;
+  static const List<Color> _teamColors = [
+    CuboColors.chill,
+    CuboColors.fiesta,
+    CuboColors.white,
+    CuboColors.alert,
+  ];
 
-    final size = veryNarrow
-        ? 34.0
-        : compact
-        ? 38.0
-        : 44.0;
+  static const int _minSeconds = 10;
+  static const int _maxSeconds = 180;
+  static const int _secondsStep = 5;
 
-    return Material(
-      color: onTap == null ? CuboColors.whiteA(0.04) : CuboColors.whiteA(0.12),
-      shape: CircleBorder(
-        side: BorderSide(
-          color: CuboColors.whiteA(onTap == null ? 0.12 : 0.40),
-          width: 1.2,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Center(
-            child: Icon(
-              icon,
-              color: CuboColors.white.withValues(
-                alpha: onTap == null ? 0.28 : 1,
-              ),
-              size: veryNarrow
-                  ? 19
-                  : compact
-                  ? 21
-                  : 24,
-            ),
-          ),
-        ),
-      ),
-    );
+  int get _teamCount => int.tryParse(teamCountController.text.trim()) ?? 2;
+
+  int get _seconds => int.tryParse(secondsController.text.trim()) ?? 30;
+
+  /// Crea los equipos y reparte a los jugadores al azar.
+  void _prepareTeams() {
+    createEmptyTeams();
+    if (teams.length >= 2) autoDistributePlayers();
   }
 
-  Widget _buildPlayersCounter({required bool compact}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final veryNarrow = constraints.maxWidth < 330;
-
-        final leadingSize = veryNarrow
-            ? 34.0
-            : compact
-            ? 38.0
-            : 44.0;
-
-        final gap = veryNarrow ? 6.0 : 9.0;
-
-        final valueWidth = veryNarrow
-            ? 27.0
-            : compact
-            ? 33.0
-            : 40.0;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(
-            veryNarrow
-                ? 8
-                : compact
-                ? 10
-                : 12,
-          ),
-          decoration: CuboDecorations.glass(radius: CuboRadii.md),
-          child: Row(
-            children: [
-              Container(
-                width: leadingSize,
-                height: leadingSize,
-                decoration: BoxDecoration(
-                  color: CuboColors.chill.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: CuboColors.chill.withValues(alpha: 0.75),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  Icons.groups_rounded,
-                  color: CuboColors.chill,
-                  size: veryNarrow
-                      ? 19
-                      : compact
-                      ? 21
-                      : 24,
-                ),
-              ),
-
-              SizedBox(width: gap),
-
-              Expanded(
-                child: _singleLineResponsiveText(
-                  'JUGADORES',
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 10.5
-                        : compact
-                        ? 12
-                        : 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: veryNarrow ? 0.1 : 0.4,
-                  ),
-                ),
-              ),
-
-              SizedBox(width: gap),
-
-              _buildPlayerCounterButton(
-                icon: Icons.remove_rounded,
-                onTap: allPlayers.isEmpty ? null : () => _changePlayers(-1),
-                compact: compact,
-              ),
-
-              SizedBox(
-                width: valueWidth,
-                child: Text(
-                  '${allPlayers.length}',
-                  maxLines: 1,
-                  softWrap: false,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 18
-                        : compact
-                        ? 20
-                        : 23,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-
-              _buildPlayerCounterButton(
-                icon: Icons.add_rounded,
-                onTap: allPlayers.length >= maxPlayers
-                    ? null
-                    : () => _changePlayers(1),
-                compact: compact,
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  void _changeTeamCount(int delta) {
+    final next = (_teamCount + delta).clamp(2, max(2, allPlayers.length));
+    teamCountController.text = '$next';
+    _prepareTeams();
   }
 
-  Widget _buildPlayerTile({
-    required String player,
-    required int index,
-    required bool compact,
-  }) {
+  void _changeSeconds(int delta) {
+    final next = (_seconds + delta).clamp(_minSeconds, _maxSeconds);
+    setState(() => secondsController.text = '$next');
+  }
+
+  void _moveToNextTeam(String player) {
+    final from = getPlayerAssignedTeamIndex(player) ?? -1;
+    assignPlayerToTeam(player, (from + 1) % teams.length);
+  }
+
+  void _goToSetupStep(int step) {
+    if (step > _setupStep) {
+      if (_setupStep == 0) {
+        if (allPlayers.length < minPlayers) {
+          showSnack('Añade al menos $minPlayers jugadores');
+          return;
+        }
+        if (_teamCount > allPlayers.length) {
+          teamCountController.text = '${allPlayers.length}';
+        }
+        if (teams.isEmpty) _prepareTeams();
+      } else if (_setupStep == 1 && !validateTeams()) {
+        return;
+      }
+    }
+    FocusScope.of(context).unfocus();
+    setState(() => _setupStep = step);
+  }
+
+  Widget _setupTeamCard(DescribeTeam team, int index) {
+    final color = _teamColors[index % _teamColors.length];
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.fromLTRB(
-        compact ? 9 : 11,
-        compact ? 7 : 8,
-        5,
-        compact ? 7 : 8,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: CuboColors.whiteA(0.12),
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
       ),
-      decoration: CuboDecorations.glass(radius: CuboRadii.md),
-      child: Row(
-        children: [
-          Container(
-            width: compact ? 31 : 35,
-            height: compact ? 31 : 35,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: CuboColors.chill.withValues(alpha: 0.18),
-              border: Border.all(
-                color: CuboColors.chill.withValues(alpha: 0.85),
-                width: 1.6,
-              ),
-            ),
-            child: Text(
-              '${index + 1}',
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 12 : 13,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          Expanded(
-            child: Text(
-              player,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 14 : 16,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          IconButton(
-            tooltip: tr('Eliminar jugador'),
-            onPressed: () => removePlayer(index),
-            icon: Icon(
-              Icons.delete_outline_rounded,
-              color: CuboColors.white.withValues(alpha: 0.78),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlayersEditor({required bool compact}) {
-    final veryNarrow = _isVeryNarrowScreen;
-    return buildPanel(
-      accent: CuboColors.chill,
-      padding: EdgeInsets.all(compact ? 12 : 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildPlayersCounter(compact: compact),
-
-          SizedBox(height: compact ? 12 : 14),
-
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _singleLineResponsiveText(
-              'AÑADIR JUGADOR',
-              style: TextStyle(
-                color: CuboColors.white.withValues(alpha: 0.70),
-                fontSize: compact ? 10.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.7,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: TextField(
-                  controller: playerController,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => addPlayer(),
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                ),
+                child: Text(
+                  '${index + 1}',
                   style: const TextStyle(
-                    color: CuboColors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: CuboColors.white,
-                  decoration: inputDecoration(
-                    'Nombre opcional',
-                    dense: compact,
+                    color: CuboColors.blueInk,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-
-              SizedBox(width: veryNarrow ? 6 : 9),
-
-              SizedBox(
-                width: veryNarrow
-                    ? 44
-                    : compact
-                    ? 50
-                    : 54,
-                height: veryNarrow
-                    ? 48
-                    : compact
-                    ? 50
-                    : 54,
-                child: ElevatedButton(
-                  onPressed: allPlayers.length >= maxPlayers ? null : addPlayer,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CuboColors.chill,
-                    foregroundColor: CuboColors.blue,
-                    disabledBackgroundColor: CuboColors.white.withValues(
-                      alpha: 0.18,
-                    ),
-                    disabledForegroundColor: CuboColors.white.withValues(
-                      alpha: 0.42,
-                    ),
-                    elevation: 0,
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    alignment: Alignment.center,
-                    shape: const CircleBorder(),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  tr(team.name).toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: CuboColors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.4,
                   ),
-                  child: const Center(child: Icon(Icons.add_rounded, size: 29)),
+                ),
+              ),
+              Text(
+                '${team.players.length}',
+                style: TextStyle(
+                  color: CuboColors.whiteA(0.72),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-
-          SizedBox(height: compact ? 12 : 14),
-
-          if (allPlayers.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: compact ? 16 : 20,
-              ),
-              decoration: BoxDecoration(
-                color: CuboColors.whiteA(0.05),
-                borderRadius: CuboRadii.mdAll,
-                border: Border.all(color: CuboColors.whiteA(0.18), width: 1.2),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.person_add_alt_1_rounded,
-                    color: CuboColors.white.withValues(alpha: 0.48),
-                    size: compact ? 28 : 34,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    'Todavía no has añadido jugadores',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.66),
-                      fontSize: compact ? 12 : 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.44),
-                      fontSize: compact ? 10.5 : 11.5,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
+          const SizedBox(height: 10),
+          if (team.players.isEmpty)
+            Text(
+              'Sin jugadores',
+              style: TextStyle(
+                color: CuboColors.whiteA(0.5),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
               ),
             )
-          else ...[
-            Row(
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Expanded(
-                  child: _singleLineResponsiveText(
-                    'LISTA DE JUGADORES',
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.70),
-                      fontSize: compact ? 10.5 : 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.7,
+                for (final player in team.players)
+                  CuboPressable(
+                    onTap: () => _moveToNextTeam(player),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 10, 8),
+                      decoration: BoxDecoration(
+                        color: CuboColors.whiteA(0.14),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(999),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 130),
+                            child: Text(
+                              player,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: CuboColors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.swap_horiz_rounded,
+                            color: CuboColors.whiteA(0.6),
+                            size: 18,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-                const SizedBox(width: 8),
-
-                Text(
-                  '${allPlayers.length} / $maxPlayers',
-                  maxLines: 1,
-                  softWrap: false,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.62),
-                    fontSize: compact ? 11 : 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
               ],
             ),
+        ],
+      ),
+    );
+  }
 
-            const SizedBox(height: 9),
-
-            ...allPlayers.asMap().entries.map(
-              (entry) => _buildPlayerTile(
-                player: entry.value,
-                index: entry.key,
-                compact: compact,
+  Widget _buildTeamsStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CuboLightCounter(
+          title: 'Número de equipos',
+          icon: Icons.groups_2_rounded,
+          value: '$_teamCount',
+          onMinus: _teamCount <= 2 ? null : () => _changeTeamCount(-1),
+          onPlus: _teamCount >= allPlayers.length
+              ? null
+              : () => _changeTeamCount(1),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Toca un jugador para cambiarlo de equipo',
+                style: TextStyle(
+                  color: CuboColors.whiteA(0.72),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            CuboPressable(
+              onTap: autoDistributePlayers,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 9, 14, 9),
+                decoration: const BoxDecoration(
+                  color: CuboColors.chill,
+                  borderRadius: BorderRadius.all(Radius.circular(999)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.shuffle_rounded,
+                      color: CuboColors.blueInk,
+                      size: 18,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'REPARTIR',
+                      style: TextStyle(
+                        color: CuboColors.blueInk,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 10),
+        for (var i = 0; i < teams.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10),
+          _setupTeamCard(teams[i], i),
         ],
-      ),
+      ],
+    );
+  }
+
+  Widget _buildWordsStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        CuboSetupOption(
+          title: 'PALABRAS APP',
+          icon: Icons.auto_awesome_rounded,
+          selected: wordsSource == WordsSource.app,
+          onTap: () => setState(() => wordsSource = WordsSource.app),
+        ),
+        const SizedBox(height: 12),
+        CuboSetupOption(
+          title: 'MI LISTA',
+          icon: Icons.edit_note_rounded,
+          selected: wordsSource == WordsSource.custom,
+          onTap: () => setState(() => wordsSource = WordsSource.custom),
+        ),
+        if (wordsSource == WordsSource.custom) ...[
+          const SizedBox(height: 12),
+          CuboSetupTextField(
+            controller: customWordsController,
+            hint: 'Una palabra por línea\nPerro\nAvión\nPizza',
+            minLines: 4,
+            maxLines: 7,
+          ),
+        ],
+        const SizedBox(height: 12),
+        CuboLightCounter(
+          title: 'Segundos por turno',
+          icon: Icons.timer_rounded,
+          value: '$_seconds',
+          onMinus: _seconds <= _minSeconds
+              ? null
+              : () => _changeSeconds(-_secondsStep),
+          onPlus: _seconds >= _maxSeconds
+              ? null
+              : () => _changeSeconds(_secondsStep),
+        ),
+        const SizedBox(height: 12),
+        const CuboSetupInfoRow(
+          title: 'Rondas',
+          icon: Icons.layers_rounded,
+          value: '3',
+        ),
+      ],
     );
   }
 
@@ -1763,310 +1475,35 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
         buildTopBar(compact: compact, showIllustration: true),
         SizedBox(height: compact ? 10 : 14),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildPlayersEditor(compact: compact),
-                SizedBox(height: compact ? 9 : 12),
-                buildPanel(
-                  accent: CuboColors.fiesta,
-                  padding: EdgeInsets.all(compact ? 12 : 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      sectionTitle('Equipos', compact: compact),
-                      SizedBox(height: compact ? 10 : 13),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final narrow = constraints.maxWidth < 390;
-
-                          final teamCountField = TextField(
-                            controller: teamCountController,
-                            keyboardType: TextInputType.number,
-                            style: const TextStyle(
-                              color: CuboColors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            cursorColor: CuboColors.white,
-                            decoration: inputDecoration(
-                              'Número de equipos',
-                              dense: compact,
-                            ),
-                          );
-
-                          final createButton = SizedBox(
-                            height: compact ? 48 : 54,
-                            child: ElevatedButton(
-                              onPressed: createEmptyTeams,
-                              style: CuboButtons.primary(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                              ),
-                              child: const FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  'CREAR',
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-
-                          final shuffleButton = SizedBox(
-                            height: compact ? 48 : 54,
-                            child: OutlinedButton.icon(
-                              onPressed: autoDistributePlayers,
-                              style: secondaryButtonStyle(),
-                              icon: Icon(
-                                Icons.shuffle_rounded,
-                                size: compact ? 20 : 23,
-                              ),
-                              label: const FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  'REPARTIR',
-                                  maxLines: 1,
-                                  softWrap: false,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-
-                          if (narrow) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                teamCountField,
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(child: createButton),
-                                    const SizedBox(width: 8),
-                                    Expanded(child: shuffleButton),
-                                  ],
-                                ),
-                              ],
-                            );
-                          }
-
-                          return Row(
-                            children: [
-                              Expanded(flex: 2, child: teamCountField),
-                              const SizedBox(width: 8),
-                              SizedBox(width: 92, child: createButton),
-                              const SizedBox(width: 8),
-                              SizedBox(width: 118, child: shuffleButton),
-                            ],
-                          );
-                        },
-                      ),
-                      if (teams.isNotEmpty) ...[
-                        SizedBox(height: compact ? 12 : 15),
-                        _smallLabel('Asignar jugadores'),
-                        const SizedBox(height: 8),
-                        ...allPlayers.map((player) {
-                          final assignedTeam = getPlayerAssignedTeamIndex(
-                            player,
-                          );
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 11,
-                              vertical: 5,
-                            ),
-                            decoration: CuboDecorations.glass(
-                              radius: CuboRadii.input,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    player,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: CuboColors.white,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                                DropdownButton<int>(
-                                  value: assignedTeam,
-                                  dropdownColor: CuboColors.blue,
-                                  borderRadius: CuboRadii.mdAll,
-                                  hint: Text(
-                                    'Equipo',
-                                    style: TextStyle(
-                                      color: CuboColors.white.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  style: const TextStyle(
-                                    color: CuboColors.white,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  underline: const SizedBox.shrink(),
-                                  iconEnabledColor: CuboColors.white,
-                                  items: List.generate(
-                                    teams.length,
-                                    (index) => DropdownMenuItem(
-                                      value: index,
-                                      child: Text(
-                                        teams[index].name,
-                                        style: const TextStyle(
-                                          color: CuboColors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      assignPlayerToTeam(player, value);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                        SizedBox(height: compact ? 6 : 9),
-                        ...teams.asMap().entries.map(
-                          (entry) => _teamSummaryCard(entry.value, entry.key),
-                        ),
-                      ],
-                    ],
-                  ),
+          child: CuboSetupSteps(
+            index: _setupStep,
+            onStepChanged: _goToSetupStep,
+            onStart: startGame,
+            steps: [
+              CuboSetupStep(
+                title: 'JUGADORES',
+                icon: Icons.groups_rounded,
+                child: CuboPlayersEditor(
+                  players: allPlayers,
+                  maxPlayers: maxPlayers,
+                  controller: playerController,
+                  onAdd: addPlayer,
+                  onRemove: removePlayer,
+                  emptyHint:
+                      'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
                 ),
-                SizedBox(height: compact ? 9 : 12),
-                buildPanel(
-                  accent: CuboColors.white,
-                  padding: EdgeInsets.all(compact ? 12 : 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      sectionTitle('Palabras y tiempo', compact: compact),
-                      SizedBox(height: compact ? 10 : 13),
-                      _sourceSelector(compact: compact),
-                      if (wordsSource == WordsSource.custom) ...[
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: customWordsController,
-                          minLines: 4,
-                          maxLines: 7,
-                          style: const TextStyle(
-                            color: CuboColors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          cursorColor: CuboColors.white,
-                          decoration: inputDecoration(
-                            'Una palabra por línea\nPerro\nAvión\nPizza',
-                            dense: compact,
-                          ),
-                        ),
-                      ],
-                      SizedBox(height: compact ? 11 : 14),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _smallLabel('Segundos por turno'),
-                                const SizedBox(height: 7),
-                                TextField(
-                                  controller: secondsController,
-                                  keyboardType: TextInputType.number,
-                                  style: const TextStyle(
-                                    color: CuboColors.white,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                  cursorColor: CuboColors.white,
-                                  decoration: inputDecoration(
-                                    '30',
-                                    dense: compact,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Container(
-                              height: compact ? 67 : 74,
-                              decoration: CuboDecorations.glass(
-                                radius: CuboRadii.md,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.layers_rounded,
-                                    color: CuboColors.white,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '3 RONDAS',
-                                    style: TextStyle(
-                                      color: CuboColors.white.withValues(
-                                        alpha: 0.76,
-                                      ),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: compact ? 8 : 12),
-        SizedBox(
-          width: double.infinity,
-          height: compact ? 54 : 62,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              FocusScope.of(context).unfocus();
-              startGame();
-            },
-            style: CuboButtons.primary(padding: null),
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: _singleLineResponsiveText(
-              'EMPEZAR TURNO',
-              alignment: Alignment.center,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.4,
               ),
-            ),
+              CuboSetupStep(
+                title: 'Equipos',
+                icon: Icons.groups_2_rounded,
+                child: _buildTeamsStep(),
+              ),
+              CuboSetupStep(
+                title: 'Palabras y tiempo',
+                icon: Icons.chat_bubble_rounded,
+                child: _buildWordsStep(),
+              ),
+            ],
           ),
         ),
       ],

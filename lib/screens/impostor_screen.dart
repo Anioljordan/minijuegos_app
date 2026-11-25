@@ -8,10 +8,12 @@ import '../core/app_settings.dart';
 import '../core/impostor_i18n.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../widgets/cubo_secret_reveal.dart';
+import '../widgets/cubo_setup_widgets.dart';
 
 enum ImpostorMode { classic, roles, question, football }
 
-enum ImpostorStep { modeSelection, setup, passPhone, reveal, finished }
+enum ImpostorStep { modeSelection, setup, passPhone, finished }
 
 class ImpostorScreen extends StatefulWidget {
   const ImpostorScreen({super.key});
@@ -39,18 +41,21 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   int currentPlayerIndex = 0;
   bool showHints = true;
 
-  bool secretCardOpen = false;
-  double secretCardDragOffset = 0;
+  /// Paso visible de la configuración (solo interfaz).
+  int _setupStep = 0;
 
-  final GlobalKey _secretCardKey = GlobalKey();
-  bool _draggingRaisedSecretCard = false;
-
-  double get secretRevealProgress {
-    return (-secretCardDragOffset / 260).clamp(0.0, 1.0);
-  }
+  /// El jugador actual ya ha levantado su carta secreta.
+  bool _secretSeen = false;
 
   List<String> playerSecrets = [];
   List<int> impostorIndexes = [];
+
+  /// Jugador que abre la ronda de preguntas.
+  int _starterIndex = 0;
+
+  /// Peso de un impostor al sortear quién empieza (los demás pesan 1):
+  /// puede empezar, pero es poco probable.
+  static const double _impostorStarterWeight = 0.2;
   List<String> playerNames = [];
 
   int get playersCount => playerNames.length;
@@ -85,8 +90,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
       impostorsCount = 1;
       currentPlayerIndex = 0;
       showHints = true;
-      secretCardOpen = false;
-      secretCardDragOffset = 0;
+      _secretSeen = false;
 
       playerNameController.clear();
 
@@ -100,36 +104,13 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     });
   }
 
-  void _goBack() {
-    if (currentStep == ImpostorStep.modeSelection) {
-      Navigator.pop(context);
-      return;
-    }
-
-    setState(() {
-      selectedMode = null;
-      currentStep = ImpostorStep.modeSelection;
-      currentPlayerIndex = 0;
-      secretCardOpen = false;
-      secretCardDragOffset = 0;
-
-      playerSecrets = [];
-      impostorIndexes = [];
-      playerNames = [];
-
-      selectedWord = '';
-      selectedCategory = '';
-      selectedHint = '';
-    });
-  }
-
   void goToSetup(ImpostorMode mode) {
     setState(() {
+      _setupStep = 0;
       selectedMode = mode;
       currentStep = ImpostorStep.setup;
       currentPlayerIndex = 0;
-      secretCardOpen = false;
-      secretCardDragOffset = 0;
+      _secretSeen = false;
       playerSecrets = [];
       impostorIndexes = [];
       playerNames = [];
@@ -188,18 +169,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
       impostorsCount = impostorsCount.clamp(1, maxImpostors).toInt();
     });
-  }
-
-  void _changePlayers(int change) {
-    if (change > 0) {
-      playerNameController.clear();
-      _addPlayer();
-      return;
-    }
-
-    if (playerNames.isEmpty) return;
-
-    _removePlayer(playerNames.length - 1);
   }
 
   void _changeImpostors(int change) {
@@ -263,8 +232,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     setState(() {
       currentPlayerIndex = 0;
-      secretCardOpen = false;
-      secretCardDragOffset = 0;
+      _secretSeen = false;
       currentStep = ImpostorStep.passPhone;
     });
   }
@@ -398,6 +366,23 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     }
   }
 
+  /// Sorteo ponderado de quién empieza: un impostor tiene
+  /// [_impostorStarterWeight] veces la probabilidad de un jugador normal.
+  int pickStarter() {
+    double weightOf(int i) =>
+        impostorIndexes.contains(i) ? _impostorStarterWeight : 1.0;
+    final total = List.generate(
+      playersCount,
+      weightOf,
+    ).fold(0.0, (a, b) => a + b);
+    var roll = _random.nextDouble() * total;
+    for (var i = 0; i < playersCount; i++) {
+      roll -= weightOf(i);
+      if (roll <= 0) return i;
+    }
+    return playersCount - 1;
+  }
+
   List<int> generateImpostorIndexes(int totalPlayers, int totalImpostors) {
     final Set<int> indexes = {};
 
@@ -408,114 +393,17 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     return indexes.toList();
   }
 
-  void revealRole() {
-    setState(() {
-      secretCardDragOffset = -260;
-      secretCardOpen = true;
-      currentStep = ImpostorStep.passPhone;
-    });
-  }
-
-  void hideRole() {
-    setState(() {
-      secretCardDragOffset = 0;
-      secretCardOpen = false;
-      currentStep = ImpostorStep.passPhone;
-    });
-  }
-
-  void _updateSecretCardDrag(DragUpdateDetails details) {
-    setState(() {
-      secretCardDragOffset = (secretCardDragOffset + details.delta.dy).clamp(
-        -260.0,
-        0.0,
-      );
-    });
-  }
-
-  void _finishSecretCardDrag(DragEndDetails details) {
-    final velocity = details.primaryVelocity ?? 0;
-
-    setState(() {
-      // Swipe fuerte hacia arriba
-      if (velocity < -500) {
-        secretCardDragOffset = -260;
-        secretCardOpen = true;
-      }
-      // Swipe fuerte hacia abajo
-      else if (velocity > 500) {
-        secretCardDragOffset = 0;
-        secretCardOpen = false;
-      }
-      // Sin velocidad fuerte:
-      // usamos la mitad del recorrido para decidir.
-      else if (secretCardDragOffset <= -130) {
-        secretCardDragOffset = -260;
-        secretCardOpen = true;
-      } else {
-        secretCardDragOffset = 0;
-        secretCardOpen = false;
-      }
-    });
-  }
-
-  bool _isPointInsideSecretCard(Offset globalPosition) {
-    final context = _secretCardKey.currentContext;
-
-    if (context == null) return false;
-
-    final renderBox = context.findRenderObject();
-
-    if (renderBox is! RenderBox) return false;
-
-    final topLeft = renderBox.localToGlobal(Offset.zero);
-
-    final bottomRight = renderBox.localToGlobal(
-      Offset(renderBox.size.width, renderBox.size.height),
-    );
-
-    final rect = Rect.fromPoints(topLeft, bottomRight);
-
-    return rect.contains(globalPosition);
-  }
-
-  void _globalSecretDragStart(DragStartDetails details) {
-    if (!secretCardOpen) {
-      _draggingRaisedSecretCard = false;
-      return;
-    }
-
-    _draggingRaisedSecretCard = _isPointInsideSecretCard(
-      details.globalPosition,
-    );
-  }
-
-  void _globalSecretDragUpdate(DragUpdateDetails details) {
-    if (!_draggingRaisedSecretCard) return;
-
-    _updateSecretCardDrag(details);
-  }
-
-  void _globalSecretDragEnd(DragEndDetails details) {
-    if (!_draggingRaisedSecretCard) return;
-
-    _finishSecretCardDrag(details);
-
-    _draggingRaisedSecretCard = false;
-  }
-
   void nextPlayer() {
     if (currentPlayerIndex < playersCount - 1) {
       setState(() {
         currentPlayerIndex++;
-        secretCardOpen = false;
-        secretCardDragOffset = 0;
+        _secretSeen = false;
         currentStep = ImpostorStep.passPhone;
       });
     } else {
       setState(() {
-        secretCardOpen = false;
-        secretCardDragOffset = 0;
+        _secretSeen = false;
+        _starterIndex = pickStarter();
         currentStep = ImpostorStep.finished;
       });
     }
@@ -653,8 +541,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         return tr(getModeTitle(selectedMode!)).toLowerCase();
       case ImpostorStep.passPhone:
         return 'pasa el móvil';
-      case ImpostorStep.reveal:
-        return playerNames[currentPlayerIndex].toLowerCase();
       case ImpostorStep.finished:
         return 'todo listo';
     }
@@ -751,62 +637,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     return Container(
       width: double.infinity,
       padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CuboColors.whiteA(0.08),
-        borderRadius: CuboRadii.lgAll,
-        border: Border.all(
-          color: borderColor ?? CuboColors.white.withValues(alpha: 0.28),
-          width: 1.4,
-        ),
-      ),
+      decoration: borderColor == null
+          ? CuboDecorations.glassRaised(radius: CuboRadii.card)
+          : BoxDecoration(
+              color: CuboColors.whiteA(0.08),
+              borderRadius: CuboRadii.lgAll,
+              border: Border.all(color: borderColor, width: 1.4),
+            ),
       child: child,
-    );
-  }
-
-  Widget buildProgress({required bool compact}) {
-    final current = currentPlayerIndex + 1;
-    final total = playersCount;
-    final progress = total == 0 ? 0.0 : current / total;
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text(
-              'JUGADOR $current DE $total',
-              style: TextStyle(
-                color: CuboColors.white.withValues(alpha: 0.72),
-                fontSize: compact ? 10.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.6,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '${(progress * 100).round()}%',
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 12 : 14,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: compact ? 8 : 10,
-          decoration: BoxDecoration(
-            color: CuboColors.whiteA(0.14),
-            borderRadius: BorderRadius.circular(99),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.transparent,
-            valueColor: AlwaysStoppedAnimation<Color>(modeColor),
-          ),
-        ),
-      ],
     );
   }
 
@@ -1259,355 +1097,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     );
   }
 
-  Widget _buildCounterButton({
-    required IconData icon,
-    required VoidCallback? onTap,
-    required bool compact,
-  }) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final veryNarrow = screenWidth < 350;
-
-    final size = veryNarrow
-        ? 34.0
-        : compact
-        ? 38.0
-        : 44.0;
-
-    return Material(
-      color: CuboColors.whiteA(onTap == null ? 0.04 : 0.10),
-      shape: RoundedRectangleBorder(
-        borderRadius: CuboRadii.smAll,
-        side: BorderSide(
-          color: CuboColors.whiteA(onTap == null ? 0.12 : 0.35),
-          width: 1.5,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          child: Icon(
-            icon,
-            color: CuboColors.white.withValues(alpha: onTap == null ? 0.28 : 1),
-            size: veryNarrow
-                ? 19
-                : compact
-                ? 21
-                : 24,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCounter({
-    required String title,
-    required IconData icon,
-    required int value,
-    required VoidCallback? onMinus,
-    required VoidCallback? onPlus,
-    required bool compact,
-  }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final veryNarrow = constraints.maxWidth < 330;
-
-        final iconSize = veryNarrow
-            ? 34.0
-            : compact
-            ? 38.0
-            : 44.0;
-
-        final horizontalGap = veryNarrow ? 6.0 : 9.0;
-        final valueWidth = veryNarrow
-            ? 27.0
-            : compact
-            ? 33.0
-            : 40.0;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(
-            veryNarrow
-                ? 8
-                : compact
-                ? 10
-                : 12,
-          ),
-          decoration: CuboDecorations.glass(radius: CuboRadii.md),
-          child: Row(
-            children: [
-              Container(
-                width: iconSize,
-                height: iconSize,
-                decoration: BoxDecoration(
-                  color: modeColor.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: modeColor.withValues(alpha: 0.75),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: modeColor,
-                  size: veryNarrow
-                      ? 19
-                      : compact
-                      ? 21
-                      : 24,
-                ),
-              ),
-
-              SizedBox(width: horizontalGap),
-
-              Expanded(
-                child: _singleLineResponsiveText(
-                  tr(title).toUpperCase(),
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 10.5
-                        : compact
-                        ? 12
-                        : 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: veryNarrow ? 0.1 : 0.4,
-                  ),
-                ),
-              ),
-
-              SizedBox(width: horizontalGap),
-
-              _buildCounterButton(
-                icon: Icons.remove_rounded,
-                onTap: onMinus,
-                compact: compact,
-              ),
-
-              SizedBox(
-                width: valueWidth,
-                child: Text(
-                  '$value',
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 18
-                        : compact
-                        ? 20
-                        : 23,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-
-              _buildCounterButton(
-                icon: Icons.add_rounded,
-                onTap: onPlus,
-                compact: compact,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPlayersEditor({required bool compact}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildCounter(
-          title: 'Jugadores',
-          icon: Icons.groups_rounded,
-          value: playersCount,
-          onMinus: playerNames.isEmpty ? null : () => _changePlayers(-1),
-          onPlus: playerNames.length >= maxPlayers
-              ? null
-              : () => _changePlayers(1),
-          compact: compact,
-        ),
-
-        SizedBox(height: compact ? 12 : 14),
-
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _singleLineResponsiveText(
-            'AÑADIR JUGADOR',
-            style: TextStyle(
-              color: CuboColors.white.withValues(alpha: 0.70),
-              fontSize: compact ? 10.5 : 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.7,
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: playerNameController,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _addPlayer(),
-                style: const TextStyle(
-                  color: CuboColors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-                cursorColor: CuboColors.white,
-                decoration: inputDecoration('Nombre opcional'),
-              ),
-            ),
-
-            const SizedBox(width: 9),
-
-            SizedBox(
-              width: compact ? 50 : 54,
-              height: compact ? 50 : 54,
-              child: ElevatedButton(
-                onPressed: playerNames.length >= maxPlayers ? null : _addPlayer,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: modeColor,
-                  foregroundColor: CuboColors.blueInk,
-                  disabledBackgroundColor: CuboColors.white.withValues(
-                    alpha: 0.18,
-                  ),
-                  disabledForegroundColor: CuboColors.white.withValues(
-                    alpha: 0.42,
-                  ),
-                  elevation: 0,
-
-                  // Esto centra correctamente el +
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  alignment: Alignment.center,
-
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: CuboRadii.inputAll,
-                  ),
-                ),
-                child: const Center(child: Icon(Icons.add_rounded, size: 29)),
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: compact ? 12 : 14),
-
-        if (playerNames.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: compact ? 16 : 20,
-            ),
-            decoration: BoxDecoration(
-              color: CuboColors.whiteA(0.05),
-              borderRadius: CuboRadii.mdAll,
-              border: Border.all(color: CuboColors.whiteA(0.18), width: 1.3),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.person_add_alt_1_rounded,
-                  color: CuboColors.white.withValues(alpha: 0.48),
-                  size: compact ? 28 : 34,
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  'Todavía no has añadido jugadores',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.66),
-                    fontSize: compact ? 12 : 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-              ],
-            ),
-          )
-        else
-          Column(
-            children: playerNames.asMap().entries.map((entry) {
-              final index = entry.key;
-              final name = entry.value;
-
-              return Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: EdgeInsets.fromLTRB(
-                  compact ? 9 : 11,
-                  compact ? 7 : 8,
-                  5,
-                  compact ? 7 : 8,
-                ),
-                decoration: CuboDecorations.glass(radius: CuboRadii.md),
-                child: Row(
-                  children: [
-                    Container(
-                      width: compact ? 31 : 35,
-                      height: compact ? 31 : 35,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: modeColor.withValues(alpha: 0.16),
-                        border: Border.all(color: modeColor, width: 1.6),
-                      ),
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: compact ? 12 : 13,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 10),
-
-                    Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: compact ? 14 : 16,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-
-                    IconButton(
-                      tooltip: tr('Eliminar jugador'),
-                      onPressed: () => _removePlayer(index),
-                      icon: Icon(
-                        Icons.delete_outline_rounded,
-                        color: CuboColors.white.withValues(alpha: 0.78),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-      ],
-    );
-  }
-
   Widget _buildFootballCategories({required bool compact}) {
     final allSelected =
         selectedFootballCategories.length == FootballCategory.values.length;
@@ -1756,466 +1245,206 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         mode == ImpostorMode.roles ||
         mode == ImpostorMode.football;
 
-    return SingleChildScrollView(
-      child: buildPanel(
-        padding: EdgeInsets.all(compact ? 13 : 17),
-        borderColor: modeColor.withValues(alpha: 0.65),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: compact ? 50 : 60,
-                  height: compact ? 50 : 60,
-                  decoration: BoxDecoration(
-                    color: modeColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: modeColor, width: 2.2),
-                  ),
-                  child: Icon(
-                    modeIcon,
-                    color: modeColor,
-                    size: compact ? 28 : 34,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _singleLineResponsiveText(
-                    getModeTitle(mode),
-                    style: TextStyle(
-                      color: CuboColors.white,
-                      fontSize: compact ? 20 : 25,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
+    return CuboSetupSteps(
+      accent: modeColor,
+      index: _setupStep,
+      onStepChanged: (step) => setState(() => _setupStep = step),
+      onStart:
+          mode == ImpostorMode.football && selectedFootballCategories.isEmpty
+          ? null
+          : startGame,
+      steps: [
+        CuboSetupStep(
+          title: 'JUGADORES',
+          icon: Icons.groups_rounded,
+          child: CuboPlayersEditor(
+            players: playerNames,
+            maxPlayers: maxPlayers,
+            controller: playerNameController,
+            onAdd: _addPlayer,
+            onRemove: _removePlayer,
+            accent: modeColor,
+          ),
+        ),
+        CuboSetupStep(
+          title: 'CONFIGURACIÓN',
+          icon: modeIcon,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CuboLightCounter(
+                title: 'Impostores',
+                icon: Icons.visibility_off_rounded,
+                value: '$impostorsCount',
+                accent: modeColor,
+                onMinus: impostorsCount <= 1
+                    ? null
+                    : () => _changeImpostors(-1),
+                onPlus: playersCount < 2 || impostorsCount >= playersCount - 1
+                    ? null
+                    : () => _changeImpostors(1),
+              ),
+              if (showHintSwitch) ...[
+                const SizedBox(height: 12),
+                CuboLightSwitch(
+                  title: 'Pista para el impostor',
+                  icon: Icons.lightbulb_rounded,
+                  value: showHints,
+                  accent: modeColor,
+                  onChanged: (value) => setState(() => showHints = value),
                 ),
               ],
-            ),
-            if (mode == ImpostorMode.football) ...[
-              SizedBox(height: compact ? 16 : 20),
-              _buildFootballCategories(compact: compact),
-            ],
-            SizedBox(height: compact ? 16 : 20),
-            _buildPlayersEditor(compact: compact),
-
-            SizedBox(height: compact ? 14 : 17),
-
-            _buildCounter(
-              title: 'Impostores',
-              icon: Icons.visibility_off_rounded,
-              value: impostorsCount,
-              onMinus: impostorsCount <= 1 ? null : () => _changeImpostors(-1),
-              onPlus: playersCount < 2 || impostorsCount >= playersCount - 1
-                  ? null
-                  : () => _changeImpostors(1),
-              compact: compact,
-            ),
-            if (showHintSwitch) ...[
-              SizedBox(height: compact ? 13 : 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: CuboDecorations.glass(radius: CuboRadii.md),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: SwitchListTile(
-                    value: showHints,
-                    onChanged: (value) => setState(() => showHints = value),
-                    contentPadding: EdgeInsets.zero,
-                    activeColor: modeColor,
-                    title: const Text(
-                      'Pista para el impostor',
-                      style: TextStyle(
-                        color: CuboColors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
+              if (mode == ImpostorMode.football) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: CuboColors.whiteA(0.08),
+                    borderRadius: const BorderRadius.all(Radius.circular(22)),
                   ),
+                  child: _buildFootballCategories(compact: compact),
                 ),
-              ),
+              ],
             ],
-            SizedBox(height: compact ? 14 : 18),
-            buildActionButton(
-              icon: Icons.play_arrow_rounded,
-              label: 'EMPEZAR PARTIDA',
-              backgroundColor: modeColor,
-              foregroundColor: CuboColors.blueInk,
-              onTap:
-                  mode == ImpostorMode.football &&
-                      selectedFootballCategories.isEmpty
-                  ? null
-                  : startGame,
-              compact: compact,
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget buildSecretContent({required bool compact}) {
-    final secret = getPlayerSecretDisplay();
+  Widget buildPassPhone({required bool compact}) {
     final isImpostor = currentPlayerIsImpostor();
-    final secretColor = isImpostor ? CuboColors.alert : modeColor;
-    final progress = secretRevealProgress;
+    final isLast = currentPlayerIndex == playersCount - 1;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 120),
-      opacity: 0.08 + (progress * 0.92),
-      child: Transform.scale(
-        scale: 0.96 + (progress * 0.04),
-        child: Center(
-          child: CuboCardSwitcher(
-            child: KeyedSubtree(
-              key: ValueKey('secret-$currentPlayerIndex'),
-              child: buildSecretHeroCard(
-                compact: compact,
-                secret: secret,
-                isImpostor: isImpostor,
-                secretColor: secretColor,
-              ),
+    return Column(
+      children: [
+        CuboRevealProgress(
+          current: currentPlayerIndex + 1,
+          total: playersCount,
+        ),
+        SizedBox(height: compact ? 10 : 14),
+        Expanded(
+          child: CuboSecretReveal(
+            revealKey: currentPlayerIndex,
+            playerName: playerNames[currentPlayerIndex],
+            onRevealed: () {
+              if (!_secretSeen) setState(() => _secretSeen = true);
+            },
+            face: CuboSecretFace(
+              icon: isImpostor ? Icons.visibility_off_rounded : modeIcon,
+              color: isImpostor ? CuboColors.alert : modeColor,
+              label: isImpostor ? 'TU PAPEL' : selectedCategory,
+              title: getPlayerSecretDisplay(),
+              extra: showHints && selectedHint.isNotEmpty && isImpostor
+                  ? buildImpostorHint()
+                  : null,
             ),
           ),
         ),
-      ),
+        SizedBox(height: compact ? 10 : 14),
+        CuboRevealNextButton(
+          enabled: _secretSeen,
+          isLast: isLast,
+          lastLabel: 'FINALIZAR',
+          lastIcon: Icons.flag_rounded,
+          onTap: nextPlayer,
+        ),
+      ],
     );
   }
 
-  /// Tarjeta blanca con la palabra/rol secreto del jugador actual.
-  Widget buildSecretHeroCard({
-    required bool compact,
-    required String secret,
-    required bool isImpostor,
-    required Color secretColor,
-  }) {
-    return CuboHeroCard(
-      chip: isImpostor ? 'TU PAPEL' : selectedCategory,
-      padding: EdgeInsets.fromLTRB(
-        compact ? 16 : 22,
-        compact ? 16 : 20,
-        compact ? 16 : 22,
-        compact ? 20 : 26,
+  Widget buildImpostorHint() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: CuboColors.whiteA(0.12),
+        borderRadius: CuboRadii.mdAll,
+        border: Border.all(color: CuboColors.fiesta, width: 1.4),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Container(
-            width: compact ? 64 : 78,
-            height: compact ? 64 : 78,
-            decoration: BoxDecoration(
-              color: secretColor.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-              border: Border.all(color: secretColor, width: 2.5),
-            ),
-            child: Icon(
-              isImpostor ? Icons.visibility_off_rounded : modeIcon,
-              color: CuboColors.blueInk,
-              size: compact ? 32 : 40,
-            ),
-          ),
-          SizedBox(height: compact ? 14 : 18),
-          Text(
-            secret,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: CuboColors.blueInk,
-              fontSize: compact ? 24 : 30,
-              height: 1.15,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
-          ),
-          if (showHints && selectedHint.isNotEmpty && isImpostor) ...[
-            SizedBox(height: compact ? 14 : 18),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(compact ? 11 : 14),
-              decoration: BoxDecoration(
-                color: CuboColors.fiesta.withValues(alpha: 0.16),
-                borderRadius: CuboRadii.mdAll,
-                border: Border.all(
-                  color: CuboColors.fiesta.withValues(alpha: 0.70),
-                  width: 1.4,
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.lightbulb_rounded, color: CuboColors.fiesta),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Pista: $selectedHint',
-                      style: TextStyle(
-                        color: CuboColors.blueInk,
-                        fontSize: compact ? 13 : 15,
-                        height: 1.3,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
+          const Icon(Icons.lightbulb_rounded, color: CuboColors.fiesta),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Pista: $selectedHint',
+              style: const TextStyle(
+                color: CuboColors.white,
+                fontSize: 15,
+                height: 1.3,
+                fontWeight: FontWeight.w800,
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget buildSecretCover({required bool compact, required String playerName}) {
-    final progress = secretRevealProgress;
-
-    return AnimatedSlide(
-      duration: const Duration(milliseconds: 90),
-      curve: Curves.easeOutCubic,
-
-      // Deja una pequeña parte de la tarjeta visible arriba
-      // para poder agarrarla y volver a bajarla.
-      offset: Offset(0, -0.88 * progress),
-
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onVerticalDragUpdate: _updateSecretCardDrag,
-        onVerticalDragEnd: _finishSecretCardDrag,
-
-        child: Container(
-          key: _secretCardKey,
-          width: double.infinity,
-          height: double.infinity,
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 16 : 22,
-            vertical: compact ? 18 : 24,
-          ),
-          decoration: BoxDecoration(
-            color: CuboColors.blue,
-            borderRadius: CuboRadii.xlAll,
-            border: Border.all(
-              color: modeColor.withValues(alpha: 0.85),
-              width: 2.4,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: modeColor.withValues(alpha: 0.22),
-                blurRadius: 28,
-                offset: const Offset(0, 14),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: compact ? 78 : 96,
-                height: compact ? 78 : 96,
-                decoration: BoxDecoration(
-                  color: modeColor.withValues(alpha: 0.16),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: modeColor, width: 2.6),
-                ),
-                child: Icon(
-                  Icons.lock_rounded,
-                  color: modeColor,
-                  size: compact ? 39 : 48,
-                ),
-              ),
-
-              SizedBox(height: compact ? 18 : 24),
-
-              Text(
-                'TARJETA SECRETA',
-                style: TextStyle(
-                  color: CuboColors.white.withValues(alpha: 0.58),
-                  fontSize: compact ? 11 : 13,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
-                ),
-              ),
-
-              const SizedBox(height: 9),
-
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  playerName.toLowerCase(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: compact ? 40 : 52,
-                    height: 0.95,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.2,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: compact ? 20 : 26),
-
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: compact ? 12 : 15,
-                  vertical: compact ? 12 : 14,
-                ),
-                decoration: CuboDecorations.glass(radius: CuboRadii.md),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.keyboard_double_arrow_up_rounded,
-                      color: CuboColors.white.withValues(alpha: 0.88),
-                      size: compact ? 30 : 34,
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      'ARRASTRA DESDE AQUÍ',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: CuboColors.white,
-                        fontSize: compact ? 13 : 15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      'sube para revelar · baja para ocultar',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: CuboColors.white.withValues(alpha: 0.62),
-                        fontSize: compact ? 11.5 : 12.5,
-                        height: 1.25,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+  /// Carta destacada con el jugador que empieza a preguntar.
+  Widget buildStarterCard({required bool compact}) {
+    final name = playerNames.isEmpty ? '' : playerNames[_starterIndex];
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: compact ? 14 : 18,
       ),
-    );
-  }
-
-  Widget buildPassPhone({required bool compact}) {
-    final playerName = playerNames[currentPlayerIndex];
-
-    return Column(
-      children: [
-        buildProgress(compact: compact),
-
-        SizedBox(height: compact ? 10 : 14),
-
-        Expanded(
-          child: buildPanel(
-            padding: EdgeInsets.all(compact ? 10 : 14),
-            borderColor: modeColor.withValues(alpha: 0.65),
-            child: Stack(
+      decoration: BoxDecoration(
+        color: CuboColors.fiesta,
+        borderRadius: CuboRadii.mdAll,
+        boxShadow: CuboShadows.soft,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: compact ? 44 : 52,
+            height: compact ? 44 : 52,
+            decoration: const BoxDecoration(
+              color: CuboColors.blue,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.record_voice_over_rounded,
+              color: CuboColors.white,
+              size: compact ? 22 : 26,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Positioned.fill(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 8 : 12,
-                      vertical: compact ? 10 : 14,
-                    ),
-                    child: SizedBox(
-                      height: compact ? 430 : 500,
-                      child: buildSecretContent(compact: compact),
-                    ),
+                const Text(
+                  'EMPIEZA',
+                  style: TextStyle(
+                    color: CuboColors.blueInk,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.9,
                   ),
                 ),
-
-                Positioned.fill(
-                  child: buildSecretCover(
-                    compact: compact,
-                    playerName: playerName,
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    name,
+                    style: TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: compact ? 26 : 30,
+                      height: 1.05,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.6,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-
-        SizedBox(height: compact ? 10 : 14),
-
-        buildActionButton(
-          icon: currentPlayerIndex == playersCount - 1
-              ? Icons.flag_rounded
-              : Icons.arrow_forward_rounded,
-          label: currentPlayerIndex == playersCount - 1
-              ? 'FINALIZAR'
-              : 'SIGUIENTE JUGADOR',
-          backgroundColor: modeColor,
-          foregroundColor: CuboColors.blueInk,
-          onTap: nextPlayer,
-          compact: compact,
-        ),
-      ],
-    );
-  }
-
-  Widget buildReveal({required bool compact}) {
-    final secret = getPlayerSecretDisplay();
-    final isImpostor = currentPlayerIsImpostor();
-    final secretColor = isImpostor ? CuboColors.alert : modeColor;
-
-    return Column(
-      children: [
-        buildProgress(compact: compact),
-        SizedBox(height: compact ? 10 : 14),
-        Expanded(
-          child: Center(
-            child: SingleChildScrollView(
-              child: CuboCardSwitcher(
-                child: KeyedSubtree(
-                  key: ValueKey('reveal-$currentPlayerIndex-$secret'),
-                  child: buildSecretHeroCard(
-                    compact: compact,
-                    secret: secret,
-                    isImpostor: isImpostor,
-                    secretColor: secretColor,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: compact ? 10 : 14),
-        Row(
-          children: [
-            Expanded(
-              child: buildActionButton(
-                icon: Icons.visibility_off_rounded,
-                label: 'OCULTAR',
-                backgroundColor: CuboColors.blue,
-                foregroundColor: CuboColors.white,
-                onTap: hideRole,
-                compact: compact,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: buildActionButton(
-                icon: currentPlayerIndex == playersCount - 1
-                    ? Icons.flag_rounded
-                    : Icons.arrow_forward_rounded,
-                label: currentPlayerIndex == playersCount - 1
-                    ? 'FINALIZAR'
-                    : 'SIGUIENTE',
-                backgroundColor: modeColor,
-                foregroundColor: CuboColors.blueInk,
-                onTap: nextPlayer,
-                compact: compact,
-              ),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -2275,6 +1504,8 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
                       ),
                     ),
                     SizedBox(height: compact ? 16 : 20),
+                    buildStarterCard(compact: compact),
+                    SizedBox(height: compact ? 12 : 14),
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(compact ? 13 : 16),
@@ -2317,8 +1548,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         return buildSetup(compact: compact);
       case ImpostorStep.passPhone:
         return buildPassPhone(compact: compact);
-      case ImpostorStep.reveal:
-        return buildReveal(compact: compact);
       case ImpostorStep.finished:
         return buildFinished(compact: compact);
     }
@@ -2329,76 +1558,55 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     return Scaffold(
       backgroundColor: CuboColors.blue,
 
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
+      body: CuboGameBackground(
+        accent: CuboColors.chill,
+        halo: CuboHalo.topLeft,
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
 
-        // Cuando la tarjeta está abierta, capturamos también
-        // el arrastre de la parte que queda fuera del panel.
-        onVerticalDragStart:
-            currentStep == ImpostorStep.passPhone && secretCardOpen
-            ? _globalSecretDragStart
-            : null,
+              final veryNarrow = constraints.maxWidth < 340;
 
-        onVerticalDragUpdate:
-            currentStep == ImpostorStep.passPhone && secretCardOpen
-            ? _globalSecretDragUpdate
-            : null,
+              final compact = constraints.maxHeight < 740 || narrow;
 
-        onVerticalDragEnd:
-            currentStep == ImpostorStep.passPhone && secretCardOpen
-            ? _globalSecretDragEnd
-            : null,
+              final horizontalPadding = veryNarrow
+                  ? 8.0
+                  : compact
+                  ? 12.0
+                  : 18.0;
 
-        child: CuboGameBackground(
-          accent: CuboColors.chill,
-          halo: CuboHalo.topLeft,
-          child: SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final narrow = constraints.maxWidth < 380;
+              final verticalPadding = compact ? 10.0 : 18.0;
 
-                final veryNarrow = constraints.maxWidth < 340;
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  verticalPadding,
+                  horizontalPadding,
+                  compact ? 11 : 16,
+                ),
 
-                final compact = constraints.maxHeight < 740 || narrow;
+                child: Column(
+                  children: [
+                    buildTopBar(compact: compact),
 
-                final horizontalPadding = veryNarrow
-                    ? 8.0
-                    : compact
-                    ? 12.0
-                    : 18.0;
+                    SizedBox(height: compact ? 10 : 14),
 
-                final verticalPadding = compact ? 10.0 : 18.0;
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
 
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    verticalPadding,
-                    horizontalPadding,
-                    compact ? 11 : 16,
-                  ),
+                        child: KeyedSubtree(
+                          key: ValueKey(currentStep),
 
-                  child: Column(
-                    children: [
-                      buildTopBar(compact: compact),
-
-                      SizedBox(height: compact ? 10 : 14),
-
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 220),
-
-                          child: KeyedSubtree(
-                            key: ValueKey(currentStep),
-
-                            child: buildCurrentStep(compact: compact),
-                          ),
+                          child: buildCurrentStep(compact: compact),
                         ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),

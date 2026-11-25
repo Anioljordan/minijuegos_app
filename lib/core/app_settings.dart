@@ -13,6 +13,12 @@ class AppSettings extends ChangeNotifier {
   bool soundEnabled = true;
   bool vibrationEnabled = true;
 
+  /// Cómo se muestran los juegos en Fiesta y Chill: 'grid' (cuadrícula con
+  /// el primero destacado), 'list' o 'carousel'.
+  String menuStyle = 'grid';
+
+  static const _menuStyles = {'grid', 'list', 'carousel'};
+
   Future<void> load() async {
     if (_loaded) return;
 
@@ -22,6 +28,8 @@ class AppSettings extends ChangeNotifier {
     volume = (prefs.getDouble('app_volume') ?? 0.8).clamp(0.0, 1.0);
     soundEnabled = prefs.getBool('app_sound_enabled') ?? true;
     vibrationEnabled = prefs.getBool('app_vibration_enabled') ?? true;
+    final storedMenu = prefs.getString('app_menu_style');
+    menuStyle = _menuStyles.contains(storedMenu) ? storedMenu! : 'grid';
 
     _loaded = true;
     notifyListeners();
@@ -34,6 +42,7 @@ class AppSettings extends ChangeNotifier {
     await prefs.setDouble('app_volume', volume);
     await prefs.setBool('app_sound_enabled', soundEnabled);
     await prefs.setBool('app_vibration_enabled', vibrationEnabled);
+    await prefs.setString('app_menu_style', menuStyle);
   }
 
   Future<void> setLanguage(String value) async {
@@ -50,6 +59,12 @@ class AppSettings extends ChangeNotifier {
 
   Future<void> setSoundEnabled(bool value) async {
     soundEnabled = value;
+    notifyListeners();
+    await _save();
+  }
+
+  Future<void> setMenuStyle(String value) async {
+    menuStyle = _menuStyles.contains(value) ? value : 'grid';
     notifyListeners();
     await _save();
   }
@@ -72,6 +87,10 @@ class AppSettings extends ChangeNotifier {
         'volume': 'Volumen',
         'sound': 'Sonidos',
         'vibration': 'Vibración',
+        'menuStyle': 'Menú de juegos',
+        'menuGrid': 'Cuadrícula',
+        'menuList': 'Lista',
+        'menuCarousel': 'Carrusel',
         'resetData': 'Reiniciar datos guardados',
         'about': 'Acerca de la app',
         'close': 'Cerrar',
@@ -90,6 +109,10 @@ class AppSettings extends ChangeNotifier {
         'volume': 'Volum',
         'sound': 'Sons',
         'vibration': 'Vibració',
+        'menuStyle': 'Menú de jocs',
+        'menuGrid': 'Quadrícula',
+        'menuList': 'Llista',
+        'menuCarousel': 'Carrusel',
         'resetData': 'Reiniciar dades guardades',
         'about': 'Sobre l’app',
         'close': 'Tancar',
@@ -108,6 +131,10 @@ class AppSettings extends ChangeNotifier {
         'volume': 'Volume',
         'sound': 'Sound',
         'vibration': 'Vibration',
+        'menuStyle': 'Games menu',
+        'menuGrid': 'Grid',
+        'menuList': 'List',
+        'menuCarousel': 'Carousel',
         'resetData': 'Reset saved data',
         'about': 'About the app',
         'close': 'Close',

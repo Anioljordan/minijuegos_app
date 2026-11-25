@@ -1,0 +1,822 @@
+import 'package:flutter/material.dart' hide Text;
+import 'package:flutter/material.dart' as m show Text;
+
+import 'cubo_game_widgets.dart';
+import 'i18n_text.dart';
+
+/// Colores de la configuración sobre cristal azul.
+class _SetupColors {
+  _SetupColors._();
+
+  static const Color ink = CuboColors.white;
+  static final Color soft = CuboColors.whiteA(0.72);
+  static final Color row = CuboColors.whiteA(0.12);
+  static final Color roundBg = CuboColors.whiteA(0.16);
+  static final Color faint = CuboColors.whiteA(0.5);
+}
+
+/// Un paso de la configuración por pasos: título (clave de traducción),
+/// icono del chip y contenido de la carta.
+class CuboSetupStep {
+  final String title;
+  final IconData icon;
+  final Widget child;
+
+  const CuboSetupStep({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+}
+
+/// Configuración de partida en pasos: barra de progreso arriba, una carta
+/// blanca por paso y, abajo, atrás + SIGUIENTE (o EMPEZAR PARTIDA en el
+/// último paso). [index] lo guarda la pantalla.
+class CuboSetupSteps extends StatelessWidget {
+  final List<CuboSetupStep> steps;
+  final int index;
+  final ValueChanged<int> onStepChanged;
+  final VoidCallback? onStart;
+  final Color accent;
+
+  const CuboSetupSteps({
+    super.key,
+    required this.steps,
+    required this.index,
+    required this.onStepChanged,
+    required this.onStart,
+    this.accent = CuboColors.chill,
+  });
+
+  bool get _isLast => index >= steps.length - 1;
+
+  @override
+  Widget build(BuildContext context) {
+    final step = steps[index];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _progress(),
+        const SizedBox(height: 14),
+        Expanded(
+          child: AnimatedSwitcher(
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
+            ),
+            duration: const Duration(milliseconds: 280),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0.06, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            ),
+            child: _card(step, key: ValueKey(index)),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _actions(),
+      ],
+    );
+  }
+
+  Widget _progress() {
+    return Row(
+      children: [
+        for (var i = 0; i < steps.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 280),
+              height: 6,
+              decoration: BoxDecoration(
+                color: i <= index ? accent : CuboColors.whiteA(0.22),
+                borderRadius: const BorderRadius.all(Radius.circular(999)),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _card(CuboSetupStep step, {required Key key}) {
+    final counter = m.Text(
+      '${index + 1} / ${steps.length}',
+      style: TextStyle(
+        color: _SetupColors.soft,
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+    final header = Row(
+      children: [
+        CuboStatusChip(step.title, icon: step.icon),
+        const Spacer(),
+        counter,
+      ],
+    );
+    return Container(
+      key: key,
+      width: double.infinity,
+      decoration: CuboDecorations.glassRaised(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(padding: EdgeInsets.fromLTRB(20, 18, 20, 0), child: header),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20, 18, 20, 22),
+              child: step.child,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actions() {
+    final primary = _isLast ? onStart : () => onStepChanged(index + 1);
+    return SizedBox(
+      height: 64,
+      child: Row(
+        children: [
+          if (index > 0) ...[
+            CuboPressable(
+              onTap: () => onStepChanged(index - 1),
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: CuboColors.whiteA(0.10),
+                  border: Border.all(color: CuboColors.whiteA(0.5), width: 1.4),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: CuboColors.white,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: _PrimaryPill(
+              label: _isLast ? 'EMPEZAR PARTIDA' : 'SIGUIENTE',
+              icon: _isLast
+                  ? Icons.play_arrow_rounded
+                  : Icons.arrow_forward_rounded,
+              background: _isLast ? accent : CuboColors.white,
+              onTap: primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrimaryPill extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color background;
+  final VoidCallback? onTap;
+
+  const _PrimaryPill({
+    required this.label,
+    required this.icon,
+    required this.background,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return CuboPressable(
+      onTap: onTap,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: enabled ? 1 : 0.45,
+        child: Container(
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: const BorderRadius.all(Radius.circular(999)),
+            boxShadow: CuboShadows.float,
+          ),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: CuboColors.blueInk),
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      color: CuboColors.blueInk,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Fila con icono, título y − valor +.
+class CuboLightCounter extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String value;
+  final VoidCallback? onMinus;
+  final VoidCallback? onPlus;
+  final Color accent;
+
+  const CuboLightCounter({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.value,
+    required this.onMinus,
+    required this.onPlus,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
+      ),
+      child: Row(
+        children: [
+          _AccentIcon(icon: icon, accent: accent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: m.Text(
+                tr(title).toUpperCase(),
+                maxLines: 1,
+                style: TextStyle(
+                  color: _SetupColors.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          _RoundButton(icon: Icons.remove_rounded, onTap: onMinus),
+          SizedBox(
+            width: 48,
+            child: m.Text(
+              value,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _SetupColors.ink,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          _RoundButton(icon: Icons.add_rounded, onTap: onPlus),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fila informativa con icono, título y un valor grande (sin botones).
+class CuboSetupInfoRow extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final String value;
+  final Color accent;
+
+  const CuboSetupInfoRow({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.value,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 12, 20, 12),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
+      ),
+      child: Row(
+        children: [
+          _AccentIcon(icon: icon, accent: accent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: m.Text(
+                tr(title).toUpperCase(),
+                maxLines: 1,
+                style: const TextStyle(
+                  color: _SetupColors.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          ),
+          m.Text(
+            value,
+            style: const TextStyle(
+              color: _SetupColors.ink,
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Opción elegible (una de varias): icono, título, subtítulo y marca.
+class CuboSetupOption extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color accent;
+
+  const CuboSetupOption({
+    super.key,
+    required this.title,
+    this.subtitle,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CuboPressable(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
+        decoration: BoxDecoration(
+          color: selected ? CuboColors.whiteA(0.2) : _SetupColors.row,
+          borderRadius: const BorderRadius.all(Radius.circular(22)),
+          border: Border.all(
+            color: selected ? accent : CuboColors.whiteA(0),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: selected ? accent : _SetupColors.roundBg,
+                borderRadius: const BorderRadius.all(Radius.circular(14)),
+              ),
+              child: Icon(
+                icon,
+                color: selected ? CuboColors.blueInk : CuboColors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  m.Text(
+                    tr(title).toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: _SetupColors.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      maxLines: 2,
+                      style: TextStyle(
+                        color: _SetupColors.soft,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: selected ? 1 : 0,
+              child: Icon(Icons.check_circle_rounded, color: accent, size: 26),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Campo de texto relleno, sin borde, para la configuración.
+class CuboSetupTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final int minLines;
+  final int maxLines;
+  final Color accent;
+
+  const CuboSetupTextField({
+    super.key,
+    required this.controller,
+    required this.hint,
+    this.minLines = 1,
+    this.maxLines = 1,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = BorderRadius.all(Radius.circular(20));
+    return TextField(
+      controller: controller,
+      minLines: minLines,
+      maxLines: maxLines,
+      cursorColor: CuboColors.white,
+      style: const TextStyle(
+        color: _SetupColors.ink,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
+      decoration: InputDecoration(
+        hintText: tr(hint),
+        hintStyle: TextStyle(
+          color: _SetupColors.faint,
+          fontWeight: FontWeight.w600,
+        ),
+        filled: true,
+        fillColor: _SetupColors.row,
+        contentPadding: const EdgeInsets.all(18),
+        border: const OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: accent, width: 2),
+        ),
+      ),
+    );
+  }
+}
+
+/// Fila con título e interruptor.
+class CuboLightSwitch extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Color accent;
+
+  const CuboLightSwitch({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.value,
+    required this.onChanged,
+    this.accent = CuboColors.chill,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(22)),
+      ),
+      child: Row(
+        children: [
+          _AccentIcon(icon: icon, accent: accent),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: _SetupColors.ink,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: CuboColors.blue,
+            activeTrackColor: accent,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Editor de jugadores: campo + botón de añadir y los jugadores como fichas
+/// con inicial que se quitan con la ✕. [emptyHint] se muestra bajo el aviso
+/// de lista vacía.
+class CuboPlayersEditor extends StatelessWidget {
+  final List<String> players;
+  final int maxPlayers;
+  final TextEditingController controller;
+  final VoidCallback onAdd;
+  final ValueChanged<int> onRemove;
+  final Color accent;
+  final String? emptyHint;
+
+  const CuboPlayersEditor({
+    super.key,
+    required this.players,
+    required this.maxPlayers,
+    required this.controller,
+    required this.onAdd,
+    required this.onRemove,
+    this.accent = CuboColors.chill,
+    this.emptyHint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final full = players.length >= maxPlayers;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                enabled: !full,
+                textCapitalization: TextCapitalization.words,
+                onSubmitted: (_) => onAdd(),
+                style: TextStyle(
+                  color: _SetupColors.ink,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
+                  hintText: tr('Nombre opcional'),
+                  hintStyle: TextStyle(
+                    color: _SetupColors.soft,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  filled: true,
+                  fillColor: _SetupColors.row,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            CuboPressable(
+              onTap: full ? null : onAdd,
+              child: Opacity(
+                opacity: full ? 0.4 : 1,
+                child: Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: CuboColors.blueInk,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Align(
+          alignment: Alignment.centerRight,
+          child: m.Text(
+            '${players.length} / $maxPlayers',
+            style: TextStyle(
+              color: _SetupColors.soft,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (players.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 26),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.person_add_alt_1_rounded,
+                  color: _SetupColors.soft,
+                  size: 40,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Todavía no has añadido jugadores',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _SetupColors.soft,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (emptyHint != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    emptyHint!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _SetupColors.faint,
+                      fontSize: 13,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var i = 0; i < players.length; i++)
+                _PlayerChip(
+                  name: players[i],
+                  accent: accent,
+                  onRemove: () => onRemove(i),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _PlayerChip extends StatelessWidget {
+  final String name;
+  final Color accent;
+  final VoidCallback onRemove;
+
+  const _PlayerChip({
+    required this.name,
+    required this.accent,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = name.isEmpty ? '?' : name.characters.first.toUpperCase();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(5, 5, 4, 5),
+      decoration: BoxDecoration(
+        color: _SetupColors.row,
+        borderRadius: const BorderRadius.all(Radius.circular(999)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 15,
+            backgroundColor: accent,
+            child: m.Text(
+              initial,
+              style: TextStyle(
+                color: CuboColors.blueInk,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 140),
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: _SetupColors.ink,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: onRemove,
+            visualDensity: VisualDensity.compact,
+            icon: Icon(Icons.close_rounded, color: _SetupColors.soft, size: 18),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccentIcon extends StatelessWidget {
+  final IconData icon;
+  final Color accent;
+
+  const _AccentIcon({required this.icon, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: accent,
+        borderRadius: const BorderRadius.all(Radius.circular(14)),
+      ),
+      child: Icon(icon, color: CuboColors.blueInk, size: 22),
+    );
+  }
+}
+
+class _RoundButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _RoundButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return CuboPressable(
+      onTap: onTap,
+      child: Opacity(
+        opacity: onTap == null ? 0.35 : 1,
+        child: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: _SetupColors.roundBg,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: CuboColors.white, size: 24),
+        ),
+      ),
+    );
+  }
+}

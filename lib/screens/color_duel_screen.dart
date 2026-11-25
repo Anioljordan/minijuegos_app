@@ -5,6 +5,7 @@ import '../widgets/i18n_text.dart';
 import '../widgets/color_wheel_picker.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../widgets/cubo_setup_widgets.dart';
 
 enum ColorDuelPhase { setup, memorize, pick, roundResult, finalResult }
 
@@ -63,6 +64,9 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   }
 
   ColorDuelPhase _phase = ColorDuelPhase.setup;
+
+  /// Paso visible de la configuración (solo interfaz).
+  int _setupStep = 0;
 
   final TextEditingController _playerNameController = TextEditingController();
   final TextEditingController _roundsController = TextEditingController(
@@ -150,7 +154,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return Container(
       width: double.infinity,
       padding: padding,
-      decoration: CuboDecorations.glass(),
+      decoration: CuboDecorations.glassRaised(radius: CuboRadii.card),
       child: child,
     );
   }
@@ -202,28 +206,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  InputDecoration _fancyInput(String label) {
-    return InputDecoration(
-      labelText: tr(label),
-      labelStyle: TextStyle(
-        color: CuboColors.white.withValues(alpha: 0.65),
-        fontWeight: FontWeight.w700,
-      ),
-      filled: true,
-      fillColor: CuboColors.white.withValues(alpha: 0.07),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: CuboInputs.rounded(
-        BorderSide(color: CuboColors.white.withValues(alpha: 0.28), width: 1.4),
-      ),
-      enabledBorder: CuboInputs.rounded(
-        BorderSide(color: CuboColors.white.withValues(alpha: 0.28), width: 1.4),
-      ),
-      focusedBorder: CuboInputs.rounded(
-        const BorderSide(color: CuboColors.white, width: 2),
       ),
     );
   }
@@ -508,18 +490,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     });
   }
 
-  void _changeSetupPlayers(int change) {
-    if (change > 0) {
-      _playerNameController.clear();
-      _addSetupPlayer();
-      return;
-    }
-
-    if (_setupPlayerNames.isEmpty) return;
-
-    _removeSetupPlayer(_setupPlayerNames.length - 1);
-  }
-
   void _changeRounds(int delta) {
     final current = int.tryParse(_roundsController.text) ?? 5;
     final next = (current + delta).clamp(1, 20);
@@ -705,6 +675,7 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
 
     setState(() {
       _phase = ColorDuelPhase.setup;
+      _setupStep = 0;
       _players = [];
       _currentRound = 1;
       _currentPlayerIndex = 0;
@@ -730,122 +701,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     return sorted;
   }
 
-  Widget _stepperCard({
-    required String title,
-    required String subtitle,
-    required String value,
-    required IconData icon,
-    required VoidCallback onMinus,
-    required VoidCallback onPlus,
-  }) {
-    return _glassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, color: CuboColors.white, size: 26),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tr(title).toUpperCase(),
-                  style: const TextStyle(
-                    color: CuboColors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.62),
-                    fontSize: 11.5,
-                    height: 1.2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: onMinus,
-            icon: const Icon(Icons.remove_rounded, color: CuboColors.white),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: CuboColors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          IconButton(
-            onPressed: onPlus,
-            icon: const Icon(Icons.add_rounded, color: CuboColors.white),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _modeCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        width: double.infinity,
-        padding: const EdgeInsets.all(13),
-        decoration: CuboDecorations.glass(selected: selected),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: selected ? CuboColors.white : CuboColors.chill,
-              size: 28,
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr(title).toUpperCase(),
-                    style: const TextStyle(
-                      color: CuboColors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.68),
-                      fontSize: 12.5,
-                      height: 1.25,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            CuboCheckBadge(selected: selected),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _sectionTitle(String text) {
     return SizedBox(
       width: double.infinity,
@@ -862,797 +717,77 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     );
   }
 
-  Widget _buildSetupCounterButton({
-    required IconData icon,
-    required VoidCallback? onTap,
-    required bool compact,
-  }) {
-    final veryNarrow = _isVeryNarrowScreen;
-
-    final size = veryNarrow
-        ? 34.0
-        : compact
-        ? 38.0
-        : 44.0;
-
-    return Material(
-      color: onTap == null
-          ? CuboColors.white.withValues(alpha: 0.04)
-          : CuboColors.white.withValues(alpha: 0.10),
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Center(
-            child: Icon(
-              icon,
-              color: CuboColors.white.withValues(
-                alpha: onTap == null ? 0.28 : 1,
-              ),
-              size: veryNarrow
-                  ? 19
-                  : compact
-                  ? 21
-                  : 24,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSetupPlayersCounter({required bool compact}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final veryNarrow = constraints.maxWidth < 330;
-
-        final leadingSize = veryNarrow
-            ? 34.0
-            : compact
-            ? 38.0
-            : 44.0;
-
-        final gap = veryNarrow ? 6.0 : 9.0;
-
-        final valueWidth = veryNarrow
-            ? 27.0
-            : compact
-            ? 33.0
-            : 40.0;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(
-            veryNarrow
-                ? 8
-                : compact
-                ? 10
-                : 12,
-          ),
-          decoration: CuboDecorations.glass(radius: CuboRadii.md),
-          child: Row(
-            children: [
-              Container(
-                width: leadingSize,
-                height: leadingSize,
-                decoration: BoxDecoration(
-                  color: CuboColors.chill.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: CuboColors.chill.withValues(alpha: 0.75),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  Icons.groups_rounded,
-                  color: CuboColors.chill,
-                  size: veryNarrow
-                      ? 19
-                      : compact
-                      ? 21
-                      : 24,
-                ),
-              ),
-
-              SizedBox(width: gap),
-
-              Expanded(
-                child: _singleLineResponsiveText(
-                  'JUGADORES',
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 10.5
-                        : compact
-                        ? 12
-                        : 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: veryNarrow ? 0.1 : 0.4,
-                  ),
-                ),
-              ),
-
-              SizedBox(width: gap),
-
-              _buildSetupCounterButton(
-                icon: Icons.remove_rounded,
-                onTap: _setupPlayerNames.isEmpty
-                    ? null
-                    : () => _changeSetupPlayers(-1),
-                compact: compact,
-              ),
-
-              SizedBox(
-                width: valueWidth,
-                child: Text(
-                  '${_setupPlayerNames.length}',
-                  maxLines: 1,
-                  softWrap: false,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 18
-                        : compact
-                        ? 20
-                        : 23,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-
-              _buildSetupCounterButton(
-                icon: Icons.add_rounded,
-                onTap: _setupPlayerNames.length >= maxPlayers
-                    ? null
-                    : () => _changeSetupPlayers(1),
-                compact: compact,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSetupPlayerTile({
-    required String player,
-    required int index,
-    required bool compact,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.fromLTRB(
-        compact ? 9 : 11,
-        compact ? 7 : 8,
-        5,
-        compact ? 7 : 8,
-      ),
-      decoration: CuboDecorations.glass(radius: CuboRadii.md),
-      child: Row(
-        children: [
-          Container(
-            width: compact ? 31 : 35,
-            height: compact ? 31 : 35,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: CuboColors.chill.withValues(alpha: 0.18),
-              border: Border.all(
-                color: CuboColors.chill.withValues(alpha: 0.85),
-                width: 1.6,
-              ),
-            ),
-            child: Text(
-              '${index + 1}',
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 12 : 13,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          Expanded(
-            child: Text(
-              player,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 14 : 16,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          IconButton(
-            tooltip: tr('Eliminar jugador'),
-            onPressed: () => _removeSetupPlayer(index),
-            icon: Icon(
-              Icons.delete_outline_rounded,
-              color: CuboColors.white.withValues(alpha: 0.78),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSetupPlayersEditor({required bool compact}) {
-    final veryNarrow = _isVeryNarrowScreen;
-
-    return _glassCard(
-      padding: EdgeInsets.all(compact ? 13 : 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSetupPlayersCounter(compact: compact),
-
-          SizedBox(height: compact ? 12 : 14),
-
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _singleLineResponsiveText(
-              'AÑADIR JUGADOR',
-              style: TextStyle(
-                color: CuboColors.white.withValues(alpha: 0.70),
-                fontSize: compact ? 10.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.7,
-              ),
-            ),
-          ),
-
-          SizedBox(height: veryNarrow ? 6 : 9),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _playerNameController,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _addSetupPlayer(),
-                  style: const TextStyle(
-                    color: CuboColors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: CuboColors.white,
-                  decoration: _fancyInput('Nombre opcional'),
-                ),
-              ),
-
-              const SizedBox(width: 9),
-
-              SizedBox(
-                width: veryNarrow
-                    ? 44
-                    : compact
-                    ? 50
-                    : 54,
-                height: veryNarrow
-                    ? 48
-                    : compact
-                    ? 50
-                    : 54,
-                child: ElevatedButton(
-                  onPressed: _setupPlayerNames.length >= maxPlayers
-                      ? null
-                      : _addSetupPlayer,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CuboColors.chill,
-                    foregroundColor: CuboColors.blueInk,
-                    disabledBackgroundColor: CuboColors.white.withValues(
-                      alpha: 0.18,
-                    ),
-                    disabledForegroundColor: CuboColors.white.withValues(
-                      alpha: 0.42,
-                    ),
-                    elevation: 0,
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    alignment: Alignment.center,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: CuboRadii.mdAll,
-                    ),
-                  ),
-                  child: const Center(child: Icon(Icons.add_rounded, size: 29)),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: compact ? 12 : 14),
-
-          if (_setupPlayerNames.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: compact ? 16 : 20,
-              ),
-              decoration: BoxDecoration(
-                color: CuboColors.white.withValues(alpha: 0.05),
-                borderRadius: CuboRadii.mdAll,
-                border: Border.all(
-                  color: CuboColors.white.withValues(alpha: 0.18),
-                  width: 1.3,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.person_add_alt_1_rounded,
-                    color: CuboColors.white.withValues(alpha: 0.48),
-                    size: compact ? 28 : 34,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    'Todavía no has añadido jugadores',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.66),
-                      fontSize: compact ? 12 : 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.44),
-                      fontSize: compact ? 10.5 : 11.5,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _singleLineResponsiveText(
-                    'LISTA DE JUGADORES',
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.70),
-                      fontSize: compact ? 10.5 : 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.7,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                Text(
-                  '${_setupPlayerNames.length} / $maxPlayers',
-                  maxLines: 1,
-                  softWrap: false,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.62),
-                    fontSize: compact ? 11 : 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 9),
-
-            ..._setupPlayerNames.asMap().entries.map(
-              (entry) => _buildSetupPlayerTile(
-                player: entry.value,
-                index: entry.key,
-                compact: compact,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactModeCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-    required bool compact,
-  }) {
-    final veryNarrow = _isVeryNarrowScreen;
-
-    return Material(
-      color: selected
-          ? CuboColors.chill.withValues(alpha: 0.24)
-          : CuboColors.white.withValues(alpha: 0.06),
-      borderRadius: CuboRadii.mdAll,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: CuboRadii.mdAll,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          height: veryNarrow
-              ? 94
-              : compact
-              ? 104
-              : 112,
-          padding: EdgeInsets.all(
-            veryNarrow
-                ? 7
-                : compact
-                ? 9
-                : 11,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: CuboRadii.mdAll,
-            border: Border.all(
-              color: selected
-                  ? CuboColors.white.withValues(alpha: 0.85)
-                  : CuboColors.white.withValues(alpha: 0.22),
-              width: selected ? 1.8 : 1.2,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    color: selected
-                        ? CuboColors.chill
-                        : CuboColors.white.withValues(alpha: 0.75),
-                    size: veryNarrow
-                        ? 20
-                        : compact
-                        ? 23
-                        : 27,
-                  ),
-
-                  if (selected) ...[
-                    SizedBox(width: veryNarrow ? 3 : 5),
-                    CuboCheckBadge(selected: true, size: veryNarrow ? 15 : 18),
-                  ],
-                ],
-              ),
-
-              SizedBox(
-                height: veryNarrow
-                    ? 5
-                    : compact
-                    ? 7
-                    : 9,
-              ),
-
-              SizedBox(
-                width: double.infinity,
-                child: _singleLineResponsiveText(
-                  tr(title).toUpperCase(),
-                  alignment: Alignment.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: compact ? 10.5 : 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: CuboColors.white.withValues(alpha: 0.58),
-                  fontSize: veryNarrow
-                      ? 8
-                      : compact
-                      ? 8.5
-                      : 9.5,
-                  height: 1.12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGameConfiguration({required bool compact}) {
-    final veryNarrow = _isVeryNarrowScreen;
-    return _glassCard(
-      padding: EdgeInsets.all(compact ? 12 : 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _singleLineResponsiveText(
-            'CONFIGURACIÓN',
-            style: TextStyle(
-              color: CuboColors.white,
-              fontSize: compact ? 14 : 16,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
-            ),
-          ),
-
-          SizedBox(
-            height: veryNarrow
-                ? 6
-                : compact
-                ? 8
-                : 10,
-          ),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _buildCompactStepperCard(
-                  title: 'Rondas',
-                  value: _roundsController.text,
-                  icon: Icons.flag_rounded,
-                  onMinus: () => _changeRounds(-1),
-                  onPlus: () => _changeRounds(1),
-                  compact: compact,
-                ),
-              ),
-
-              SizedBox(
-                width: veryNarrow
-                    ? 6
-                    : compact
-                    ? 8
-                    : 10,
-              ),
-
-              Expanded(
-                child: _buildCompactStepperCard(
-                  title: 'Memoria',
-                  value: '${_memorizeSecondsController.text}s',
-                  icon: Icons.timer_rounded,
-                  onMinus: () => _changeSeconds(-1),
-                  onPlus: () => _changeSeconds(1),
-                  compact: compact,
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(
-            height: veryNarrow
-                ? 6
-                : compact
-                ? 8
-                : 10,
-          ),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _buildCompactModeCard(
-                  title: 'Mismo color',
-                  subtitle: 'Uno para todos',
-                  icon: Icons.group_work_rounded,
-                  selected: _gameMode == ColorDuelMode.sameColorForAll,
-                  onTap: () {
-                    setState(() {
-                      _gameMode = ColorDuelMode.sameColorForAll;
-                    });
-                  },
-                  compact: compact,
-                ),
-              ),
-
-              SizedBox(
-                width: veryNarrow
-                    ? 6
-                    : compact
-                    ? 8
-                    : 10,
-              ),
-
-              Expanded(
-                child: _buildCompactModeCard(
-                  title: 'Color distinto',
-                  subtitle: 'Uno por jugador',
-                  icon: Icons.auto_awesome_rounded,
-                  selected: _gameMode == ColorDuelMode.differentColorPerPlayer,
-                  onTap: () {
-                    setState(() {
-                      _gameMode = ColorDuelMode.differentColorPerPlayer;
-                    });
-                  },
-                  compact: compact,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSmallConfigButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required bool compact,
-  }) {
-    final veryNarrow = _isVeryNarrowScreen;
-
-    final size = veryNarrow
-        ? 27.0
-        : compact
-        ? 31.0
-        : 35.0;
-
-    return Material(
-      color: CuboColors.white.withValues(alpha: 0.10),
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            icon,
-            color: CuboColors.white,
-            size: veryNarrow
-                ? 17
-                : compact
-                ? 19
-                : 21,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactStepperCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required VoidCallback onMinus,
-    required VoidCallback onPlus,
-    required bool compact,
-  }) {
-    final veryNarrow = _isVeryNarrowScreen;
-
-    return Container(
-      height: veryNarrow
-          ? 94
-          : compact
-          ? 104
-          : 112,
-      padding: EdgeInsets.all(
-        veryNarrow
-            ? 7
-            : compact
-            ? 9
-            : 11,
-      ),
-      decoration: CuboDecorations.glass(radius: CuboRadii.md),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                color: CuboColors.chill,
-                size: veryNarrow
-                    ? 17
-                    : compact
-                    ? 19
-                    : 22,
-              ),
-
-              SizedBox(width: veryNarrow ? 4 : 6),
-
-              Expanded(
-                child: _singleLineResponsiveText(
-                  tr(title).toUpperCase(),
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: compact ? 10.5 : 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.25,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const Spacer(),
-
-          Row(
-            children: [
-              _buildSmallConfigButton(
-                icon: Icons.remove_rounded,
-                onTap: onMinus,
-                compact: compact,
-              ),
-
-              Expanded(
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  softWrap: false,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 18
-                        : compact
-                        ? 21
-                        : 24,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-
-              _buildSmallConfigButton(
-                icon: Icons.add_rounded,
-                onTap: onPlus,
-                compact: compact,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+  void _goToSetupStep(int step) {
+    if (step > _setupStep && _setupPlayerNames.length < minPlayers) {
+      _showSetupMessage('Añade al menos $minPlayers jugadores.');
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() => _setupStep = step);
   }
 
   Widget _buildSetupPhase() {
-    final compact = _isCompactScreen;
-
-    return SingleChildScrollView(
+    return CuboSetupSteps(
       key: const ValueKey('setup'),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.only(
-        top: compact ? 6 : 10,
-        bottom: compact ? 14 : 18,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSetupPlayersEditor(compact: compact),
-
-          SizedBox(height: compact ? 10 : 14),
-
-          _buildGameConfiguration(compact: compact),
-
-          SizedBox(height: compact ? 12 : 16),
-
-          _primaryButton(
-            text: 'Empezar partida',
-            icon: Icons.play_arrow_rounded,
-            onPressed: _startGame,
+      index: _setupStep,
+      onStepChanged: _goToSetupStep,
+      onStart: _startGame,
+      steps: [
+        CuboSetupStep(
+          title: 'JUGADORES',
+          icon: Icons.groups_rounded,
+          child: CuboPlayersEditor(
+            players: _setupPlayerNames,
+            maxPlayers: maxPlayers,
+            controller: _playerNameController,
+            onAdd: _addSetupPlayer,
+            onRemove: _removeSetupPlayer,
           ),
-        ],
-      ),
+        ),
+        CuboSetupStep(
+          title: 'CONFIGURACIÓN',
+          icon: Icons.palette_rounded,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CuboLightCounter(
+                title: 'Rondas',
+                icon: Icons.flag_rounded,
+                value: _roundsController.text,
+                onMinus: () => _changeRounds(-1),
+                onPlus: () => _changeRounds(1),
+              ),
+              const SizedBox(height: 12),
+              CuboLightCounter(
+                title: 'Memoria',
+                icon: Icons.timer_rounded,
+                value: '${_memorizeSecondsController.text}s',
+                onMinus: () => _changeSeconds(-1),
+                onPlus: () => _changeSeconds(1),
+              ),
+              const SizedBox(height: 12),
+              CuboSetupOption(
+                title: 'Mismo color',
+                subtitle: 'Uno para todos',
+                icon: Icons.group_work_rounded,
+                selected: _gameMode == ColorDuelMode.sameColorForAll,
+                onTap: () =>
+                    setState(() => _gameMode = ColorDuelMode.sameColorForAll),
+              ),
+              const SizedBox(height: 12),
+              CuboSetupOption(
+                title: 'Color distinto',
+                subtitle: 'Uno por jugador',
+                icon: Icons.auto_awesome_rounded,
+                selected: _gameMode == ColorDuelMode.differentColorPerPlayer,
+                onTap: () => setState(
+                  () => _gameMode = ColorDuelMode.differentColorPerPlayer,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

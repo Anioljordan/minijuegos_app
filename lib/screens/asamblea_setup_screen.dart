@@ -8,6 +8,7 @@ import 'asamblea_board_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../widgets/cubo_setup_widgets.dart';
 
 enum AsambleaRole { izquierda, derecha, liderOculto }
 
@@ -39,6 +40,9 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   int get playersCount => _players.length;
 
   bool _startupDialogShown = false;
+
+  /// Paso visible de la configuración (solo interfaz).
+  int _setupStep = 0;
 
   @override
   void initState() {
@@ -316,44 +320,32 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     }
   }
 
-  Future<void> _changePlayers(int change) async {
-    if (change > 0) {
-      // El + del contador siempre añade un nombre automático.
-      _controller.clear();
-      await _addPlayer();
-      return;
+  bool _checkPlayersCount() {
+    if (_players.length >= minPlayers && _players.length <= maxPlayers) {
+      return true;
     }
-
-    if (_players.isEmpty) return;
-
-    await _removePlayer(_players.length - 1);
+    _snack(
+      'La Asamblea necesita entre '
+      '$minPlayers y $maxPlayers jugadores',
+    );
+    return false;
   }
 
-  Future<void> _restoreLastPlayers() async {
-    await _loadLastPlayers();
-
-    if (!mounted) return;
-    _snack('Jugadores de la última partida cargados');
+  void _goToStep(int step) {
+    if (step > _setupStep && !_checkPlayersCount()) return;
+    FocusScope.of(context).unfocus();
+    setState(() => _setupStep = step);
   }
 
-  Future<void> _clearPlayersList() async {
-    setState(() {
-      _players.clear();
-    });
-
-    await _clearLastPlayers();
-    if (!mounted) return;
-    _snack('Lista vaciada');
+  /// Jugadores de derecha según el total (sin contar al Líder Oculto).
+  static int _rightCount(int total) {
+    if (total <= 6) return 1;
+    if (total <= 8) return 2;
+    return 3;
   }
 
   void _startGame() {
-    if (_players.length < minPlayers || _players.length > maxPlayers) {
-      _snack(
-        'La Asamblea necesita entre '
-        '$minPlayers y $maxPlayers jugadores',
-      );
-      return;
-    }
+    if (!_checkPlayersCount()) return;
 
     final playersWithRoles = _assignRoles(_players);
 
@@ -371,16 +363,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
         originalPlayers.map((p) => AsambleaPlayer(name: p.name)).toList()
           ..shuffle(random);
 
-    final total = players.length;
-
-    int numDerecha;
-    if (total <= 6) {
-      numDerecha = 1;
-    } else if (total <= 8) {
-      numDerecha = 2;
-    } else {
-      numDerecha = 3;
-    }
+    final numDerecha = _rightCount(players.length);
 
     players[0].role = AsambleaRole.liderOculto;
 
@@ -479,6 +462,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
               CuboIllustration('asamblea', size: illustrationSize),
               SizedBox(height: compact ? 6 : 10),
               CuboSectionTitle(
+                barColor: CuboColors.chill,
                 'la asamblea',
                 alignEnd: true,
                 size: titleSize,
@@ -491,501 +475,53 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
     );
   }
 
-  Widget buildGlassCard({required Widget child, EdgeInsets? padding}) {
-    return Container(
-      width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(16),
-      decoration: CuboDecorations.glass(),
-      child: child,
-    );
-  }
-
-  InputDecoration inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: tr(hint),
-      hintStyle: TextStyle(
-        color: CuboColors.white.withValues(alpha: 0.45),
-        fontWeight: FontWeight.w600,
-      ),
-      filled: true,
-      fillColor: CuboColors.white.withValues(alpha: 0.07),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: CuboInputs.rounded(
-        BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
-      ),
-      enabledBorder: CuboInputs.rounded(
-        BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
-      ),
-      focusedBorder: CuboInputs.rounded(
-        const BorderSide(color: CuboColors.white, width: 2),
-      ),
-    );
-  }
-
-  Widget sectionTitle(String text) {
-    return Text(
-      tr(text).toLowerCase(),
-      style: const TextStyle(
-        color: CuboColors.white,
-        fontSize: 30,
-        height: 0.95,
-        fontWeight: FontWeight.w900,
-        letterSpacing: -0.7,
-      ),
-    );
-  }
-
-  Widget _smallStat({
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        decoration: CuboDecorations.glass(radius: CuboRadii.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              tr(title).toUpperCase(),
-              style: TextStyle(
-                color: CuboColors.white.withValues(alpha: 0.62),
-                fontSize: 10.5,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.6,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: CuboColors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _playerTile(
-    AsambleaPlayer player,
-    int index, {
-    required bool compact,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.fromLTRB(
-        compact ? 9 : 11,
-        compact ? 7 : 8,
-        5,
-        compact ? 7 : 8,
-      ),
-      decoration: CuboDecorations.glass(radius: CuboRadii.md),
-      child: Row(
-        children: [
-          Container(
-            width: compact ? 31 : 35,
-            height: compact ? 31 : 35,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: CuboColors.chill.withValues(alpha: 0.16),
-              border: Border.all(
-                color: CuboColors.chill.withValues(alpha: 0.80),
-                width: 1.6,
-              ),
-            ),
-            child: Text(
-              '${index + 1}',
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 12 : 13,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          Expanded(
-            child: Text(
-              player.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: CuboColors.white,
-                fontSize: compact ? 14 : 16,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-
-          IconButton(
-            tooltip: tr('Eliminar jugador'),
-            onPressed: () => _removePlayer(index),
-            icon: Icon(
-              Icons.delete_outline_rounded,
-              color: CuboColors.white.withValues(alpha: 0.78),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _singleLineResponsiveText(
-    String text, {
-    required TextStyle style,
-    Alignment alignment = Alignment.centerLeft,
-  }) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: alignment,
-      child: Text(
-        text,
-        maxLines: 1,
-        softWrap: false,
-        overflow: TextOverflow.visible,
-        style: style,
-      ),
-    );
-  }
-
-  Widget _buildCounterButton({
-    required IconData icon,
-    required VoidCallback? onTap,
-    required bool compact,
-  }) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final veryNarrow = screenWidth < 350;
-
-    final size = veryNarrow
-        ? 34.0
-        : compact
-        ? 38.0
-        : 44.0;
-
-    return Material(
-      color: onTap == null
-          ? CuboColors.white.withValues(alpha: 0.04)
-          : CuboColors.white.withValues(alpha: 0.10),
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Center(
-            child: Icon(
-              icon,
-              color: CuboColors.white.withValues(
-                alpha: onTap == null ? 0.28 : 1,
-              ),
-              size: veryNarrow
-                  ? 19
-                  : compact
-                  ? 21
-                  : 24,
-            ),
+  Widget _buildSetupSteps() {
+    final total = _players.length;
+    final right = _rightCount(total);
+    return CuboSetupSteps(
+      index: _setupStep,
+      onStepChanged: _goToStep,
+      onStart: _startGame,
+      steps: [
+        CuboSetupStep(
+          title: 'JUGADORES',
+          icon: Icons.groups_rounded,
+          child: CuboPlayersEditor(
+            players: [for (final p in _players) p.name],
+            maxPlayers: maxPlayers,
+            controller: _controller,
+            onAdd: _addPlayer,
+            onRemove: _removePlayer,
+            emptyHint: 'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPlayersCounter({required bool compact}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final veryNarrow = constraints.maxWidth < 330;
-
-        final leadingSize = veryNarrow
-            ? 34.0
-            : compact
-            ? 38.0
-            : 44.0;
-
-        final gap = veryNarrow ? 6.0 : 9.0;
-
-        final valueWidth = veryNarrow
-            ? 27.0
-            : compact
-            ? 33.0
-            : 40.0;
-
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(
-            veryNarrow
-                ? 8
-                : compact
-                ? 10
-                : 12,
-          ),
-          decoration: CuboDecorations.glass(radius: CuboRadii.md),
-          child: Row(
+        CuboSetupStep(
+          title: 'CONFIGURACIÓN',
+          icon: Icons.how_to_vote_rounded,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: leadingSize,
-                height: leadingSize,
-                decoration: BoxDecoration(
-                  color: CuboColors.chill.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: CuboColors.chill.withValues(alpha: 0.75),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  Icons.groups_rounded,
-                  color: CuboColors.chill,
-                  size: veryNarrow
-                      ? 19
-                      : compact
-                      ? 21
-                      : 24,
-                ),
+              CuboSetupInfoRow(
+                title: 'Líder Oculto',
+                icon: Icons.visibility_off_rounded,
+                value: '1',
               ),
-
-              SizedBox(width: gap),
-
-              Expanded(
-                child: _singleLineResponsiveText(
-                  'JUGADORES',
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 10.5
-                        : compact
-                        ? 12
-                        : 13.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: veryNarrow ? 0.1 : 0.4,
-                  ),
-                ),
+              const SizedBox(height: 12),
+              CuboSetupInfoRow(
+                title: 'Derecha',
+                icon: Icons.gavel_rounded,
+                value: '$right',
               ),
-
-              SizedBox(width: gap),
-
-              _buildCounterButton(
-                icon: Icons.remove_rounded,
-                onTap: _players.isEmpty ? null : () => _changePlayers(-1),
-                compact: compact,
-              ),
-
-              SizedBox(
-                width: valueWidth,
-                child: Text(
-                  '$playersCount',
-                  maxLines: 1,
-                  softWrap: false,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: veryNarrow
-                        ? 18
-                        : compact
-                        ? 20
-                        : 23,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-
-              _buildCounterButton(
-                icon: Icons.add_rounded,
-                onTap: _players.length >= maxPlayers
-                    ? null
-                    : () => _changePlayers(1),
-                compact: compact,
+              const SizedBox(height: 12),
+              CuboSetupInfoRow(
+                title: 'Izquierda',
+                icon: Icons.shield_rounded,
+                value: '${total - right - 1}',
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPlayersEditor({required bool compact}) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final veryNarrow = screenWidth < 350;
-    return buildGlassCard(
-      padding: EdgeInsets.all(compact ? 13 : 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildPlayersCounter(compact: compact),
-
-          SizedBox(height: compact ? 12 : 14),
-
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _singleLineResponsiveText(
-              'AÑADIR JUGADOR',
-              style: TextStyle(
-                color: CuboColors.white.withValues(alpha: 0.70),
-                fontSize: compact ? 10.5 : 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.7,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _addPlayer(),
-                  style: const TextStyle(
-                    color: CuboColors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  cursorColor: CuboColors.white,
-                  decoration: inputDecoration('Nombre opcional'),
-                ),
-              ),
-
-              SizedBox(width: veryNarrow ? 6 : 9),
-
-              SizedBox(
-                width: veryNarrow
-                    ? 44
-                    : compact
-                    ? 50
-                    : 54,
-                height: veryNarrow
-                    ? 48
-                    : compact
-                    ? 50
-                    : 54,
-                child: ElevatedButton(
-                  onPressed: _players.length >= maxPlayers ? null : _addPlayer,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CuboColors.chill,
-                    foregroundColor: CuboColors.blueInk,
-                    disabledBackgroundColor: CuboColors.white.withValues(
-                      alpha: 0.18,
-                    ),
-                    disabledForegroundColor: CuboColors.white.withValues(
-                      alpha: 0.42,
-                    ),
-                    elevation: 0,
-
-                    // Centra correctamente el símbolo +
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    alignment: Alignment.center,
-
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: CuboRadii.inputAll,
-                    ),
-                  ),
-                  child: const Center(child: Icon(Icons.add_rounded, size: 29)),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: compact ? 12 : 14),
-
-          if (_players.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: compact ? 16 : 20,
-              ),
-              decoration: BoxDecoration(
-                color: CuboColors.whiteA(0.05),
-                borderRadius: CuboRadii.mdAll,
-                border: Border.all(color: CuboColors.whiteA(0.18), width: 1.3),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.person_add_alt_1_rounded,
-                    color: CuboColors.white.withValues(alpha: 0.48),
-                    size: compact ? 28 : 34,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-                    'Todavía no has añadido jugadores',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.66),
-                      fontSize: compact ? 12 : 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  Text(
-                    'Pulsa + sin escribir para añadir Jugador 1, Jugador 2…',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.44),
-                      fontSize: compact ? 10.5 : 11.5,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _singleLineResponsiveText(
-                    'LISTA DE JUGADORES',
-                    style: TextStyle(
-                      color: CuboColors.white.withValues(alpha: 0.70),
-                      fontSize: compact ? 10.5 : 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.7,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                Text(
-                  '$playersCount / $maxPlayers',
-                  maxLines: 1,
-                  softWrap: false,
-                  style: TextStyle(
-                    color: CuboColors.white.withValues(alpha: 0.62),
-                    fontSize: compact ? 11 : 12,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 9),
-
-            ..._players.asMap().entries.map(
-              (entry) => CuboEntrance(
-                key: ObjectKey(entry.value),
-                child: _playerTile(entry.value, entry.key, compact: compact),
-              ),
-            ),
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1025,44 +561,7 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
                     SizedBox(height: compact ? 9 : 14),
 
-                    Expanded(
-                      child: SingleChildScrollView(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [_buildPlayersEditor(compact: compact)],
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: compact ? 10 : 14),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: compact ? 62 : 72,
-                      child: ElevatedButton.icon(
-                        onPressed: _startGame,
-                        style: CuboButtons.primary(padding: null),
-                        icon: Icon(
-                          Icons.play_arrow_rounded,
-                          size: compact ? 30 : 36,
-                        ),
-                        label: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            'EMPEZAR PARTIDA',
-                            maxLines: 1,
-                            softWrap: false,
-                            style: TextStyle(
-                              fontSize: compact ? 14 : 16,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    Expanded(child: _buildSetupSteps()),
                   ],
                 ),
               );

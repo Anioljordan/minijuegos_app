@@ -1,9 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-<circle cx="60" cy="62" r="46" fill="#4064BC"/>
-<circle cx="60" cy="62" r="38" fill="#F7F7F7"/>
-<path d="M60 62 L60 24 A38 38 0 0 1 93 43 Z" fill="#B9C8EC"/>
-<path d="M60 62 L93 81 A38 38 0 0 1 60 100 Z" fill="#B9C8EC"/>
-<path d="M60 62 L27 81 A38 38 0 0 1 27 43 Z" fill="#B9C8EC"/>
-<circle cx="60" cy="62" r="9" fill="#2F4F9C"/>
-<path d="M52 10 H68 L60 24 Z" fill="#F7F7F7"/>
+<defs><linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5E86E6"/><stop offset="1" stop-color="#2F4F9C"/></linearGradient></defs>
+<ellipse cx="60" cy="112" rx="34" ry="5" fill="#1F3672" opacity="0.2"/><circle cx="60" cy="62" r="50" fill="#FFFFFF" opacity="0.35"/><circle cx="60" cy="62" r="48" fill="url(#rim)"/><circle cx="104" cy="62" r="2.3" fill="#F7F7F7"/><circle cx="98.1" cy="84" r="2.3" fill="#F7F7F7"/><circle cx="82" cy="100.1" r="2.3" fill="#F7F7F7"/><circle cx="60" cy="106" r="2.3" fill="#F7F7F7"/><circle cx="38" cy="100.1" r="2.3" fill="#F7F7F7"/><circle cx="21.9" cy="84" r="2.3" fill="#F7F7F7"/><circle cx="16" cy="62" r="2.3" fill="#F7F7F7"/><circle cx="21.9" cy="40" r="2.3" fill="#F7F7F7"/><circle cx="38" cy="23.9" r="2.3" fill="#F7F7F7"/><circle cx="60" cy="18" r="2.3" fill="#F7F7F7"/><circle cx="82" cy="23.9" r="2.3" fill="#F7F7F7"/><circle cx="98.1" cy="40" r="2.3" fill="#F7F7F7"/><path d="M60 62 L60 22 A40 40 0 0 1 94.64 42 Z" fill="#FFCC3D"/><path d="M60 62 L94.64 42 A40 40 0 0 1 94.64 82 Z" fill="#F7F7F7"/><path d="M60 62 L94.64 82 A40 40 0 0 1 60 102 Z" fill="#8FD3FF"/><path d="M60 62 L60 102 A40 40 0 0 1 25.36 82 Z" fill="#FFCC3D"/><path d="M60 62 L25.36 82 A40 40 0 0 1 25.36 42 Z" fill="#F7F7F7"/><path d="M60 62 L25.36 42 A40 40 0 0 1 60 22 Z" fill="#8FD3FF"/><path d="M20 62 A40 40 0 0 0 100 62 A40 30 0 0 1 20 62 Z" fill="#1F3672" opacity="0.14"/><circle cx="60" cy="62" r="11" fill="#2F4F9C"/><circle cx="60" cy="62" r="4.5" fill="#F7F7F7"/><path d="M47 6 Q60 0 73 6 L60 30 Z" fill="#FFCC3D"/><path d="M60 30 L73 6 Q68 4 64 3.5 Z" fill="#F0A91C"/><ellipse cx="36" cy="30" rx="8" ry="4" fill="#FFFFFF" opacity="0.5" transform="rotate(-40 36 30)"/>
 </svg>

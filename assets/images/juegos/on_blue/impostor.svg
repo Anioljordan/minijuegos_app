@@ -1,7 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-<circle cx="60" cy="60" r="50" fill="#4064BC"/>
-<path d="M18 52 Q60 30 102 52 Q100 80 76 80 Q66 80 60 70 Q54 80 44 80 Q20 80 18 52 Z" fill="#F7F7F7"/>
-<ellipse cx="42" cy="58" rx="10" ry="7" fill="#2F4F9C"/>
-<ellipse cx="78" cy="58" rx="10" ry="7" fill="#2F4F9C"/>
-<path d="M44 96 Q60 88 76 96" stroke="#B9C8EC" stroke-width="6" fill="none" stroke-linecap="round"/>
+<defs><linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FD3FF"/><stop offset="1" stop-color="#4FA9E6"/></linearGradient><linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE48C"/><stop offset="1" stop-color="#FFCC3D"/></linearGradient><linearGradient id="mask" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F4F9C"/><stop offset="1" stop-color="#1F3672"/></linearGradient></defs>
+<ellipse cx="60" cy="110" rx="32" ry="5" fill="#1F3672" opacity="0.2"/><path d="M60 8 C92 8 110 34 110 66 L110 98 Q60 114 10 98 L10 66 C10 34 28 8 60 8 Z" fill="url(#hood)"/><circle cx="60" cy="66" r="37" fill="#4FA9E6"/><circle cx="60" cy="68" r="33" fill="url(#face)"/><path d="M27 68 A33 33 0 0 0 93 68 A33 25 0 0 1 27 68 Z" fill="#F0A91C" opacity="0.45"/><path d="M20 58 Q60 42 100 58 Q99 78 79 78 Q67 78 60 69 Q53 78 41 78 Q21 78 20 58 Z" fill="url(#mask)"/><ellipse cx="43" cy="62" rx="8.5" ry="6" fill="#F7F7F7"/><ellipse cx="77" cy="62" rx="8.5" ry="6" fill="#F7F7F7"/><circle cx="47" cy="63" r="3.6" fill="#1F3672"/><circle cx="81" cy="63" r="3.6" fill="#1F3672"/><path d="M50 89 Q61 93 72 85" stroke="#1F3672" stroke-width="4.5" fill="none" stroke-linecap="round"/><ellipse cx="36" cy="24" rx="10" ry="5" fill="#FFFFFF" opacity="0.55" transform="rotate(-35 36 24)"/>
 </svg>
