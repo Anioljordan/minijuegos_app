@@ -69,7 +69,7 @@ class CuboMenuLayout extends StatelessWidget {
     final hero = CuboIllustration(
       heroIllustration,
       size: heroSize,
-      opacity: 0.55,
+      opacity: 0.92,
     );
     final titleWidget = CuboSectionTitle(
       title,
@@ -137,9 +137,11 @@ class CuboMenuLayout extends StatelessWidget {
   List<Widget> _gameSlivers(BuildContext context, bool compact) {
     final featured = games.first;
     final rest = games.skip(1).toList();
-    final style = AppSettings.instance.menuStyle == 'carousel'
-        ? CuboMenuStyle.carrusel
-        : CuboMenuStyle.destacado;
+    final style = switch (AppSettings.instance.menuStyle) {
+      'carousel' => CuboMenuStyle.carrusel,
+      'list' => CuboMenuStyle.lista,
+      _ => CuboMenuStyle.destacado,
+    };
     switch (style) {
       case CuboMenuStyle.destacado:
         return [
@@ -178,6 +180,25 @@ class CuboMenuLayout extends StatelessWidget {
                   ),
                 ),
                 childCount: rest.length,
+              ),
+            ),
+          ),
+        ];
+      case CuboMenuStyle.lista:
+        return [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+            sliver: SliverList.separated(
+              itemCount: games.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, i) => CuboEntrance(
+                index: i + 1,
+                child: CuboMenuListRow(
+                  game: games[i],
+                  accent: _accent,
+                  highlighted: i % 3 == 0,
+                  onTap: () => _open(context, games[i]),
+                ),
               ),
             ),
           ),

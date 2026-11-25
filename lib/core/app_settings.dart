@@ -14,8 +14,10 @@ class AppSettings extends ChangeNotifier {
   bool vibrationEnabled = true;
 
   /// Cómo se muestran los juegos en Fiesta y Chill: 'grid' (cuadrícula con
-  /// el primero destacado) o 'carousel'.
+  /// el primero destacado), 'list' o 'carousel'.
   String menuStyle = 'grid';
+
+  static const _menuStyles = {'grid', 'list', 'carousel'};
 
   Future<void> load() async {
     if (_loaded) return;
@@ -27,7 +29,7 @@ class AppSettings extends ChangeNotifier {
     soundEnabled = prefs.getBool('app_sound_enabled') ?? true;
     vibrationEnabled = prefs.getBool('app_vibration_enabled') ?? true;
     final storedMenu = prefs.getString('app_menu_style');
-    menuStyle = storedMenu == 'carousel' ? 'carousel' : 'grid';
+    menuStyle = _menuStyles.contains(storedMenu) ? storedMenu! : 'grid';
 
     _loaded = true;
     notifyListeners();
@@ -62,7 +64,7 @@ class AppSettings extends ChangeNotifier {
   }
 
   Future<void> setMenuStyle(String value) async {
-    menuStyle = value == 'carousel' ? 'carousel' : 'grid';
+    menuStyle = _menuStyles.contains(value) ? value : 'grid';
     notifyListeners();
     await _save();
   }
@@ -87,6 +89,7 @@ class AppSettings extends ChangeNotifier {
         'vibration': 'Vibración',
         'menuStyle': 'Menú de juegos',
         'menuGrid': 'Cuadrícula',
+        'menuList': 'Lista',
         'menuCarousel': 'Carrusel',
         'resetData': 'Reiniciar datos guardados',
         'about': 'Acerca de la app',
@@ -108,6 +111,7 @@ class AppSettings extends ChangeNotifier {
         'vibration': 'Vibració',
         'menuStyle': 'Menú de jocs',
         'menuGrid': 'Quadrícula',
+        'menuList': 'Llista',
         'menuCarousel': 'Carrusel',
         'resetData': 'Reiniciar dades guardades',
         'about': 'Sobre l’app',
@@ -129,6 +133,7 @@ class AppSettings extends ChangeNotifier {
         'vibration': 'Vibration',
         'menuStyle': 'Games menu',
         'menuGrid': 'Grid',
+        'menuList': 'List',
         'menuCarousel': 'Carousel',
         'resetData': 'Reset saved data',
         'about': 'About the app',

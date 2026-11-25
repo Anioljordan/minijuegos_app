@@ -5,7 +5,7 @@ import 'cubo_menu_layout.dart';
 import 'i18n_text.dart';
 
 /// Formas de presentar los juegos en Fiesta y Chill (se elige en Ajustes).
-enum CuboMenuStyle { destacado, carrusel }
+enum CuboMenuStyle { destacado, lista, carrusel }
 
 /// Botón pequeño de jugar en azul.
 class _PlayPill extends StatelessWidget {
@@ -47,6 +47,87 @@ Widget _tappable(CuboMenuGame game, VoidCallback onTap, Widget child) {
     excludeSemantics: true,
     child: CuboPressable(onTap: onTap, child: child),
   );
+}
+
+/// Lista: una fila por juego con la ilustración a la izquierda.
+class CuboMenuListRow extends StatelessWidget {
+  final CuboMenuGame game;
+  final Color accent;
+  final bool highlighted;
+  final VoidCallback onTap;
+
+  const CuboMenuListRow({
+    super.key,
+    required this.game,
+    required this.accent,
+    required this.highlighted,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _tappable(
+      game,
+      onTap,
+      Container(
+        height: 96,
+        padding: const EdgeInsets.fromLTRB(10, 10, 16, 10),
+        decoration: BoxDecoration(
+          color: highlighted ? accent : CuboColors.paper,
+          borderRadius: CuboRadii.cardAll,
+          boxShadow: CuboShadows.card,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: highlighted
+                    ? CuboColors.white.withValues(alpha: 0.45)
+                    : CuboColors.blueTint,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: CuboIllustration(
+                game.illustration,
+                onBlue: false,
+                size: 62,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                game.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: CuboColors.blueInk,
+                  fontSize: 20,
+                  height: 1.1,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: CuboColors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: CuboColors.white,
+                size: 24,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Carrusel: cartas altas que se pasan de lado, con puntos debajo.

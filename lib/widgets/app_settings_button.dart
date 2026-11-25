@@ -377,6 +377,7 @@ class AppSettingsSheet {
                           children: [
                             for (final option in const [
                               ('menuGrid', 'grid', Icons.grid_view_rounded),
+                              ('menuList', 'list', Icons.view_list_rounded),
                               (
                                 'menuCarousel',
                                 'carousel',
