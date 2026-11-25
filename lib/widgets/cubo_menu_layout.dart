@@ -4,6 +4,7 @@ import '../core/app_settings.dart';
 import 'app_logo_button.dart';
 import 'app_settings_button.dart';
 import 'cubo_game_widgets.dart';
+import 'cubo_menu_variants.dart';
 import 'i18n_text.dart';
 
 /// Un juego del menú: título (clave de traducción), ilustración y pantalla.
@@ -37,8 +38,12 @@ class CuboMenuLayout extends StatelessWidget {
     required this.games,
   });
 
-  /// Franja bajo los iconos donde el contenido se desvanece al hacer scroll.
+  /// Forma de mostrar los juegos (de momento se elige desde las capturas).
+  static CuboMenuStyle style = CuboMenuStyle.destacado;
+
   static const double _sidePadding = 24;
+
+  /// Franja bajo los iconos donde el contenido se desvanece al hacer scroll.
 
   static const double _fadeStart = 60;
   static const double _fadeEnd = 92;
@@ -107,8 +112,6 @@ class CuboMenuLayout extends StatelessWidget {
   /// Título y juegos se desplazan juntos, así las cartas nunca tapan el
   /// título; solo los iconos de arriba quedan fijos.
   Widget _scrollContent(BuildContext context, bool compact) {
-    final featured = games.first;
-    final rest = games.skip(1).toList();
     return CustomScrollView(
       slivers: [
         SliverPadding(
@@ -128,47 +131,135 @@ class CuboMenuLayout extends StatelessWidget {
           ),
         ),
         SliverToBoxAdapter(child: SizedBox(height: compact ? 24 : 40)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
-          sliver: SliverToBoxAdapter(
-            child: CuboEntrance(
-              index: 1,
-              child: _FeaturedGameCard(
-                game: featured,
-                accent: _accent,
-                height: compact ? 150 : 176,
-                onTap: () => _open(context, featured),
-              ),
-            ),
-          ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 14)),
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 14,
-              crossAxisSpacing: 14,
-              childAspectRatio: compact ? 1.05 : 0.95,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => CuboEntrance(
-                index: index + 2,
-                child: _GridGameCard(
-                  game: rest[index],
-                  accent: _accent,
-                  highlighted: index % 3 == 2,
-                  onTap: () => _open(context, rest[index]),
-                ),
-              ),
-              childCount: rest.length,
-            ),
-          ),
-        ),
+        ..._gameSlivers(context, compact),
         const SliverToBoxAdapter(child: SizedBox(height: 28)),
       ],
     );
+  }
+
+  List<Widget> _gameSlivers(BuildContext context, bool compact) {
+    final featured = games.first;
+    final rest = games.skip(1).toList();
+    Widget padded(Widget sliver) => SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+      sliver: sliver,
+    );
+    switch (style) {
+      case CuboMenuStyle.destacado:
+        return [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+            sliver: SliverToBoxAdapter(
+              child: CuboEntrance(
+                index: 1,
+                child: _FeaturedGameCard(
+                  game: featured,
+                  accent: _accent,
+                  height: compact ? 150 : 176,
+                  onTap: () => _open(context, featured),
+                ),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 14)),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: _sidePadding),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
+                childAspectRatio: compact ? 1.05 : 0.95,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => CuboEntrance(
+                  index: index + 2,
+                  child: _GridGameCard(
+                    game: rest[index],
+                    accent: _accent,
+                    highlighted: index % 3 == 2,
+                    onTap: () => _open(context, rest[index]),
+                  ),
+                ),
+                childCount: rest.length,
+              ),
+            ),
+          ),
+        ];
+      case CuboMenuStyle.lista:
+        return [
+          padded(
+            SliverList.separated(
+              itemCount: games.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              itemBuilder: (context, i) => CuboEntrance(
+                index: i + 1,
+                child: CuboMenuListRow(
+                  game: games[i],
+                  accent: _accent,
+                  highlighted: i % 3 == 0,
+                  onTap: () => _open(context, games[i]),
+                ),
+              ),
+            ),
+          ),
+        ];
+      case CuboMenuStyle.carrusel:
+        return [
+          SliverToBoxAdapter(
+            child: CuboEntrance(
+              index: 1,
+              child: CuboMenuCarousel(
+                games: games,
+                accent: _accent,
+                height: compact ? 330 : 440,
+                onOpen: (game) => _open(context, game),
+              ),
+            ),
+          ),
+        ];
+      case CuboMenuStyle.mosaico:
+        return [
+          padded(
+            SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.72,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, i) => CuboEntrance(
+                  index: i + 1,
+                  child: CuboMenuTile(
+                    game: games[i],
+                    onTap: () => _open(context, games[i]),
+                  ),
+                ),
+                childCount: games.length,
+              ),
+            ),
+          ),
+        ];
+      case CuboMenuStyle.posters:
+        return [
+          padded(
+            SliverList.separated(
+              itemCount: games.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 14),
+              itemBuilder: (context, i) => CuboEntrance(
+                index: i + 1,
+                child: CuboMenuPoster(
+                  game: games[i],
+                  accent: _accent,
+                  flip: i.isOdd,
+                  onTap: () => _open(context, games[i]),
+                ),
+              ),
+            ),
+          ),
+        ];
+    }
   }
 
   void _open(BuildContext context, CuboMenuGame game) {
