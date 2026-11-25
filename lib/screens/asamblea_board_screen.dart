@@ -7,6 +7,7 @@ import 'asamblea_setup_screen.dart';
 import 'asamblea_roles_screen.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_dialog.dart';
 import '../widgets/cubo_game_widgets.dart';
 
 enum LeyType { izquierda, derecha }
@@ -30,11 +31,6 @@ class AsambleaBoardScreen extends StatefulWidget {
 
 class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   static const String saveKey = 'asamblea_partida_guardada';
-
-  static final ShapeBorder _alertShape = RoundedRectangleBorder(
-    borderRadius: CuboRadii.xlAll,
-    side: BorderSide(color: CuboColors.whiteA(0.30), width: 1.2),
-  );
 
   late List<AsambleaPlayer> players;
 
@@ -385,9 +381,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Color _colorLey(LeyType ley) {
-    return ley == LeyType.izquierda
-        ? const Color(0xFF2563EB)
-        : const Color(0xFFDC2626);
+    // Mismos colores que los marcadores del tablero.
+    return ley == LeyType.izquierda ? CuboColors.chill : CuboColors.alert;
   }
 
   String _textoLey(LeyType ley) {
@@ -535,71 +530,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     }
   }
 
-  Future<void> _seleccionarPortavoz() async {
-    final opciones = <int>[];
-    for (int i = 0; i < players.length; i++) {
-      if (i == presidenteIndex) continue;
-      if (!players[i].isAlive) continue;
-      opciones.add(i);
-    }
-
-    final seleccionado = await showCuboDialog<int>(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          backgroundColor: CuboColors.blue,
-          shape: _alertShape,
-          title: const Text(
-            'Elegir jugador',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: opciones.length,
-              separatorBuilder: (_, __) => const Divider(color: Colors.white12),
-              itemBuilder: (_, index) {
-                final i = opciones[index];
-                return ListTile(
-                  title: Text(
-                    players[i].name,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  onTap: () => Navigator.pop(context, i),
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-
-    if (seleccionado == null) return;
-
-    setState(() {
-      portavozIndex = seleccionado;
-    });
-
-    await _guardarPartida();
-    await _comprobarVictoriaLiderOcultoAlSerPortavoz();
-  }
-
-  Future<void> _comprobarVictoriaLiderOcultoAlSerPortavoz() async {
-    if (portavozIndex == null) return;
-    if (leyesDerecha < 3) return;
-
-    final portavoz = players[portavozIndex!];
-    if (portavoz.role == AsambleaRole.liderOculto) {
-      partidaTerminada = true;
-      await _guardarPartida();
-      await _mostrarGanador(
-        '¡Gana la Derecha!',
-        'El Dictador ha llegado al poder.',
-      );
-    }
-  }
-
   Future<void> _jugarTurno() async {
     if (partidaTerminada) return;
 
@@ -634,6 +564,33 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await _guardarPartida();
   }
 
+  /// Carta de ley dentro de un popup; oculta, solo muestra el reverso.
+  Widget _dialogLeyCard({
+    required LeyType ley,
+    required bool visible,
+    required VoidCallback? onTap,
+    bool selected = false,
+  }) {
+    return CuboDialogOption(
+      label: visible ? _textoLey(ley) : 'Carta oculta',
+      icon: visible
+          ? (ley == LeyType.izquierda
+                ? Icons.shield_rounded
+                : Icons.gavel_rounded)
+          : Icons.visibility_off_rounded,
+      color: visible ? _colorLey(ley) : null,
+      selected: selected,
+      onTap: onTap,
+    );
+  }
+
+  /// Opciones (índice, nombre) de los jugadores vivos.
+  List<(int, String)> _opcionesJugadores({bool sinPresidente = true}) => [
+    for (var i = 0; i < players.length; i++)
+      if (players[i].isAlive && !(sinPresidente && i == presidenteIndex))
+        (i, players[i].name),
+  ];
+
   Future<List<LeyType>?> _modalPresidente(List<LeyType> cartas) async {
     bool cartasVisibles = true;
 
@@ -641,204 +598,65 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     // porque pueden salir varias cartas iguales.
     final Set<int> cartasSeleccionadas = <int>{};
 
-    return showDialog<List<LeyType>>(
+    return showCuboDialog<List<LeyType>>(
       context: context,
       barrierDismissible: false,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return AlertDialog(
-              backgroundColor: CuboColors.blue,
-              shape: _alertShape,
-
-              titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
-
-              title: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Primera elección: selecciona 2 cartas',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-
-                  IconButton(
-                    onPressed: () {
-                      setModalState(() {
-                        cartasVisibles = !cartasVisibles;
-                      });
-                    },
-                    icon: Icon(
-                      cartasVisibles
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: Colors.white70,
-                    ),
-                    tooltip: tr(
-                      cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
-                    ),
-                  ),
-                ],
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final listas = cartasSeleccionadas.length == 2;
+          return CuboDialogFrame(
+            icon: Icons.account_balance_rounded,
+            title: 'presidente',
+            trailing: CuboDialogEyeToggle(
+              visible: cartasVisibles,
+              onTap: () =>
+                  setModalState(() => cartasVisibles = !cartasVisibles),
+            ),
+            children: [
+              CuboDialogNote(
+                cartasVisibles
+                    ? listas
+                          ? '2 de 2 seleccionadas · pulsa CONFIRMAR'
+                          : 'Selecciona las 2 cartas que pasarán a la siguiente elección'
+                    : 'Cartas ocultas para pasar el móvil',
               ),
-
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: CuboRadii.smAll,
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: Text(
-                      cartasVisibles
-                          ? cartasSeleccionadas.length == 2
-                                ? '2 de 2 seleccionadas · pulsa CONFIRMAR'
-                                : 'Selecciona las 2 cartas que pasarán a la siguiente elección'
-                          : 'Cartas ocultas para pasar el móvil',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-
-                  ...List.generate(cartas.length, (index) {
-                    final ley = cartas[index];
-                    final seleccionada = cartasSeleccionadas.contains(index);
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: cartasVisibles
-                              ? _colorLey(ley)
-                              : CuboColors.blueDeep,
-                          disabledBackgroundColor: CuboColors.blueDeep,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 16,
-                          ),
-                          side: BorderSide(
-                            color: seleccionada
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.18),
-                            width: seleccionada ? 3 : 1.4,
-                          ),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: CuboRadii.mdAll,
-                          ),
-                        ),
-
-                        onPressed: cartasVisibles
-                            ? () {
-                                setModalState(() {
-                                  if (seleccionada) {
-                                    cartasSeleccionadas.remove(index);
-                                  } else if (cartasSeleccionadas.length < 2) {
-                                    cartasSeleccionadas.add(index);
-                                  }
-                                });
-                              }
-                            : null,
-
-                        child: Row(
-                          children: [
-                            Icon(
-                              cartasVisibles
-                                  ? ley == LeyType.izquierda
-                                        ? Icons.gavel_outlined
-                                        : Icons.policy_outlined
-                                  : Icons.visibility_off_outlined,
-                              color: Colors.white,
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: Text(
-                                cartasVisibles
-                                    ? _textoLey(ley)
-                                    : 'Carta oculta',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-
-                            if (cartasVisibles && seleccionada)
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                color: Colors.white,
-                                size: 26,
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 8),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed:
-                          cartasVisibles && cartasSeleccionadas.length == 2
-                          ? () {
-                              // La única carta no seleccionada
-                              // se descarta.
-                              final indiceDescartado =
-                                  List.generate(
-                                    cartas.length,
-                                    (index) => index,
-                                  ).firstWhere(
-                                    (index) =>
-                                        !cartasSeleccionadas.contains(index),
-                                  );
-
-                              descarte.add(cartas[indiceDescartado]);
-
-                              // Las dos seleccionadas pasan al portavoz.
-                              final indicesSeleccionados =
-                                  cartasSeleccionadas.toList()..sort();
-
-                              final cartasParaPortavoz = indicesSeleccionados
-                                  .map((index) => cartas[index])
-                                  .toList();
-
-                              Navigator.pop(context, cartasParaPortavoz);
-                            }
-                          : null,
-                      style: CuboButtons.primary(padding: null),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 14),
-                        child: Text(
-                          'CONFIRMAR CARTAS',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              for (var index = 0; index < cartas.length; index++)
+                _dialogLeyCard(
+                  ley: cartas[index],
+                  visible: cartasVisibles,
+                  selected:
+                      cartasVisibles && cartasSeleccionadas.contains(index),
+                  onTap: cartasVisibles
+                      ? () => setModalState(() {
+                          if (!cartasSeleccionadas.remove(index) &&
+                              cartasSeleccionadas.length < 2) {
+                            cartasSeleccionadas.add(index);
+                          }
+                        })
+                      : null,
+                ),
+              CuboDialogButton(
+                label: 'CONFIRMAR CARTAS',
+                onTap: cartasVisibles && listas
+                    ? () {
+                        // La carta no seleccionada se descarta y las otras
+                        // dos pasan al portavoz.
+                        for (var i = 0; i < cartas.length; i++) {
+                          if (!cartasSeleccionadas.contains(i)) {
+                            descarte.add(cartas[i]);
+                          }
+                        }
+                        final elegidas = cartasSeleccionadas.toList()..sort();
+                        Navigator.pop(dialogContext, [
+                          for (final i in elegidas) cartas[i],
+                        ]);
+                      }
+                    : null,
               ),
-            );
-          },
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -848,121 +666,35 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     return showCuboDialog<LeyType>(
       context: context,
       barrierDismissible: false,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return AlertDialog(
-              backgroundColor: CuboColors.blue,
-              shape: _alertShape,
-              titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
-              title: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Segunda elección: elige la ley a aprobar',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setModalState(() {
-                        cartasVisibles = !cartasVisibles;
-                      });
-                    },
-                    icon: Icon(
-                      cartasVisibles
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: Colors.white70,
-                    ),
-                    tooltip: tr(
-                      cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
-                    ),
-                  ),
-                ],
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setModalState) => CuboDialogFrame(
+          icon: Icons.record_voice_over_rounded,
+          title: 'portavoz',
+          trailing: CuboDialogEyeToggle(
+            visible: cartasVisibles,
+            onTap: () => setModalState(() => cartasVisibles = !cartasVisibles),
+          ),
+          children: [
+            CuboDialogNote(
+              cartasVisibles
+                  ? 'Pulsa una carta para aprobarla'
+                  : 'Cartas ocultas para pasar el móvil',
+            ),
+            for (var index = 0; index < cartas.length; index++)
+              _dialogLeyCard(
+                ley: cartas[index],
+                visible: cartasVisibles,
+                onTap: cartasVisibles
+                    ? () {
+                        // La otra carta se descarta.
+                        descarte.add(cartas[1 - index]);
+                        Navigator.pop(dialogContext, cartas[index]);
+                      }
+                    : null,
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: Text(
-                      cartasVisibles
-                          ? 'Pulsa una carta para aprobarla'
-                          : 'Cartas ocultas para pasar el móvil',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  ...cartas.map((ley) {
-                    final visible = cartasVisibles;
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: visible
-                              ? _colorLey(ley)
-                              : CuboColors.blueDeep,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          disabledBackgroundColor: CuboColors.blueDeep,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: CuboRadii.mdAll,
-                          ),
-                        ),
-                        onPressed: visible
-                            ? () {
-                                final restante = cartas.firstWhere(
-                                  (c) => c != ley,
-                                  orElse: () => ley,
-                                );
-
-                                if (restante != ley ||
-                                    cartas.where((c) => c == ley).length > 1) {
-                                  descarte.add(restante);
-                                }
-
-                                Navigator.pop(context, ley);
-                              }
-                            : null,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              visible
-                                  ? (ley == LeyType.izquierda
-                                        ? Icons.gavel_outlined
-                                        : Icons.policy_outlined)
-                                  : Icons.visibility_off_outlined,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              visible ? _textoLey(ley) : 'Carta oculta',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            );
-          },
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
@@ -1009,58 +741,28 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Future<void> _investigarJugador() async {
-    final opciones = <int>[];
-    for (int i = 0; i < players.length; i++) {
-      if (i == presidenteIndex) continue;
-      if (!players[i].isAlive) continue;
-      opciones.add(i);
-    }
-
-    final elegido = await showCuboDialog<int>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: CuboColors.blue,
-        shape: _alertShape,
-        title: const Text(
-          'Investigar jugador',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: opciones.length,
-            itemBuilder: (_, index) {
-              final i = opciones[index];
-              return ListTile(
-                title: Text(
-                  players[i].name,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onTap: () => Navigator.pop(context, i),
-              );
-            },
-          ),
-        ),
-      ),
+    final elegido = await showCuboPlayerPicker(
+      context,
+      title: 'investigar',
+      icon: Icons.search_rounded,
+      note: 'Investigar jugador',
+      options: _opcionesJugadores(),
     );
 
-    if (elegido == null) return;
+    if (elegido == null || !mounted) return;
 
     await showCuboDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: CuboColors.blue,
-        shape: _alertShape,
-        title: const Text('Resultado', style: TextStyle(color: Colors.white)),
-        content: Text(
-          '${players[elegido].name} es ${_textoRol(players[elegido].role)}',
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+      builder: (dialogContext) => CuboDialogFrame(
+        icon: Icons.search_rounded,
+        title: 'resultado',
+        children: [
+          CuboDialogNote(
+            '${players[elegido].name} es ${_textoRol(players[elegido].role)}',
+          ),
+          CuboDialogButton(
+            label: 'CERRAR',
+            onTap: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -1076,154 +778,39 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     await showCuboDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return AlertDialog(
-              backgroundColor: CuboColors.blue,
-              shape: _alertShape,
-              titlePadding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
-              title: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Próximas 3 leyes',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setModalState(() {
-                        cartasVisibles = !cartasVisibles;
-                      });
-                    },
-                    icon: Icon(
-                      cartasVisibles
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: Colors.white70,
-                    ),
-                    tooltip: tr(
-                      cartasVisibles ? 'Ocultar cartas' : 'Mostrar cartas',
-                    ),
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: Text(
-                      cartasVisibles
-                          ? 'Memoriza las leyes y vuelve a ocultarlas si vas a pasar el móvil'
-                          : 'Cartas ocultas para pasar el móvil',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  ...preview.map((ley) {
-                    final visible = cartasVisibles;
-
-                    return Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: visible ? _colorLey(ley) : CuboColors.blueDeep,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: visible ? Colors.white24 : Colors.white10,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            visible
-                                ? (ley == LeyType.izquierda
-                                      ? Icons.gavel_outlined
-                                      : Icons.policy_outlined)
-                                : Icons.visibility_off_outlined,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            visible ? _textoLey(ley) : 'Carta oculta',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cerrar'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setModalState) => CuboDialogFrame(
+          icon: Icons.visibility_rounded,
+          title: 'próximas leyes',
+          trailing: CuboDialogEyeToggle(
+            visible: cartasVisibles,
+            onTap: () => setModalState(() => cartasVisibles = !cartasVisibles),
+          ),
+          children: [
+            CuboDialogNote(
+              cartasVisibles
+                  ? 'Memoriza las leyes y vuelve a ocultarlas si vas a pasar el móvil'
+                  : 'Cartas ocultas para pasar el móvil',
+            ),
+            for (final ley in preview)
+              _dialogLeyCard(ley: ley, visible: cartasVisibles, onTap: null),
+            CuboDialogButton(
+              label: 'CERRAR',
+              onTap: () => Navigator.pop(dialogContext),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Future<void> _eliminarJugador() async {
-    final opciones = <int>[];
-    for (int i = 0; i < players.length; i++) {
-      if (i == presidenteIndex) continue;
-      if (!players[i].isAlive) continue;
-      opciones.add(i);
-    }
-
-    final elegido = await showCuboDialog<int>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: CuboColors.blue,
-        shape: _alertShape,
-        title: const Text(
-          'Eliminar jugador',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: opciones.length,
-            itemBuilder: (_, index) {
-              final i = opciones[index];
-              return ListTile(
-                title: Text(
-                  players[i].name,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onTap: () => Navigator.pop(context, i),
-              );
-            },
-          ),
-        ),
-      ),
+    final elegido = await showCuboPlayerPicker(
+      context,
+      title: 'eliminar',
+      icon: Icons.close_rounded,
+      note: 'Eliminar jugador',
+      options: _opcionesJugadores(),
     );
 
     if (elegido == null) return;
@@ -1245,39 +832,12 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Future<void> _elegirSiguientePresidente() async {
-    final opciones = <int>[];
-    for (int i = 0; i < players.length; i++) {
-      if (!players[i].isAlive) continue;
-      opciones.add(i);
-    }
-
-    final elegido = await showCuboDialog<int>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: CuboColors.blue,
-        shape: _alertShape,
-        title: const Text(
-          'Elegir jugador',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: opciones.length,
-            itemBuilder: (_, index) {
-              final i = opciones[index];
-              return ListTile(
-                title: Text(
-                  players[i].name,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onTap: () => Navigator.pop(context, i),
-              );
-            },
-          ),
-        ),
-      ),
+    final elegido = await showCuboPlayerPicker(
+      context,
+      title: 'presidente',
+      icon: Icons.account_balance_rounded,
+      note: 'Elegir jugador',
+      options: _opcionesJugadores(sinPresidente: false),
     );
 
     if (elegido == null) return;
@@ -1778,25 +1338,19 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   Future<void> _reiniciarPartida() async {
     final confirmado = await showCuboDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: CuboColors.blue,
-        shape: _alertShape,
-        title: const Text(
-          'Reiniciar partida',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Se perderá el progreso actual.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+      builder: (dialogContext) => CuboDialogFrame(
+        icon: Icons.restart_alt_rounded,
+        title: 'reiniciar',
+        children: [
+          const CuboDialogNote('Se perderá el progreso actual.'),
+          CuboDialogButton(
+            label: 'REINICIAR',
+            onTap: () => Navigator.pop(dialogContext, true),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Reiniciar'),
+          CuboDialogButton(
+            label: 'CANCELAR',
+            primary: false,
+            onTap: () => Navigator.pop(dialogContext, false),
           ),
         ],
       ),
