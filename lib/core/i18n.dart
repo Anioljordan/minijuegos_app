@@ -1,4 +1,5 @@
 import 'app_settings.dart';
+import 'content_i18n.dart';
 import 'i18n_catalog.dart';
 import 'yo_nunca_i18n.dart';
 import 'prueba_verdad_i18n.dart';
@@ -15,7 +16,8 @@ class AppI18n {
     final lang = language;
     if (lang == 'es' || text.trim().isEmpty) return text;
 
-    final exact = (lang == 'ca' ? uiCaExact : uiEnExact)[text] ??
+    final exact = contentExact(text, lang) ??
+        (lang == 'ca' ? uiCaExact : uiEnExact)[text] ??
         (lang == 'ca' ? yoNuncaCaExact : yoNuncaEnExact)[text] ??
         (lang == 'ca' ? pruebaVerdadCaExact : pruebaVerdadEnExact)[text] ??
         (lang == 'ca' ? impostorQuestionCaExact : impostorQuestionEnExact)[text] ??

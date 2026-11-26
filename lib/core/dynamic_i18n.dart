@@ -1,4 +1,5 @@
 import 'i18n_catalog.dart';
+import 'content_i18n.dart';
 import 'impostor_i18n.dart';
 
 String? translateDynamicText(String text, String language) {
@@ -6,7 +7,8 @@ String? translateDynamicText(String text, String language) {
   final ca = language == 'ca';
 
   String embedded(String value) {
-    final mapValue = ca
+    final mapValue = contentExact(value, language) ??
+        (ca
         ? (impostorQuestionCaExact[value] ??
             impostorFactCaExact[value] ??
             impostorTermCaExact[value] ??
@@ -14,7 +16,7 @@ String? translateDynamicText(String text, String language) {
         : (impostorQuestionEnExact[value] ??
             impostorFactEnExact[value] ??
             impostorTermEnExact[value] ??
-            enExactCatalog[value]);
+            enExactCatalog[value]));
     return mapValue ?? value;
   }
 

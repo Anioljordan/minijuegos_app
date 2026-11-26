@@ -4,6 +4,8 @@ import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../data/piccolo_data.dart';
+import '../core/default_lists.dart';
 
 class PiccoloScreen extends StatefulWidget {
   const PiccoloScreen({super.key});
@@ -63,7 +65,8 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
   Future<void> cargarFrases() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final guardadas = prefs.getStringList(storageKey) ?? [];
+    final guardadas =
+        await loadListWithDefaults(prefs, storageKey, piccoloFrases);
 
     if (!mounted) return;
 

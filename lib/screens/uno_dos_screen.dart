@@ -4,6 +4,8 @@ import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../data/uno_dos_data.dart';
+import '../core/default_lists.dart';
 
 class UnoDosScreen extends StatefulWidget {
   const UnoDosScreen({super.key});
@@ -62,7 +64,8 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
   Future<void> cargarAcciones() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final guardadas = prefs.getStringList(storageKey) ?? [];
+    final guardadas =
+        await loadListWithDefaults(prefs, storageKey, unoDosAcciones);
 
     if (!mounted) return;
 

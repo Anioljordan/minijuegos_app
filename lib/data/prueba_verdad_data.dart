@@ -2,9 +2,6 @@ const String pruebaVerdadAviso =
     'Todos los retos son opcionales. Si alguien no quiere responder o hacer una prueba, puede pasar sin dar explicaciones.';
 
 const List<String> preguntasVerdad = [
-
-  // FIESTA
-
   '¿Cuál es la cosa más vergonzosa que has hecho en una fiesta?',
   '¿Alguna vez has fingido estar mejor de lo que realmente estabas en una fiesta?',
   '¿Has llamado alguna vez a un ex después de una fiesta?',
@@ -24,9 +21,6 @@ const List<String> preguntasVerdad = [
   '¿Alguna vez has tenido que cuidar a alguien durante toda la fiesta?',
   '¿Alguna vez tú has sido la persona a la que tuvieron que cuidar?',
   '¿Cuál es la historia de fiesta que siempre acabas contando?',
-
-  // GRUPO Y SALSEO
-
   '¿A quién del grupo besarías?',
   '¿Quién del grupo te parece más atractivo?',
   '¿Quién del grupo crees que liga mejor?',
@@ -52,9 +46,6 @@ const List<String> preguntasVerdad = [
   '¿Has mentido alguna vez a alguien que está jugando?',
   '¿Hay alguien del grupo a quien no confiarías un secreto?',
   '¿Qué persona del grupo te gustaría conocer mucho mejor?',
-
-  // LIGUES Y TENSIÓN
-
   '¿Has mentido alguna vez para ligar?',
   '¿Cuál ha sido tu peor cita?',
   '¿Te has enamorado alguna vez de alguien que no debías?',
@@ -85,9 +76,6 @@ const List<String> preguntasVerdad = [
   '¿Alguna vez has imaginado besar a alguien presente?',
   '¿Has tenido química con alguien con quien no convenía tenerla?',
   '¿Cuál es la situación más atrevida que has vivido sin entrar en detalles explícitos?',
-
-  // SECRETOS Y MÓVIL
-
   '¿Qué es lo más vergonzoso que hay ahora mismo en tu móvil?',
   '¿Qué es lo más raro que has buscado en Internet?',
   '¿Qué conversación borrarías antes de prestar tu móvil?',
@@ -101,16 +89,12 @@ const List<String> preguntasVerdad = [
   '¿Cuál es la última foto de tu galería que no enseñarías al grupo?',
   '¿Qué contacto te daría más miedo que te llamara ahora?',
   '¿Has puesto el móvil en modo avión para evitar responder?',
-  '¿Has borrado el historial antes de prestar el móvil?',
   '¿Cuál es la búsqueda más comprometida que recuerdas?',
   '¿Qué persona no debería ver nunca todo el contenido de tu móvil?',
   '¿Has mandado un mensaje al chat equivocado?',
   '¿Has hecho una captura de pantalla de una conversación para enseñársela a alguien?',
   '¿Has guardado una foto de alguien que ya no forma parte de tu vida?',
   '¿Has publicado algo únicamente para que lo viera una persona concreta?',
-
-  // CONFESIONES INCÓMODAS
-
   '¿Cuál es tu mayor inseguridad?',
   '¿Cuál es tu mayor arrepentimiento?',
   '¿Cuál es la mentira más grande que has mantenido?',
@@ -125,8 +109,8 @@ const List<String> preguntasVerdad = [
   '¿Qué es lo peor que has pensado de alguien que está jugando?',
   '¿Cuál es la cosa más egoísta que has hecho?',
   '¿Alguna vez te has alegrado en secreto de que a alguien le saliera algo mal?',
-  '¿Qué jamás admitirías normalmente delante de este grupo?',
-  '¿Cuál es el mayor dinero que has gastado en una tontería?',
+  '¿Qué no admitirías nunca delante de este grupo?',
+  '¿Cuánto es lo máximo que te has gastado en una tontería?',
   '¿Qué es lo más desesperado que has hecho por dinero?',
   '¿Alguna vez has fingido ser otra persona para impresionar?',
   '¿Qué harías si supieras que nadie se enteraría?',
@@ -136,16 +120,9 @@ const List<String> preguntasVerdad = [
   '¿Has sentido envidia de alguien que está jugando?',
   '¿Qué defecto tuyo intentas ocultar cuando conoces a alguien?',
   '¿Cuál ha sido tu momento más falso para quedar bien?',
-
 ];
 
 const List<String> pruebas = [
-
-  // FIESTA
-
-
-  // RETOS DIVERTIDOS
-
   'Haz una imitación de alguien del grupo hasta que descubran quién es.',
   'Baila sin música durante veinte segundos.',
   'Haz una pasarela de moda con lo que llevas puesto.',
@@ -195,15 +172,12 @@ const List<String> pruebas = [
   'Deja que el grupo elija una emoción y actúa con ella durante veinte segundos.',
   'Haz una declaración de amistad épica a la persona de tu derecha.',
   'Interpreta a alguien que intenta entrar en una discoteca y no le dejan.',
-
-  // MÓVIL Y REDES SIN INVADIR PRIVACIDAD
-
   'Enseña tus cinco emojis más utilizados, solo si quieres.',
   'Enseña tu tiempo de pantalla de hoy, solo si quieres.',
   'Enseña la última foto de una comida, mascota o paisaje que tengas.',
   'Busca una canción que represente a alguien del grupo.',
   'Deja que alguien elija un emoji para describirte.',
-  'Pon durante una ronda un fondo de pantalla elegido de una galería segura.',
+  'Pon de fondo de pantalla, durante una ronda, una foto de tu galería que elija el grupo.',
   'Enseña la aplicación que más usas y explica por qué.',
   'Escribe una nota absurda dictada por el grupo y después bórrala.',
   'Haz una foto grupal solo si todas las personas aceptan.',
@@ -213,9 +187,6 @@ const List<String> pruebas = [
   'Muestra un meme que te haga mucha gracia.',
   'Busca tu nombre en tus propias notas y cuenta si aparece algo raro.',
   'Elige un contacto al azar sin llamar y explica cómo conociste a esa persona.',
-
-  // ASQUEROSAS PERO SEGURAS
-
   'Huele el calcetín de alguien durante dos segundos y puntúalo.',
   'Huele el interior del zapato de alguien durante dos segundos.',
   'Deja que alguien describa el olor de tu pelo.',
@@ -235,9 +206,6 @@ const List<String> pruebas = [
   'Sostén una cuchara con el codo durante cinco segundos.',
   'Prueba un aperitivo con los ojos cerrados y adivina qué es.',
   'Deja que alguien te coloque un hielo envuelto sobre el hombro durante cinco segundos.',
-
-  // CONTACTO Y CAOS CON CONSENTIMIENTO
-
   'Haz una pelea de pulgares con alguien.',
   'Haz una pelea de miradas con alguien.',
   'Deja que alguien te despeine, si aceptas.',
@@ -245,13 +213,12 @@ const List<String> pruebas = [
   'Intercambia una prenda exterior o accesorio con alguien durante una ronda.',
   'Intercambia un zapato con alguien durante una ronda.',
   'Comparte una silla con alguien durante una ronda, si ambos estáis cómodos.',
-  'Mantén una mano cogida a la de alguien hasta la siguiente carta, si ambos queréis.',
+  'Coge de la mano a alguien hasta la siguiente carta, si ambos queréis.',
   'Haz cosquillas a alguien durante cinco segundos, solo si acepta.',
   'Deja que alguien te haga cosquillas durante cinco segundos, solo si aceptas.',
   'Mantén una pelota de papel entre tu frente y la de alguien durante diez segundos.',
   'Transporta una pelota de papel con alguien sin usar las manos.',
   'Pasa un objeto pequeño a alguien usando solo los codos.',
-  'Haz una pose ridícula con alguien durante diez segundos.',
   'Baila con alguien durante quince segundos.',
   'Abraza a alguien durante diez segundos, si ambos queréis.',
   'Da un abrazo por detrás a alguien que acepte.',
@@ -268,9 +235,6 @@ const List<String> pruebas = [
   'Copia todos los movimientos de alguien durante veinte segundos.',
   'Deja que alguien copie todos tus movimientos durante veinte segundos.',
   'Haz un saludo secreto con contacto de manos con alguien.',
-
-  // PICANTES AL LÍMITE SIN SER EXPLÍCITAS
-
   'Da un beso en la mejilla a alguien que acepte.',
   'Da un beso en el cuello a alguien que acepte.',
   'Deja que alguien te dé un beso en la mejilla, si aceptas.',
@@ -285,7 +249,6 @@ const List<String> pruebas = [
   'Deja que alguien intente ponerte nervioso durante veinte segundos.',
   'Intenta poner nervioso a alguien sin tocarlo.',
   'Hazle un cumplido atrevido a alguien elegido por el grupo.',
-  'Abraza por detrás durante diez segundos a alguien que acepte.',
   'Hazle un masaje de hombros de quince segundos a alguien que acepte.',
   'Elige a alguien y acercaos lentamente hasta que uno decida parar.',
   'Dile al oído a alguien lo más atrevido que puedas decir sin ser explícito.',
@@ -307,9 +270,6 @@ const List<String> pruebas = [
   'Pasa un hielo envuelto lentamente por el cuello de alguien que acepte.',
   'Deja que alguien pase un hielo envuelto por tu cuello, si aceptas.',
   'Elige a alguien y susúrrale una confesión que nunca dirías en una primera cita.',
-
-  // PREGUNTAS INCÓMODAS COMO RETO
-
   'Responde: ¿quién del grupo te parece más atractivo?',
   'Responde: ¿con quién del grupo tendrías una cita?',
   'Responde: ¿quién crees que besa mejor del grupo?',
@@ -330,5 +290,4 @@ const List<String> pruebas = [
   'Responde: ¿quién del grupo crees que liga mejor?',
   'Responde: ¿qué mentira has usado para quedar con alguien?',
   'Responde: ¿qué pregunta esperabas que no apareciera esta noche?',
-
 ];

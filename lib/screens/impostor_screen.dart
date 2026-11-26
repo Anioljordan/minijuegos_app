@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import '../data/impostor_data.dart';
 import '../core/app_settings.dart';
+import '../core/content_i18n.dart';
 import '../core/impostor_i18n.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
@@ -242,14 +243,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
         classicWordsData[_random.nextInt(classicWordsData.length)];
 
     final words = (categoryData['words'] as List)
-        .map((item) => Map<String, String>.from(item as Map))
+        .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
 
     final selectedData = words[_random.nextInt(words.length)];
 
     selectedCategory = categoryData['category'] as String;
-    selectedWord = selectedData['word']!;
-    selectedHint = selectedData['hint']!;
+    selectedWord = selectedData['word'] as String;
+    selectedHint = _pickHint(selectedWord, selectedData['hints'] as List);
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
@@ -275,10 +276,7 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     selectedCategory = 'Lugar';
     selectedWord = place;
-    selectedHint = localizeImpostorRoleValue(
-      scenario['hint'] as String,
-      language,
-    );
+    selectedHint = _pickHint(placeSource, scenario['hints'] as List);
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
 
@@ -314,16 +312,21 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
     selectedCategory = _footballCategoryLabel(selected.category);
     selectedWord = selected.word.name;
-    selectedHint = _footballText(
-      selected.word.hintEs,
-      selected.word.hintCa,
-      selected.word.hintEn,
-    );
+    selectedHint = _pickHint(selected.word.name, selected.word.hints);
 
     impostorIndexes = generateImpostorIndexes(playersCount, impostorsCount);
     playerSecrets = List.generate(playersCount, (index) {
       return impostorIndexes.contains(index) ? 'IMPOSTOR' : selectedWord;
     });
+  }
+
+  /// Cada palabra tiene varias pistas genéricas: en cada partida sale una al
+  /// azar. Algunas pistas cambian de sentido según la palabra (por ejemplo,
+  /// «Muñeca» en Barbie o en Reloj), así que se traducen con su contexto.
+  String _pickHint(String word, List hints) {
+    if (hints.isEmpty) return '';
+    final hint = hints[_random.nextInt(hints.length)] as String;
+    return localizeContentHint(word, hint, AppSettings.instance.language);
   }
 
   // Los textos nuevos siguen el idioma elegido en los ajustes de Cubo.

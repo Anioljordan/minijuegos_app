@@ -4,6 +4,8 @@ import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../data/prueba_verdad_data.dart' as datos;
+import '../core/default_lists.dart';
 
 class PruebaVerdadScreen extends StatefulWidget {
   const PruebaVerdadScreen({super.key});
@@ -83,9 +85,11 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
   Future<void> cargarDatos() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final verdadesGuardadas = prefs.getStringList(storageVerdades) ?? [];
+    final verdadesGuardadas =
+        await loadListWithDefaults(prefs, storageVerdades, datos.preguntasVerdad);
 
-    final pruebasGuardadas = prefs.getStringList(storagePruebas) ?? [];
+    final pruebasGuardadas =
+        await loadListWithDefaults(prefs, storagePruebas, datos.pruebas);
 
     if (!mounted) return;
 
