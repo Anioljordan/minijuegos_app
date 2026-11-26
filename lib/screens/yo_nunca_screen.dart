@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/cubo_dialog.dart';
 import '../widgets/cubo_game_widgets.dart';
 
 class YoNuncaScreen extends StatefulWidget {
@@ -240,197 +241,68 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   Future<void> mostrarImportarFrases() async {
     final controller = TextEditingController();
 
-    final resultado = await showDialog<int>(
+    final resultado = await showCuboDialog<int>(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withValues(alpha: 0.55),
-      builder: (dialogContext) {
-        return CuboGameScope(
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(
-              horizontal: _isVeryNarrowScreen ? 10 : 18,
-              vertical: 24,
+      builder: (dialogContext) => CuboDialogFrame(
+        icon: Icons.content_paste_rounded,
+        title: 'importar lista',
+        trailing: const CuboDialogCloseButton(),
+        children: [
+          const CuboDialogNote(
+            'Pega todas tus frases aquí. Pon una frase en cada línea. También puedes pegar listas numeradas: 1. ..., 2. ..., 3. ...',
+          ),
+          SizedBox(
+            height: (MediaQuery.sizeOf(dialogContext).height * 0.32).clamp(
+              160.0,
+              320.0,
             ),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                _isVeryNarrowScreen ? 14 : 18,
-                18,
-                _isVeryNarrowScreen ? 14 : 18,
-                16,
+            child: TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              maxLines: null,
+              expands: true,
+              textAlignVertical: TextAlignVertical.top,
+              style: const TextStyle(
+                color: CuboColors.white,
+                fontSize: 14,
+                height: 1.35,
+                fontWeight: FontWeight.w600,
               ),
-              decoration: CuboDecorations.dialog(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.80,
+              cursorColor: CuboColors.white,
+              decoration: InputDecoration(
+                hintText: tr('Yo nunca he...\nYo nunca he...\nYo nunca he...'),
+                hintStyle: TextStyle(
+                  color: CuboColors.white.withValues(alpha: 0.30),
+                  fontSize: 13,
+                  height: 1.4,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: accentColor.withValues(alpha: 0.14),
-                            border: Border.all(color: accentColor, width: 2),
-                          ),
-                          child: Icon(
-                            Icons.content_paste_rounded,
-                            color: accentColor,
-                            size: 24,
-                          ),
-                        ),
-
-                        const SizedBox(width: 11),
-
-                        Expanded(
-                          child: _singleLineResponsiveText(
-                            'IMPORTAR LISTA',
-                            style: const TextStyle(
-                              color: CuboColors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ),
-
-                        IconButton(
-                          onPressed: () => Navigator.pop(dialogContext),
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: CuboColors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: CuboPillBar(),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    Text(
-                      'Pega todas tus frases aquí. Pon una frase en cada línea.',
-                      style: TextStyle(
-                        color: CuboColors.white.withValues(alpha: 0.75),
-                        fontSize: 12.5,
-                        height: 1.3,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Text(
-                      'También puedes pegar listas numeradas: 1. ..., 2. ..., 3. ...',
-                      style: TextStyle(
-                        color: CuboColors.white.withValues(alpha: 0.50),
-                        fontSize: 11.5,
-                        height: 1.25,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Expanded(
-                      child: TextField(
-                        controller: controller,
-                        autofocus: true,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: TextInputAction.newline,
-                        maxLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        style: const TextStyle(
-                          color: CuboColors.white,
-                          fontSize: 14,
-                          height: 1.35,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        cursorColor: CuboColors.white,
-                        decoration: InputDecoration(
-                          hintText: tr(
-                            'Yo nunca he...\nYo nunca he...\nYo nunca he...',
-                          ),
-                          hintStyle: TextStyle(
-                            color: CuboColors.white.withValues(alpha: 0.30),
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
-                          filled: true,
-                          fillColor: CuboColors.white.withValues(alpha: 0.07),
-                          contentPadding: const EdgeInsets.all(14),
-                          enabledBorder: CuboInputs.rounded(
-                            BorderSide(
-                              color: CuboColors.whiteA(0.28),
-                              width: 1.4,
-                            ),
-                          ),
-                          focusedBorder: CuboInputs.rounded(
-                            BorderSide(color: accentColor, width: 2),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 54,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final cantidad = await importarFrasesDesdeTexto(
-                            controller.text,
-                          );
-
-                          if (!dialogContext.mounted) {
-                            return;
-                          }
-
-                          Navigator.pop(dialogContext, cantidad);
-                        },
-                        style: mainButtonStyle(),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.playlist_add_rounded),
-
-                            const SizedBox(width: 8),
-
-                            Expanded(
-                              child: _singleLineResponsiveText(
-                                'IMPORTAR FRASES',
-                                alignment: Alignment.center,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                filled: true,
+                fillColor: CuboColors.white.withValues(alpha: 0.07),
+                contentPadding: const EdgeInsets.all(14),
+                enabledBorder: CuboInputs.rounded(
+                  BorderSide(color: CuboColors.whiteA(0.28), width: 1.4),
+                ),
+                focusedBorder: CuboInputs.rounded(
+                  const BorderSide(color: CuboColors.white, width: 2),
                 ),
               ),
             ),
           ),
-        );
-      },
+          const SizedBox(height: 6),
+          CuboDialogButton(
+            label: 'IMPORTAR FRASES',
+            onTap: () async {
+              final cantidad = await importarFrasesDesdeTexto(controller.text);
+              if (!dialogContext.mounted) return;
+              Navigator.pop(dialogContext, cantidad);
+            },
+          ),
+        ],
+      ),
     );
 
     controller.dispose();
@@ -593,26 +465,11 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
 
         const SizedBox(height: 24),
 
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CuboIllustration('yo_nunca', size: compact ? 72 : 100),
-              const SizedBox(height: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  tituloModo(),
-                  maxLines: 1,
-                  style: CuboText.title(size: 42),
-                ),
-              ),
-              const SizedBox(height: 12),
-              CuboPillBar(width: 44, color: accentColor),
-            ],
-          ),
+        CuboGameTitle(
+          tituloModo(),
+          side: CuboTitleSide.fiesta,
+          illustration: 'yo_nunca',
+          compact: compact,
         ),
       ],
     );
@@ -627,172 +484,170 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   }
 
   void mostrarNormas() {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
-      builder: (_) => CuboGameScope(
-        child: Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 22),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-            decoration: CuboDecorations.dialog(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.78,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const CuboDialogHeader(),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: CuboDecorations.dialog(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const CuboDialogHeader(),
 
-                    const SizedBox(height: 18),
+                  const SizedBox(height: 18),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: _singleLineResponsiveText(
-                        nombreModo(),
-                        style: const TextStyle(
-                          color: CuboColors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                        ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: _singleLineResponsiveText(
+                      nombreModo(),
+                      style: const TextStyle(
+                        color: CuboColors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 14),
+                  const SizedBox(height: 14),
 
-                    if (widget.modo == 'normal') ...[
-                      rulesItem(
-                        icon: Icons.record_voice_over_rounded,
-                        title: 'Lee el Yo Nunca',
-                        text:
-                            'Una persona lee en voz alta la frase de “Yo nunca...”.',
-                      ),
+                  if (widget.modo == 'normal') ...[
+                    rulesItem(
+                      icon: Icons.record_voice_over_rounded,
+                      title: 'Lee el Yo Nunca',
+                      text:
+                          'Una persona lee en voz alta la frase de “Yo nunca...”.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.pan_tool_alt_rounded,
-                        title: '¿Lo has hecho?',
-                        text:
-                            'Todos los que sí lo hayan hecho cumplen un castigo. Los que no, se libran.',
-                      ),
+                    rulesItem(
+                      icon: Icons.pan_tool_alt_rounded,
+                      title: '¿Lo has hecho?',
+                      text:
+                          'Todos los que sí lo hayan hecho cumplen un castigo. Los que no, se libran.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.arrow_forward_rounded,
-                        title: 'Siguiente',
-                        text:
-                            'Pasad a la siguiente frase y seguid jugando. El clásico Yo Nunca de toda la vida.',
-                      ),
-                    ],
+                    rulesItem(
+                      icon: Icons.arrow_forward_rounded,
+                      title: 'Siguiente',
+                      text:
+                          'Pasad a la siguiente frase y seguid jugando. El clásico Yo Nunca de toda la vida.',
+                    ),
+                  ],
 
-                    if (widget.modo == 'equipos') ...[
-                      rulesItem(
-                        icon: Icons.groups_rounded,
-                        title: 'Dos equipos',
-                        text:
-                            'Dividíos en dos equipos. Un equipo lanza una frase de “Yo nunca...” al equipo contrario.',
-                      ),
+                  if (widget.modo == 'equipos') ...[
+                    rulesItem(
+                      icon: Icons.groups_rounded,
+                      title: 'Dos equipos',
+                      text:
+                          'Dividíos en dos equipos. Un equipo lanza una frase de “Yo nunca...” al equipo contrario.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.hearing_rounded,
-                        title: 'Pasad el número',
-                        text:
-                            'El otro equipo se coloca en orden. El primero susurra “1” si lo ha hecho o “0” si no. Cada jugador suma 1 si también lo ha hecho o repite el número si no.',
-                      ),
+                    rulesItem(
+                      icon: Icons.hearing_rounded,
+                      title: 'Pasad el número',
+                      text:
+                          'El otro equipo se coloca en orden. El primero susurra “1” si lo ha hecho o “0” si no. Cada jugador suma 1 si también lo ha hecho o repite el número si no.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.tag_rounded,
-                        title: 'Solo sabéis cuántos',
-                        text:
-                            'El número va pasando de jugador en jugador hasta el último. Así se sabe cuántos lo han hecho, pero no quiénes.',
-                      ),
+                    rulesItem(
+                      icon: Icons.tag_rounded,
+                      title: 'Solo sabéis cuántos',
+                      text:
+                          'El número va pasando de jugador en jugador hasta el último. Así se sabe cuántos lo han hecho, pero no quiénes.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.psychology_alt_rounded,
-                        title: 'Adivinad quién',
-                        text:
-                            'El equipo que lanzó la pregunta debe adivinar exactamente qué jugadores sí lo han hecho y cuáles no.',
-                      ),
+                    rulesItem(
+                      icon: Icons.psychology_alt_rounded,
+                      title: 'Adivinad quién',
+                      text:
+                          'El equipo que lanzó la pregunta debe adivinar exactamente qué jugadores sí lo han hecho y cuáles no.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.swap_horiz_rounded,
-                        title: 'Cambiad de equipo',
-                        text:
-                            'Después se intercambian los papeles y el otro equipo lanza la siguiente frase.',
-                      ),
-                    ],
+                    rulesItem(
+                      icon: Icons.swap_horiz_rounded,
+                      title: 'Cambiad de equipo',
+                      text:
+                          'Después se intercambian los papeles y el otro equipo lanza la siguiente frase.',
+                    ),
+                  ],
 
-                    if (widget.modo == 'lobo') ...[
-                      rulesItem(
-                        icon: Icons.nightlight_round,
-                        title: 'El pueblo duerme',
-                        text:
-                            'En cada ronda hay un narrador. Todos cierran los ojos y el narrador lee una frase de “Yo nunca...”.',
-                      ),
+                  if (widget.modo == 'lobo') ...[
+                    rulesItem(
+                      icon: Icons.nightlight_round,
+                      title: 'El pueblo duerme',
+                      text:
+                          'En cada ronda hay un narrador. Todos cierran los ojos y el narrador lee una frase de “Yo nunca...”.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.visibility_rounded,
-                        title: 'Despiertan los lobos',
-                        text:
-                            'Solo se levantan o abren los ojos quienes sí hayan hecho lo que dice la frase. Ellos son los lobos de esa ronda.',
-                      ),
+                    rulesItem(
+                      icon: Icons.visibility_rounded,
+                      title: 'Despiertan los lobos',
+                      text:
+                          'Solo se levantan o abren los ojos quienes sí hayan hecho lo que dice la frase. Ellos son los lobos de esa ronda.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.gps_fixed_rounded,
-                        title: 'Los lobos matan',
-                        text:
-                            'Sin hablar, los lobos eligen a una persona que no se haya levantado. Esa persona será la víctima.',
-                      ),
+                    rulesItem(
+                      icon: Icons.gps_fixed_rounded,
+                      title: 'Los lobos matan',
+                      text:
+                          'Sin hablar, los lobos eligen a una persona que no se haya levantado. Esa persona será la víctima.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.search_rounded,
-                        title: 'Descubre los lobos',
-                        text:
-                            'Todos despiertan. El narrador dice cuántos lobos había y la víctima intenta adivinar quiénes eran.',
-                      ),
+                    rulesItem(
+                      icon: Icons.search_rounded,
+                      title: 'Descubre los lobos',
+                      text:
+                          'Todos despiertan. El narrador dice cuántos lobos había y la víctima intenta adivinar quiénes eran.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.auto_stories_rounded,
-                        title: 'Compra historias',
-                        text:
-                            'Si la víctima acierta, puede pedir la mitad de las historias de los lobos: deberán contar qué pasó para haber hecho ese “Yo nunca”.',
-                      ),
+                    rulesItem(
+                      icon: Icons.auto_stories_rounded,
+                      title: 'Compra historias',
+                      text:
+                          'Si la víctima acierta, puede pedir la mitad de las historias de los lobos: deberán contar qué pasó para haber hecho ese “Yo nunca”.',
+                    ),
 
-                      rulesItem(
-                        icon: Icons.campaign_rounded,
-                        title: 'Nuevo narrador',
-                        text:
-                            'La persona que ha muerto pasa a ser el narrador de la siguiente ronda y lanza el próximo “Yo nunca”.',
-                      ),
-                    ],
+                    rulesItem(
+                      icon: Icons.campaign_rounded,
+                      title: 'Nuevo narrador',
+                      text:
+                          'La persona que ha muerto pasa a ser el narrador de la siguiente ronda y lanza el próximo “Yo nunca”.',
+                    ),
+                  ],
 
-                    const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: mainButtonStyle(),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            'ENTENDIDO',
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.4,
-                            ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

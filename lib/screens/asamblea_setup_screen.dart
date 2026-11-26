@@ -427,8 +427,6 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 34.0 : 42.0;
-    final illustrationSize = compact ? 72.0 : 104.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -454,22 +452,11 @@ class _AsambleaSetupScreenState extends State<AsambleaSetupScreen> {
 
         SizedBox(height: compact ? 8 : 14),
 
-        Padding(
-          padding: EdgeInsets.only(right: compact ? 4 : 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              CuboIllustration('asamblea', size: illustrationSize),
-              SizedBox(height: compact ? 6 : 10),
-              CuboSectionTitle(
-                barColor: CuboColors.chill,
-                'la asamblea',
-                alignEnd: true,
-                size: titleSize,
-                gap: compact ? 8 : 10,
-              ),
-            ],
-          ),
+        CuboGameTitle(
+          'la asamblea',
+          side: CuboTitleSide.chill,
+          illustration: 'asamblea',
+          compact: compact,
         ),
       ],
     );

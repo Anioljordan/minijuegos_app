@@ -5,6 +5,8 @@ import '../widgets/i18n_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'asamblea_setup_screen.dart';
 import 'asamblea_roles_screen.dart';
+import '../widgets/asamblea_law_board.dart';
+import '../widgets/asamblea_role_portrait.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_dialog.dart';
@@ -402,58 +404,8 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     }
   }
 
-  PoderDerecha _getPoderDerechaActual() {
-    final total = players.length;
-
-    if (total >= 5 && total <= 6) {
-      switch (leyesDerecha) {
-        case 1:
-        case 2:
-          return PoderDerecha.none;
-        case 3:
-          return PoderDerecha.verTresLeyes;
-        case 4:
-        case 5:
-          return PoderDerecha.eliminarJugador;
-        default:
-          return PoderDerecha.none;
-      }
-    }
-
-    if (total >= 7 && total <= 8) {
-      switch (leyesDerecha) {
-        case 1:
-        case 2:
-          return PoderDerecha.none;
-        case 3:
-          return PoderDerecha.investigarJugador;
-        case 4:
-          return PoderDerecha.none;
-        case 5:
-          return PoderDerecha.eliminarJugador;
-        default:
-          return PoderDerecha.none;
-      }
-    }
-
-    if (total >= 9 && total <= 10) {
-      switch (leyesDerecha) {
-        case 1:
-          return PoderDerecha.none;
-        case 2:
-          return PoderDerecha.investigarJugador;
-        case 3:
-          return PoderDerecha.none;
-        case 4:
-        case 5:
-          return PoderDerecha.eliminarJugador;
-        default:
-          return PoderDerecha.none;
-      }
-    }
-
-    return PoderDerecha.none;
-  }
+  PoderDerecha _getPoderDerechaActual() =>
+      _getPoderDerechaPorCasilla(leyesDerecha);
 
   String _textoPoder(PoderDerecha poder) {
     switch (poder) {
@@ -466,52 +418,28 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
       case PoderDerecha.eliminarJugador:
         return 'Eliminar jugador';
       case PoderDerecha.elegirSiguientePresidente:
-        return 'Sin poder';
+        return 'Elegir presidente';
     }
   }
 
+  /// Poder de cada casilla de la Derecha según el número de jugadores.
+  /// Con 7 o más, la casilla 3 deja elegir al siguiente presidente.
   PoderDerecha _getPoderDerechaPorCasilla(int casillaDerecha) {
     final total = players.length;
+    final investigar = total >= 9 ? const {1, 2} : const {2};
 
-    if (total >= 5 && total <= 6) {
-      switch (casillaDerecha) {
-        case 3:
-          return PoderDerecha.verTresLeyes;
-        case 4:
-        case 5:
-          return PoderDerecha.eliminarJugador;
-        default:
-          return PoderDerecha.none;
-      }
+    if (casillaDerecha == 4 || casillaDerecha == 5) {
+      return PoderDerecha.eliminarJugador;
     }
-
-    if (total >= 7 && total <= 8) {
-      switch (casillaDerecha) {
-        case 3:
-          return PoderDerecha.investigarJugador;
-        case 4:
-          return PoderDerecha.none;
-        case 5:
-          return PoderDerecha.eliminarJugador;
-        default:
-          return PoderDerecha.none;
-      }
+    if (total <= 6) {
+      return casillaDerecha == 3
+          ? PoderDerecha.verTresLeyes
+          : PoderDerecha.none;
     }
-
-    if (total >= 9 && total <= 10) {
-      switch (casillaDerecha) {
-        case 2:
-          return PoderDerecha.investigarJugador;
-        case 3:
-          return PoderDerecha.none;
-        case 4:
-        case 5:
-          return PoderDerecha.eliminarJugador;
-        default:
-          return PoderDerecha.none;
-      }
+    if (casillaDerecha == 3) return PoderDerecha.elegirSiguientePresidente;
+    if (investigar.contains(casillaDerecha)) {
+      return PoderDerecha.investigarJugador;
     }
-
     return PoderDerecha.none;
   }
 
@@ -757,6 +685,9 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
         icon: Icons.search_rounded,
         title: 'resultado',
         children: [
+          Center(
+            child: AsambleaRolePortrait(role: players[elegido].role, size: 170),
+          ),
           CuboDialogNote(
             '${players[elegido].name} es ${_textoRol(players[elegido].role)}',
           ),
@@ -1469,8 +1400,6 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 30.0 : 36.0;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1512,15 +1441,11 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
 
         SizedBox(height: compact ? 12 : 20),
 
-        Padding(
-          padding: EdgeInsets.only(right: compact ? 4 : 8),
-          child: CuboSectionTitle(
-            barColor: CuboColors.chill,
-            'tablero asamblea',
-            alignEnd: true,
-            size: titleSize,
-            gap: compact ? 8 : 10,
-          ),
+        CuboGameTitle(
+          'tablero asamblea',
+          side: CuboTitleSide.chill,
+          illustration: null,
+          compact: compact,
         ),
       ],
     );
@@ -1548,144 +1473,47 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
     );
   }
 
-  /// Marcador de leyes de un bando: cabecera compacta, casillas y, si el
-  /// bando tiene poderes, una leyenda que los explica (en la casilla solo
-  /// va el icono, así nunca se corta el texto).
-  Widget _buildLeyTrack({
-    required String title,
-    required int total,
-    required int active,
-    required Color color,
-    required bool compact,
-    bool mostrarAcciones = false,
-  }) {
-    final cellHeight = compact ? 54.0 : 64.0;
-    final poderes = <PoderDerecha>[
-      if (mostrarAcciones)
-        for (var c = 1; c <= total; c++)
-          if (_getPoderDerechaPorCasilla(c) != PoderDerecha.none)
-            _getPoderDerechaPorCasilla(c),
-    ].toSet().toList();
-
-    return buildPanel(
-      padding: EdgeInsets.fromLTRB(
-        14,
-        compact ? 12 : 14,
-        14,
-        compact ? 12 : 14,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: compact ? 34 : 38,
-                height: compact ? 34 : 38,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                child: Icon(
-                  title == 'Izquierda'
-                      ? Icons.shield_rounded
-                      : Icons.gavel_rounded,
-                  color: CuboColors.blueInk,
-                  size: compact ? 19 : 21,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  tr(title).toUpperCase(),
-                  style: TextStyle(
-                    color: CuboColors.white,
-                    fontSize: compact ? 15 : 17,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-              ),
-              Text(
-                '$active/$total',
-                style: TextStyle(
-                  color: color,
-                  fontSize: compact ? 20 : 24,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
+  /// Los dos tableros (izquierda en azul, derecha en rojo) a todo el alto.
+  Widget _buildTableros({required bool compact}) {
+    final poderes = <int, IconData>{
+      for (var c = 1; c <= 6; c++)
+        if (_getPoderDerechaPorCasilla(c) != PoderDerecha.none)
+          c: _iconoPoder(_getPoderDerechaPorCasilla(c)),
+    };
+    final leyenda = <(IconData, String)>[
+      for (final poder in {
+        for (var c = 1; c <= 6; c++) _getPoderDerechaPorCasilla(c),
+      })
+        if (poder != PoderDerecha.none)
+          (_iconoPoder(poder), _textoPoder(poder)),
+    ];
+    final gap = compact ? 10.0 : 14.0;
+    return Column(
+      children: [
+        Expanded(
+          child: AsambleaLawBoard(
+            title: 'Izquierda',
+            emblem: Icons.shield_rounded,
+            total: 5,
+            active: leyesIzquierda,
+            palette: AsambleaBoardPalette.izquierda,
+            compact: compact,
           ),
-          SizedBox(height: compact ? 10 : 12),
-          Row(
-            children: List.generate(total, (index) {
-              final filled = index < active;
-              final casilla = index + 1;
-              final poder = mostrarAcciones
-                  ? _getPoderDerechaPorCasilla(casilla)
-                  : PoderDerecha.none;
-              final tienePoder = poder != PoderDerecha.none;
-              final fg = filled ? CuboColors.blueInk : CuboColors.whiteA(0.6);
-
-              return Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: cellHeight,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    color: filled ? color : CuboColors.whiteA(0.08),
-                    borderRadius: const BorderRadius.all(Radius.circular(16)),
-                    border: Border.all(
-                      color: filled ? color : CuboColors.whiteA(0.22),
-                      width: 1.4,
-                    ),
-                  ),
-                  child: Center(
-                    child: filled
-                        ? Icon(Icons.check_rounded, color: fg, size: 26)
-                        : tienePoder
-                        ? Icon(_iconoPoder(poder), color: fg, size: 22)
-                        : Text(
-                            '$casilla',
-                            style: TextStyle(
-                              color: fg,
-                              fontSize: compact ? 18 : 21,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                  ),
-                ),
-              );
-            }),
+        ),
+        SizedBox(height: gap),
+        Expanded(
+          child: AsambleaLawBoard(
+            title: 'Derecha',
+            emblem: Icons.gavel_rounded,
+            total: 6,
+            active: leyesDerecha,
+            palette: AsambleaBoardPalette.derecha,
+            powers: poderes,
+            legend: leyenda,
+            compact: compact,
           ),
-          if (poderes.isNotEmpty) ...[
-            SizedBox(height: compact ? 10 : 12),
-            Wrap(
-              spacing: 14,
-              runSpacing: 6,
-              children: [
-                for (final poder in poderes)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _iconoPoder(poder),
-                        color: CuboColors.whiteA(0.75),
-                        size: 16,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        _textoPoder(poder),
-                        style: TextStyle(
-                          color: CuboColors.whiteA(0.75),
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1900,29 +1728,20 @@ class _AsambleaBoardScreenState extends State<AsambleaBoardScreen> {
                       buildTopBar(compact: compact),
                       SizedBox(height: compact ? 9 : 13),
                       Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildLeyTrack(
-                                title: 'Izquierda',
-                                total: 5,
-                                active: leyesIzquierda,
-                                color: CuboColors.chill,
-                                compact: compact,
-                              ),
-                              SizedBox(height: compact ? 9 : 12),
-                              _buildLeyTrack(
-                                title: 'Derecha',
-                                total: 6,
-                                active: leyesDerecha,
-                                color: CuboColors.alert,
-                                compact: compact,
-                                mostrarAcciones: true,
-                              ),
-
-                              SizedBox(height: compact ? 9 : 12),
-                              _buildJugadoresList(),
-                            ],
+                        child: LayoutBuilder(
+                          builder: (context, box) => SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                // Los tableros llenan la pantalla; los
+                                // jugadores quedan debajo, deslizando.
+                                SizedBox(
+                                  height: box.maxHeight,
+                                  child: _buildTableros(compact: compact),
+                                ),
+                                SizedBox(height: compact ? 9 : 12),
+                                _buildJugadoresList(),
+                              ],
+                            ),
                           ),
                         ),
                       ),

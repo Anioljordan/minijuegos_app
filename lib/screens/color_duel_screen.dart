@@ -7,7 +7,7 @@ import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
 import '../widgets/cubo_setup_widgets.dart';
 
-enum ColorDuelPhase { setup, memorize, pick, roundResult, finalResult }
+enum ColorDuelPhase { setup, ready, memorize, pick, roundResult, finalResult }
 
 enum ColorDuelMode { sameColorForAll, differentColorPerPlayer }
 
@@ -211,9 +211,6 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
   }
 
   Widget _buildTopBar({required bool compact}) {
-    final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 52.0 : 62.0;
 
     final bool showRound = _phase != ColorDuelPhase.setup;
 
@@ -239,54 +236,12 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
           ],
         ),
 
-        if (!showRound) ...[
-          SizedBox(height: compact ? 4 : 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: compact ? 18 : 28),
-              child: CuboIllustration('color_memory', size: compact ? 76 : 108),
-            ),
-          ),
-          SizedBox(height: compact ? 2 : 4),
-        ] else
-          SizedBox(height: compact ? 14 : 24),
-
-        Padding(
-          padding: EdgeInsets.only(right: compact ? 18 : 28),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        'memoria fotográfica',
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: titleSize,
-                          height: 1.4,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Positioned(top: lineTop, right: 0, child: const CuboPillBar()),
-              ],
-            ),
-          ),
+        SizedBox(height: compact ? 6 : 12),
+        CuboGameTitle(
+          'memoria fotográfica',
+          side: CuboTitleSide.chill,
+          illustration: showRound ? null : 'color_memory',
+          compact: compact,
         ),
 
         if (showRound) ...[
@@ -586,6 +541,14 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     }
 
     setState(() {
+      _phase = ColorDuelPhase.ready;
+    });
+  }
+
+  /// El color no se muestra hasta que el jugador pulsa "Preparado".
+  void _startMemorize() {
+    setState(() {
+      _secondsLeft = _memorizeSeconds;
       _phase = ColorDuelPhase.memorize;
     });
 
@@ -648,10 +611,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       }
 
       setState(() {
-        _phase = ColorDuelPhase.memorize;
+        _phase = ColorDuelPhase.ready;
       });
-
-      _startMemorizeCountdown();
     } else {
       setState(() {
         _phase = ColorDuelPhase.roundResult;
@@ -795,6 +756,8 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
     switch (_phase) {
       case ColorDuelPhase.setup:
         return _buildSetupPhase();
+      case ColorDuelPhase.ready:
+        return _buildReadyPhase();
       case ColorDuelPhase.memorize:
         return _buildMemorizePhase();
       case ColorDuelPhase.pick:
@@ -804,6 +767,94 @@ class _ColorDuelScreenState extends State<ColorDuelScreen> {
       case ColorDuelPhase.finalResult:
         return _buildFinalResultPhase();
     }
+  }
+
+  /// Pantalla de paso entre jugadores: el color sigue tapado hasta que el
+  /// jugador que tiene el móvil pulsa "Preparado".
+  Widget _buildReadyPhase() {
+    final player = _players[_currentPlayerIndex];
+    final compact = _isCompactScreen;
+    final hiddenSize = compact ? 150.0 : 190.0;
+
+    return Padding(
+      key: ValueKey('ready_${_currentRound}_$_currentPlayerIndex'),
+      padding: EdgeInsets.only(top: compact ? 6 : 10, bottom: compact ? 8 : 12),
+      child: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: _glassCard(
+                padding: const EdgeInsets.fromLTRB(18, 24, 18, 26),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      tr('PÁSALE EL MÓVIL A'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: CuboColors.whiteA(0.62),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.9,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: _singleLineResponsiveText(
+                        player.name,
+                        alignment: Alignment.center,
+                        style: TextStyle(
+                          color: CuboColors.white,
+                          fontSize: compact ? 30 : 38,
+                          height: 1.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: compact ? 18 : 24),
+                    Container(
+                      width: hiddenSize,
+                      height: hiddenSize,
+                      decoration: BoxDecoration(
+                        color: CuboColors.whiteA(0.06),
+                        borderRadius: CuboRadii.lgAll,
+                        border: Border.all(
+                          color: CuboColors.whiteA(0.28),
+                          width: 2.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.visibility_off_rounded,
+                        color: CuboColors.whiteA(0.45),
+                        size: hiddenSize * 0.3,
+                      ),
+                    ),
+                    SizedBox(height: compact ? 14 : 18),
+                    Text(
+                      tr('El color sale al pulsar Preparado'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: CuboColors.whiteA(0.6),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: compact ? 8 : 12),
+          _primaryButton(
+            text: 'Preparado',
+            icon: Icons.visibility_rounded,
+            onPressed: _startMemorize,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMemorizePhase() {

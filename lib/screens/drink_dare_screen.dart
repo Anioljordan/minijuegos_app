@@ -124,8 +124,6 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
       CuboButtons.primary(padding: EdgeInsets.zero);
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 38.0 : 46.0;
-    final illustrationSize = compact ? 60.0 : 78.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -145,33 +143,11 @@ class _DrinkDareScreenState extends State<DrinkDareScreen>
           ],
         ),
         SizedBox(height: compact ? 10 : 16),
-        Padding(
-          padding: EdgeInsets.only(left: compact ? 18 : 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        'la ruleta',
-                        maxLines: 1,
-                        style: CuboText.title(size: titleSize),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CuboIllustration('ruleta', size: illustrationSize),
-                ],
-              ),
-              SizedBox(height: compact ? 8 : 12),
-              const CuboPillBar(width: 44, color: CuboColors.fiesta),
-            ],
-          ),
+        CuboGameTitle(
+          'la ruleta',
+          side: CuboTitleSide.fiesta,
+          illustration: 'ruleta',
+          compact: compact,
         ),
       ],
     );

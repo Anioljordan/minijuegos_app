@@ -20,7 +20,7 @@ class FiestaScreen extends StatelessWidget {
       builder: (_) => const YoNuncaModesScreen(),
     ),
     CuboMenuGame(
-      title: 'Señala al mas...',
+      title: 'Señala al más probable',
       illustration: 'senala',
       fallbackIcon: Icons.back_hand_rounded,
       builder: (_) => const PiccoloScreen(),

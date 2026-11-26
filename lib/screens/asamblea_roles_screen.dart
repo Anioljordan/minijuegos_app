@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Text;
-import '../widgets/i18n_text.dart';
 import 'asamblea_setup_screen.dart';
 import 'asamblea_board_screen.dart';
+import '../widgets/asamblea_role_portrait.dart';
 import '../widgets/asamblea_rules_dialog.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
@@ -21,70 +21,6 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
 
   /// El jugador actual ya ha levantado su carta secreta.
   bool _roleHasBeenRevealed = false;
-
-  String _roleTitle(AsambleaRole? role) {
-    switch (role) {
-      case AsambleaRole.izquierda:
-        return 'Izquierda';
-
-      case AsambleaRole.derecha:
-        return 'Derecha';
-
-      case AsambleaRole.liderOculto:
-        return 'Dictador';
-
-      default:
-        return '';
-    }
-  }
-
-  String _roleDescription(AsambleaRole? role) {
-    switch (role) {
-      case AsambleaRole.izquierda:
-        return 'Tu objetivo es aprobar 5 leyes de izquierda o eliminar al Líder Oculto.';
-
-      case AsambleaRole.derecha:
-        return 'Tu objetivo es aprobar 6 leyes de derecha o ayudar al Líder Oculto a llegar al poder.';
-
-      case AsambleaRole.liderOculto:
-        return 'Eres el Dictador. Debes llegar al poder sin que te descubran.';
-
-      default:
-        return '';
-    }
-  }
-
-  Color _roleColor(AsambleaRole? role) {
-    switch (role) {
-      case AsambleaRole.izquierda:
-        return CuboColors.chill;
-
-      case AsambleaRole.derecha:
-        return CuboColors.alert;
-
-      case AsambleaRole.liderOculto:
-        return CuboColors.fiesta;
-
-      default:
-        return CuboColors.white;
-    }
-  }
-
-  IconData _roleIcon(AsambleaRole? role) {
-    switch (role) {
-      case AsambleaRole.izquierda:
-        return Icons.shield_outlined;
-
-      case AsambleaRole.derecha:
-        return Icons.gavel_outlined;
-
-      case AsambleaRole.liderOculto:
-        return Icons.visibility_off_outlined;
-
-      default:
-        return Icons.help_outline;
-    }
-  }
 
   Widget circleButton({
     required Widget child,
@@ -109,8 +45,6 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 34.0 : 42.0;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -140,22 +74,11 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
 
         SizedBox(height: compact ? 12 : 20),
 
-        Padding(
-          padding: EdgeInsets.only(right: compact ? 4 : 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: CuboSectionTitle(
-                  barColor: CuboColors.chill,
-                  'reparto de roles',
-                  alignEnd: true,
-                  size: titleSize,
-                  gap: compact ? 8 : 10,
-                ),
-              ),
-            ],
-          ),
+        CuboGameTitle(
+          'reparto de roles',
+          side: CuboTitleSide.chill,
+          illustration: null,
+          compact: compact,
         ),
       ],
     );
@@ -226,13 +149,7 @@ class _AsambleaRolesScreenState extends State<AsambleaRolesScreen> {
                             setState(() => _roleHasBeenRevealed = true);
                           }
                         },
-                        face: CuboSecretFace(
-                          icon: _roleIcon(role),
-                          color: _roleColor(role),
-                          label: 'TU ROL',
-                          title: tr(_roleTitle(role)),
-                          description: _roleDescription(role),
-                        ),
+                        face: AsambleaRoleFace(role: role),
                       ),
                     ),
                     SizedBox(height: compact ? 10 : 14),

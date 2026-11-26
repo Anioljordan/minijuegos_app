@@ -152,17 +152,28 @@ class CuboDialogButton extends StatelessWidget {
   final VoidCallback? onTap;
   final bool primary;
 
+  /// Relleno sólido con texto blanco (p. ej. rojo para acciones graves).
+  final Color? color;
+
   const CuboDialogButton({
     super.key,
     required this.label,
     required this.onTap,
     this.primary = true,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
-    final fg = primary ? CuboColors.blueInk : CuboColors.white;
+    final solid = color;
+    final fg = solid != null
+        ? CuboColors.white
+        : primary
+        ? CuboColors.blueInk
+        : CuboColors.white;
+    final bg = solid ?? (primary ? CuboColors.white : CuboColors.whiteA(0.12));
+    final outlined = solid == null && !primary;
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: CuboPressable(
@@ -173,11 +184,11 @@ class CuboDialogButton extends StatelessWidget {
             height: 54,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: primary ? CuboColors.white : CuboColors.whiteA(0.12),
+              color: bg,
               borderRadius: const BorderRadius.all(Radius.circular(999)),
-              border: primary
-                  ? null
-                  : Border.all(color: CuboColors.whiteA(0.28), width: 1.2),
+              border: outlined
+                  ? Border.all(color: CuboColors.whiteA(0.28), width: 1.2)
+                  : null,
             ),
             child: Text(
               label,
@@ -252,4 +263,135 @@ Future<int?> showCuboPlayerPicker(
       ],
     ),
   );
+}
+
+/// Botón redondo con una X para cerrar un popup (va en `trailing`).
+class CuboDialogCloseButton extends StatelessWidget {
+  const CuboDialogCloseButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return CuboPressable(
+      onTap: () => Navigator.of(context).maybePop(),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: CuboColors.whiteA(0.12),
+          shape: BoxShape.circle,
+          border: Border.all(color: CuboColors.whiteA(0.28)),
+        ),
+        child: const Icon(
+          Icons.close_rounded,
+          color: CuboColors.white,
+          size: 24,
+        ),
+      ),
+    );
+  }
+}
+
+/// Etiqueta en mayúsculas encima de un campo de un popup.
+class CuboDialogLabel extends StatelessWidget {
+  final String text;
+
+  const CuboDialogLabel(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: CuboColors.whiteA(0.65),
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.7,
+        ),
+      ),
+    );
+  }
+}
+
+/// Fichas para elegir una opción (un jugador, un bien...) dentro de un
+/// popup. La elegida va en blanco; el resto en cristal.
+class CuboDialogChoices<T> extends StatelessWidget {
+  final String? label;
+  final T? value;
+  final List<(T, String)> options;
+  final ValueChanged<T> onChanged;
+
+  const CuboDialogChoices({
+    super.key,
+    this.label,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (label != null) CuboDialogLabel(label!),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (option, name) in options)
+                _CuboChoiceChip(
+                  label: name,
+                  selected: option == value,
+                  onTap: () => onChanged(option),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CuboChoiceChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CuboChoiceChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CuboPressable(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        decoration: BoxDecoration(
+          color: selected ? CuboColors.white : CuboColors.whiteA(0.12),
+          borderRadius: const BorderRadius.all(Radius.circular(999)),
+          border: Border.all(
+            color: selected ? CuboColors.white : CuboColors.whiteA(0.22),
+            width: 1.2,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? CuboColors.blueInk : CuboColors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
 }

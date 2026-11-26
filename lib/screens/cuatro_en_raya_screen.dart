@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'package:flutter/services.dart';
 import '../core/app_settings.dart';
+import '../core/cuatro_en_raya_ai.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_game_widgets.dart';
 
@@ -238,89 +240,16 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
     return null;
   }
 
-  List<int> _columnasDisponibles() {
-    return List.generate(
-      columnas,
-      (index) => index,
-    ).where((columna) => obtenerFilaDisponible(columna) != null).toList();
-  }
-
-  bool _esMovimientoGanador(int columna, int jugador) {
-    final fila = obtenerFilaDisponible(columna);
-
-    if (fila == null) return false;
-
-    tablero[fila][columna] = jugador;
-
-    final gana = obtenerFichasGanadoras(jugador).isNotEmpty;
-
-    tablero[fila][columna] = 0;
-
-    return gana;
-  }
-
-  bool _movimientoSeguroParaMaquina(int columna) {
-    final fila = obtenerFilaDisponible(columna);
-
-    if (fila == null) return false;
-
-    // Simulamos la ficha de la máquina.
-    tablero[fila][columna] = 2;
-
-    final humanoPuedeGanar = _columnasDisponibles().any(
-      (columnaHumano) => _esMovimientoGanador(columnaHumano, 1),
-    );
-
-    tablero[fila][columna] = 0;
-
-    return !humanoPuedeGanar;
-  }
-
-  int _elegirColumnaMaquina() {
-    final disponibles = _columnasDisponibles();
-
-    if (disponibles.isEmpty) return 0;
-
-    // 1. Ganar.
-    for (final columna in disponibles) {
-      if (_esMovimientoGanador(columna, 2)) {
-        return columna;
-      }
+  /// Pide la jugada a la máquina. `compute` la calcula en otro hilo en
+  /// móvil y escritorio, y en web (donde no hay isolates) en el mismo. Si
+  /// algo falla, la calcula aquí para que la partida nunca se quede parada.
+  Future<int> _elegirColumnaMaquina() async {
+    final tableroActual = [for (final fila in tablero) List<int>.of(fila)];
+    try {
+      return await compute(_columnaMaquina, tableroActual);
+    } catch (_) {
+      return _columnaMaquina(tableroActual);
     }
-
-    // 2. Bloquear al jugador.
-    for (final columna in disponibles) {
-      if (_esMovimientoGanador(columna, 1)) {
-        return columna;
-      }
-    }
-
-    // 3. Priorizar el centro y evitar regalar
-    // una victoria inmediata.
-    const prioridad = [3, 2, 4, 1, 5, 0, 6];
-
-    final seguras = prioridad
-        .where(
-          (columna) =>
-              disponibles.contains(columna) &&
-              _movimientoSeguroParaMaquina(columna),
-        )
-        .toList();
-
-    if (seguras.isNotEmpty) {
-      return seguras.first;
-    }
-
-    // 4. Si no existe una jugada segura,
-    // elegir la mejor columna disponible.
-    return prioridad.firstWhere(
-      disponibles.contains,
-      orElse: () => disponibles[_randomIndex(disponibles.length)],
-    );
-  }
-
-  int _randomIndex(int length) {
-    return math.Random().nextInt(length);
   }
 
   Future<void> _jugarMaquina() async {
@@ -345,7 +274,11 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         return;
       }
 
-      final columna = _elegirColumnaMaquina();
+      final columna = await _elegirColumnaMaquina();
+
+      if (!mounted || juegoTerminado || jugadorActual != 2) {
+        return;
+      }
 
       await colocarFicha(columna, movimientoMaquina: true);
     } finally {
@@ -973,8 +906,6 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 34.0 : 42.0;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1000,32 +931,10 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
 
         SizedBox(height: compact ? 8 : 16),
 
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            CuboIllustration('cuatro_raya', size: compact ? 64 : 96),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '4 en raya',
-                      maxLines: 1,
-                      textAlign: TextAlign.right,
-                      style: CuboText.title(size: titleSize),
-                    ),
-                  ),
-                  SizedBox(height: compact ? 9 : 12),
-                  const CuboPillBar(width: 44, color: CuboColors.chill),
-                  const SizedBox(height: 4),
-                ],
-              ),
-            ),
-          ],
+        CuboGameTitle(
+          '4 en raya',
+          side: CuboTitleSide.chill,
+          compact: compact,
         ),
       ],
     );
@@ -1402,7 +1311,7 @@ class _CuatroEnRayaScreenState extends State<CuatroEnRayaScreen> {
         scorePill(
           label: 'Empates',
           value: '$empates',
-          color: Colors.white70,
+          color: CuboColors.blue,
           icon: Icons.handshake_rounded,
         ),
 
@@ -1595,3 +1504,7 @@ class WinningLinePainter extends CustomPainter {
     return oldDelegate.fichasGanadoras != fichasGanadoras;
   }
 }
+
+/// Fuera de la clase para poder mandarla a otro hilo con `compute`.
+int _columnaMaquina(List<List<int>> tablero) =>
+    CuatroEnRayaAi().chooseColumn(tablero, me: 2, rival: 1);

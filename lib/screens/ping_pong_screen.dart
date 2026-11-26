@@ -104,9 +104,6 @@ class _PingPongScreenState extends State<PingPongScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 38.0 : 48.0;
-    final titleHeight = compact ? 72.0 : 94.0;
-    final lineTop = compact ? 62.0 : 82.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -130,42 +127,11 @@ class _PingPongScreenState extends State<PingPongScreen> {
           ],
         ),
         SizedBox(height: compact ? 14 : 24),
-        Padding(
-          padding: EdgeInsets.only(left: compact ? 18 : 28),
-          child: SizedBox(
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        'ping pong',
-                        maxLines: 1,
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: titleSize,
-                          height: 1.9,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: lineTop,
-                  left: 0,
-                  child: const CuboPillBar(width: 44, color: CuboColors.fiesta),
-                ),
-              ],
-            ),
-          ),
+        CuboGameTitle(
+          'ping pong',
+          side: CuboTitleSide.fiesta,
+          illustration: 'ping_pong',
+          compact: compact,
         ),
       ],
     );
@@ -308,11 +274,7 @@ class _PingPongScreenState extends State<PingPongScreen> {
                   key: const ValueKey('timer'),
                   child: buildTimer(compact: compact),
                 )
-              : CuboIllustration(
-                  'ping_pong',
-                  key: const ValueKey('illustration'),
-                  size: compact ? 82 : 110,
-                ),
+              : const SizedBox.shrink(key: ValueKey('empty')),
         ),
         SizedBox(height: compact ? 8 : 14),
         Expanded(
