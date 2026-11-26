@@ -5,6 +5,7 @@ import 'cubo_play_widgets.dart';
 import 'cubo_widgets.dart';
 import 'i18n_text.dart';
 
+export 'cubo_game_title.dart';
 export 'cubo_play_widgets.dart';
 export 'cubo_widgets.dart';
 

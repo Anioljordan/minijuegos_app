@@ -648,7 +648,6 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
     bool showReset = false,
     bool showIllustration = false,
   }) {
-    final titleSize = compact ? 34.0 : 42.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -688,32 +687,12 @@ class _DescribeLaPalabraScreenState extends State<DescribeLaPalabraScreen> {
           ],
         ),
 
-        if (showIllustration) ...[
-          SizedBox(height: compact ? 4 : 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: CuboIllustration('describe', size: compact ? 72 : 108),
-          ),
-          SizedBox(height: compact ? 6 : 12),
-        ] else
-          SizedBox(height: compact ? 14 : 24),
-
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                'describe la palabra',
-                maxLines: 1,
-                textAlign: TextAlign.right,
-                style: CuboText.title(size: titleSize),
-              ),
-            ),
-            SizedBox(height: compact ? 9 : 12),
-            const CuboPillBar(width: 44, color: CuboColors.chill),
-          ],
+        SizedBox(height: compact ? 6 : 12),
+        CuboGameTitle(
+          'describe la palabra',
+          side: CuboTitleSide.chill,
+          illustration: showIllustration ? 'describe' : null,
+          compact: compact,
         ),
 
         if (subtitle != null) ...[

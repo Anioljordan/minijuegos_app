@@ -40,26 +40,11 @@ class YoNuncaModesScreen extends StatelessWidget {
 
         const SizedBox(height: 24),
 
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CuboIllustration('yo_nunca', size: compact ? 72 : 104),
-              const SizedBox(height: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'yo nunca',
-                  maxLines: 1,
-                  style: CuboText.title(size: 46),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const CuboPillBar(width: 44, color: CuboColors.fiesta),
-            ],
-          ),
+        CuboGameTitle(
+          'yo nunca',
+          side: CuboTitleSide.fiesta,
+          illustration: 'yo_nunca',
+          compact: compact,
         ),
       ],
     );
@@ -74,86 +59,84 @@ class YoNuncaModesScreen extends StatelessWidget {
   }
 
   void mostrarNormas(BuildContext context) {
-    showDialog(
+    showCuboDialog(
       context: context,
       barrierDismissible: true,
       barrierColor: Colors.black.withValues(alpha: 0.45),
-      builder: (_) => CuboGameScope(
-        child: Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 22),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-            decoration: CuboDecorations.dialog(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.78,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const CuboDialogHeader(),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          decoration: CuboDecorations.dialog(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.78,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const CuboDialogHeader(),
 
-                    const SizedBox(height: 18),
+                  const SizedBox(height: 18),
 
-                    const Text(
-                      'YO NUNCA',
-                      style: TextStyle(
-                        color: CuboColors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
-                      ),
+                  const Text(
+                    'YO NUNCA',
+                    style: TextStyle(
+                      color: CuboColors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
                     ),
+                  ),
 
-                    const SizedBox(height: 14),
+                  const SizedBox(height: 14),
 
-                    rulesItem(
-                      icon: Icons.record_voice_over_rounded,
-                      title: 'Yo Nunca',
-                      text:
-                          'El modo clásico. Aparece una frase de “Yo nunca...” y cada persona responde según si lo ha hecho o no.',
-                    ),
+                  rulesItem(
+                    icon: Icons.record_voice_over_rounded,
+                    title: 'Yo Nunca',
+                    text:
+                        'El modo clásico. Aparece una frase de “Yo nunca...” y cada persona responde según si lo ha hecho o no.',
+                  ),
 
-                    rulesItem(
-                      icon: Icons.groups_rounded,
-                      title: 'Por equipos',
-                      text:
-                          'Una variante de Yo Nunca en la que los jugadores se dividen en equipos y compiten durante la partida.',
-                    ),
+                  rulesItem(
+                    icon: Icons.groups_rounded,
+                    title: 'Por equipos',
+                    text:
+                        'Una variante de Yo Nunca en la que los jugadores se dividen en equipos y compiten durante la partida.',
+                  ),
 
-                    rulesItem(
-                      icon: Icons.visibility_off_rounded,
-                      title: 'Lobo',
-                      text:
-                          'Una variante con identidades ocultas en la que tendrás que descubrir quién está jugando como lobo.',
-                    ),
+                  rulesItem(
+                    icon: Icons.visibility_off_rounded,
+                    title: 'Lobo',
+                    text:
+                        'Una variante con identidades ocultas en la que tendrás que descubrir quién está jugando como lobo.',
+                  ),
 
-                    const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: mainButtonStyle(),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            'ENTENDIDO',
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.4,
-                            ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: mainButtonStyle(),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        child: Text(
+                          'ENTENDIDO',
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.4,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

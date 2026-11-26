@@ -338,7 +338,7 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
     if (!configurando) {
       return CuboGameHeader(
         onRules: mostrarNormas,
-        status: CuboStatusChip('señala al mas...', dot: CuboColors.fiesta),
+        status: CuboStatusChip('señala al más probable', dot: CuboColors.fiesta),
       );
     }
 
@@ -364,28 +364,11 @@ class _PiccoloScreenState extends State<PiccoloScreen> {
 
         const SizedBox(height: 24),
 
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (configurando) ...[
-                CuboIllustration('senala', size: compact ? 72 : 100),
-                const SizedBox(height: 8),
-              ],
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'señala al mas...',
-                  maxLines: 1,
-                  style: CuboText.title(size: 42),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const CuboPillBar(width: 44, color: CuboColors.fiesta),
-            ],
-          ),
+        CuboGameTitle(
+          'señala al más probable',
+          side: CuboTitleSide.fiesta,
+          illustration: configurando ? 'senala' : null,
+          compact: compact,
         ),
       ],
     );

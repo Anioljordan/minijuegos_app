@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart' hide Text;
 import '../widgets/i18n_text.dart';
 import 'fiesta_screen.dart';
@@ -7,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_settings_button.dart';
 import '../core/app_settings.dart';
 import '../widgets/app_logo_button.dart';
+import '../widgets/mood_physics.dart';
+import '../core/cubo_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
 
@@ -20,6 +23,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   bool showSplash = true;
+
+  /// Palabras y líneas de la pantalla de inicio con las que chocan los cubos.
+  final MoodPhysics _moodPhysics = MoodPhysics();
   late final AnimationController _splashController;
 
   String selectedLanguage = 'es';
@@ -53,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _splashController.dispose();
+    _moodPhysics.dispose();
     super.dispose();
   }
 
@@ -805,8 +812,30 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  static const Duration _entranceDuration = Duration(milliseconds: 1500);
+
+  /// Anima de 0 a 1 al abrir la pantalla, empezando en [delay] (fracción
+  /// de [_entranceDuration]).
+  Widget _entrance({
+    required double delay,
+    required Widget Function(double t) builder,
+  }) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: _entranceDuration,
+      curve: Interval(
+        delay,
+        math.min(1, delay + 0.6),
+        curve: Curves.easeOutCubic,
+      ),
+      builder: (context, t, _) => builder(t),
+    );
+  }
+
   Widget buildMoodOption({
+    required String id,
     required String title,
+    required Color accent,
     required Alignment alignment,
     required VoidCallback onTap,
   }) {
@@ -814,6 +843,8 @@ class _HomeScreenState extends State<HomeScreen>
 
     const double parentPadding = 30;
     const double sideInset = 28;
+    final double wordDelay = isChill ? 0.15 : 0.32;
+    final double lineDelay = isChill ? 0.2 : 0.38;
 
     return GestureDetector(
       onTap: onTap,
@@ -828,18 +859,60 @@ class _HomeScreenState extends State<HomeScreen>
           child: Stack(
             clipBehavior: Clip.none,
             children: [
+              // Brillo suave del color del mood detrás de la palabra.
+              Positioned(
+                top: -34,
+                left: isChill ? null : -36,
+                right: isChill ? -36 : null,
+                child: IgnorePointer(
+                  child: _entrance(
+                    delay: wordDelay,
+                    builder: (t) => Opacity(
+                      opacity: t,
+                      child: ImageFiltered(
+                        imageFilter: ui.ImageFilter.blur(
+                          sigmaX: 30,
+                          sigmaY: 30,
+                        ),
+                        child: Container(
+                          width: 230,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(120),
+                            color: accent.withValues(alpha: 0.30),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
               Positioned(
                 top: 0,
                 left: isChill ? null : 0,
                 right: isChill ? 0 : null,
-                child: Text(
-                  title,
-                  textAlign: isChill ? TextAlign.right : TextAlign.left,
-                  style: const TextStyle(
-                    color: white,
-                    fontSize: 66,
-                    height: 0.9,
-                    fontWeight: FontWeight.w900,
+                child: _entrance(
+                  delay: wordDelay,
+                  builder: (t) => Opacity(
+                    opacity: t,
+                    child: Transform.translate(
+                      offset: Offset((1 - t) * (isChill ? 46 : -46), 0),
+                      child: MoodBouncy(
+                        physics: _moodPhysics,
+                        id: '$id-word',
+                        child: Text(
+                          title,
+                          textAlign: isChill ? TextAlign.right : TextAlign.left,
+                          style: const TextStyle(
+                            color: white,
+                            fontSize: 66,
+                            height: 0.9,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -848,9 +921,33 @@ class _HomeScreenState extends State<HomeScreen>
                 top: 68,
                 left: isChill ? -parentPadding : 0,
                 right: isChill ? 0 : -parentPadding,
-                child: Container(
-                  height: 3,
-                  color: white.withOpacity(0.58),
+                child: _entrance(
+                  delay: lineDelay,
+                  // La línea se dibuja desde el borde de la pantalla.
+                  builder: (t) => Transform.scale(
+                    scaleX: t,
+                    scaleY: 1,
+                    alignment: isChill
+                        ? Alignment.centerLeft
+                        : Alignment.centerRight,
+                    child: MoodBouncy(
+                      physics: _moodPhysics,
+                      id: '$id-line',
+                      child: Container(
+                        height: 3.5,
+                        decoration: BoxDecoration(
+                          color: accent,
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accent.withValues(alpha: 0.45),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -864,7 +961,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       key: const ValueKey('mood'),
       backgroundColor: blue,
-      body: Stack(
+      body: MoodRain(physics: _moodPhysics, child: Stack(
         children: [
           buildTopIcons(),
 
@@ -888,7 +985,7 @@ class _HomeScreenState extends State<HomeScreen>
                             Positioned(
                               left: 0,
                               top: 0,
-                              child: Text(
+                              child: MoodBouncy(physics: _moodPhysics, id: 'chooseYour', child: Text(
                                 AppSettings.instance.t('chooseYour'),
                                 style: TextStyle(
                                   color: white.withOpacity(0.96),
@@ -903,12 +1000,12 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ],
                                 ),
-                              ),
+                              )),
                             ),
                             Positioned(
                               left: 120,
                               top: 36,
-                              child: Text(
+                              child: MoodBouncy(physics: _moodPhysics, id: 'mood', child: Text(
                                 AppSettings.instance.t('mood'),
                                 style: TextStyle(
                                   color: white.withOpacity(0.98),
@@ -923,7 +1020,7 @@ class _HomeScreenState extends State<HomeScreen>
                                     ),
                                   ],
                                 ),
-                              ),
+                              )),
                             ),
                           ],
                         ),
@@ -934,6 +1031,8 @@ class _HomeScreenState extends State<HomeScreen>
                   const Spacer(flex: 2),
 
                   buildMoodOption(
+                    id: 'chill',
+                    accent: CuboColors.chill,
                     title: AppSettings.instance.t('chill'),
                     alignment: Alignment.centerRight,
                     onTap: () {
@@ -951,6 +1050,8 @@ class _HomeScreenState extends State<HomeScreen>
                   const SizedBox(height: 72),
 
                   buildMoodOption(
+                    id: 'fiesta',
+                    accent: CuboColors.fiesta,
                     title: AppSettings.instance.t('party'),
                     alignment: Alignment.centerLeft,
                     onTap: () {
@@ -969,7 +1070,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 

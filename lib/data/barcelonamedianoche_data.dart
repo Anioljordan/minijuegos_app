@@ -209,6 +209,10 @@ class BarcelonaMedianocheGame {
     return normalized.toSet().length != normalized.length;
   }
 
+  int get killerCount => _killerCountForPlayers(players.length);
+
+  int get agentCount => _agentCountForPlayers(players.length);
+
   int _agentCountForPlayers(int count) {
     if (count <= 6) return 1;
     if (count <= 9) return 2;

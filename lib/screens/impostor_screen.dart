@@ -547,9 +547,6 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
   }
 
   Widget buildTopBar({required bool compact}) {
-    final titleSize = compact ? 34.0 : 42.0;
-    final titleHeight = compact ? 70.0 : 92.0;
-    final lineTop = compact ? 40.0 : 60.0;
     final showReset = currentStep != ImpostorStep.modeSelection;
 
     return Column(
@@ -578,52 +575,14 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
             ),
           ],
         ),
-        if (currentStep == ImpostorStep.modeSelection) ...[
-          SizedBox(height: compact ? 6 : 12),
-          Padding(
-            padding: EdgeInsets.only(right: compact ? 18 : 28),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: CuboIllustration('impostor', size: compact ? 72 : 104),
-            ),
-          ),
-          SizedBox(height: compact ? 2 : 6),
-        ] else
-          SizedBox(height: compact ? 14 : 24),
-        Padding(
-          padding: EdgeInsets.only(right: compact ? 18 : 28),
-          child: SizedBox(
-            width: double.infinity,
-            height: titleHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
-                  bottom: 10,
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topRight,
-                      child: Text(
-                        currentTitle,
-                        maxLines: 1,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: CuboColors.white,
-                          fontSize: titleSize,
-                          height: 1.4,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(top: lineTop, right: 0, child: const CuboPillBar()),
-              ],
-            ),
-          ),
+        SizedBox(height: compact ? 6 : 12),
+        CuboGameTitle(
+          currentTitle,
+          side: CuboTitleSide.chill,
+          illustration: currentStep == ImpostorStep.modeSelection
+              ? 'impostor'
+              : null,
+          compact: compact,
         ),
       ],
     );
@@ -949,75 +908,54 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
 
   Widget buildModeCard({
     required String title,
-    required String subtitle,
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
     required bool compact,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: CuboRadii.lgAll,
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 10 : 13,
-            vertical: compact ? 11 : 15,
-          ),
-          decoration: CuboDecorations.glassRaised(radius: CuboRadii.lg),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: compact ? 54 : 66,
-                height: compact ? 54 : 66,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(compact ? 18 : 22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.35),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  icon,
-                  color: CuboColors.blueInk,
-                  size: compact ? 30 : 38,
-                ),
+    final tile = compact ? 68.0 : 84.0;
+    return CuboPressable(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 14),
+        decoration: CuboDecorations.glassRaised(radius: CuboRadii.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: tile,
+              height: tile,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(tile / 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              SizedBox(height: compact ? 8 : 11),
-              Text(
+              child: Icon(icon, color: CuboColors.blueInk, size: tile * 0.55),
+            ),
+            SizedBox(height: compact ? 12 : 16),
+            // Una sola línea en todas las cartas para que los iconos queden
+            // a la misma altura.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
                 tr(title).toUpperCase(),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                softWrap: false,
                 style: TextStyle(
                   color: CuboColors.white,
-                  fontSize: compact ? 12 : 14,
-                  height: 1.05,
+                  fontSize: compact ? 14 : 16,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.35,
                 ),
               ),
-              SizedBox(height: compact ? 5 : 7),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                maxLines: compact ? 3 : 4,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: CuboColors.white.withValues(alpha: 0.68),
-                  fontSize: compact ? 10.2 : 11.5,
-                  height: 1.22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1027,61 +965,57 @@ class _ImpostorScreenState extends State<ImpostorScreen> {
     final cards = [
       (
         title: 'Clásico',
-        subtitle: 'Todos tienen una palabra menos el impostor.',
         icon: Icons.visibility_off_rounded,
         color: CuboColors.fiesta,
         mode: ImpostorMode.classic,
       ),
       (
         title: 'Con roles',
-        subtitle: 'Mismo lugar, roles distintos y alguien no sabe nada.',
         icon: Icons.theater_comedy_rounded,
         color: CuboColors.chill,
         mode: ImpostorMode.roles,
       ),
       (
         title: 'Pregunta distinta',
-        subtitle: 'Uno recibe una pregunta parecida, pero diferente.',
         icon: Icons.quiz_rounded,
         color: CuboColors.fiesta,
         mode: ImpostorMode.question,
       ),
       (
         title: _footballText('Fútbol', 'Futbol', 'Football'),
-        subtitle: _footballText(
-          'Jugadores, leyendas, entrenadores y clubes.',
-          'Jugadors, llegendes, entrenadors i clubs.',
-          'Players, legends, coaches and clubs.',
-        ),
         icon: Icons.sports_soccer_rounded,
         color: CuboColors.chill,
         mode: ImpostorMode.football,
       ),
     ];
 
-    return GridView.builder(
-      padding: EdgeInsets.zero,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: compact ? 9 : 12,
-        mainAxisSpacing: compact ? 9 : 12,
-        childAspectRatio: compact ? 0.88 : 0.82,
+    // Pegados abajo, cerca del pulgar.
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: GridView.builder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: compact ? 9 : 12,
+          mainAxisSpacing: compact ? 9 : 12,
+          childAspectRatio: compact ? 1.0 : 0.95,
+        ),
+        itemCount: cards.length,
+        itemBuilder: (context, index) {
+          final card = cards[index];
+          return CuboEntrance(
+            index: index,
+            child: buildModeCard(
+              title: card.title,
+              icon: card.icon,
+              color: card.color,
+              compact: compact,
+              onTap: () => goToSetup(card.mode),
+            ),
+          );
+        },
       ),
-      itemCount: cards.length,
-      itemBuilder: (context, index) {
-        final card = cards[index];
-        return CuboEntrance(
-          index: index,
-          child: buildModeCard(
-            title: card.title,
-            subtitle: card.subtitle,
-            icon: card.icon,
-            color: card.color,
-            compact: compact,
-            onTap: () => goToSetup(card.mode),
-          ),
-        );
-      },
     );
   }
 

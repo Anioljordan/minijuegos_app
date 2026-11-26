@@ -318,9 +318,6 @@ class _EscalaScreenState extends State<EscalaScreen> {
 
   Widget buildTopBar({required bool compact}) {
     final enJuego = fase > 0;
-    final titleSize = enJuego
-        ? (compact ? 28.0 : 34.0)
-        : (compact ? 34.0 : 42.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,27 +336,12 @@ class _EscalaScreenState extends State<EscalaScreen> {
             ),
           ],
         ),
-        if (!enJuego) ...[
-          SizedBox(height: compact ? 4 : 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: compact ? 12 : 20),
-              child: CuboIllustration('escala', size: compact ? 76 : 108),
-            ),
-          ),
-          SizedBox(height: compact ? 6 : 10),
-        ] else
-          SizedBox(height: compact ? 6 : 12),
-        Padding(
-          padding: EdgeInsets.only(right: compact ? 6 : 10),
-          child: CuboSectionTitle(
-            barColor: CuboColors.chill,
-            'escala mental',
-            alignEnd: true,
-            size: titleSize,
-            gap: compact ? 8 : 10,
-          ),
+        SizedBox(height: compact ? 6 : 12),
+        CuboGameTitle(
+          'escala mental',
+          side: CuboTitleSide.chill,
+          illustration: enJuego ? null : 'escala',
+          compact: compact,
         ),
         if (enJuego) ...[
           SizedBox(height: compact ? 10 : 14),
@@ -452,7 +434,9 @@ class _EscalaScreenState extends State<EscalaScreen> {
                 SizedBox(width: veryNarrow ? 5 : 9),
               ],
 
-              Expanded(
+              // Flexible (no Expanded): el icono queda pegado al texto y
+              // el conjunto centrado, como en los demás juegos.
+              Flexible(
                 child: _singleLineResponsiveText(
                   tr(text).toUpperCase(),
                   alignment: Alignment.center,

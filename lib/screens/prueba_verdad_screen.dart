@@ -434,33 +434,11 @@ class _PruebaVerdadScreenState extends State<PruebaVerdadScreen> {
 
         SizedBox(height: compact ? 10 : 16),
 
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        'prueba o verdad',
-                        maxLines: 1,
-                        style: CuboText.title(size: compact ? 38 : 44),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CuboIllustration('prueba_verdad', size: compact ? 60 : 78),
-                ],
-              ),
-              SizedBox(height: compact ? 8 : 12),
-              const CuboPillBar(width: 44, color: CuboColors.fiesta),
-            ],
-          ),
+        CuboGameTitle(
+          'prueba o verdad',
+          side: CuboTitleSide.fiesta,
+          illustration: 'prueba_verdad',
+          compact: compact,
         ),
       ],
     );

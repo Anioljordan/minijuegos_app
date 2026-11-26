@@ -32,7 +32,7 @@ class ChillScreen extends StatelessWidget {
       builder: (_) => const EscalaScreen(),
     ),
     CuboMenuGame(
-      title: 'Color Memory',
+      title: 'Memoria fotográfica',
       illustration: 'color_memory',
       fallbackIcon: Icons.palette_rounded,
       builder: (_) => const ColorDuelScreen(),
@@ -50,7 +50,7 @@ class ChillScreen extends StatelessWidget {
       builder: (_) => const CuatroEnRayaScreen(),
     ),
     CuboMenuGame(
-      title: 'Animales Prof',
+      title: 'Animales Profesionales',
       illustration: 'animales',
       fallbackIcon: Icons.pets_rounded,
       builder: (_) => const AnimalesProfesionalesScreen(),

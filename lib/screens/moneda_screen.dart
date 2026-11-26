@@ -137,48 +137,11 @@ class _CaraCruzScreenState extends State<MonedaScreen>
 
         const SizedBox(height: 24),
 
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: SizedBox(
-            height: 94,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: compact ? 80 : 96,
-                  child: const FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'moneda',
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: CuboColors.white,
-                        fontSize: 48,
-                        height: 1.90,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Positioned(
-                  top: 82,
-                  left: 0,
-                  child: CuboPillBar(width: 44, color: CuboColors.fiesta),
-                ),
-
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: CuboIllustration('moneda', size: compact ? 72 : 88),
-                ),
-              ],
-            ),
-          ),
+        CuboGameTitle(
+          'moneda',
+          side: CuboTitleSide.fiesta,
+          illustration: 'moneda',
+          compact: compact,
         ),
       ],
     );

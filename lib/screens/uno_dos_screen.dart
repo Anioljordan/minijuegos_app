@@ -333,7 +333,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
     if (!configurando) {
       return CuboGameHeader(
         onRules: mostrarNormas,
-        status: CuboStatusChip('1 y 2', dot: CuboColors.fiesta),
+        status: CuboStatusChip('1 & 2', dot: CuboColors.fiesta),
       );
     }
 
@@ -359,33 +359,11 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
 
         SizedBox(height: compact ? 10 : 16),
 
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        '1 y 2',
-                        maxLines: 1,
-                        style: CuboText.title(size: compact ? 44 : 54),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CuboIllustration('uno_dos', size: compact ? 60 : 78),
-                ],
-              ),
-              SizedBox(height: compact ? 8 : 12),
-              const CuboPillBar(width: 44, color: CuboColors.fiesta),
-            ],
-          ),
+        CuboGameTitle(
+          '1 & 2',
+          side: CuboTitleSide.fiesta,
+          illustration: 'uno_dos',
+          compact: compact,
         ),
       ],
     );
@@ -424,7 +402,7 @@ class _UnoDosScreenState extends State<UnoDosScreen> {
                   const SizedBox(height: 18),
 
                   const Text(
-                    '1 Y 2',
+                    '1 & 2',
                     style: TextStyle(
                       color: CuboColors.white,
                       fontSize: 15,

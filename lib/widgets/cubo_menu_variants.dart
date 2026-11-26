@@ -191,11 +191,15 @@ class _CuboMenuCarouselState extends State<CuboMenuCarousel> {
                 ),
               ),
               const SizedBox(height: 14),
-              Text(
-                game.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: CuboText.cardPhrase(size: 26),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  game.title,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: CuboText.cardPhrase(size: 26),
+                ),
               ),
               const SizedBox(height: 12),
               const _PlayPill(),
