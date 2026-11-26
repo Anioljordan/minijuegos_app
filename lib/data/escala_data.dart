@@ -15,8 +15,8 @@ const List<Map<String, String>> escalasJuego = [
     'categoria': 'Comida',
   },
   {
-    'izquierda': 'Muy picante',
-    'derecha': 'Nada picante',
+    'izquierda': 'Comida de valientes',
+    'derecha': 'Comida apta para todos',
     'categoria': 'Comida',
   },
   {
@@ -25,8 +25,8 @@ const List<Map<String, String>> escalasJuego = [
     'categoria': 'Comida',
   },
   {
-    'izquierda': 'Comida sana',
-    'derecha': 'Comida basura',
+    'izquierda': 'Placer sin culpa',
+    'derecha': 'Placer culpable',
     'categoria': 'Comida',
   },
   {
@@ -100,8 +100,8 @@ const List<Map<String, String>> escalasJuego = [
     'categoria': 'Amor',
   },
   {
-    'izquierda': 'Muy caro',
-    'derecha': 'Muy barato',
+    'izquierda': 'Vale cada euro',
+    'derecha': 'Tirar el dinero',
     'categoria': 'Estilo',
   },
   {
@@ -115,8 +115,8 @@ const List<Map<String, String>> escalasJuego = [
     'categoria': 'Estilo',
   },
   {
-    'izquierda': 'Lujo total',
-    'derecha': 'Low cost total',
+    'izquierda': 'Capricho justificado',
+    'derecha': 'Capricho absurdo',
     'categoria': 'Estilo',
   },
   {
@@ -145,8 +145,8 @@ const List<Map<String, String>> escalasJuego = [
     'categoria': 'Cultura',
   },
   {
-    'izquierda': 'Muy famoso',
-    'derecha': 'Nada famoso',
+    'izquierda': 'Famoso que mola',
+    'derecha': 'Famoso insoportable',
     'categoria': 'Cultura',
   },
   {
@@ -165,13 +165,13 @@ const List<Map<String, String>> escalasJuego = [
     'categoria': 'Vida',
   },
   {
-    'izquierda': 'Nada peligroso',
-    'derecha': 'Muy peligroso',
+    'izquierda': 'Riesgo que merece la pena',
+    'derecha': 'Locura total',
     'categoria': 'Vida',
   },
   {
-    'izquierda': 'Muy fácil',
-    'derecha': 'Muy difícil',
+    'izquierda': 'Cualquiera puede hacerlo',
+    'derecha': 'Solo un genio',
     'categoria': 'Vida',
   },
   {
@@ -187,6 +187,196 @@ const List<Map<String, String>> escalasJuego = [
   {
     'izquierda': 'Trabajo soñado',
     'derecha': 'Trabajo pesadilla',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Comida sobrevalorada',
+    'derecha': 'Comida infravalorada',
+    'categoria': 'Comida',
+  },
+  {
+    'izquierda': 'Comida para una cita',
+    'derecha': 'Comida de domingo en el sofá',
+    'categoria': 'Comida',
+  },
+  {
+    'izquierda': 'Ingrediente que mejora todo',
+    'derecha': 'Ingrediente que lo estropea todo',
+    'categoria': 'Comida',
+  },
+  {
+    'izquierda': 'Comida de abuela',
+    'derecha': 'Comida de influencer',
+    'categoria': 'Comida',
+  },
+  {
+    'izquierda': 'Para compartir',
+    'derecha': 'No se comparte ni loco',
+    'categoria': 'Comida',
+  },
+  {
+    'izquierda': 'Merienda de campeón',
+    'derecha': 'Merienda triste',
+    'categoria': 'Comida',
+  },
+  {
+    'izquierda': 'Plan de introvertido',
+    'derecha': 'Plan de extrovertido',
+    'categoria': 'Planes',
+  },
+  {
+    'izquierda': 'Plan de domingo',
+    'derecha': 'Plan de sábado noche',
+    'categoria': 'Planes',
+  },
+  {
+    'izquierda': 'Plan que nunca cancelas',
+    'derecha': 'Plan que cancelas sin pena',
+    'categoria': 'Planes',
+  },
+  {
+    'izquierda': 'Plan para hacer en pareja',
+    'derecha': 'Plan para hacer con amigos',
+    'categoria': 'Planes',
+  },
+  {
+    'izquierda': 'Disfraz de 10',
+    'derecha': 'Disfraz de 0',
+    'categoria': 'Planes',
+  },
+  {
+    'izquierda': 'Ciudad emocionante',
+    'derecha': 'Ciudad aburrida',
+    'categoria': 'Planes',
+  },
+  {
+    'izquierda': 'Detalle bonito',
+    'derecha': 'Detalle cringe',
+    'categoria': 'Amor',
+  },
+  {
+    'izquierda': 'Perdonable',
+    'derecha': 'Motivo para cortar',
+    'categoria': 'Amor',
+  },
+  {
+    'izquierda': 'Te hace más atractivo',
+    'derecha': 'Te quita puntos',
+    'categoria': 'Amor',
+  },
+  {
+    'izquierda': 'Buen tema en una primera cita',
+    'derecha': 'Tema prohibido en una primera cita',
+    'categoria': 'Amor',
+  },
+  {
+    'izquierda': 'Normal en una pareja',
+    'derecha': 'Tóxico',
+    'categoria': 'Amor',
+  },
+  {
+    'izquierda': 'Mensaje que respondes al momento',
+    'derecha': 'Mensaje que dejas en visto',
+    'categoria': 'Amor',
+  },
+  {
+    'izquierda': 'Muy de pijo',
+    'derecha': 'Muy de barrio',
+    'categoria': 'Estilo',
+  },
+  {
+    'izquierda': 'Cosa de boomer',
+    'derecha': 'Cosa de Gen Z',
+    'categoria': 'Estilo',
+  },
+  {
+    'izquierda': 'Está volviendo',
+    'derecha': 'Que no vuelva nunca',
+    'categoria': 'Estilo',
+  },
+  {
+    'izquierda': 'Regalo de compromiso',
+    'derecha': 'Regalo de corazón',
+    'categoria': 'Estilo',
+  },
+  {
+    'izquierda': 'Canción para el coche',
+    'derecha': 'Canción que quitas al momento',
+    'categoria': 'Cultura',
+  },
+  {
+    'izquierda': 'Peli para ver en pareja',
+    'derecha': 'Peli para ver solo',
+    'categoria': 'Cultura',
+  },
+  {
+    'izquierda': 'Cantante sobrevalorado',
+    'derecha': 'Cantante infravalorado',
+    'categoria': 'Cultura',
+  },
+  {
+    'izquierda': 'Mejor villano',
+    'derecha': 'Peor villano',
+    'categoria': 'Cultura',
+  },
+  {
+    'izquierda': 'Serie que todos deberían ver',
+    'derecha': 'Serie que nadie debería ver',
+    'categoria': 'Cultura',
+  },
+  {
+    'izquierda': 'Mejor invento',
+    'derecha': 'Peor invento',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Buena excusa',
+    'derecha': 'Excusa terrible',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Mentira piadosa',
+    'derecha': 'Mentira imperdonable',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Totalmente aceptable',
+    'derecha': 'Muy mala educación',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Se puede decir en una cena familiar',
+    'derecha': 'Ni de broma en una cena familiar',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Talento útil',
+    'derecha': 'Talento inútil',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Animal adorable',
+    'derecha': 'Animal aterrador',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Trabajo sobrevalorado',
+    'derecha': 'Trabajo infravalorado',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Cosa de niños',
+    'derecha': 'Cosa de adultos',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Muy de mañanas',
+    'derecha': 'Muy de noche',
+    'categoria': 'Vida',
+  },
+  {
+    'izquierda': 'Vicio aceptable',
+    'derecha': 'Vicio preocupante',
     'categoria': 'Vida',
   },
 ];

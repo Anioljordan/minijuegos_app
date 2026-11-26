@@ -108,12 +108,6 @@ class YoNuncaModesScreen extends StatelessWidget {
                         'Una variante de Yo Nunca en la que los jugadores se dividen en equipos y compiten durante la partida.',
                   ),
 
-                  rulesItem(
-                    icon: Icons.visibility_off_rounded,
-                    title: 'Lobo',
-                    text:
-                        'Una variante con identidades ocultas en la que tendrás que descubrir quién está jugando como lobo.',
-                  ),
 
                   const SizedBox(height: 8),
 
@@ -244,13 +238,6 @@ class YoNuncaModesScreen extends StatelessWidget {
         icon: Icons.groups_rounded,
         color: CuboColors.white,
         modo: 'equipos',
-      ),
-      (
-        title: 'Yo Nunca Lobo',
-        description: 'Un modo con identidades ocultas y sospechas.',
-        icon: Icons.visibility_off_rounded,
-        color: CuboColors.chill,
-        modo: 'lobo',
       ),
     ];
 

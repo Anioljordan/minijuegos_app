@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_logo_button.dart';
 import '../widgets/cubo_dialog.dart';
 import '../widgets/cubo_game_widgets.dart';
+import '../core/default_lists.dart';
+import '../data/yo_nunca_data.dart';
 
 class YoNuncaScreen extends StatefulWidget {
   final String modo;
@@ -35,7 +37,13 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   bool get _isCompactScreen =>
       MediaQuery.sizeOf(context).height < 740 || _isNarrowScreen;
 
-  String get storageKey => 'yo_nunca_${widget.modo}_frases_personalizadas';
+  // La misma lista para el modo normal y por equipos.
+  static const String storageKey = 'yo_nunca_frases';
+  static const List<String> legacyKeys = [
+    'yo_nunca_normal_frases_personalizadas',
+    'yo_nunca_equipos_frases_personalizadas',
+    'yo_nunca_lobo_frases_personalizadas',
+  ];
 
   Color get accentColor {
     switch (widget.modo) {
@@ -116,7 +124,12 @@ class _YoNuncaScreenState extends State<YoNuncaScreen> {
   Future<void> cargarFrases() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final guardadas = prefs.getStringList(storageKey) ?? [];
+    final guardadas = await loadListWithDefaults(
+      prefs,
+      storageKey,
+      yoNuncaFrases,
+      legacyKeys: legacyKeys,
+    );
 
     if (!mounted) return;
 

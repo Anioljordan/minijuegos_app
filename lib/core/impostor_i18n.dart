@@ -1,3 +1,4 @@
+import 'content_i18n.dart';
 // Traducciones exactas de Impostor.
 
 const Map<String, String> impostorQuestionCaExact = {
@@ -2503,6 +2504,13 @@ const Map<String, String> impostorTermEnExact = {
 String localizeImpostorRoleValue(String source, String language, {bool isRole = false}) {
   if (language == 'es') return source;
 
+  // Lugares cuyo nombre en español coincide con una pista (Banco = banco del
+  // parque / entidad bancaria).
+  if (!isRole) {
+    final place = (language == 'ca' ? contentPlaceCa : contentPlaceEn)[source];
+    if (place != null) return place;
+  }
+
   if (isRole) {
     const caOverrides = <String, String>{
       'Guardia': 'Guàrdia',
@@ -2518,5 +2526,7 @@ String localizeImpostorRoleValue(String source, String language, {bool isRole = 
     if (overridden != null) return overridden;
   }
 
-  return (language == 'ca' ? impostorTermCaExact : impostorTermEnExact)[source] ?? source;
+  return contentExact(source, language) ??
+      (language == 'ca' ? impostorTermCaExact : impostorTermEnExact)[source] ??
+      source;
 }
