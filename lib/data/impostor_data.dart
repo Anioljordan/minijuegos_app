@@ -1,7 +1,7 @@
-/// ===============================
-/// MODO 1 — CLÁSICO
-/// Cada palabra tiene varias pistas genéricas; en cada partida sale una al azar.
-/// ===============================
+// ===============================
+// MODO 1 — CLÁSICO
+// Cada palabra tiene varias pistas genéricas; en cada partida sale una al azar.
+// ===============================
 
 const List<Map<String, dynamic>> classicWordsData = [
   {
