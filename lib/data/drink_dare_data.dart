@@ -6,7 +6,7 @@ const List<String> drinkDareOpciones = [
   "ERES EL ESCLAVO DE TODOS DURANTE UNA RONDA",
   "MEDUSA",
   "SACO LLENO DE…",
-  "SUPER RETO",
+  "SUPERRETO",
   "PONER UNA NORMA",
   "PROHIBIR PALABRA",
   "ZAS",

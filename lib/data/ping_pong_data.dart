@@ -38,7 +38,7 @@ const List<String> preguntasPingPong = [
   'Di 5 comidas rápidas.',
   'Di 5 platos italianos.',
   'Di 5 comidas que lleven queso.',
-  'Di 5 cócteles.',
+  'Di 5 sabores de helado.',
   'Di 5 comidas picantes.',
   'Di 5 postres.',
   'Di 5 marcas de comida rápida.',
@@ -113,7 +113,7 @@ const List<String> preguntasPingPong = [
 
   'Di 5 juegos de fiesta.',
   'Di 5 cosas que pasan en una discoteca.',
-  'Di 5 cócteles famosos.',
+  'Di 5 refrescos.',
   'Di 5 cosas que haces en una fiesta.',
   'Di 5 cosas que haces cuando sales de fiesta.',
 
