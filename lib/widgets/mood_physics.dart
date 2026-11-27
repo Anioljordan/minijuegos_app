@@ -163,9 +163,18 @@ class _MoodRainState extends State<MoodRain>
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(widget.every, (_) => _spawn());
+    _timer = Timer.periodic(widget.every, (_) => _spawnIfVisible());
     // El primero cae enseguida, para que se vea que existe.
-    _firstDrop = Timer(const Duration(milliseconds: 1800), _spawn);
+    _firstDrop = Timer(const Duration(milliseconds: 1800), _spawnIfVisible);
+  }
+
+  /// Los cubos automáticos solo caen si el menú está a la vista: con otra
+  /// pantalla encima el ticker está en pausa y se acumularían para caer
+  /// todos de golpe al volver.
+  void _spawnIfVisible() {
+    if (!mounted || _ticker.muted) return;
+    if (ModalRoute.of(context)?.isCurrent == false) return;
+    _spawn();
   }
 
   @override

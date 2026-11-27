@@ -2,6 +2,16 @@
 // Generado con literales Dart escapados y sin claves duplicadas.
 
 const Map<String, String> caExactCatalog = {
+  '2 RETOS': '2 REPTES',
+  '3 RETOS': '3 REPTES',
+  'REPARTE 4': 'REPARTEIX 4',
+  'ESCLAVO': 'ESCLAU',
+  'SACO LLENO': 'SAC PLE',
+  'SÚPER RETO': 'SUPER REPTE',
+  'NORMA': 'NORMA',
+  'PROHIBIR': 'PROHIBIR',
+  'TODOS': 'TOTHOM',
+  'TÚ ELIGES': 'TRIES TU',
   'Un jugador lee la frase en voz alta para todo el grupo.': 'Un jugador llegeix la frase en veu alta per a tot el grup.',
   'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un reto.': 'Tria una paraula que queda prohibida. Cada vegada que algú la digui, rep un repte.',
   'FRENANDO': 'FRENANT',
@@ -812,6 +822,16 @@ const Map<String, String> caExactCatalog = {
   'El 1 y el 2 deben intercambiar sus asientos sin levantarse a la vez.': 'L’1 i el 2 han d’intercanviar els seients sense aixecar-se alhora.',
 };
 const Map<String, String> enExactCatalog = {
+  '2 RETOS': '2 DARES',
+  '3 RETOS': '3 DARES',
+  'REPARTE 4': 'GIVE OUT 4',
+  'ESCLAVO': 'SERVANT',
+  'SACO LLENO': 'BAG FULL OF',
+  'SÚPER RETO': 'SUPER DARE',
+  'NORMA': 'RULE',
+  'PROHIBIR': 'BAN A WORD',
+  'TODOS': 'EVERYONE',
+  'TÚ ELIGES': 'YOU PICK',
   'Un jugador lee la frase en voz alta para todo el grupo.': 'One player reads the prompt aloud to the whole group.',
   'Elige una palabra que queda prohibida. Cada vez que alguien la diga, recibe un reto.': 'Choose a forbidden word. Every time someone says it, they get a challenge.',
   'FRENANDO': 'SLOWING DOWN',
